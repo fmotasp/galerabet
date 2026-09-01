@@ -154,18 +154,59 @@ export const RegistrationsView: React.FC = () => {
     }
   };
 
-  const getEmployeeEfficiency = (emp: Employee, index: number) => {
-    const empTasks = tasks.filter(
-      (t) =>
-        t.assigneeId === emp.id ||
-        (t.assigneeName && t.assigneeName.toLowerCase() === emp.name.toLowerCase())
-    );
-    if (empTasks.length > 0) {
-      const done = empTasks.filter((t) => t.status === 'done').length;
-      return Math.round((done / empTasks.length) * 100);
-    }
-    const presets = [100, 82, 66, 100, 33, 48, 75, 90];
-    return presets[index % presets.length];
+  // Helper: Get real tasks assigned to an employee
+  const getEmployeeTasks = (emp: Employee) => {
+    const empFirstName = emp.name.toLowerCase().split(' ')[0].trim();
+    const empFullName = emp.name.toLowerCase().trim();
+    const empEmailName = (emp.email || '').split('@')[0].toLowerCase().trim();
+
+    return tasks.filter((t) => {
+      // 1. Assignee direto
+      if (t.assigneeId === emp.id) return true;
+      if (t.assigneeName) {
+        const aName = t.assigneeName.toLowerCase().trim();
+        if (aName === empFullName || aName.includes(empFirstName) || empFullName.includes(aName)) return true;
+      }
+      // 2. Lista de membros
+      if (t.members && t.members.length > 0) {
+        if (
+          t.members.some(
+            (m) =>
+              m.id === emp.id ||
+              m.name.toLowerCase().includes(empFirstName) ||
+              empFullName.includes(m.name.toLowerCase())
+          )
+        ) {
+          return true;
+        }
+      }
+      // 3. Nome da coluna no Trello
+      if (t.trelloListName) {
+        const lName = t.trelloListName.toLowerCase();
+        if (
+          lName.includes(empFirstName) ||
+          (empEmailName && lName.includes(empEmailName)) ||
+          (empFirstName === 'bismarques' && lName.includes('marques')) ||
+          (empFirstName === 'gerdson' && lName.includes('gerdeson')) ||
+          (empFirstName === 'felipe' && (lName.includes('fmota') || lName.includes('mota'))) ||
+          (empFirstName === 'daiane' && lName.includes('dai'))
+        ) {
+          return true;
+        }
+      }
+      return false;
+    });
+  };
+
+  const getEmployeeEfficiency = (emp: Employee) => {
+    const empTasks = getEmployeeTasks(emp);
+    if (empTasks.length === 0) return 0;
+    const completed = empTasks.filter((t) => {
+      const s = (t.status || '').toLowerCase();
+      const l = (t.trelloListName || '').toLowerCase();
+      return s === 'done' || s.includes('concl') || s.includes('finaliz') || s.includes('postad') || l.includes('concl') || l.includes('postar');
+    }).length;
+    return Math.round((completed / empTasks.length) * 100);
   };
 
   return (
@@ -314,7 +355,7 @@ export const RegistrationsView: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredEmployees.map((emp, index) => {
-                const efficiency = getEmployeeEfficiency(emp, index);
+                const efficiency = getEmployeeEfficiency(emp);
                 const borderRing = getAvatarBorderColor(index);
                 const totalSegments = 4;
                 const filledSegments = Math.round((efficiency / 100) * totalSegments);
