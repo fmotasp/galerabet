@@ -860,27 +860,12 @@ export const ReportsView: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Detalhamento de Complexidade e Barra de Capacidade */}
-                  <div className="px-5 sm:px-6 py-3.5 bg-[#141414] border-t border-[#262626] flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
-                    {/* Segmentação de Complexidade de Peças */}
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="font-bold text-slate-400">Distribuição de Esforço:</span>
-                      <span className="px-2.5 py-1 rounded-lg bg-[#E4007E]/15 border border-[#E4007E]/30 text-pink-300 font-semibold flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#E4007E]" />
-                        <span>Campanhas / Complexas ({stat.complexityBreakdown.complex})</span>
-                      </span>
-                      <span className="px-2.5 py-1 rounded-lg bg-[#E94E18]/15 border border-[#E94E18]/30 text-orange-300 font-semibold flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#E94E18]" />
-                        <span>Médias / Vídeos ({stat.complexityBreakdown.medium})</span>
-                      </span>
-                      <span className="px-2.5 py-1 rounded-lg bg-emerald-950/50 border border-emerald-800/40 text-emerald-300 font-semibold flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                        <span>Posts Rápidos ({stat.complexityBreakdown.simple})</span>
-                      </span>
-                    </div>
+                  {/* Barra de Capacidade e Ocupação */}
+                  <div className="px-5 sm:px-6 py-3.5 bg-[#141414] border-t border-[#262626] flex items-center justify-between gap-4 text-xs">
+                    <span className="text-slate-400 font-medium">Status de Capacidade Operacional</span>
 
                     {/* Barra de Progresso de Capacidade */}
-                    <div className="flex items-center gap-3 min-w-[260px]">
+                    <div className="flex items-center gap-3 min-w-[260px] max-w-xs w-full">
                       <span className="font-bold text-slate-400 shrink-0">Ocupação Atual:</span>
                       <div className="flex-1 h-2.5 bg-[#262626] rounded-full overflow-hidden">
                         <div
