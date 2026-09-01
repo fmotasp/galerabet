@@ -144,19 +144,36 @@ export function parseTaskDueDate(dateStr?: string | null): Date | null {
 }
 
 /**
- * Checks if a task is already completed, delivered, or in final approval status.
+ * Checks if a task is already completed, delivered, or in final approval/posting status (Postar & Concluída).
  */
-export function isTaskCompleted(task: { status?: string; deliveredAt?: string }): boolean {
+export function isTaskCompleted(task: { status?: string; deliveredAt?: string; trelloListName?: string }): boolean {
   if (task.deliveredAt && task.deliveredAt.trim() !== '') return true;
   const s = (task.status || '').toLowerCase().trim();
-  return (
+  const l = ((task as any).trelloListName || '').toLowerCase().trim();
+
+  // Status check (Postar, Concluída, Done, Finalizada, Entregue, Aprovada)
+  const isStatusDone =
     s === 'done' ||
+    s === 'postar' ||
+    s === 'postado' ||
+    s === 'postada' ||
     s.includes('concl') ||
     s.includes('final') ||
+    s.includes('postar') ||
     s.includes('postad') ||
     s.includes('aprov') ||
-    s.includes('entreg')
-  );
+    s.includes('entreg');
+
+  // Coluna do Trello check
+  const isListDone =
+    l.includes('postar') ||
+    l.includes('postad') ||
+    l.includes('concl') ||
+    l.includes('final') ||
+    l.includes('done') ||
+    l.includes('entreg');
+
+  return isStatusDone || isListDone;
 }
 
 /**

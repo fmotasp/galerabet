@@ -276,8 +276,17 @@ export const ReportsView: React.FC = () => {
           if (isMember) return true;
         }
         // 3. Coluna nominal no Trello
-        if (task.trelloListName && empFirstName.length > 2) {
-          if (task.trelloListName.toLowerCase().includes(empFirstName)) {
+        if (task.trelloListName) {
+          const lName = task.trelloListName.toLowerCase();
+          const emailPrefix = (emp.email || '').split('@')[0].toLowerCase().trim();
+          if (
+            (empFirstName.length > 2 && lName.includes(empFirstName)) ||
+            (emailPrefix.length > 2 && lName.includes(emailPrefix)) ||
+            (empFirstName === 'bismarques' && lName.includes('marques')) ||
+            (empFirstName === 'gerdson' && lName.includes('gerdeson')) ||
+            (empFirstName === 'felipe' && (lName.includes('fmota') || lName.includes('mota'))) ||
+            (empFirstName === 'daiane' && lName.includes('dai'))
+          ) {
             return true;
           }
         }
