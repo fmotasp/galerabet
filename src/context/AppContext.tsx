@@ -943,59 +943,68 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
-    let updatedTaskObj: Task | null = null;
     const now = Date.now();
-    setTasks((prev) =>
-      prev.map((task) => {
+
+    // 1. Atualiza estado local e localStorage de forma síncrona e confiável
+    setTasks((prev) => {
+      const next = prev.map((task) => {
         if (task.id === id) {
           const statusChanged = updates.status !== undefined && updates.status !== task.status;
-          updatedTaskObj = {
+          return {
             ...task,
             ...updates,
             lastMovedAt: statusChanged ? now : (task.lastMovedAt || now),
           };
-          return updatedTaskObj;
         }
         return task;
-      })
-    );
-
-    if (updatedTaskObj) {
-      // Atualiza exclusivamente no Supabase
+      });
       try {
-        const payload: any = {
-          updated_at: new Date().toISOString(),
-          status: (updatedTaskObj as Task).status,
-        };
-        if (updates.status !== undefined) {
-          payload.last_moved_at = now;
-        }
-        if (updates.title !== undefined) payload.title = updates.title;
-        if (updates.description !== undefined) payload.description = updates.description;
-        if (updates.category !== undefined) payload.category = updates.category;
-        if (updates.dueDate !== undefined) payload.due_date = updates.dueDate;
-        if (updates.assigneeId !== undefined) payload.assignee_id = updates.assigneeId;
-        if (updates.assigneeName !== undefined) payload.assignee_name = updates.assigneeName;
-        if (updates.assigneeInitials !== undefined) payload.assignee_initials = updates.assigneeInitials;
-        if (updates.members !== undefined) payload.members = updates.members;
-        if (updates.labels !== undefined) payload.labels = updates.labels;
-        if (updates.referenceImages !== undefined) payload.reference_images = updates.referenceImages;
-        if (updates.attachments !== undefined) payload.attachments = updates.attachments;
-        if (updates.comments !== undefined) payload.comments = updates.comments;
-        if (updates.points !== undefined) payload.points = updates.points;
-        if (updates.isFlagged !== undefined) payload.is_flagged = updates.isFlagged;
-        if (updates.deliveredAt !== undefined) payload.delivered_at = updates.deliveredAt;
-        if (updates.activityLog !== undefined) payload.activity_log = updates.activityLog;
-        if (updates.coverImageUrl !== undefined) payload.cover_image_url = updates.coverImageUrl;
-        if (updates.coverAttachmentId !== undefined) payload.cover_attachment_id = updates.coverAttachmentId;
-        if (updates.projectName !== undefined) payload.project_name = updates.projectName;
-        if (updates.projectId !== undefined) payload.project_id = updates.projectId;
-        if (updates.sprintId !== undefined) payload.sprint_id = updates.sprintId;
+        localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
 
-        await supabase.from('tasks').update(payload).eq('id', id);
-      } catch (sbErr) {
-        console.warn('Supabase task update warning:', sbErr);
+    // 2. Monta o payload completo para gravação persistente no Supabase
+    try {
+      const payload: any = {
+        updated_at: new Date().toISOString(),
+      };
+      if (updates.status !== undefined) {
+        payload.status = updates.status;
+        payload.last_moved_at = now;
       }
+      if (updates.title !== undefined) payload.title = updates.title;
+      if (updates.description !== undefined) payload.description = updates.description;
+      if (updates.category !== undefined) payload.category = updates.category;
+      if (updates.dueDate !== undefined) payload.due_date = updates.dueDate;
+      if (updates.assigneeId !== undefined) payload.assignee_id = updates.assigneeId;
+      if (updates.assigneeName !== undefined) payload.assignee_name = updates.assigneeName;
+      if (updates.assigneeInitials !== undefined) payload.assignee_initials = updates.assigneeInitials;
+      if (updates.members !== undefined) payload.members = updates.members;
+      if (updates.labels !== undefined) payload.labels = updates.labels;
+      if (updates.referenceImages !== undefined) payload.reference_images = updates.referenceImages;
+      if (updates.attachments !== undefined) payload.attachments = updates.attachments;
+      if (updates.comments !== undefined) payload.comments = updates.comments;
+      if (updates.points !== undefined) payload.points = updates.points;
+      if (updates.isFlagged !== undefined) payload.is_flagged = updates.isFlagged;
+      if (updates.deliveredAt !== undefined) payload.delivered_at = updates.deliveredAt;
+      if (updates.activityLog !== undefined) payload.activity_log = updates.activityLog;
+      if (updates.coverImageUrl !== undefined) payload.cover_image_url = updates.coverImageUrl;
+      if (updates.coverAttachmentId !== undefined) payload.cover_attachment_id = updates.coverAttachmentId;
+      if (updates.projectName !== undefined) payload.project_name = updates.projectName;
+      if (updates.projectId !== undefined) payload.project_id = updates.projectId;
+      if (updates.sprintId !== undefined) payload.sprint_id = updates.sprintId;
+      if (updates.driveFolderId !== undefined) payload.drive_folder_id = updates.driveFolderId;
+      if (updates.driveFolderUrl !== undefined) payload.drive_folder_url = updates.driveFolderUrl;
+
+      const { error: sbErr } = await supabase.from('tasks').update(payload).eq('id', id);
+      if (sbErr) {
+        console.error('[Supabase] Falha ao atualizar tarefa:', sbErr.message);
+      } else {
+        console.log(`[Supabase] Tarefa "${id}" atualizada com sucesso no banco.`);
+      }
+    } catch (sbErr) {
+      console.warn('Supabase task update warning:', sbErr);
     }
   };
 
