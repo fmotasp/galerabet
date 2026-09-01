@@ -234,8 +234,8 @@ export const LoginView: React.FC = () => {
     const cleanNew = newPassword.trim();
     const cleanConf = confirmPassword.trim();
 
-    if (cleanNew.length < 6) {
-      setFirstAccessError('A nova senha deve conter pelo menos 6 caracteres.');
+    if (cleanNew.length < 4) {
+      setFirstAccessError('A nova senha deve conter pelo menos 4 caracteres.');
       return;
     }
 
@@ -277,7 +277,7 @@ export const LoginView: React.FC = () => {
         name: firstAccessUser.name,
         email: firstAccessUser.email || '',
         role: firstAccessUser.role || 'Colaborador',
-        roleType: 'employee' as const,
+        roleType: (firstAccessUser.role?.toLowerCase().includes('gestor') || firstAccessUser.role?.toLowerCase().includes('manager')) ? 'manager' as const : 'employee' as const,
         avatarUrl: firstAccessUser.avatarUrl || firstAccessUser.avatar_url || '',
         initials: firstAccessUser.initials || 'CB',
         needsPasswordChange: false,
@@ -341,7 +341,7 @@ export const LoginView: React.FC = () => {
                     type={showNewPassword ? 'text' : 'password'}
                     required
                     autoFocus
-                    placeholder="nova senha (mínimo 6 dígitos)"
+                    placeholder="nova senha (mínimo 4 dígitos)"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     style={{ background: 'transparent', backgroundColor: 'transparent' }}
