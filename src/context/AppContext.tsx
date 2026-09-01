@@ -1053,8 +1053,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const statusLabel = currentStatusConfig?.label || newStatus;
 
     const isApprovalOrDone =
-      newStatus === 'in_review' ||
       newStatus === 'done' ||
+      newStatus === 'postar' ||
+      newStatus.toLowerCase().includes('concl') ||
+      newStatus.toLowerCase().includes('post') ||
+      statusLabel.toLowerCase().includes('concl') ||
+      statusLabel.toLowerCase().includes('post') ||
+      newStatus === 'in_review' ||
       newStatus.toLowerCase().includes('aprov') ||
       statusLabel.toLowerCase().includes('aprov') ||
       statusLabel.toLowerCase().includes('entreg') ||
@@ -1064,8 +1069,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ? (targetTask.deliveredAt || new Date().toLocaleDateString('pt-BR'))
       : targetTask.deliveredAt;
 
+    // Preserva ou infere o responsável se a coluna anterior era nominal
+    let nextAssigneeId = targetTask.assigneeId;
+    let nextAssigneeName = targetTask.assigneeName;
+    let nextAssigneeInitials = targetTask.assigneeInitials;
+
+    if (!nextAssigneeName && targetTask.trelloListName) {
+      const foundEmp = employees.find((e) => {
+        const fName = e.name.toLowerCase().split(' ')[0].trim();
+        return fName.length > 2 && targetTask.trelloListName!.toLowerCase().includes(fName);
+      });
+      if (foundEmp) {
+        nextAssigneeId = foundEmp.id;
+        nextAssigneeName = foundEmp.name;
+        nextAssigneeInitials = foundEmp.initials;
+      }
+    }
+
     setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, status: newStatus, trelloListName: statusLabel, lastMovedAt: now, deliveredAt: nextDeliveredAt } : t))
+      prev.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              status: newStatus,
+              trelloListName: statusLabel,
+              lastMovedAt: now,
+              deliveredAt: nextDeliveredAt,
+              assigneeId: nextAssigneeId,
+              assigneeName: nextAssigneeName,
+              assigneeInitials: nextAssigneeInitials,
+            }
+          : t
+      )
     );
 
     // 1. Atualiza no Supabase imediatamente em tempo real
@@ -1075,6 +1110,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         last_moved_at: now,
         updated_at: new Date().toISOString(),
       };
+      if (nextAssigneeId) updateObj.assignee_id = nextAssigneeId;
+      if (nextAssigneeName) updateObj.assignee_name = nextAssigneeName;
+      if (nextAssigneeInitials) updateObj.assignee_initials = nextAssigneeInitials;
 
       const { error } = await supabase
         .from('tasks')
