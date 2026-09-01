@@ -37,6 +37,7 @@ export const DashboardView: React.FC = () => {
     activities,
     setSelectedEmployeeForDetail,
     updateCurrentSprintGoal,
+    currentUser,
   } = useApp();
 
   const [isSprintDropdownOpen, setIsSprintDropdownOpen] = useState(false);
@@ -44,15 +45,74 @@ export const DashboardView: React.FC = () => {
   const [goalText, setGoalText] = useState(currentSprint.goal);
 
   const isTaskAssignedToMe = (task: Task) => {
+    if (!currentUser) return false;
     if (task.isMine) return true;
-    if (task.assigneeInitials === 'FM') return true;
-    if (task.assigneeName && task.assigneeName.toLowerCase().includes('felipe')) return true;
-    if (
-      task.members &&
-      task.members.some((m) => m.name.toLowerCase().includes('felipe') || m.initials === 'FM')
-    ) {
+
+    const myId = (currentUser.id || '').toString().toLowerCase().trim();
+    const myEmployeeId = (currentUser.employeeId || '').toString().toLowerCase().trim();
+    const myName = (currentUser.name || '').toLowerCase().trim();
+    const myFirstName = myName.split(' ')[0].trim();
+    const myUsername = (currentUser.username || '').toLowerCase().trim();
+    const myEmailPrefix = (currentUser.email || '').split('@')[0].toLowerCase().trim();
+    const myInitials = (currentUser.initials || '').toUpperCase().trim();
+    const myTrelloId = (currentUser.trelloMemberId || '').toLowerCase().trim();
+
+    // 1. Assignee direto
+    if (task.assigneeId) {
+      const aId = task.assigneeId.toString().toLowerCase().trim();
+      if (myId && aId === myId) return true;
+      if (myEmployeeId && aId === myEmployeeId) return true;
+      if (myTrelloId && aId === myTrelloId) return true;
+    }
+
+    if (task.assigneeName) {
+      const aName = task.assigneeName.toLowerCase().trim();
+      if (myName && (aName.includes(myName) || myName.includes(aName))) return true;
+      if (myFirstName && myFirstName.length > 2 && (aName.includes(myFirstName) || myFirstName.includes(aName))) return true;
+      if (myUsername && (aName.includes(myUsername) || myUsername.includes(aName))) return true;
+      if (myEmailPrefix && (aName.includes(myEmailPrefix) || myEmailPrefix.includes(aName))) return true;
+    }
+
+    if (myInitials && task.assigneeInitials && task.assigneeInitials.toUpperCase().trim() === myInitials) {
       return true;
     }
+
+    // 2. Lista de membros da tarefa
+    if (task.members && task.members.length > 0) {
+      const isMemberMatch = task.members.some((m) => {
+        const mId = (m.id || '').toString().toLowerCase().trim();
+        if (myId && mId === myId) return true;
+        if (myEmployeeId && mId === myEmployeeId) return true;
+        if (myTrelloId && mId === myTrelloId) return true;
+
+        const mName = (m.name || '').toLowerCase().trim();
+        if (myName && (mName.includes(myName) || myName.includes(mName))) return true;
+        if (myFirstName && myFirstName.length > 2 && (mName.includes(myFirstName) || myFirstName.includes(mName))) return true;
+        if (myUsername && (mName.includes(myUsername) || myUsername.includes(mName))) return true;
+
+        const mInitials = (m.initials || '').toUpperCase().trim();
+        if (myInitials && mInitials === myInitials) return true;
+
+        return false;
+      });
+      if (isMemberMatch) return true;
+    }
+
+    // 3. Coluna nominal no Trello
+    if (task.trelloListName) {
+      const lName = task.trelloListName.toLowerCase();
+      if (
+        (myFirstName && myFirstName.length > 2 && lName.includes(myFirstName)) ||
+        (myEmailPrefix && myEmailPrefix.length > 2 && lName.includes(myEmailPrefix)) ||
+        (myFirstName === 'bismarques' && lName.includes('marques')) ||
+        (myFirstName === 'gerdson' && lName.includes('gerdeson')) ||
+        (myFirstName === 'felipe' && (lName.includes('fmota') || lName.includes('mota'))) ||
+        (myFirstName === 'daiane' && lName.includes('dai'))
+      ) {
+        return true;
+      }
+    }
+
     return false;
   };
 

@@ -285,7 +285,7 @@ export const TasksView: React.FC = () => {
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedClient, setSelectedClient] = useState<string>('all');
-  const [selectedMember, setSelectedMember] = useState<string>('all');
+  const [selectedMember, setSelectedMember] = useState<string>('mine');
   const [isMemberDropdownOpen, setIsMemberDropdownOpen] = useState<boolean>(false);
   const [memberFilterSearch, setMemberFilterSearch] = useState<string>('');
   const [showDoneColumn, setShowDoneColumn] = useState<boolean>(false);
@@ -331,7 +331,9 @@ export const TasksView: React.FC = () => {
     const myId = (currentUser.id || '').toString().toLowerCase().trim();
     const myEmployeeId = (currentUser.employeeId || '').toString().toLowerCase().trim();
     const myName = (currentUser.name || '').toLowerCase().trim();
+    const myFirstName = myName.split(' ')[0].trim();
     const myUsername = (currentUser.username || '').toLowerCase().trim();
+    const myEmailPrefix = (currentUser.email || '').split('@')[0].toLowerCase().trim();
     const myInitials = (currentUser.initials || '').toUpperCase().trim();
     const myTrelloId = (currentUser.trelloMemberId || '').toLowerCase().trim();
 
@@ -346,7 +348,9 @@ export const TasksView: React.FC = () => {
     if (task.assigneeName) {
       const aName = task.assigneeName.toLowerCase().trim();
       if (myName && (aName.includes(myName) || myName.includes(aName))) return true;
+      if (myFirstName && myFirstName.length > 2 && (aName.includes(myFirstName) || myFirstName.includes(aName))) return true;
       if (myUsername && (aName.includes(myUsername) || myUsername.includes(aName))) return true;
+      if (myEmailPrefix && (aName.includes(myEmailPrefix) || myEmailPrefix.includes(aName))) return true;
     }
 
     if (myInitials && task.assigneeInitials && task.assigneeInitials.toUpperCase().trim() === myInitials) {
@@ -363,6 +367,7 @@ export const TasksView: React.FC = () => {
 
         const mName = (m.name || '').toLowerCase().trim();
         if (myName && (mName.includes(myName) || myName.includes(mName))) return true;
+        if (myFirstName && myFirstName.length > 2 && (mName.includes(myFirstName) || myFirstName.includes(mName))) return true;
         if (myUsername && (mName.includes(myUsername) || myUsername.includes(mName))) return true;
 
         const mInitials = (m.initials || '').toUpperCase().trim();
@@ -377,6 +382,21 @@ export const TasksView: React.FC = () => {
     if ((task as any).idMembers && Array.isArray((task as any).idMembers)) {
       if (myTrelloId && (task as any).idMembers.includes(myTrelloId)) return true;
       if (myId && (task as any).idMembers.includes(myId)) return true;
+    }
+
+    // 4. Trello List Name (coluna nominal no Trello)
+    if (task.trelloListName) {
+      const lName = task.trelloListName.toLowerCase();
+      if (
+        (myFirstName && myFirstName.length > 2 && lName.includes(myFirstName)) ||
+        (myEmailPrefix && myEmailPrefix.length > 2 && lName.includes(myEmailPrefix)) ||
+        (myFirstName === 'bismarques' && lName.includes('marques')) ||
+        (myFirstName === 'gerdson' && lName.includes('gerdeson')) ||
+        (myFirstName === 'felipe' && (lName.includes('fmota') || lName.includes('mota'))) ||
+        (myFirstName === 'daiane' && lName.includes('dai'))
+      ) {
+        return true;
+      }
     }
 
     return false;
