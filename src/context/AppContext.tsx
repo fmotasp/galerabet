@@ -987,8 +987,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (updates.comments !== undefined) payload.comments = updates.comments;
       if (updates.points !== undefined) payload.points = updates.points;
       if (updates.isFlagged !== undefined) payload.is_flagged = updates.isFlagged;
-      if (updates.deliveredAt !== undefined) payload.delivered_at = updates.deliveredAt;
-      if (updates.activityLog !== undefined) payload.activity_log = updates.activityLog;
       if (updates.coverImageUrl !== undefined) payload.cover_image_url = updates.coverImageUrl;
       if (updates.coverAttachmentId !== undefined) payload.cover_attachment_id = updates.coverAttachmentId;
       if (updates.projectName !== undefined) payload.project_name = updates.projectName;
@@ -1078,7 +1076,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         last_moved_at: now,
         updated_at: new Date().toISOString(),
       };
-      if (nextDeliveredAt) updateObj.delivered_at = nextDeliveredAt;
 
       const { error } = await supabase
         .from('tasks')
