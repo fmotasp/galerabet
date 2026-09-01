@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import confetti from 'canvas-confetti';
 import { supabase } from '../lib/supabase';
 import { isTaskOverdue, isTaskCompleted } from '../lib/taskDateUtils';
 import {
@@ -1092,15 +1091,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     pushTrelloMutation('MOVE', { ...targetTask, status: newStatus, trelloListName: statusLabel, lastMovedAt: now, deliveredAt: nextDeliveredAt }, { newStatus });
 
     if (newStatus === 'done' || newStatus.toLowerCase().includes('concl') || newStatus.toLowerCase().includes('done')) {
-      try {
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.8 },
-        });
-      } catch {
-        // ignore
-      }
       addActivity(targetTask.assigneeName || 'User', targetTask.assigneeInitials || 'US', `completed task "${targetTask.title}"`, 'green');
       addToast('Task Completed! 🎉', `"${targetTask.title}" is now done.`);
     } else {

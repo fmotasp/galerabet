@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import confetti from 'canvas-confetti';
 import {
   User,
   KeyRound,
@@ -61,17 +60,6 @@ export const LoginView: React.FC = () => {
     }
     setWelcomeUser(user);
     setCountdown(5);
-
-    try {
-      confetti({
-        particleCount: 60,
-        spread: 80,
-        origin: { y: 0.55 },
-        colors: ['#FFB903', '#0052CC', '#10B981', '#ffffff'],
-      });
-    } catch {
-      // Ignore if confetti not supported
-    }
 
     // Countdown 5s
     const timer = setInterval(() => {
@@ -571,14 +559,14 @@ export const LoginView: React.FC = () => {
             {/* Animated Logo with Glowing Spinning Ring */}
             <div className="relative w-28 h-28 flex items-center justify-center">
               {/* Outer glowing spinner rings */}
-              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#E4007E] border-r-[#E94E18] border-b-[#10B981] animate-spin" />
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#E4007E] border-r-[#E94E18] border-b-[#E4007E]/30 animate-spin" />
               <div
                 className="absolute -inset-1.5 rounded-full border-2 border-dashed border-[#E4007E]/40 animate-spin"
                 style={{ animationDirection: 'reverse', animationDuration: '4s' }}
               />
 
               {/* Icon Container with subtle bounce/pulse */}
-              <div className="w-20 h-20 rounded-full bg-[#181818] border-2 border-[#E4007E]/60 p-3.5 shadow-2xl shadow-pink-600/20 flex items-center justify-center animate-pulse">
+              <div className="w-20 h-20 rounded-full bg-[#181818] border-2 border-[#E4007E]/60 p-3.5 shadow-2xl shadow-[#E4007E]/20 flex items-center justify-center animate-pulse">
                 <img
                   src="/sidebar-icon.png"
                   alt="Logo"
@@ -607,7 +595,7 @@ export const LoginView: React.FC = () => {
             {/* Countdown & Loading Status Indicator */}
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-center gap-2.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#E4007E] animate-ping shrink-0" />
                 <span className="text-xs font-bold text-slate-200">
                   Carregando os dados...
                 </span>
