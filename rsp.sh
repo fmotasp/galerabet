@@ -44,7 +44,8 @@ if git remote | grep -q "origin"; then
     CURRENT_BRANCH="main"
   fi
 
-  echo -e "${YELLOW}☁️  3. Enviando alterações para o GitHub (branch: ${CURRENT_BRANCH})...${NC}"
+  echo -e "${YELLOW}☁️  3. Sincronizando e enviando alterações para o GitHub (branch: ${CURRENT_BRANCH})...${NC}"
+  git pull --rebase origin "$CURRENT_BRANCH" 2>/dev/null || true
   git push -u origin "$CURRENT_BRANCH"
 
   if [ $? -eq 0 ]; then
