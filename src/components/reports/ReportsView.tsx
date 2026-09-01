@@ -197,23 +197,45 @@ export const ReportsView: React.FC = () => {
     });
   }, [tasks, selectedClient, period, registeredClients]);
 
-  // Lista de colaboradores relevantes (Designers, Video Makers e membros ativos)
+  // Lista de colaboradores relevantes (SOMENTE Designers e Video Makers)
   const reportEmployees = useMemo(() => {
     return employees.filter((emp) => {
       const role = (emp.role || '').toLowerCase();
       const name = (emp.name || '').toLowerCase();
+      const dept = (emp.department || '').toLowerCase();
+      const tags = (emp.tags || []).map((t) => t.toLowerCase());
 
       // Filtro de busca por nome
       if (searchMember && !name.includes(searchMember.toLowerCase())) {
         return false;
       }
 
-      // Filtro de departamento
+      const isDesigner =
+        role.includes('design') ||
+        dept.includes('design') ||
+        tags.some((t) => t.includes('design'));
+
+      const isVideoMaker =
+        role.includes('video') ||
+        role.includes('maker') ||
+        role.includes('motion') ||
+        role.includes('audiovisual') ||
+        role.includes('edição') ||
+        dept.includes('audiovisual') ||
+        dept.includes('video') ||
+        tags.some((t) => t.includes('video') || t.includes('maker') || t.includes('motion'));
+
+      // Se não for Designer nem Video Maker, exclui da visualização de desempenho
+      if (!isDesigner && !isVideoMaker) {
+        return false;
+      }
+
+      // Filtro de sub-departamento selecionado
       if (selectedDept === 'design') {
-        return role.includes('design') || (!role.includes('video') && !role.includes('maker'));
+        return isDesigner;
       }
       if (selectedDept === 'videomaker') {
-        return role.includes('video') || role.includes('maker') || role.includes('motion') || role.includes('edição');
+        return isVideoMaker;
       }
 
       return true;
@@ -539,7 +561,7 @@ export const ReportsView: React.FC = () => {
                   selectedDept === 'all' ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Todos Cargos
+                Todos (Design & Vídeo)
               </button>
               <button
                 onClick={() => setSelectedDept('design')}
