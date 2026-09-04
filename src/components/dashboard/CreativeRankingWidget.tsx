@@ -129,11 +129,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
         });
 
         const total = empTasks.length;
-        const completed = empTasks.filter((t) => {
-          const s = (t.status || '').toLowerCase();
-          const l = (t.trelloListName || '').toLowerCase();
-          return isTaskCompleted(t) || s === 'done' || s.includes('concl') || s.includes('finaliz') || s.includes('postad') || l.includes('concl') || l.includes('postar');
-        }).length;
+        const completed = empTasks.filter((t) => isTaskCompleted(t)).length;
 
         const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 

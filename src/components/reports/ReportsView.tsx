@@ -27,7 +27,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Task, Employee } from '../../types';
 import { getLabelColorHex } from '../tasks/TasksView';
-import { isTaskOverdue, isTaskCompleted, parseTaskDueDate } from '../../lib/taskDateUtils';
+import { isTaskOverdue, isTaskCompleted, isTaskInProgress, parseTaskDueDate } from '../../lib/taskDateUtils';
 
 type PeriodFilter = 'all' | '7d' | '30d' | 'month' | 'sprint';
 type DepartmentFilter = 'all' | 'design' | 'videomaker';
@@ -293,18 +293,24 @@ export const ReportsView: React.FC = () => {
         return false;
       });
 
-      // 1. Demandas Recebidas
-      const receivedCount = empTasks.length;
+      // 1. Demandas Recebidas (novos pedidos, em progresso, em revisão, concluídas atribuídas ao colaborador)
+      const receivedTasks = empTasks.filter((t) => {
+        const s = (t.status || '').toLowerCase();
+        // Backlog geral não conta como recebida a menos que seja um novo pedido do colaborador ou esteja em andamento
+        if (s === 'backlog' && !t.assigneeId && !t.assigneeName) return false;
+        return true;
+      });
+      const receivedCount = receivedTasks.length;
 
-      // 2. Demandas Finalizadas (Concluídas / Entregues)
+      // 2. Demandas Finalizadas (Concluídas / Entregues / Postadas / Aprovadas)
       const finishedTasks = empTasks.filter((t) => isTaskCompleted(t));
       const finishedCount = finishedTasks.length;
 
-      // 3. Demandas em Andamento (Ativas na fila ou em produção)
-      const inProgressTasks = empTasks.filter((t) => !isTaskCompleted(t) && t.status !== 'backlog');
+      // 3. Demandas em Andamento (Em Progresso / Produção e Em Revisão)
+      const inProgressTasks = empTasks.filter((t) => isTaskInProgress(t));
       const inProgressCount = inProgressTasks.length;
 
-      // 4. Demandas Atrasadas
+      // 4. Demandas Atrasadas (prazo expirado ou urgentes)
       const overdueTasks = empTasks.filter((t) => isTaskOverdue(t));
       const overdueCount = overdueTasks.length;
 

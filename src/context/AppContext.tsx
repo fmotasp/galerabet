@@ -1059,15 +1059,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       newStatus.toLowerCase().includes('post') ||
       statusLabel.toLowerCase().includes('concl') ||
       statusLabel.toLowerCase().includes('post') ||
-      newStatus === 'in_review' ||
-      newStatus.toLowerCase().includes('aprov') ||
-      statusLabel.toLowerCase().includes('aprov') ||
-      statusLabel.toLowerCase().includes('entreg') ||
-      statusLabel.toLowerCase().includes('revis');
+      statusLabel.toLowerCase().includes('entreg');
 
     const nextDeliveredAt = isApprovalOrDone
       ? (targetTask.deliveredAt || new Date().toLocaleDateString('pt-BR'))
-      : targetTask.deliveredAt;
+      : (newStatus === 'in_review' || newStatus.toLowerCase().includes('revis') ? undefined : targetTask.deliveredAt);
 
     // Preserva ou infere o responsável se a coluna anterior era nominal
     let nextAssigneeId = targetTask.assigneeId;

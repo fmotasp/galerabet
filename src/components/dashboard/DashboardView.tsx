@@ -17,7 +17,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Task, TaskStatus, Employee } from '../../types';
 import { getLabelColorHex } from '../tasks/TasksView';
-import { isTaskOverdue, isTaskCompleted, getTaskOverdueDays, parseTaskDueDate } from '../../lib/taskDateUtils';
+import { isTaskOverdue, isTaskCompleted, isTaskInProgress, getTaskOverdueDays, parseTaskDueDate } from '../../lib/taskDateUtils';
 import { CreativeRankingWidget } from './CreativeRankingWidget';
 
 export const DashboardView: React.FC = () => {
@@ -173,9 +173,16 @@ export const DashboardView: React.FC = () => {
           </span>
         );
       case 'overdue':
+        if (isTaskOverdue(task)) {
+          return (
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-950/80 text-rose-300 border border-rose-800 whitespace-nowrap">
+              Atrasada
+            </span>
+          );
+        }
         return (
-          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-950/80 text-rose-300 border border-rose-800 whitespace-nowrap">
-            Atrasada
+          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-950/80 text-blue-300 border border-blue-800 whitespace-nowrap">
+            Em progresso
           </span>
         );
       case 'blocked':
@@ -198,14 +205,19 @@ export const DashboardView: React.FC = () => {
     return 'bg-[#011C39] text-slate-200 border border-slate-700';
   };
 
-  const getIndicatorColor = (status: TaskStatus) => {
-    switch (status) {
+  const getIndicatorColor = (task: Task) => {
+    if (isTaskCompleted(task)) {
+      return 'bg-[#16A34A]';
+    }
+    if (isTaskOverdue(task)) {
+      return 'bg-[#E11D48]';
+    }
+    const s = task.status;
+    switch (s) {
       case 'in_progress':
         return 'bg-[#5D55F9]';
       case 'in_review':
         return 'bg-[#0284C7]';
-      case 'overdue':
-        return 'bg-[#E11D48]';
       case 'blocked':
         return 'bg-[#94A3B8]';
       case 'done':
@@ -224,8 +236,8 @@ export const DashboardView: React.FC = () => {
   const dashboardMetrics = {
     totalTasks: filteredTasks.length,
     completedTasks: filteredTasks.filter((t) => isTaskCompleted(t)).length,
-    inProgressTasks: filteredTasks.filter((t) => !isTaskCompleted(t) && (t.status === 'in_progress' || t.status === 'in_review')).length,
-    backlogTasks: filteredTasks.filter((t) => !isTaskCompleted(t) && (t.status === 'backlog' || t.status === 'blocked')).length,
+    inProgressTasks: filteredTasks.filter((t) => isTaskInProgress(t)).length,
+    backlogTasks: filteredTasks.filter((t) => !isTaskCompleted(t) && !isTaskInProgress(t) && (t.status === 'backlog' || t.status === 'blocked')).length,
     overdueTasks: filteredTasks.filter((t) => isTaskOverdue(t)).length,
     completionPercentage:
       filteredTasks.length > 0
@@ -504,7 +516,7 @@ export const DashboardView: React.FC = () => {
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div
                         className={`w-3.5 h-3.5 rounded-md ${getIndicatorColor(
-                          task.status
+                          task
                         )} shrink-0 transition-transform group-hover:scale-110`}
                       />
                       <span className="font-semibold text-white text-sm truncate group-hover:text-[#E4007E] transition-colors">

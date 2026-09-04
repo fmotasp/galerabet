@@ -144,14 +144,25 @@ export function parseTaskDueDate(dateStr?: string | null): Date | null {
 }
 
 /**
- * Checks if a task is already completed, delivered, or in final approval/posting status (Postar & Concluída).
+ * Checks if a task is completed, delivered, or in final approval/posting status (Aprovar, Postar & Concluída).
+ * Note: Tasks in review ('in_review', 'revisão', etc.) are NOT considered completed.
  */
 export function isTaskCompleted(task: { status?: string; deliveredAt?: string; trelloListName?: string }): boolean {
-  if (task.deliveredAt && task.deliveredAt.trim() !== '') return true;
   const s = (task.status || '').toLowerCase().trim();
   const l = ((task as any).trelloListName || '').toLowerCase().trim();
 
-  // Status check (Postar, Concluída, Done, Finalizada, Entregue, Aprovada)
+  // If the task or list is explicitly in review, it is NEVER completed
+  if (
+    s === 'in_review' ||
+    s.includes('revis') ||
+    s.includes('review') ||
+    l.includes('revis') ||
+    l.includes('review')
+  ) {
+    return false;
+  }
+
+  // Status check (Aprovar, Postar, Concluída, Done, Finalizada, Entregue, Publicada)
   const isStatusDone =
     s === 'done' ||
     s === 'postar' ||
@@ -162,6 +173,7 @@ export function isTaskCompleted(task: { status?: string; deliveredAt?: string; t
     s.includes('postar') ||
     s.includes('postad') ||
     s.includes('aprov') ||
+    s.includes('publica') ||
     s.includes('entreg');
 
   // Coluna do Trello check
@@ -171,24 +183,65 @@ export function isTaskCompleted(task: { status?: string; deliveredAt?: string; t
     l.includes('concl') ||
     l.includes('final') ||
     l.includes('done') ||
+    l.includes('aprov') ||
+    l.includes('publica') ||
     l.includes('entreg');
 
-  return isStatusDone || isListDone;
+  if (isStatusDone || isListDone) return true;
+
+  // deliveredAt check (only if not in active progress/backlog)
+  if (task.deliveredAt && task.deliveredAt.trim() !== '') {
+    if (s === 'backlog' || s === 'in_progress' || s === 'blocked') {
+      return false;
+    }
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Checks if a task is currently in progress (Em Progresso / Em Produção ou Em Revisão).
+ */
+export function isTaskInProgress(task: { status?: string; deliveredAt?: string; trelloListName?: string }): boolean {
+  if (isTaskCompleted(task)) return false;
+  const s = (task.status || '').toLowerCase().trim();
+  const l = ((task as any).trelloListName || '').toLowerCase().trim();
+
+  return (
+    s === 'in_progress' ||
+    s === 'in_review' ||
+    s.includes('progresso') ||
+    s.includes('andamento') ||
+    s.includes('doing') ||
+    s.includes('revis') ||
+    s.includes('review') ||
+    s.includes('produz') ||
+    l.includes('progresso') ||
+    l.includes('andamento') ||
+    l.includes('doing') ||
+    l.includes('revis') ||
+    l.includes('review') ||
+    l.includes('produz')
+  );
 }
 
 /**
  * Returns how many days overdue a task is relative to referenceDate (default: today).
- * If the task is not overdue or is completed, returns 0.
+ * If the task is not overdue, is completed, or has a future/today due date, returns 0.
  */
 export function getTaskOverdueDays(
-  task: { dueDate?: string; status?: string; deliveredAt?: string },
+  task: { dueDate?: string; status?: string; deliveredAt?: string; isFlagged?: boolean },
   referenceDate = new Date()
 ): number {
   if (isTaskCompleted(task)) return 0;
-  if (task.status === 'overdue' && (!task.dueDate || task.dueDate === 'Sem prazo')) return 1;
 
   const due = parseTaskDueDate(task.dueDate);
-  if (!due) return 0;
+  if (!due) {
+    // Flagged/urgent or explicitly overdue with no date
+    if (task.status === 'overdue' || task.isFlagged) return 1;
+    return 0;
+  }
 
   const now = new Date(referenceDate);
   now.setHours(0, 0, 0, 0);
@@ -200,17 +253,27 @@ export function getTaskOverdueDays(
   if (diffMs > 0) {
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
   }
+  // If flagged as urgent, counts as overdue/alerta even if date is today
+  if (task.isFlagged) return 1;
+
+  // Due date is today or in the future -> NOT overdue
   return 0;
 }
 
 /**
- * Returns true if the task is overdue based on its predicted due date compared to today.
+ * Returns true if the task is overdue or urgent (atrasada / urgente) based on predicted date or flagged status.
  */
 export function isTaskOverdue(
-  task: { dueDate?: string; status?: string; deliveredAt?: string },
+  task: { dueDate?: string; status?: string; deliveredAt?: string; isFlagged?: boolean },
   referenceDate = new Date()
 ): boolean {
   if (isTaskCompleted(task)) return false;
-  if (task.status === 'overdue') return true;
-  return getTaskOverdueDays(task, referenceDate) > 0;
+  if (task.isFlagged) return true;
+
+  const due = parseTaskDueDate(task.dueDate);
+  if (due) {
+    return getTaskOverdueDays(task, referenceDate) > 0;
+  }
+
+  return task.status === 'overdue';
 }
