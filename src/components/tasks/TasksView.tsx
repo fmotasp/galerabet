@@ -285,7 +285,7 @@ export const TasksView: React.FC = () => {
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedClient, setSelectedClient] = useState<string>('all');
-  const [selectedMember, setSelectedMember] = useState<string>('mine');
+  const [selectedMember, setSelectedMember] = useState<string>('all');
   const [isMemberDropdownOpen, setIsMemberDropdownOpen] = useState<boolean>(false);
   const [memberFilterSearch, setMemberFilterSearch] = useState<string>('');
   const [showDoneColumn, setShowDoneColumn] = useState<boolean>(false);
@@ -999,15 +999,15 @@ export const TasksView: React.FC = () => {
                   }
                   setDraggedTaskId(null);
                 }}
-                className={`w-80 shrink-0 min-w-[320px] rounded-2xl p-4 min-h-[520px] flex flex-col justify-between transition-all duration-200 border border-[#262626] ${
+                className={`w-80 shrink-0 min-w-[320px] rounded-2xl p-4 max-h-[calc(100vh-210px)] min-h-[520px] flex flex-col justify-between transition-all duration-200 border border-[#262626] ${
                   dragOverColumnId === col.id
                     ? 'bg-[#222222] ring-2 ring-[#E4007E] scale-[1.01]'
                     : 'bg-[#181818]'
                 }`}
               >
-                <div>
+                <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
                   {/* Column Header */}
-                  <div className="flex items-center justify-between mb-4 px-1 pt-1">
+                  <div className="flex items-center justify-between mb-4 px-1 pt-1 shrink-0">
                     <div className="flex items-center gap-2.5">
                       <span className={`text-sm font-extrabold ${col.color}`}>{col.label}</span>
                       <span className="text-xs font-extrabold bg-[#262626] text-white px-2.5 py-0.5 rounded-full border border-[#333333]">
@@ -1036,7 +1036,7 @@ export const TasksView: React.FC = () => {
                   </div>
 
                   {/* Cards in this column */}
-                  <div className="space-y-3 min-h-[100px]">
+                  <div className="space-y-3 flex-1 overflow-y-auto no-scrollbar pr-0.5 min-h-[100px] pb-1">
                     {columnTasks.map((task) => {
                       const cleanDesc = task.description
                         ? task.description

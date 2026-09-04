@@ -344,7 +344,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'mine' | 'flagged'>('mine');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'mine' | 'flagged'>('all');
   const [globalSearchQuery, setGlobalSearchQuery] = useState<string>('');
 
   // Spine Statuses (Customizable)
