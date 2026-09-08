@@ -157,6 +157,7 @@ export interface Project {
 
 export interface Employee {
   id: string;
+  auth_user_id?: string;
   name: string;
   role: string;
   department: 'Engineering' | 'Design' | 'Product' | 'Infrastructure' | 'Operations' | 'Management' | 'Creative' | string;
@@ -168,6 +169,7 @@ export interface Employee {
   assignedTaskCount: number;
   collaboratorIds: string[];
   email: string;
+  /** @deprecated Utilizar Supabase Auth. Não armazenar nem comparar senhas no frontend. */
   password?: string;
   username?: string;
   location?: string;

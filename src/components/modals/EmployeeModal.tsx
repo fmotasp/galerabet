@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, User, Palette, Eye, EyeOff, KeyRound, UserCheck } from 'lucide-react';
+import { X, Trash2, Palette, UserCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { supabase } from '../../lib/supabase';
 import { Employee } from '../../types';
+import { supabase } from '../../lib/supabase';
 
 export const EmployeeModal: React.FC = () => {
   const {
@@ -13,22 +13,21 @@ export const EmployeeModal: React.FC = () => {
     addEmployee,
     updateEmployee,
     deleteEmployee,
-    createTrelloLabel,
-    updateTrelloLabel,
+    addToast,
   } = useApp();
 
   const isOpen = isNewEmployeeModalOpen || editingEmployee !== null;
 
-  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '',
     role: 'Designer',
     department: 'Design',
     labelColor: 'purple',
-    needsPasswordChange: true,
   });
+
+  const [validationError, setValidationError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const TRELLO_COLORS = [
     { id: 'purple', name: 'Roxo', bg: 'bg-purple-600', hex: '#89609e' },
@@ -47,65 +46,63 @@ export const EmployeeModal: React.FC = () => {
       setFormData({
         name: editingEmployee.name,
         email: editingEmployee.email || '',
-        password: editingEmployee.password || '',
         role: editingEmployee.role || 'Designer',
         department: editingEmployee.department || 'Design',
         labelColor: editingEmployee.labelColor || 'purple',
-        needsPasswordChange: editingEmployee.needsPasswordChange !== false,
       });
-
-      // Se a senha estiver vazia no estado em memória, busca direto no Supabase em tempo real
-      if (!editingEmployee.password) {
-        supabase
-          .from('employees')
-          .select('password, needs_password_change')
-          .eq('id', editingEmployee.id)
-          .single()
-          .then(({ data }) => {
-            if (data) {
-              setFormData((prev) => ({
-                ...prev,
-                password: data.password || prev.password,
-                needsPasswordChange: data.needs_password_change !== undefined ? data.needs_password_change : prev.needsPasswordChange,
-              }));
-            }
-          });
-      }
     } else {
       setFormData({
         name: '',
         email: '',
-        password: '',
         role: 'Designer',
         department: 'Design',
         labelColor: 'purple',
-        needsPasswordChange: true,
       });
     }
+    setValidationError('');
+    setIsSubmitting(false);
   }, [editingEmployee, isOpen]);
 
   if (!isOpen) return null;
 
   const handleClose = () => {
+    setValidationError('');
+    setIsSubmitting(false);
     setIsNewEmployeeModalOpen(false);
     setEditingEmployee(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim()) return;
+    setValidationError('');
 
-    const initials = formData.name
+    const cleanName = formData.name.trim();
+    const cleanEmail = formData.email.trim().toLowerCase();
+
+    if (!cleanName) {
+      setValidationError('Nome é obrigatório.');
+      return;
+    }
+
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      setValidationError('E-mail válido é obrigatório.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const initials = cleanName
       .split(' ')
       .map((n) => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
 
+    // Objeto Employee: NUNCA inclui campo password
+    // Novos funcionários recebem needsPasswordChange = true para forçar troca no primeiro acesso
     const empPayload = {
-      name: formData.name.trim(),
-      email: formData.email.trim().toLowerCase(),
-      password: formData.password.trim(),
+      name: cleanName,
+      email: cleanEmail,
       role: formData.role.trim() || 'Colaborador',
       department: (formData.department.trim() || 'Design') as Employee['department'],
       initials,
@@ -116,16 +113,91 @@ export const EmployeeModal: React.FC = () => {
       collaboratorIds: [],
       location: editingEmployee ? editingEmployee.location : 'Brasil',
       labelColor: formData.labelColor,
-      needsPasswordChange: formData.needsPasswordChange,
+      needsPasswordChange: editingEmployee ? (editingEmployee.needsPasswordChange ?? false) : true,
     };
 
-    if (editingEmployee) {
-      updateEmployee(editingEmployee.id, empPayload);
-    } else {
-      addEmployee(empPayload);
-    }
+    try {
+      if (editingEmployee) {
+        // Modo Edição: Atualiza os dados normais do funcionário
+        await updateEmployee(editingEmployee.id, empPayload);
 
-    handleClose();
+        // Se for um funcionário legado ou sem vínculo ao Supabase Auth, provisiona o acesso com a senha padrão 1234
+        if (!editingEmployee.auth_user_id) {
+          const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
+            body: {
+              operation: 'create',
+              employee_id: editingEmployee.id,
+              email: cleanEmail,
+              password: '1234',
+              name: cleanName,
+              role: empPayload.role,
+            },
+          });
+
+          const funcErrorMsg = funcErr?.message || funcData?.error;
+          if (funcErrorMsg) {
+            console.warn('[manage-employee] Aviso ao configurar acesso do colaborador existente:', funcErrorMsg);
+            addToast(
+              'Atenção ⚠️',
+              `Dados cadastrais salvos, mas o acesso não foi configurado: ${funcErrorMsg}`,
+              'warning'
+            );
+          } else {
+            if (funcData?.auth_user_id) {
+              updateEmployee(editingEmployee.id, {
+                auth_user_id: funcData.auth_user_id,
+                needsPasswordChange: true,
+              });
+            }
+            addToast('Sucesso', 'Funcionário atualizado e acesso inicial configurado.', 'success');
+          }
+        } else {
+          addToast('Sucesso', 'Funcionário atualizado com sucesso.', 'success');
+        }
+      } else {
+        // Modo Criação: Cadastra o funcionário no banco
+        const createdEmp = await addEmployee(empPayload);
+        const employeeId = createdEmp?.id || `emp-${Date.now()}`;
+
+        // Chama a Edge Function para criar/vincular a identidade no Supabase Auth com senha inicial 1234
+        // e needs_password_change = true
+        const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
+          body: {
+            operation: 'create',
+            employee_id: employeeId,
+            email: cleanEmail,
+            password: '1234',
+            name: cleanName,
+            role: empPayload.role,
+          },
+        });
+
+        const funcErrorMsg = funcErr?.message || funcData?.error;
+        if (funcErrorMsg) {
+          console.warn('[manage-employee] Aviso ao provisionar credencial inicial:', funcErrorMsg);
+          addToast(
+            'Atenção ⚠️',
+            `Funcionário cadastrado, mas a criação do acesso falhou: ${funcErrorMsg}. Abra o cadastro dele para tentar novamente.`,
+            'warning'
+          );
+        } else {
+          if (funcData?.auth_user_id) {
+            updateEmployee(employeeId, {
+              auth_user_id: funcData.auth_user_id,
+              needsPasswordChange: true,
+            });
+          }
+          addToast('Sucesso', 'Funcionário cadastrado e credenciais configuradas.', 'success');
+        }
+      }
+
+      handleClose();
+    } catch (err) {
+      console.warn('Erro ao processar funcionário:', err);
+      addToast('Erro', 'Não foi possível concluir a operação. Tente novamente.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -134,7 +206,7 @@ export const EmployeeModal: React.FC = () => {
         className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs transition-opacity"
         onClick={handleClose}
       />
-      <div className="relative bg-[#181818] rounded-3xl shadow-2xl border border-[#2A2A2A] max-w-md w-full p-6 sm:p-7 z-10 animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative bg-[#181818] rounded-3xl shadow-2xl border border-[#2A2A2A] max-w-md w-full p-6 sm:p-7 z-10 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-4 border-b border-[#2A2A2A]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-black shadow-md shadow-[#E4007E]/25">
@@ -151,6 +223,13 @@ export const EmployeeModal: React.FC = () => {
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {validationError && (
+          <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center gap-2.5 text-rose-400 text-xs font-semibold animate-in fade-in duration-150">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{validationError}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-5">
           <div>
@@ -170,55 +249,16 @@ export const EmployeeModal: React.FC = () => {
 
           <div>
             <label className="block text-xs font-bold text-slate-300 mb-1.5">
-              E-mail de Login
+              E-mail de Login <span className="text-rose-500">*</span>
             </label>
             <input
               type="email"
+              required
               placeholder="exemplo@gmail.com ou usuario@empresa.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full p-3 bg-[#222222] border border-[#2A2A2A] focus:border-[#E4007E] rounded-xl text-sm font-semibold text-white placeholder-slate-500 focus:outline-none transition-all shadow-inner"
             />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-[#E4007E]" />
-                Senha de Acesso (Login)
-              </span>
-              <span className="text-[10px] text-slate-400 font-medium">Padrão: 123456</span>
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Defina a senha de login..."
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full p-3 pr-11 bg-[#222222] border border-[#2A2A2A] focus:border-[#E4007E] rounded-xl text-sm font-semibold text-white placeholder-slate-500 focus:outline-none transition-all shadow-inner"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 transition-colors cursor-pointer"
-                title={showPassword ? 'Ocultar senha' : 'Exibir senha'}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-
-            {/* Checkbox Exigir Troca de Senha no 1º Acesso */}
-            <label className="flex items-center gap-2.5 mt-2 p-2 rounded-xl bg-[#222222]/60 border border-[#2A2A2A] cursor-pointer select-none group hover:border-[#E4007E]/40 transition-colors">
-              <input
-                type="checkbox"
-                checked={formData.needsPasswordChange}
-                onChange={(e) => setFormData({ ...formData, needsPasswordChange: e.target.checked })}
-                className="w-4 h-4 rounded text-[#E4007E] focus:ring-[#E4007E] bg-[#181818] border-[#3A3A3A] cursor-pointer"
-              />
-              <div className="text-xs text-slate-300">
-                <span className="font-bold text-white">Primeiro Acesso:</span> Exigir troca de senha no 1º login
-              </div>
-            </label>
           </div>
 
           <div>
@@ -278,9 +318,9 @@ export const EmployeeModal: React.FC = () => {
                 <button
                   key={c.id}
                   type="button"
-                  onClick={() => setFormData({ ...formData, color: c.id })}
+                  onClick={() => setFormData({ ...formData, labelColor: c.id })}
                   className={`h-7 rounded-lg ${c.bg} transition-all cursor-pointer ${
-                    formData.color === c.id
+                    formData.labelColor === c.id
                       ? 'ring-2 ring-white scale-110 shadow-md'
                       : 'opacity-70 hover:opacity-100'
                   }`}
@@ -294,13 +334,14 @@ export const EmployeeModal: React.FC = () => {
             {editingEmployee ? (
               <button
                 type="button"
+                disabled={isSubmitting}
                 onClick={() => {
                   if (confirm(`Tem certeza que deseja remover ${editingEmployee.name}?`)) {
                     deleteEmployee(editingEmployee.id);
                     handleClose();
                   }
                 }}
-                className="text-xs text-rose-500 hover:text-rose-400 font-bold flex items-center gap-1 cursor-pointer"
+                className="text-xs text-rose-500 hover:text-rose-400 font-bold flex items-center gap-1 cursor-pointer disabled:opacity-50"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Excluir</span>
@@ -310,16 +351,19 @@ export const EmployeeModal: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 type="button"
+                disabled={isSubmitting}
                 onClick={handleClose}
-                className="px-4 py-2.5 hover:bg-[#222222] text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                className="px-4 py-2.5 hover:bg-[#222222] text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-xs font-black shadow-lg shadow-[#E4007E]/25 transition-all active:scale-98"
+                disabled={isSubmitting}
+                className="px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-xs font-black shadow-lg shadow-[#E4007E]/25 transition-all active:scale-98 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
               >
-                {editingEmployee ? 'Salvar Alterações' : 'Cadastrar Membro'}
+                {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>{editingEmployee ? 'Salvar Alterações' : 'Cadastrar Membro'}</span>
               </button>
             </div>
           </div>

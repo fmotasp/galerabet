@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   User,
+  Mail,
   KeyRound,
   Eye,
   EyeOff,
@@ -17,7 +18,16 @@ import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabase';
 
 export const LoginView: React.FC = () => {
-  const { setCurrentUser, addToast, employees, loginArtUrl, updateLoginArtUrl, updateEmployee } = useApp();
+  const {
+    setCurrentUser,
+    addToast,
+    employees,
+    loginArtUrl,
+    updateLoginArtUrl,
+    updateEmployee,
+    pendingPasswordChangeUser,
+    setPendingPasswordChangeUser,
+  } = useApp();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +48,23 @@ export const LoginView: React.FC = () => {
   const [firstAccessLoading, setFirstAccessLoading] = useState(false);
   const [firstAccessError, setFirstAccessError] = useState('');
 
+  // Se houver usuário com troca pendente identificado no AppContext (ex: após F5/reload),
+  // ativa automaticamente o modal de Primeiro Acesso
+  React.useEffect(() => {
+    if (pendingPasswordChangeUser && !firstAccessUser) {
+      setFirstAccessUser({
+        id: pendingPasswordChangeUser.id,
+        name: pendingPasswordChangeUser.name,
+        email: pendingPasswordChangeUser.email,
+        role: pendingPasswordChangeUser.role,
+        profile: pendingPasswordChangeUser.profile || pendingPasswordChangeUser,
+      });
+      setNewPassword('');
+      setConfirmPassword('');
+      setFirstAccessError('');
+    }
+  }, [pendingPasswordChangeUser]);
+
   React.useEffect(() => {
     supabase
       .from('projects')
@@ -55,9 +82,6 @@ export const LoginView: React.FC = () => {
   }, []);
 
   const triggerWelcomeAndLogin = (user: any) => {
-    if (rememberMe) {
-      localStorage.setItem('spine_logged_user', JSON.stringify(user));
-    }
     setWelcomeUser(user);
     setCountdown(5);
 
@@ -84,146 +108,132 @@ export const LoginView: React.FC = () => {
     setErrorMsg('');
     setLoading(true);
 
-    const normInput = identifier.trim().toLowerCase();
+    const cleanEmail = identifier.trim().toLowerCase();
     const cleanPass = password.trim();
 
-    // 1. Verificação de Acesso do Administrador Geral
-    if (normInput === 'admin' && cleanPass === 'g4l3r4') {
-      const adminUser = {
-        id: 'usr-admin',
-        name: 'Administrador Geral',
-        email: 'admin@empresa.com',
-        role: 'Admin',
-        roleType: 'admin' as const,
-        avatarUrl: '',
-        initials: 'AD',
-      };
-      setLoading(false);
-      triggerWelcomeAndLogin(adminUser);
-      return;
-    }
-
-    if (normInput === 'admin' && cleanPass !== 'g4l3r4') {
-      setErrorMsg('Senha incorreta para o Administrador.');
+    if (!cleanEmail || !cleanPass) {
+      setErrorMsg('Por favor, informe seu e-mail e senha de acesso.');
       setLoading(false);
       return;
     }
 
-    // 2. Busca do Funcionário diretamente no Supabase em tempo real e fallback local
+    if (!cleanEmail.includes('@')) {
+      setErrorMsg('Por favor, informe um endereço de e-mail válido (ex: usuario@empresa.com).');
+      setLoading(false);
+      return;
+    }
+
     try {
-      let matchedEmp: any = null;
-
-      // Fallback para estado em memória primeiro
-      matchedEmp = employees.find((emp) => {
-        const empEmail = (emp.email || '').toLowerCase().trim();
-        const empName = (emp.name || '').toLowerCase().trim();
-        const empUser = (emp.username || '').toLowerCase().trim();
-        return (
-          (empEmail && empEmail === normInput) ||
-          (empName && empName === normInput) ||
-          (empUser && empUser === normInput) ||
-          (empName && (empName.includes(normInput) || normInput.includes(empName)))
-        );
+      // Autenticação oficial via Supabase Auth (servidor valida com hash criptografado)
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: cleanPass,
       });
 
-      // Tenta buscar no Supabase se não encontrou ou para pegar senha atualizada
-      try {
-        const { data: dbEmps } = await supabase.from('employees').select('*');
-        if (dbEmps && dbEmps.length > 0) {
-          const foundInDb = dbEmps.find((row: any) => {
-            const empEmail = (row.email || '').toLowerCase().trim();
-            const empName = (row.name || '').toLowerCase().trim();
-            const empUser = (row.username || '').toLowerCase().trim();
-            return (
-              (empEmail && empEmail === normInput) ||
-              (empName && empName === normInput) ||
-              (empUser && empUser === normInput) ||
-              (empName && (empName.includes(normInput) || normInput.includes(empName)))
-            );
-          });
-          if (foundInDb) {
-            matchedEmp = {
-              ...matchedEmp,
-              ...foundInDb,
-              password: foundInDb.password || matchedEmp?.password || '',
-              needsPasswordChange:
-                foundInDb.needs_password_change !== undefined
-                  ? Boolean(foundInDb.needs_password_change)
-                  : matchedEmp?.needsPasswordChange,
-            };
+      if (authError || !authData.user) {
+        console.warn('[Supabase Auth] Falha no login:', authError?.message);
+        setErrorMsg('E-mail ou senha incorretos. Verifique suas credenciais.');
+        setLoading(false);
+        return;
+      }
+
+      const authUser = authData.user;
+
+      // 3. Busca o perfil do colaborador associado ao auth_user_id
+      let profile: any = null;
+
+      const { data: byAuthId } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('auth_user_id', authUser.id)
+        .maybeSingle();
+
+      if (byAuthId) {
+        profile = byAuthId;
+      } else if (authUser.email) {
+        // Fallback por email: vincula automaticamente auth_user_id no primeiro login
+        const { data: byEmail } = await supabase
+          .from('employees')
+          .select('*')
+          .ilike('email', authUser.email.trim())
+          .maybeSingle();
+
+        if (byEmail) {
+          profile = byEmail;
+          if (!byEmail.auth_user_id) {
+            await supabase
+              .from('employees')
+              .update({ auth_user_id: authUser.id })
+              .eq('id', byEmail.id);
           }
         }
-      } catch (dbErr) {
-        console.warn('Supabase fetch error on login:', dbErr);
       }
 
-      if (!matchedEmp) {
-        setErrorMsg('Usuário ou e-mail não encontrado no cadastro do sistema.');
-        setLoading(false);
-        return;
-      }
+      const isUserAdmin =
+        profile?.role_type === 'admin' ||
+        profile?.role?.toLowerCase() === 'admin' ||
+        profile?.role?.toLowerCase() === 'administrador' ||
+        authUser.email === 'admin@empresa.com' ||
+        authUser.user_metadata?.role === 'admin' ||
+        authUser.app_metadata?.role === 'admin';
 
-      // 3. Validação de Senha
-      const expectedPassword = String(matchedEmp.password || '').trim();
-      const inputPass = String(password || '').trim();
-
-      if (!expectedPassword) {
-        setErrorMsg(
-          'Este usuário ainda não possui senha cadastrada. Acesse como admin e cadastre a senha no perfil do funcionário.'
-        );
-        setLoading(false);
-        return;
-      }
-
-      if (expectedPassword !== inputPass) {
-        setErrorMsg('Senha incorreta.');
-        setLoading(false);
-        return;
-      }
-
-      // 4. Verificação de Primeiro Acesso (Redefinição de Senha Obrigatória)
+      // 4. Verificação de Primeiro Acesso (Troca Obrigatória de Senha)
       const requiresPasswordChange =
-        matchedEmp.needsPasswordChange === true ||
-        matchedEmp.needs_password_change === true;
+        profile?.needs_password_change === true ||
+        authUser.user_metadata?.needs_password_change === true;
 
       if (requiresPasswordChange) {
         setLoading(false);
-        setFirstAccessUser(matchedEmp);
+        setFirstAccessUser({
+          id: profile?.id || authUser.id,
+          name: profile?.name || authUser.user_metadata?.name || 'Colaborador',
+          email: authUser.email,
+          role: profile?.role || 'Colaborador',
+          profile,
+        });
         setNewPassword('');
         setConfirmPassword('');
         setFirstAccessError('');
         return;
       }
 
-      // Login de Funcionário Autorizado
-      const employeeUser = {
-        id: matchedEmp.id,
-        name: matchedEmp.name,
-        email: matchedEmp.email || '',
-        role: matchedEmp.role || 'Colaborador',
-        roleType: 'employee' as const,
-        avatarUrl: matchedEmp.avatarUrl || matchedEmp.avatar_url || '',
-        initials: matchedEmp.initials || 'CB',
+      // 5. Monta usuário autenticado para o contexto da aplicação
+      const userRole = profile?.role || (isUserAdmin ? 'Administrador' : 'Colaborador');
+      const userName =
+        profile?.name ||
+        authUser.user_metadata?.name ||
+        (isUserAdmin ? 'Administrador Geral' : authUser.email?.split('@')[0] || 'Usuário');
+
+      const authenticatedUser = {
+        id: profile?.id || authUser.id,
+        authUserId: authUser.id,
+        name: userName,
+        email: authUser.email || profile?.email || '',
+        role: userRole,
+        roleType: isUserAdmin ? ('admin' as const) : ('employee' as const),
+        avatarUrl: profile?.avatar_url || profile?.avatarUrl || '',
+        initials: profile?.initials || (isUserAdmin ? 'AD' : 'CB'),
+        department: profile?.department,
       };
 
       setLoading(false);
-      triggerWelcomeAndLogin(employeeUser);
+      triggerWelcomeAndLogin(authenticatedUser);
     } catch (err: any) {
-      console.error('Login error:', err);
-      setErrorMsg('Erro ao autenticar. Tente novamente.');
+      console.error('[Supabase Auth] Login exception:', err);
+      setErrorMsg('Ocorreu um erro ao autenticar. Tente novamente.');
       setLoading(false);
     }
   };
 
-  // Salvar nova senha no primeiro acesso
+  // Salvar nova senha no primeiro acesso através do Supabase Auth
   const handleFirstAccessSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFirstAccessError('');
     const cleanNew = newPassword.trim();
     const cleanConf = confirmPassword.trim();
 
-    if (cleanNew.length < 4) {
-      setFirstAccessError('A nova senha deve conter pelo menos 4 caracteres.');
+    if (cleanNew.length < 6) {
+      setFirstAccessError('A nova senha deve conter pelo menos 6 caracteres.');
       return;
     }
 
@@ -235,48 +245,71 @@ export const LoginView: React.FC = () => {
     setFirstAccessLoading(true);
 
     try {
-      // 1. Grava no Supabase
-      const { error: sbErr } = await supabase
-        .from('employees')
-        .update({
-          password: cleanNew,
+      // 1. Atualiza a senha no Supabase Auth e o metadata de forma criptografada pelo servidor
+      const { error: authErr } = await supabase.auth.updateUser({
+        password: cleanNew,
+        data: {
           needs_password_change: false,
-        })
-        .eq('id', firstAccessUser.id);
+        },
+      });
 
-      if (sbErr) {
-        console.error('Supabase password change error:', sbErr);
-        setFirstAccessError(`Falha ao salvar no banco de dados: ${sbErr.message}`);
+      if (authErr) {
+        console.error('[Supabase Auth] Erro ao atualizar senha no primeiro acesso:', authErr);
+        setFirstAccessError(`Falha ao definir nova senha: ${authErr.message}`);
         setFirstAccessLoading(false);
         return;
       }
 
-      // 2. Atualiza estado local
-      if (updateEmployee) {
-        updateEmployee(firstAccessUser.id, {
-          password: cleanNew,
-          needsPasswordChange: false,
-        });
+      // 2. Atualiza a flag needs_password_change na tabela employees (sem armazenar texto puro!)
+      const targetEmpId = firstAccessUser.profile?.id || firstAccessUser.id;
+      if (targetEmpId) {
+        const { error: empErr } = await supabase
+          .from('employees')
+          .update({
+            needs_password_change: false,
+          })
+          .eq('id', targetEmpId);
+
+        if (empErr) {
+          console.warn('[Supabase] Erro ao sincronizar flag no banco de employees:', empErr);
+          // Alerta o usuário mas não impede login se a senha no Auth já foi trocada
+          addToast('Aviso', 'Sua senha foi alterada no Auth, mas houve lentidão ao atualizar o cadastro.', 'warning');
+        }
+
+        if (updateEmployee) {
+          updateEmployee(targetEmpId, {
+            needsPasswordChange: false,
+          });
+        }
       }
 
       // 3. Monta usuário logado
+      const isUserAdmin =
+        firstAccessUser.profile?.role_type === 'admin' ||
+        firstAccessUser.profile?.role?.toLowerCase() === 'admin' ||
+        firstAccessUser.profile?.role?.toLowerCase() === 'administrador' ||
+        firstAccessUser.email === 'admin@empresa.com';
+
       const authenticatedUser = {
-        id: firstAccessUser.id,
+        id: firstAccessUser.profile?.id || firstAccessUser.id,
+        authUserId: firstAccessUser.id,
         name: firstAccessUser.name,
         email: firstAccessUser.email || '',
         role: firstAccessUser.role || 'Colaborador',
-        roleType: (firstAccessUser.role?.toLowerCase().includes('gestor') || firstAccessUser.role?.toLowerCase().includes('manager')) ? 'manager' as const : 'employee' as const,
-        avatarUrl: firstAccessUser.avatarUrl || firstAccessUser.avatar_url || '',
-        initials: firstAccessUser.initials || 'CB',
+        roleType: isUserAdmin ? ('admin' as const) : ('employee' as const),
+        avatarUrl: firstAccessUser.profile?.avatar_url || firstAccessUser.profile?.avatarUrl || '',
+        initials: firstAccessUser.profile?.initials || 'CB',
+        department: firstAccessUser.profile?.department,
         needsPasswordChange: false,
       };
 
+      setPendingPasswordChangeUser(null);
       setFirstAccessLoading(false);
       setFirstAccessUser(null);
       triggerWelcomeAndLogin(authenticatedUser);
       addToast('Senha Definida! 🔒', 'Sua nova senha foi gravada com sucesso.', 'success');
     } catch (err: any) {
-      console.error('First access password update exception:', err);
+      console.error('[Supabase Auth] Exceção ao gravar nova senha:', err);
       setFirstAccessError('Ocorreu um erro ao gravar a nova senha. Tente novamente.');
       setFirstAccessLoading(false);
     }
@@ -329,7 +362,7 @@ export const LoginView: React.FC = () => {
                     type={showNewPassword ? 'text' : 'password'}
                     required
                     autoFocus
-                    placeholder="nova senha (mínimo 4 dígitos)"
+                    placeholder="nova senha (mínimo 6 dígitos)"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     style={{ background: 'transparent', backgroundColor: 'transparent' }}
@@ -402,14 +435,14 @@ export const LoginView: React.FC = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-7">
-                {/* Username / Identifier Input */}
+                {/* Email Input */}
                 <div className="relative border-b-2 border-[#2A2A2A] focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
-                  <User className="w-5 h-5 text-[#E4007E] shrink-0" />
+                  <Mail className="w-5 h-5 text-[#E4007E] shrink-0" />
                   <input
-                    type="text"
+                    type="email"
                     required
                     autoFocus
-                    placeholder="usuário ou e-mail"
+                    placeholder="seu e-mail de acesso"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     style={{ background: 'transparent', backgroundColor: 'transparent' }}

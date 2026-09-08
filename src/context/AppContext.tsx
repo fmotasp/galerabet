@@ -82,7 +82,7 @@ interface AppContextType {
 
   // Employees
   employees: Employee[];
-  addEmployee: (employee: Omit<Employee, 'id'>) => void;
+  addEmployee: (employee: Omit<Employee, 'id'>) => Promise<Employee | null> | void;
   updateEmployee: (id: string, updates: Partial<Employee>) => void;
   deleteEmployee: (id: string) => void;
 
@@ -146,7 +146,10 @@ interface AppContextType {
     avatarUrl?: string;
     initials: string;
     department?: string;
+    needsPasswordChange?: boolean;
   } | null;
+  pendingPasswordChangeUser: any | null;
+  setPendingPasswordChangeUser: (user: any | null) => void;
   setCurrentUser: (user: any) => void;
   logout: () => void;
   isManagerOrAdmin: (user?: any) => boolean;
@@ -250,7 +253,9 @@ const STORAGE_KEYS = {
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Current Authenticated User with Daily 00:00 Expiration
+  // Current Authenticated User sincronizado com Supabase Auth
+  const [pendingPasswordChangeUser, setPendingPasswordChangeUser] = useState<any | null>(null);
+
   const [currentUser, setCurrentUserState] = useState<any>(() => {
     const saved = localStorage.getItem('spine_logged_user');
     const loginDate = localStorage.getItem(STORAGE_KEYS.LOGIN_DATE);
@@ -258,13 +263,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (saved) {
       if (loginDate && loginDate !== today) {
-        // Expired on midnight 00:00
         localStorage.removeItem('spine_logged_user');
         localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
         return null;
       }
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed?.needsPasswordChange) {
+          localStorage.removeItem('spine_logged_user');
+          localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
+          return null;
+        }
+        return parsed;
       } catch {
         return null;
       }
@@ -272,19 +282,159 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return null;
   });
 
-  const setCurrentUser = (user: any) => {
-    if (user) {
-      localStorage.setItem(STORAGE_KEYS.LOGIN_DATE, getTodayDateStr());
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
+  const fetchProfileForAuthUser = async (authUser: any) => {
+    if (!authUser) return null;
+    try {
+      let profile: any = null;
+
+      // 1. Tenta buscar por auth_user_id
+      const { data: byAuthId, error: authIdErr } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('auth_user_id', authUser.id)
+        .maybeSingle();
+
+      if (!authIdErr && byAuthId) {
+        profile = byAuthId;
+      }
+
+      // 2. Fallback por email e vinculação automática
+      if (!profile && authUser.email) {
+        const { data: byEmail, error: emailErr } = await supabase
+          .from('employees')
+          .select('*')
+          .ilike('email', authUser.email.trim())
+          .maybeSingle();
+
+        if (!emailErr && byEmail) {
+          profile = byEmail;
+          if (!byEmail.auth_user_id) {
+            await supabase
+              .from('employees')
+              .update({ auth_user_id: authUser.id })
+              .eq('id', byEmail.id);
+          }
+        }
+      }
+
+      const isUserAdmin =
+        profile?.role_type === 'admin' ||
+        profile?.role?.toLowerCase() === 'admin' ||
+        profile?.role?.toLowerCase() === 'administrador' ||
+        authUser.email === 'admin@empresa.com' ||
+        authUser.user_metadata?.role === 'admin' ||
+        authUser.app_metadata?.role === 'admin';
+
+      const userRole = profile?.role || (isUserAdmin ? 'Administrador' : 'Colaborador');
+      const userName =
+        profile?.name ||
+        authUser.user_metadata?.name ||
+        (isUserAdmin ? 'Administrador Geral' : authUser.email?.split('@')[0] || 'Usuário');
+
+      const needsChange =
+        Boolean(profile?.needs_password_change) ||
+        Boolean(authUser.user_metadata?.needs_password_change);
+
+      return {
+        id: profile?.id || authUser.id,
+        authUserId: authUser.id,
+        name: userName,
+        email: authUser.email || profile?.email || '',
+        role: userRole,
+        roleType: isUserAdmin ? ('admin' as const) : ('employee' as const),
+        avatarUrl: profile?.avatar_url || profile?.avatarUrl || '',
+        initials: profile?.initials || (isUserAdmin ? 'AD' : 'CB'),
+        department: profile?.department,
+        needsPasswordChange: needsChange,
+        profile,
+      };
+    } catch (err) {
+      console.warn('[Supabase Auth] Falha ao carregar perfil do usuário:', err);
+      return null;
     }
-    setCurrentUserState(user);
   };
 
-  const logout = () => {
+  // Sincronização em tempo real de sessão do Supabase Auth
+  useEffect(() => {
+    let isMounted = true;
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!isMounted) return;
+      if (session?.user) {
+        const appUser = await fetchProfileForAuthUser(session.user);
+        if (isMounted && appUser) {
+          if (appUser.needsPasswordChange) {
+            setCurrentUserState(null);
+            setPendingPasswordChangeUser(appUser);
+          } else {
+            setCurrentUserState(appUser);
+            setPendingPasswordChangeUser(null);
+          }
+        }
+      } else if (!localStorage.getItem('spine_logged_user')) {
+        setCurrentUserState(null);
+        setPendingPasswordChangeUser(null);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') {
+        if (session?.user) {
+          const appUser = await fetchProfileForAuthUser(session.user);
+          if (isMounted && appUser) {
+            if (appUser.needsPasswordChange) {
+              setCurrentUserState(null);
+              setPendingPasswordChangeUser(appUser);
+            } else {
+              setCurrentUserState(appUser);
+              setPendingPasswordChangeUser(null);
+            }
+          }
+        }
+      } else if (event === 'SIGNED_OUT') {
+        if (isMounted) {
+          setCurrentUserState(null);
+          setPendingPasswordChangeUser(null);
+          localStorage.removeItem('spine_logged_user');
+          localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
+        }
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const setCurrentUser = (user: any) => {
+    if (user && !user.needsPasswordChange) {
+      localStorage.setItem(STORAGE_KEYS.LOGIN_DATE, getTodayDateStr());
+      setCurrentUserState(user);
+      setPendingPasswordChangeUser(null);
+    } else if (user && user.needsPasswordChange) {
+      localStorage.removeItem('spine_logged_user');
+      localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
+      setCurrentUserState(null);
+      setPendingPasswordChangeUser(user);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
+      setCurrentUserState(null);
+      setPendingPasswordChangeUser(null);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn('Erro ao encerrar sessão no Supabase Auth:', err);
+    }
     localStorage.removeItem('spine_logged_user');
     localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
     setCurrentUserState(null);
+    setPendingPasswordChangeUser(null);
   };
 
   // Login Art Customization with Persistent IndexedDB + LocalStorage Sync
@@ -1104,7 +1254,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       )
     );
 
-    // 1. Atualiza no Supabase imediatamente em tempo real
+    // 1. Se a demanda estiver desatribuída, assume a titularidade de forma segura via RPC
+    if (!targetTask.assigneeId || targetTask.assigneeId === 'unassigned') {
+      try {
+        await supabase.rpc('claim_task', { p_task_id: id });
+      } catch (claimErr) {
+        console.warn('[Supabase] Aviso ao reivindicar demanda:', claimErr);
+      }
+    }
+
+    // 2. Atualiza no Supabase imediatamente em tempo real
     try {
       const updateObj: any = {
         status: newStatus,
@@ -1434,7 +1593,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         tags: newEmp.tags,
         current_workload: newEmp.currentWorkload,
         email: newEmp.email,
-        password: newEmp.password || '',
         username: newEmp.username || '',
         location: newEmp.location || 'Brasil',
         label_id: newEmp.labelId,
@@ -1453,6 +1611,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     addActivity('Admin', 'AD', `adicionou ${newEmp.name} como colaborador`, 'purple');
+    return newEmp;
   };
 
   const updateEmployee = async (id: string, updates: Partial<Employee>) => {
@@ -1471,7 +1630,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (updates.tags !== undefined) payload.tags = updates.tags;
       if (updates.currentWorkload !== undefined) payload.current_workload = updates.currentWorkload;
       if (updates.email !== undefined) payload.email = updates.email;
-      if (updates.password !== undefined) payload.password = updates.password;
       if (updates.username !== undefined) payload.username = updates.username;
       if (updates.location !== undefined) payload.location = updates.location;
       if (updates.labelId !== undefined) payload.label_id = updates.labelId;
@@ -1997,12 +2155,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             assignedTaskCount: 0,
             collaboratorIds: [],
             email: row.email || '',
-            password: row.password || '',
             username: row.username || '',
             location: row.location || 'Brasil',
             labelId: row.label_id,
             labelColor: row.label_color,
             needsPasswordChange: Boolean(row.needs_password_change),
+            auth_user_id: row.auth_user_id,
           }));
 
           setEmployees(loadedEmps);
@@ -2200,12 +2358,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               assignedTaskCount: 0,
               collaboratorIds: [],
               email: row.email || '',
-              password: row.password || '',
               username: row.username || '',
               location: row.location || 'Brasil',
               labelId: row.label_id,
               labelColor: row.label_color,
               needsPasswordChange: Boolean(row.needs_password_change),
+              auth_user_id: row.auth_user_id,
             };
             setEmployees((prev) => {
               const exists = prev.some((e) => e.id === updatedEmp.id);
@@ -2512,6 +2670,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         removeToast,
         currentUser,
         setCurrentUser,
+        pendingPasswordChangeUser,
+        setPendingPasswordChangeUser,
         logout,
         isManagerOrAdmin: (u?: any) => checkIsManagerOrAdmin(u !== undefined ? u : currentUser),
         computedMetrics,
