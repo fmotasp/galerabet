@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Palette, UserCheck, AlertCircle, Loader2 } from 'lucide-react';
+import { Trash2, Palette, UserCheck, AlertCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Employee } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { Button, Input, Modal } from '../ui';
 
 export const EmployeeModal: React.FC = () => {
   const {
@@ -210,174 +211,169 @@ export const EmployeeModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs transition-opacity"
-        onClick={handleClose}
-      />
-      <div className="relative bg-[#181818] rounded-3xl shadow-2xl border border-[#2A2A2A] max-w-md w-full p-6 sm:p-7 z-10 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between pb-4 border-b border-[#2A2A2A]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-black shadow-md shadow-[#E4007E]/25">
-              <UserCheck className="w-4 h-4" />
-            </div>
-            <h2 className="text-lg font-black text-white tracking-tight">
-              {editingEmployee ? 'Editar Membro da Equipe' : 'Cadastrar Novo Membro'}
-            </h2>
-          </div>
-          <button
-            onClick={handleClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-[#2A2A2A] transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="sm"
+      className="!bg-[#181818]"
+      icon={<UserCheck className="w-4 h-4" />}
+      title={editingEmployee ? 'Editar Membro da Equipe' : 'Cadastrar Novo Membro'}
+    >
+      {validationError && (
+        <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center gap-2.5 text-rose-400 text-xs font-semibold animate-in fade-in duration-150">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{validationError}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+            Nome Completo <span className="text-rose-500">*</span>
+          </label>
+          <Input
+            type="text"
+            required
+            autoFocus
+            disabled={isSubmitting}
+            placeholder="Ex: Felipe Mota, Rafael Barbosa..."
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
+          />
         </div>
 
-        {validationError && (
-          <div className="mt-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center gap-2.5 text-rose-400 text-xs font-semibold animate-in fade-in duration-150">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{validationError}</span>
-          </div>
-        )}
+        <div>
+          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+            E-mail de Login <span className="text-rose-500">*</span>
+          </label>
+          <Input
+            type="email"
+            required
+            disabled={isSubmitting}
+            placeholder="exemplo@gmail.com ou usuario@empresa.com"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
+          />
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-5">
-          <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
-              Nome Completo <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              autoFocus
-              placeholder="Ex: Felipe Mota, Rafael Barbosa..."
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full p-3 bg-[#222222] border border-[#2A2A2A] focus:border-[#E4007E] rounded-xl text-sm font-semibold text-white placeholder-slate-500 focus:outline-none transition-all shadow-inner"
-            />
-          </div>
+        <div>
+          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+            Cargo / Função
+          </label>
+          <Input
+            type="text"
+            list="role-suggestions"
+            disabled={isSubmitting}
+            placeholder="Ex: Designer, Video Maker, Gestor, Copywriter..."
+            value={formData.role}
+            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+            className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
+          />
+          <datalist id="role-suggestions">
+            <option value="Designer" />
+            <option value="Video Maker" />
+            <option value="Diretor de Arte" />
+            <option value="Motion Designer" />
+            <option value="Copywriter / Redator" />
+            <option value="Gestor" />
+            <option value="Social Media" />
+            <option value="Desenvolvedor Frontend" />
+            <option value="Administrador" />
+          </datalist>
+        </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
-              E-mail de Login <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="email"
-              required
-              placeholder="exemplo@gmail.com ou usuario@empresa.com"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full p-3 bg-[#222222] border border-[#2A2A2A] focus:border-[#E4007E] rounded-xl text-sm font-semibold text-white placeholder-slate-500 focus:outline-none transition-all shadow-inner"
-            />
-          </div>
+        <div>
+          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+            Departamento / Time
+          </label>
+          <Input
+            type="text"
+            list="dept-suggestions"
+            disabled={isSubmitting}
+            placeholder="Ex: Design, Audiovisual, Gestão, Conteúdo..."
+            value={formData.department}
+            onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+            className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
+          />
+          <datalist id="dept-suggestions">
+            <option value="Design" />
+            <option value="Audiovisual" />
+            <option value="Gestão" />
+            <option value="Marketing" />
+            <option value="Conteúdo" />
+            <option value="Tecnologia" />
+          </datalist>
+        </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
-              Cargo / Função
-            </label>
-            <input
-              type="text"
-              list="role-suggestions"
-              placeholder="Ex: Designer, Video Maker, Gestor, Copywriter..."
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="w-full p-3 bg-[#222222] border border-[#2A2A2A] focus:border-[#E4007E] rounded-xl text-sm font-semibold text-white placeholder-slate-500 focus:outline-none transition-all shadow-inner"
-            />
-            <datalist id="role-suggestions">
-              <option value="Designer" />
-              <option value="Video Maker" />
-              <option value="Diretor de Arte" />
-              <option value="Motion Designer" />
-              <option value="Copywriter / Redator" />
-              <option value="Gestor" />
-              <option value="Social Media" />
-              <option value="Desenvolvedor Frontend" />
-              <option value="Administrador" />
-            </datalist>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
-              Departamento / Time
-            </label>
-            <input
-              type="text"
-              list="dept-suggestions"
-              placeholder="Ex: Design, Audiovisual, Gestão, Conteúdo..."
-              value={formData.department}
-              onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-              className="w-full p-3 bg-[#222222] border border-[#2A2A2A] focus:border-[#E4007E] rounded-xl text-sm font-semibold text-white placeholder-slate-500 focus:outline-none transition-all shadow-inner"
-            />
-            <datalist id="dept-suggestions">
-              <option value="Design" />
-              <option value="Audiovisual" />
-              <option value="Gestão" />
-              <option value="Marketing" />
-              <option value="Conteúdo" />
-              <option value="Tecnologia" />
-            </datalist>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1.5">
-              <Palette className="w-3.5 h-3.5 text-[#E4007E]" />
-              Cor de Identificação (Avatar)
-            </label>
-            <div className="grid grid-cols-9 gap-1.5 p-2 bg-[#222222] rounded-xl border border-[#2A2A2A]">
-              {TRELLO_COLORS.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, labelColor: c.id })}
-                  className={`h-7 rounded-lg ${c.bg} transition-all cursor-pointer ${
-                    formData.labelColor === c.id
-                      ? 'ring-2 ring-white scale-110 shadow-md'
-                      : 'opacity-70 hover:opacity-100'
-                  }`}
-                  title={c.name}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-5 border-t border-[#2A2A2A] mt-6">
-            {editingEmployee ? (
+        <div>
+          <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1.5">
+            <Palette className="w-3.5 h-3.5 text-[#E4007E]" />
+            Cor de Identificação (Avatar)
+          </label>
+          <div className="grid grid-cols-9 gap-1.5 p-2 bg-[#222222] rounded-xl border border-[#2A2A2A]">
+            {TRELLO_COLORS.map((c) => (
               <button
+                key={c.id}
                 type="button"
                 disabled={isSubmitting}
-                onClick={() => {
-                  if (confirm(`Tem certeza que deseja remover ${editingEmployee.name}?`)) {
-                    deleteEmployee(editingEmployee.id);
-                    handleClose();
-                  }
-                }}
-                className="text-xs text-rose-500 hover:text-rose-400 font-bold flex items-center gap-1 cursor-pointer disabled:opacity-50"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Excluir</span>
-              </button>
-            ) : <div />}
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={handleClose}
-                className="px-4 py-2.5 hover:bg-[#222222] text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-xs font-black shadow-lg shadow-[#E4007E]/25 transition-all active:scale-98 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
-              >
-                {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                <span>{editingEmployee ? 'Salvar Alterações' : 'Cadastrar Membro'}</span>
-              </button>
-            </div>
+                onClick={() => setFormData({ ...formData, labelColor: c.id })}
+                className={`h-7 rounded-lg ${c.bg} transition-all cursor-pointer ${
+                  formData.labelColor === c.id
+                    ? 'ring-2 ring-white scale-110 shadow-md'
+                    : 'opacity-70 hover:opacity-100'
+                }`}
+                title={c.name}
+              />
+            ))}
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-5 border-t border-[#2A2A2A] mt-6">
+          {editingEmployee ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isSubmitting}
+              onClick={() => {
+                if (confirm(`Tem certeza que deseja remover ${editingEmployee.name}?`)) {
+                  deleteEmployee(editingEmployee.id);
+                  handleClose();
+                }
+              }}
+              leftIcon={<Trash2 className="w-4 h-4" />}
+              className="px-0 py-0 text-xs text-rose-500 hover:text-rose-400 font-bold hover:bg-transparent"
+            >
+              Excluir
+            </Button>
+          ) : (
+            <div />
+          )}
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="md"
+              disabled={isSubmitting}
+              onClick={handleClose}
+              className="px-4 py-2.5 hover:bg-[#222222] text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              isLoading={isSubmitting}
+              disabled={isSubmitting}
+              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-xs font-black"
+            >
+              {editingEmployee ? 'Salvar Alterações' : 'Cadastrar Membro'}
+            </Button>
+          </div>
+        </div>
+      </form>
+    </Modal>
   );
 };

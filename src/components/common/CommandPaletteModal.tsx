@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Task } from '../../types';
+import { Button, Badge } from '../ui';
 
 export const CommandPaletteModal: React.FC = () => {
   const {
@@ -144,6 +145,9 @@ export const CommandPaletteModal: React.FC = () => {
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Paleta de Comandos e Busca Rápida"
       className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center pt-16 sm:pt-24 px-4 animate-in fade-in duration-150"
       onClick={() => setIsSearchModalOpen(false)}
     >
@@ -167,12 +171,16 @@ export const CommandPaletteModal: React.FC = () => {
             className="w-full py-4 text-sm sm:text-base font-bold bg-transparent border-none text-white placeholder:text-slate-400 focus:outline-none"
           />
           {query && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setQuery('')}
-              className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
+              className="text-slate-400 hover:text-white p-1 rounded-lg"
+              aria-label="Limpar busca"
+              title="Limpar busca"
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           )}
           <span className="hidden sm:flex items-center gap-1 text-[11px] font-black text-slate-300 bg-[#222222] px-2.5 py-1 rounded-xl border border-[#303030] shadow-sm ml-2">
             <Command className="w-3.5 h-3.5 text-[#E4007E]" /> K
@@ -254,6 +262,17 @@ export const CommandPaletteModal: React.FC = () => {
                     const globalIdx = allResults.findIndex((r) => r.item === t);
                     const isSelected = globalIdx === selectedIndex;
 
+                    const statusLabel =
+                      t.status === 'done'
+                        ? 'Concluído'
+                        : t.status === 'in_progress'
+                        ? 'Em Progresso'
+                        : t.status === 'in_review'
+                        ? 'Em Revisão'
+                        : t.status === 'overdue'
+                        ? 'Atrasada'
+                        : 'Backlog';
+
                     return (
                       <div
                         key={t.id}
@@ -293,23 +312,16 @@ export const CommandPaletteModal: React.FC = () => {
                           </div>
                         </div>
 
-                        <span
-                          className={`text-[10px] font-black px-2.5 py-1 rounded-xl shrink-0 uppercase tracking-wider ${
+                        <Badge
+                          size="sm"
+                          className={`shrink-0 ${
                             isSelected
-                              ? 'bg-[#101010] text-[#E4007E]'
-                              : 'bg-[#181818] border border-[#303030] text-slate-300'
+                              ? '!bg-[#101010] !text-[#E4007E] !border-transparent'
+                              : '!bg-[#181818] !text-slate-300 !border-[#303030]'
                           }`}
                         >
-                          {t.status === 'done'
-                            ? 'Concluído'
-                            : t.status === 'in_progress'
-                            ? 'Em Progresso'
-                            : t.status === 'in_review'
-                            ? 'Em Revisão'
-                            : t.status === 'overdue'
-                            ? 'Atrasada'
-                            : 'Backlog'}
-                        </span>
+                          {statusLabel}
+                        </Badge>
                       </div>
                     );
                   })}
