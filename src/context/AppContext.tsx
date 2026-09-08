@@ -1581,27 +1581,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setEmployees((prev) => [newEmp, ...prev]);
 
-    // Persiste no Supabase
+    // Persiste no Supabase com payload sanitizado
     try {
-      const { data, error } = await supabase.from('employees').upsert({
+      const dbPayload: any = {
         id: newEmp.id,
         name: newEmp.name,
+        email: newEmp.email,
         role: newEmp.role,
         department: newEmp.department,
         initials: newEmp.initials,
         status: newEmp.status,
-        tags: newEmp.tags,
-        current_workload: newEmp.currentWorkload,
-        email: newEmp.email,
-        username: newEmp.username || '',
-        location: newEmp.location || 'Brasil',
-        label_id: newEmp.labelId,
-        label_color: newEmp.labelColor,
-        needs_password_change: newEmp.needsPasswordChange !== undefined ? newEmp.needsPasswordChange : true,
-      });
+      };
+
+      if (newEmp.tags) dbPayload.tags = newEmp.tags;
+      if (newEmp.currentWorkload !== undefined) dbPayload.current_workload = newEmp.currentWorkload;
+      if (newEmp.labelId) dbPayload.label_id = newEmp.labelId;
+      if (newEmp.labelColor) dbPayload.label_color = newEmp.labelColor;
+      if (newEmp.username) dbPayload.username = newEmp.username;
+      if (newEmp.location) dbPayload.location = newEmp.location;
+      if (newEmp.needsPasswordChange !== undefined) dbPayload.needs_password_change = newEmp.needsPasswordChange;
+
+      const { data, error } = await supabase.from('employees').insert(dbPayload);
       if (error) {
-        console.error('Supabase employee insert error:', error);
-        addToast('Erro Supabase ⚠️', `Falha ao gravar no Supabase: ${error.message}`, 'error');
+        console.error('Supabase employee insert error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+        });
+        // Tenta fallback com apenas os campos essenciais se alguma coluna opcional falhar
+        const basicPayload = {
+          id: newEmp.id,
+          name: newEmp.name,
+          email: newEmp.email,
+          role: newEmp.role,
+          department: newEmp.department,
+          initials: newEmp.initials,
+          status: newEmp.status,
+        };
+        const { error: fallbackErr } = await supabase.from('employees').insert(basicPayload);
+        if (fallbackErr) {
+          console.error('Supabase employee basic insert error:', fallbackErr);
+          addToast('Erro Supabase ⚠️', `Falha ao gravar no Supabase: ${fallbackErr.message}`, 'error');
+        } else {
+          addToast('Funcionário Salvo ☁️', `${newEmp.name} gravado com sucesso.`, 'success');
+        }
       } else {
         addToast('Funcionário Salvo no Supabase ☁️', `${newEmp.name} gravado no banco de dados.`, 'success');
       }
