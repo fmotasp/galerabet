@@ -123,7 +123,11 @@ export const EmployeeModal: React.FC = () => {
 
         // Se for um funcionário legado ou sem vínculo ao Supabase Auth, provisiona o acesso com a senha padrão 1234
         if (!editingEmployee.auth_user_id) {
+          const { data: { session } } = await supabase.auth.getSession();
+          const authHeaders = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+
           const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
+            headers: authHeaders,
             body: {
               operation: 'create',
               employee_id: editingEmployee.id,
@@ -159,9 +163,14 @@ export const EmployeeModal: React.FC = () => {
         const createdEmp = await addEmployee(empPayload);
         const employeeId = createdEmp?.id || `emp-${Date.now()}`;
 
+        // Obtém a sessão atual para enviar o token de autorização explicitamente
+        const { data: { session } } = await supabase.auth.getSession();
+        const authHeaders = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+
         // Chama a Edge Function para criar/vincular a identidade no Supabase Auth com senha inicial 1234
         // e needs_password_change = true
         const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
+          headers: authHeaders,
           body: {
             operation: 'create',
             employee_id: employeeId,
