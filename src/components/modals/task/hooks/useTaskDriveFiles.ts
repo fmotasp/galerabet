@@ -53,7 +53,6 @@ export const useTaskDriveFiles = ({
     try {
       const taskName = editingTask.title || 'Demanda Sem Nome';
       if (!driveFolderId) {
-        addToast('Google Drive 📁', `Criando pasta "${taskName}" no Drive...`, 'info');
         const folderRes = await createDriveFolder(taskName);
         if (folderRes) {
           driveFolderId = folderRes.id;
@@ -66,7 +65,6 @@ export const useTaskDriveFiles = ({
               driveFolderUrl,
             });
           }
-          addToast('Pasta Única no Drive ✅', 'Vinculada à pasta da demanda.', 'success');
         }
       }
     } catch (err) {
@@ -85,11 +83,9 @@ export const useTaskDriveFiles = ({
 
         let driveFileId = '';
         if (driveFolderId) {
-          addToast('Enviando para o Drive ☁️', `Fazendo upload de "${file.name}"...`, 'info');
           const uploadRes = await uploadFileToDrive(file, driveFolderId, isPsd ? 'psd' : 'final');
           if (uploadRes) {
             driveFileId = uploadRes.id;
-            addToast('Upload Concluído 🚀', `"${file.name}" salvo na pasta ${isPsd ? 'PSD' : 'Arquivos Entregues'}.`, 'success');
           }
         }
 
@@ -148,12 +144,6 @@ export const useTaskDriveFiles = ({
             : null
         );
       }
-
-      addToast(
-        'Upload Concluído! 🚀',
-        `${createdAttachments.length} arquivo(s) salvos com sucesso.`,
-        'success'
-      );
     }
 
     setSelectedAttachmentFiles([]);
