@@ -126,9 +126,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         authUser.user_metadata?.name ||
         (isUserAdmin ? 'Administrador Geral' : authUser.email?.split('@')[0] || 'Usuário');
 
+      const hasAlreadyChangedPassword = authUser.user_metadata?.needs_password_change === false;
       const needsChange =
-        Boolean(profile?.needs_password_change) ||
-        Boolean(authUser.user_metadata?.needs_password_change);
+        !hasAlreadyChangedPassword &&
+        (Boolean(profile?.needs_password_change) || Boolean(authUser.user_metadata?.needs_password_change));
 
       return {
         id: profile?.id || authUser.id,

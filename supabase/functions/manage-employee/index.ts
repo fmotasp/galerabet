@@ -364,6 +364,12 @@ serve(async (req) => {
         );
       }
 
+      // Sincroniza também na tabela employees com privilégio de service_role
+      await adminClient
+        .from("employees")
+        .update({ needs_password_change: false })
+        .eq("id", employee_id);
+
       return new Response(
         JSON.stringify({
           success: true,

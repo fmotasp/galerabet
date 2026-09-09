@@ -178,9 +178,11 @@ export const LoginView: React.FC = () => {
         authUser.app_metadata?.role === 'admin';
 
       // 4. Verificação de Primeiro Acesso (Troca Obrigatória de Senha)
+      // Se no Auth já foi marcado como false (o usuário já definiu sua senha pessoal), NUNCA mais exige nova troca.
+      const hasAlreadyChangedPassword = authUser.user_metadata?.needs_password_change === false;
       const requiresPasswordChange =
-        profile?.needs_password_change === true ||
-        authUser.user_metadata?.needs_password_change === true;
+        !hasAlreadyChangedPassword &&
+        (profile?.needs_password_change === true || authUser.user_metadata?.needs_password_change === true);
 
       if (requiresPasswordChange) {
         setLoading(false);
