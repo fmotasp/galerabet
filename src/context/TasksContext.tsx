@@ -65,51 +65,87 @@ export const TasksProvider: React.FC<{
     return INITIAL_TASKS;
   });
 
-  // LocalStorage persistence effects with QuotaExceeded protection
+  // Helper para mapear linha bruta do Supabase para objeto Task tipado
+  const mapRowToTask = (row: any): Task => ({
+    id: row.id,
+    title: row.title,
+    description: row.description || '',
+    category: row.category || 'Geral',
+    status: row.status as TaskStatus,
+    dueDate: row.due_date,
+    points: Number(row.points) || 0,
+    isFlagged: Boolean(row.is_flagged),
+    projectId: row.project_id,
+    projectName: row.project_name || 'General',
+    sprintId: row.sprint_id || 'sprint-1',
+    assigneeId: row.assignee_id,
+    assigneeName: row.assignee_name,
+    assigneeInitials: row.assignee_initials,
+    members: row.members || [],
+    labels: row.labels || [],
+    attachments: row.attachments || [],
+    referenceImages: row.reference_images || [],
+    comments: row.comments || [],
+    coverImageUrl: row.cover_image_url,
+    coverAttachmentId: row.cover_attachment_id,
+    lastMovedAt: Number(row.last_moved_at) || Date.now(),
+    createdAt: row.created_at ? row.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+  });
+
+  // Inscrição em tempo real (Supabase Realtime WebSockets) para os 15+ usuários simultâneos
+  useEffect(() => {
+    const channel = supabase
+      .channel('realtime:tasks')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'tasks' },
+        (payload) => {
+          if (!payload.new || !payload.new.id) return;
+          const incomingTask = mapRowToTask(payload.new);
+          setTasks((prev) => {
+            if (prev.some((t) => t.id === incomingTask.id)) {
+              return prev.map((t) => (t.id === incomingTask.id ? { ...t, ...incomingTask } : t));
+            }
+            return [incomingTask, ...prev];
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'tasks' },
+        (payload) => {
+          if (!payload.new || !payload.new.id) return;
+          const updatedTask = mapRowToTask(payload.new);
+          setTasks((prev) =>
+            prev.map((t) => (t.id === updatedTask.id ? { ...t, ...updatedTask } : t))
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'tasks' },
+        (payload) => {
+          if (!payload.old || !payload.old.id) return;
+          setTasks((prev) => prev.filter((t) => t.id !== payload.old.id));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Cache inteligente e seguro no LocalStorage (armazena apenas as 50 mais recentes para evitar QuotaExceededError em 10.000+ tarefas)
   useEffect(() => {
     try {
-      const sanitizedTasks = tasks.map((t) => {
-        const leanAttachments = (t.attachments || []).map((a) => ({
-          id: a.id,
-          name: a.name,
-          url: a.url,
-          mimeType: a.mimeType,
-          bytes: a.bytes,
-          date: a.date,
-        }));
-
-        const leanRefImages = (t.referenceImages || [])
-          .map((r) => {
-            let directUrl = r.url;
-            if ((!directUrl || directUrl.startsWith('data:')) && r.driveFileId) {
-              directUrl = `https://drive.google.com/thumbnail?id=${r.driveFileId}&sz=w1000`;
-            }
-            return {
-              id: r.id,
-              name: r.name,
-              url: directUrl,
-              date: r.date,
-              driveFileId: r.driveFileId,
-            };
-          })
-          .filter((r) => r.url && !r.url.startsWith('data:'));
-
-        return {
-          ...t,
-          attachments: leanAttachments,
-          referenceImages: leanRefImages,
-        };
-      });
-
-      localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(sanitizedTasks));
-    } catch (e: any) {
-      if (e.name === 'QuotaExceededError' || e.code === 22) {
-        console.warn('LocalStorage quota exceeded in TasksProvider, storing lightweight tasks.');
-        try {
-          const minimalTasks = tasks.map(({ referenceImages, attachments, comments, ...rest }) => rest);
-          localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(minimalTasks));
-        } catch {}
-      }
+      const topRecentTasks = tasks.slice(0, 50).map(({ referenceImages, attachments, comments, ...rest }) => ({
+        ...rest,
+        attachments: (attachments || []).slice(0, 3).map((a) => ({ id: a.id, name: a.name })),
+      }));
+      localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(topRecentTasks));
+    } catch {
+      // Ignora silenciosamente se o navegador desabilitar ou limitar o LocalStorage
     }
   }, [tasks]);
 

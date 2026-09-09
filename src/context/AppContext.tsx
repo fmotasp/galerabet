@@ -313,9 +313,39 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   useEffect(() => {
     const loadInitialSupabaseData = async () => {
       try {
-        const { data: tasksData } = await supabase.from('tasks').select('*');
-        if (tasksData && tasksData.length > 0) {
-          const loadedFromSb: Task[] = tasksData.map((row: any) => ({
+        let allTasksData: any[] = [];
+        let from = 0;
+        const batchSize = 1000;
+        let hasMore = true;
+
+        // Busca paginada em blocos para contornar o limite de 1.000 do PostgREST e carregar até 10.000+ tarefas
+        while (hasMore && from < 10000) {
+          const { data, error } = await supabase
+            .from('tasks')
+            .select('*')
+            .order('last_moved_at', { ascending: false })
+            .range(from, from + batchSize - 1);
+
+          if (error) {
+            console.warn('[Supabase] Erro na busca de tarefas em lote:', error.message);
+            break;
+          }
+
+          if (!data || data.length === 0) {
+            hasMore = false;
+            break;
+          }
+
+          allTasksData = allTasksData.concat(data);
+          if (data.length < batchSize) {
+            hasMore = false;
+          } else {
+            from += batchSize;
+          }
+        }
+
+        if (allTasksData.length > 0) {
+          const loadedFromSb: Task[] = allTasksData.map((row: any) => ({
             id: row.id,
             title: row.title,
             description: row.description || '',
@@ -342,9 +372,6 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           }));
 
           tasksContext.setTasks(loadedFromSb);
-          try {
-            localStorage.setItem('spine_tasks_v1', JSON.stringify(loadedFromSb));
-          } catch {}
         }
       } catch (e) {
         console.warn('Initial Supabase load error:', e);

@@ -52,6 +52,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
 
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverColumnId, setDragOverColumnId] = useState<string | null>(null);
+  const [columnLimits, setColumnLimits] = useState<Record<string, number>>({});
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!kanbanRef.current) return;
@@ -92,6 +93,9 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
         const columnTasks = filteredTasks
           .filter((t) => t.status === col.id)
           .sort((a, b) => getTaskNumericTimestamp(b) - getTaskNumericTimestamp(a));
+
+        const limit = columnLimits[col.id] || 40;
+        const visibleTasks = columnTasks.slice(0, limit);
 
         return (
           <div
@@ -156,7 +160,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
 
               {/* Cards in this column */}
               <div className="space-y-3 flex-1 overflow-y-auto no-scrollbar pr-0.5 min-h-[100px] pb-1">
-                {columnTasks.map((task) => {
+                {visibleTasks.map((task) => {
                   // Determine Priority Header Style (matches reference design & custom statuses)
                   const getPriorityInfo = () => {
                     if (task.isFlagged || task.status === 'overdue') {
@@ -451,6 +455,22 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
                     </div>
                   );
                 })}
+
+                {columnTasks.length > limit && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setColumnLimits((prev) => ({
+                        ...prev,
+                        [col.id]: (prev[col.id] || 40) + 40,
+                      }));
+                    }}
+                    className="w-full py-2.5 my-2 bg-[#202020] hover:bg-[#282828] text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all border border-[#333333] flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.99]"
+                  >
+                    <span>Carregar mais (+{columnTasks.length - limit} restantes)</span>
+                  </button>
+                )}
               </div>
             </div>
 
