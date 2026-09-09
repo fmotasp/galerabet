@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { isTaskOverdue, isTaskCompleted, getTaskOverdueDays } from '../lib/taskDateUtils';
+import { encodeTaskDescriptionWithChecklist, decodeTaskDescriptionWithChecklist } from '../lib/taskUtils';
 import { Task, TaskStatus, SpineStatusConfig, Employee } from '../types';
 import { INITIAL_TASKS } from '../data/mockData';
 
@@ -65,32 +66,59 @@ export const TasksProvider: React.FC<{
     return INITIAL_TASKS;
   });
 
+  // Helper para obter os dados do usuário autenticado no momento da ação
+  const getCurrentActor = () => {
+    let actor = currentUser;
+    if (!actor || !actor.name) {
+      try {
+        const saved = localStorage.getItem('spine_logged_user');
+        if (saved) {
+          actor = JSON.parse(saved);
+        }
+      } catch {}
+    }
+    return {
+      name: actor?.name || 'Membro',
+      initials: actor?.initials || 'MB',
+      avatarUrl: actor?.avatarUrl,
+    };
+  };
+
   // Helper para mapear linha bruta do Supabase para objeto Task tipado
-  const mapRowToTask = (row: any): Task => ({
-    id: row.id,
-    title: row.title,
-    description: row.description || '',
-    category: row.category || 'Geral',
-    status: row.status as TaskStatus,
-    dueDate: row.due_date,
-    points: Number(row.points) || 0,
-    isFlagged: Boolean(row.is_flagged),
-    projectId: row.project_id,
-    projectName: row.project_name || 'General',
-    sprintId: row.sprint_id || 'sprint-1',
-    assigneeId: row.assignee_id,
-    assigneeName: row.assignee_name,
-    assigneeInitials: row.assignee_initials,
-    members: row.members || [],
-    labels: row.labels || [],
-    attachments: row.attachments || [],
-    referenceImages: row.reference_images || [],
-    comments: row.comments || [],
-    coverImageUrl: row.cover_image_url,
-    coverAttachmentId: row.cover_attachment_id,
-    lastMovedAt: Number(row.last_moved_at) || Date.now(),
-    createdAt: row.created_at ? row.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
-  });
+  const mapRowToTask = (row: any): Task => {
+    const rawDesc = row.description || '';
+    const { cleanDescription, checklists: decodedChecklists } = decodeTaskDescriptionWithChecklist(rawDesc);
+    const resolvedChecklists = (row.checklists && row.checklists.length > 0) ? row.checklists : decodedChecklists;
+
+    return {
+      id: row.id,
+      title: row.title,
+      description: cleanDescription,
+      category: row.category || 'Geral',
+      status: row.status as TaskStatus,
+      dueDate: row.due_date,
+      points: Number(row.points) || 0,
+      isFlagged: Boolean(row.is_flagged),
+      projectId: row.project_id,
+      projectName: row.project_name || 'General',
+      sprintId: row.sprint_id || 'sprint-1',
+      assigneeId: row.assignee_id,
+      assigneeName: row.assignee_name,
+      assigneeInitials: row.assignee_initials,
+      members: row.members || [],
+      labels: row.labels || [],
+      attachments: row.attachments || [],
+      checklists: resolvedChecklists,
+      checklistsCount: Array.isArray(resolvedChecklists) ? resolvedChecklists.length : (row.checklists_count || 0),
+      referenceImages: row.reference_images || [],
+      comments: row.comments || [],
+      coverImageUrl: row.cover_image_url,
+      coverAttachmentId: row.cover_attachment_id,
+      lastMovedAt: Number(row.last_moved_at) || Date.now(),
+      activityLog: row.activity_log || row.activityLog || [],
+      createdAt: row.created_at ? row.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+    };
+  };
 
   // Inscrição em tempo real (Supabase Realtime WebSockets) para os 15+ usuários simultâneos
   useEffect(() => {
@@ -141,6 +169,7 @@ export const TasksProvider: React.FC<{
     try {
       const topRecentTasks = tasks.slice(0, 50).map(({ referenceImages, attachments, comments, ...rest }) => ({
         ...rest,
+        checklists: rest.checklists || [],
         attachments: (attachments || []).slice(0, 3).map((a) => ({ id: a.id, name: a.name })),
       }));
       localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(topRecentTasks));
@@ -227,6 +256,20 @@ export const TasksProvider: React.FC<{
   // Task Actions
   const addTask = async (newTaskData: Omit<Task, 'id' | 'createdAt'>) => {
     const newId = `task-${Date.now()}`;
+    const actor = getCurrentActor();
+    const initialActivityLog = [
+      {
+        id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        type: 'created' as const,
+        user: actor.name || newTaskData.assigneeName || 'Equipe',
+        userInitials: actor.initials || newTaskData.assigneeInitials || 'EQ',
+        avatarUrl: actor.avatarUrl,
+        description: `Demanda criada`,
+        timestamp: new Date().toISOString(),
+        details: `Criada no quadro`,
+      },
+    ];
+
     const newTask: Task = {
       ...newTaskData,
       id: newId,
@@ -234,6 +277,7 @@ export const TasksProvider: React.FC<{
       commentsCount: 0,
       attachmentsCount: 0,
       lastMovedAt: Date.now(),
+      activityLog: initialActivityLog,
     };
 
     setTasks((prev) => [newTask, ...prev]);
@@ -242,7 +286,7 @@ export const TasksProvider: React.FC<{
       const payload = {
         id: newTask.id,
         title: newTask.title,
-        description: newTask.description || '',
+        description: encodeTaskDescriptionWithChecklist(newTask.description || '', newTask.checklists || []),
         category: newTask.category || 'Geral',
         status: newTask.status || 'backlog',
         due_date: newTask.dueDate || null,
@@ -259,16 +303,23 @@ export const TasksProvider: React.FC<{
         reference_images: newTask.referenceImages || [],
         attachments: newTask.attachments || [],
         comments: newTask.comments || [],
+        checklists: newTask.checklists || [],
         cover_image_url: newTask.coverImageUrl || null,
         cover_attachment_id: newTask.coverAttachmentId || null,
         last_moved_at: newTask.lastMovedAt,
+        activity_log: initialActivityLog,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
       const { error: sbErr } = await supabase.from('tasks').insert([payload]);
       if (sbErr) {
-        console.error('[Supabase] Falha ao inserir tarefa:', sbErr.message);
+        console.warn('[Supabase] Tentando inserção sem campos adicionais devido a:', sbErr.message);
+        const { activity_log, checklists, ...fallbackPayload } = payload;
+        const { error: retryErr } = await supabase.from('tasks').insert([fallbackPayload]);
+        if (retryErr) {
+          console.error('[Supabase] Falha ao inserir tarefa (fallback):', retryErr.message);
+        }
       }
     } catch (sbErr) {
       console.warn('Supabase task insert warning:', sbErr);
@@ -294,10 +345,42 @@ export const TasksProvider: React.FC<{
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
     const now = Date.now();
+    const actor = getCurrentActor();
+    const targetTask = tasks.find((t) => t.id === id);
+
+    let nextActivityLog = updates.activityLog ?? (targetTask?.activityLog ? [...targetTask.activityLog] : []);
+
+    if (targetTask && updates.status && updates.status !== targetTask.status) {
+      const currentStatusConfig = spineStatuses.find((s) => s.id === updates.status);
+      const statusLabel = currentStatusConfig?.label || updates.status;
+      const isApprovalOrDone =
+        updates.status === 'done' ||
+        updates.status === 'postar' ||
+        updates.status.toLowerCase().includes('concl') ||
+        updates.status.toLowerCase().includes('post') ||
+        statusLabel.toLowerCase().includes('concl') ||
+        statusLabel.toLowerCase().includes('post') ||
+        statusLabel.toLowerCase().includes('entreg');
+
+      const statusActivity = {
+        id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        type: (isApprovalOrDone ? 'delivered' : 'status_changed') as any,
+        user: actor.name || targetTask.assigneeName || 'Membro',
+        userInitials: actor.initials || targetTask.assigneeInitials || 'MB',
+        avatarUrl: actor.avatarUrl,
+        description: isApprovalOrDone ? 'Demanda entregue para aprovação' : `Status alterado para "${statusLabel}"`,
+        timestamp: new Date().toISOString(),
+        details: isApprovalOrDone ? `Concluída / Entregue no status "${statusLabel}"` : `Movida para a coluna ${statusLabel}`,
+      };
+
+      nextActivityLog = [...nextActivityLog, statusActivity];
+      updates.activityLog = nextActivityLog;
+    }
+
     setTasks((prev) =>
       prev.map((t) => {
         if (t.id === id) {
-          const next = { ...t, ...updates };
+          const next = { ...t, ...updates, activityLog: nextActivityLog };
           if (updates.status && updates.status !== t.status) {
             next.lastMovedAt = now;
           }
@@ -314,7 +397,12 @@ export const TasksProvider: React.FC<{
         payload.last_moved_at = now;
       }
       if (updates.title !== undefined) payload.title = updates.title;
-      if (updates.description !== undefined) payload.description = updates.description;
+      if (updates.description !== undefined || updates.checklists !== undefined) {
+        const currentTask = tasks.find(t => t.id === id);
+        const baseDescription = updates.description !== undefined ? updates.description : (currentTask?.description || '');
+        const baseChecklists = updates.checklists !== undefined ? updates.checklists : (currentTask?.checklists || []);
+        payload.description = encodeTaskDescriptionWithChecklist(baseDescription, baseChecklists);
+      }
       if (updates.category !== undefined) payload.category = updates.category;
       if (updates.dueDate !== undefined) payload.due_date = updates.dueDate;
       if (updates.assigneeId !== undefined) payload.assignee_id = updates.assigneeId;
@@ -334,11 +422,14 @@ export const TasksProvider: React.FC<{
       if (updates.sprintId !== undefined) payload.sprint_id = updates.sprintId;
       if (updates.driveFolderId !== undefined) payload.drive_folder_id = updates.driveFolderId;
       if (updates.driveFolderUrl !== undefined) payload.drive_folder_url = updates.driveFolderUrl;
+      if (updates.activityLog !== undefined) payload.activity_log = updates.activityLog;
 
       const { error: sbErr } = await supabase.from('tasks').update(payload).eq('id', id);
       if (sbErr) {
-        console.error('[Supabase] Falha ao atualizar tarefa:', sbErr.message);
-        if (updates.status !== undefined) {
+        console.warn('[Supabase] Tentando atualizar sem campos adicionais devido a:', sbErr.message);
+        const { activity_log, checklists, ...fallbackPayload } = payload;
+        const { error: retryErr } = await supabase.from('tasks').update(fallbackPayload).eq('id', id);
+        if (retryErr && updates.status !== undefined) {
           await supabase.from('tasks').update({ status: updates.status, last_moved_at: now }).eq('id', id);
         }
       }
@@ -428,6 +519,24 @@ export const TasksProvider: React.FC<{
       }
     }
 
+    const actor = getCurrentActor();
+    const actorName = actor.name || targetTask.assigneeName || 'Membro';
+    const actorInitials = actor.initials || targetTask.assigneeInitials || 'MB';
+    const actorAvatar = actor.avatarUrl;
+
+    const newActivity = {
+      id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      type: (isApprovalOrDone ? 'delivered' : 'status_changed') as any,
+      user: actorName,
+      userInitials: actorInitials,
+      avatarUrl: actorAvatar,
+      description: isApprovalOrDone ? 'Demanda entregue para aprovação' : `Status alterado para "${statusLabel}"`,
+      timestamp: new Date().toISOString(),
+      details: isApprovalOrDone ? `Concluída / Entregue no status "${statusLabel}"` : `Movida para a coluna ${statusLabel}`,
+    };
+
+    const nextActivityLog = [...(targetTask.activityLog || []), newActivity];
+
     setTasks((prev) =>
       prev.map((t) => {
         if (t.id === id) {
@@ -440,6 +549,7 @@ export const TasksProvider: React.FC<{
             members: nextMembers,
             lastMovedAt: now,
             deliveredAt: nextDeliveredAt,
+            activityLog: nextActivityLog,
           };
         }
         return t;
@@ -450,6 +560,7 @@ export const TasksProvider: React.FC<{
       const updatePayload: Record<string, any> = {
         status: newStatus,
         last_moved_at: now,
+        activity_log: nextActivityLog,
       };
 
       if (isReview && nextAssigneeId !== targetTask.assigneeId) {

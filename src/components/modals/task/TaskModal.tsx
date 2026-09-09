@@ -6,6 +6,7 @@ import { TaskStatusAndDates } from './components/TaskStatusAndDates';
 import { TaskMembersAndClients } from './components/TaskMembersAndClients';
 import { TaskDescriptionSection } from './components/TaskDescriptionSection';
 import { TaskReferenceImagesSection } from './components/TaskReferenceImagesSection';
+import { TaskChecklistSection } from './components/TaskChecklistSection';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { TaskDriveAttachmentsTab } from './components/TaskDriveAttachmentsTab';
 import { TaskActivityTimelineTab } from './components/TaskActivityTimelineTab';
@@ -42,6 +43,10 @@ export const TaskModal: React.FC = () => {
     newCommentText,
     setNewCommentText,
     isPostingComment,
+    checklists,
+    handleAddChecklistItem,
+    handleToggleChecklistItem,
+    handleDeleteChecklistItem,
     attachments,
     setAttachments,
     loadingAttachments,
@@ -182,36 +187,51 @@ export const TaskModal: React.FC = () => {
               />
             </div>
 
-            <TaskDescriptionSection
-              description={formData.description}
-              onChange={(val) => setFormData((prev) => ({ ...prev, description: val }))}
-              isEditingDescription={isEditingDescription}
-              setIsEditingDescription={setIsEditingDescription}
-            />
-
-            <TaskReferenceImagesSection
-              referenceImages={referenceImages}
-              isUploadingReference={isUploadingReference}
-              uploadingReferenceName={uploadingReferenceName}
-              deletingFileIds={deletingFileIds}
-              driveFolderId={editingTask?.driveFolderId}
-              driveFolderUrl={editingTask?.driveFolderUrl}
-              onFileUpload={handleUploadReferenceImage}
-              onDeleteReference={handleDeleteReferenceImage}
-              onPreview={setPreviewingReference}
-            />
-
-            {editingTask && (
-              <TaskCommentsSection
-                comments={comments}
-                newCommentText={newCommentText}
-                setNewCommentText={setNewCommentText}
-                isPostingComment={isPostingComment}
-                onAddComment={handleAddComment}
-                onDeleteComment={handleDeleteComment}
-                currentUser={currentUser}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+              <TaskDescriptionSection
+                description={formData.description}
+                onChange={(val) => setFormData((prev) => ({ ...prev, description: val }))}
+                isEditingDescription={isEditingDescription}
+                setIsEditingDescription={setIsEditingDescription}
               />
-            )}
+
+              <TaskReferenceImagesSection
+                referenceImages={referenceImages}
+                isUploadingReference={isUploadingReference}
+                uploadingReferenceName={uploadingReferenceName}
+                deletingFileIds={deletingFileIds}
+                driveFolderId={editingTask?.driveFolderId}
+                driveFolderUrl={editingTask?.driveFolderUrl}
+                onFileUpload={handleUploadReferenceImage}
+                onDeleteReference={handleDeleteReferenceImage}
+                onPreview={setPreviewingReference}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start pt-4 border-t border-[#262626]">
+              <TaskChecklistSection
+                checklists={checklists}
+                onAddChecklistItem={handleAddChecklistItem}
+                onToggleChecklistItem={handleToggleChecklistItem}
+                onDeleteChecklistItem={handleDeleteChecklistItem}
+              />
+
+              {editingTask ? (
+                <TaskCommentsSection
+                  comments={comments}
+                  newCommentText={newCommentText}
+                  setNewCommentText={setNewCommentText}
+                  isPostingComment={isPostingComment}
+                  onAddComment={handleAddComment}
+                  onDeleteComment={handleDeleteComment}
+                  currentUser={currentUser}
+                />
+              ) : (
+                <div className="p-4 bg-[#1C1C1C]/40 border border-dashed border-[#2E2E2E] rounded-xl text-center text-xs text-slate-400 font-medium flex items-center justify-center min-h-[120px]">
+                  Comentários estarão disponíveis após salvar a tarefa.
+                </div>
+              )}
+            </div>
 
             {/* Drawer Footer Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-[#2E2E2E] mt-4">

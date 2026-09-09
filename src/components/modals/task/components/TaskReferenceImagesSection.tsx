@@ -26,9 +26,9 @@ export const TaskReferenceImagesSection: React.FC<{
   const referenceFileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="p-4 bg-[#1C1C1C] border border-[#2E2E2E] rounded-2xl space-y-3">
+    <div className="space-y-2 flex-1 flex flex-col min-w-0">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-bold text-white flex items-center gap-1.5">
+        <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
           <ImageIcon className="w-4 h-4 text-[#E4007E]" />
           <span>Imagem de Referência (Briefing)</span>
         </label>
@@ -37,34 +37,35 @@ export const TaskReferenceImagesSection: React.FC<{
         </span>
       </div>
 
-      {/* Hidden File Input */}
-      <input
-        type="file"
-        ref={referenceFileInputRef}
-        accept="image/*"
-        disabled={isUploadingReference}
-        onChange={async (e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          await onFileUpload(file);
-          e.target.value = '';
-        }}
-        className="hidden"
-      />
+      <div className="p-4 bg-[#1C1C1C] border border-[#2E2E2E] rounded-2xl space-y-3 flex-1 flex flex-col">
+        {/* Hidden File Input */}
+        <input
+          type="file"
+          ref={referenceFileInputRef}
+          accept="image/*"
+          disabled={isUploadingReference}
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            await onFileUpload(file);
+            e.target.value = '';
+          }}
+          className="hidden"
+        />
 
-      {/* Upload Trigger Area */}
-      <div
-        onClick={() => {
-          if (!isUploadingReference) {
-            referenceFileInputRef.current?.click();
-          }
-        }}
-        className={`border-2 border-dashed rounded-xl p-4 text-center transition-all group ${
-          isUploadingReference
-            ? 'border-[#E4007E] bg-[#E4007E]/10 cursor-not-allowed'
-            : 'border-[#2E2E2E] hover:border-[#E4007E] bg-[#101010]/60 hover:bg-[#022B54] cursor-pointer'
-        }`}
-      >
+        {/* Upload Trigger Area */}
+        <div
+          onClick={() => {
+            if (!isUploadingReference) {
+              referenceFileInputRef.current?.click();
+            }
+          }}
+          className={`border-2 border-dashed rounded-xl p-4 text-center transition-all group flex-1 flex flex-col items-center justify-center min-h-[140px] ${
+            isUploadingReference
+              ? 'border-[#E4007E] bg-[#E4007E]/10 cursor-not-allowed'
+              : 'border-[#2E2E2E] hover:border-[#E4007E] bg-[#101010]/60 hover:bg-[#022B54] cursor-pointer'
+          }`}
+        >
         {isUploadingReference ? (
           <div className="flex flex-col items-center justify-center gap-2 text-slate-300 py-1">
             <Loader2 className="w-7 h-7 text-[#E4007E] animate-spin" />
@@ -184,6 +185,7 @@ export const TaskReferenceImagesSection: React.FC<{
           </a>
         </div>
       )}
+      </div>
     </div>
   );
 };

@@ -177,7 +177,7 @@ export const TaskMembersAndClients: React.FC<{
       {/* Clientes */}
       <div className={`relative ${isLabelsPopoverOpen ? 'z-50' : 'z-20'}`}>
         <label className="block text-xs font-bold text-slate-200 mb-2">
-          Clientes
+          Clientes <span className="text-rose-500">*</span>
         </label>
         <div className="flex items-center gap-2 flex-wrap">
           {selectedLabels.length > 0 ? (

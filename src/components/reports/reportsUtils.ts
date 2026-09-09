@@ -152,14 +152,30 @@ export const getTaskRevisionsCount = (task: Task): number => {
   return count;
 };
 
+export interface ReportClient {
+  id: string;
+  name: string;
+  icon?: string;
+  color?: string;
+}
+
+export const getClientLogoFallback = (name: string, logoUrl?: string): string | undefined => {
+  if (logoUrl) return logoUrl;
+  const n = (name || '').toLowerCase();
+  if (n.includes('f12')) return '/icones/icon_f12.png';
+  if (n.includes('galera')) return '/icones/icon_galera.png';
+  if (n.includes('luva')) return '/icones/icon_luva.png';
+  return undefined;
+};
+
 /**
  * Monta lista de clientes a partir de projetos e tarefas.
  */
 export const getRegisteredClients = (
   projects: Project[],
   tasks: Task[]
-): { id: string; name: string }[] => {
-  const clientsMap = new Map<string, { id: string; name: string }>();
+): ReportClient[] => {
+  const clientsMap = new Map<string, ReportClient>();
 
   projects
     .filter(
@@ -172,22 +188,32 @@ export const getRegisteredClients = (
     .forEach((p) => {
       if (p.clientIds && p.clientIds.length > 0) {
         p.clientIds.forEach((cId, idx) => {
+          const clientName = p.clientNames?.[idx] || p.name;
           clientsMap.set(cId, {
             id: cId,
-            name: p.clientNames?.[idx] || p.name,
+            name: clientName,
+            icon: getClientLogoFallback(clientName, p.logoUrl),
+            color: p.color || p.iconColor || '#10B981',
           });
         });
       } else {
         clientsMap.set(p.id, {
           id: p.id,
           name: p.name,
+          icon: getClientLogoFallback(p.name, p.logoUrl),
+          color: p.color || p.iconColor || '#10B981',
         });
       }
     });
 
   tasks.forEach((t) => {
     if (t.projectId && !clientsMap.has(t.projectId) && t.projectName) {
-      clientsMap.set(t.projectId, { id: t.projectId, name: t.projectName });
+      clientsMap.set(t.projectId, {
+        id: t.projectId,
+        name: t.projectName,
+        icon: getClientLogoFallback(t.projectName),
+        color: '#10B981',
+      });
     }
   });
 
@@ -201,7 +227,7 @@ export const filterReportTasks = (
   tasks: Task[],
   selectedClient: string,
   period: PeriodFilter,
-  registeredClients: { id: string; name: string }[]
+  registeredClients: ReportClient[]
 ): Task[] => {
   const now = new Date();
 
@@ -210,11 +236,12 @@ export const filterReportTasks = (
     if (selectedClient !== 'all') {
       const clientObj = registeredClients.find((c) => c.id === selectedClient);
       const clientName = (clientObj?.name || selectedClient).toLowerCase().trim();
+      const taskProject = (task.projectName || '').toLowerCase().trim();
+      const taskCategory = (task.category || '').toLowerCase().trim();
       const matchesClient =
         task.projectId === selectedClient ||
         task.category === selectedClient ||
-        taskProject.includes(clientName) ||
-        taskCategory.includes(clientName);
+        (clientName ? taskProject.includes(clientName) || taskCategory.includes(clientName) : false);
       if (!matchesClient) {
         return false;
       }

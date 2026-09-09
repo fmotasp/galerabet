@@ -63,3 +63,31 @@ export const isTaskAssignedToMe = (
 
   return false;
 };
+
+export const encodeTaskDescriptionWithChecklist = (
+  description: string = '',
+  checklists: { id: string; title: string; completed: boolean }[] = []
+): string => {
+  const cleanDesc = (description || '').replace(/\n?<!-- __TASK_CHECKLIST__[\s\S]*?-->/g, '').trim();
+  if (!checklists || checklists.length === 0) return cleanDesc;
+  const json = JSON.stringify(checklists);
+  return `${cleanDesc}\n<!-- __TASK_CHECKLIST__ ${json} -->`.trim();
+};
+
+export const decodeTaskDescriptionWithChecklist = (
+  rawDescription: string = ''
+): { cleanDescription: string; checklists: { id: string; title: string; completed: boolean }[] } => {
+  if (!rawDescription) return { cleanDescription: '', checklists: [] };
+  const match = rawDescription.match(/<!-- __TASK_CHECKLIST__ ([\s\S]*?) -->/);
+  let checklists: { id: string; title: string; completed: boolean }[] = [];
+  let cleanDescription = rawDescription;
+
+  if (match && match[1]) {
+    try {
+      checklists = JSON.parse(match[1]);
+      cleanDescription = rawDescription.replace(match[0], '').trim();
+    } catch {}
+  }
+
+  return { cleanDescription, checklists };
+};

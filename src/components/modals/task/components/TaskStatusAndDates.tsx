@@ -52,7 +52,7 @@ export const TaskStatusAndDates: React.FC<{
       {/* Prazo Previsto */}
       <div>
         <label className="block text-xs font-bold text-slate-200 mb-1.5">
-          Prazo Previsto
+          Prazo Previsto <span className="text-rose-500">*</span>
         </label>
         <div className="relative">
           <input

@@ -59,6 +59,12 @@ export interface TaskMember {
   avatarUrl?: string;
 }
 
+export interface TaskChecklistItem {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -83,6 +89,7 @@ export interface Task {
   labels?: TaskLabel[];
   comments?: TaskComment[];
   attachments?: TaskAttachment[];
+  checklists?: TaskChecklistItem[];
   referenceImages?: Array<{ id: string; name: string; url: string; date?: string; driveFileId?: string }>;
   finalImages?: Array<{ id: string; name: string; url: string; date?: string; driveFileId?: string }>;
   driveFolderId?: string;

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Task, Employee, Project, Sprint, TaskMember, SpineStatusConfig, TaskAttachment, TaskComment, TaskStatus } from '../../../../types';
+import { Task, Employee, Project, Sprint, TaskMember, SpineStatusConfig, TaskAttachment, TaskComment, TaskStatus, TaskChecklistItem } from '../../../../types';
 import {
   listTaskBriefingFiles,
   listTaskDeliveredFiles,
@@ -39,14 +39,49 @@ export const useTaskModalForm = ({
   const [activeDrawerTab, setActiveDrawerTab] = useState<'details' | 'attachments' | 'history'>('details');
   const [loadingActions] = useState(false);
 
+  const getCurrentActor = () => {
+    let actor = currentUser;
+    if (!actor || !actor.name) {
+      try {
+        const saved = localStorage.getItem('spine_logged_user');
+        if (saved) {
+          actor = JSON.parse(saved);
+        }
+      } catch {}
+    }
+
+    const matchedEmp = employees.find(
+      (e) =>
+        (actor?.id && e.id === actor.id) ||
+        (actor?.email && e.email?.toLowerCase() === actor.email.toLowerCase()) ||
+        (actor?.name && e.name.toLowerCase() === actor.name.toLowerCase())
+    );
+
+    return {
+      id: matchedEmp?.id || actor?.id || 'unassigned',
+      name: matchedEmp?.name || actor?.name || 'Membro',
+      initials: matchedEmp?.initials || actor?.initials || 'MB',
+      avatarUrl: matchedEmp?.avatarUrl || actor?.avatarUrl,
+    };
+  };
+
+  const DEFAULT_TASK_DESCRIPTION = `**Briefing:** 
+**Identidade:** 
+**Copy principal:** 
+**Copy secundário:** 
+**Dados:** 
+**Observação:** 
+**Tamanho:** 
+**Referência:** `;
+
   const [formData, setFormData] = useState<TaskModalFormData>({
     title: '',
-    description: '',
-    category: 'Geral',
+    description: DEFAULT_TASK_DESCRIPTION,
+    category: '',
     assigneeId: employees[0]?.id || '',
-    projectId: projects[0]?.id || '',
+    projectId: '',
     sprintId: currentSprint?.id || 'sprint-1',
-    dueDate: 'Sem prazo',
+    dueDate: '',
     deliveredAt: '',
     status: 'backlog' as TaskStatus,
     points: 1,
@@ -57,6 +92,8 @@ export const useTaskModalForm = ({
   const [loadingComments] = useState(false);
   const [newCommentText, setNewCommentText] = useState('');
   const [isPostingComment, setIsPostingComment] = useState(false);
+
+  const [checklists, setChecklists] = useState<TaskChecklistItem[]>([]);
 
   const [attachments, setAttachments] = useState<TaskAttachment[]>([]);
   const [loadingAttachments] = useState(false);
@@ -71,7 +108,18 @@ export const useTaskModalForm = ({
   const [copiedLink, setCopiedLink] = useState(false);
 
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
-  const [taskMembers, setTaskMembers] = useState<TaskMember[]>([]);
+  const [taskMembers, setTaskMembers] = useState<TaskMember[]>(() => {
+    const actor = getCurrentActor();
+    if (actor.name && actor.name !== 'Membro') {
+      return [{
+        id: actor.id,
+        name: actor.name,
+        initials: actor.initials,
+        avatarUrl: actor.avatarUrl,
+      }];
+    }
+    return [];
+  });
 
   const DEFAULT_CLIENT_LABELS = [
     { id: 'lbl-galera', name: 'GALERABET', color: 'blue', hex: '#002B66' },
@@ -245,13 +293,95 @@ export const useTaskModalForm = ({
     if (!editingTask) return [];
     const list: TimelineActionItem[] = [];
 
-    if (editingTask.deliveredAt) {
+    // 1. Process explicit activityLog items if recorded
+    if (editingTask.activityLog && editingTask.activityLog.length > 0) {
+      editingTask.activityLog.forEach((act) => {
+        const ts = safeParseTimestamp(act.timestamp, Date.now());
+        let itemType: TimelineActionItem['type'] = 'general';
+        if (act.type === 'created') itemType = 'created';
+        else if (act.type === 'status_changed') itemType = 'status';
+        else if (act.type === 'delivered') itemType = 'delivery';
+        else if (act.type === 'attachment_added') itemType = 'file';
+        else if (act.type === 'comment_added') itemType = 'comment';
+        else if (act.type === 'edited') itemType = 'edited';
+        else if (act.type === 'member_added') itemType = 'member';
+
+        list.push({
+          id: act.id,
+          type: itemType,
+          user: act.user || editingTask.assigneeName || 'Equipe',
+          userInitials: act.userInitials || editingTask.assigneeInitials || 'EQ',
+          avatarUrl: act.avatarUrl,
+          title: act.description,
+          details: act.details,
+          date: safeFormatISO(ts),
+          rawTimestamp: ts,
+        });
+      });
+    }
+
+    // 2. Add comments to timeline if not already represented
+    if (comments && comments.length > 0) {
+      comments.forEach((c) => {
+        if (!list.some((l) => l.id === c.id)) {
+          const cTs = safeParseTimestamp(c.date, Date.now());
+          list.push({
+            id: c.id,
+            type: 'comment',
+            user: c.authorName || 'Membro',
+            userInitials: c.authorInitials || 'MB',
+            title: 'Comentário adicionado',
+            details: c.text,
+            date: safeFormatISO(cTs),
+            rawTimestamp: cTs,
+          });
+        }
+      });
+    }
+
+    // 3. Add attachments to timeline if not already represented
+    if (attachments && attachments.length > 0) {
+      attachments.forEach((a) => {
+        const attId = `file-${a.id}`;
+        if (!list.some((l) => l.id === attId || l.id === a.id)) {
+          const aTs = safeParseTimestamp(a.date, Date.now());
+          list.push({
+            id: attId,
+            type: 'file',
+            user: editingTask.assigneeName || 'Equipe',
+            userInitials: editingTask.assigneeInitials || 'EQ',
+            title: `Arquivo anexado: "${a.name}"`,
+            details: a.bytes ? `${(a.bytes / (1024 * 1024)).toFixed(2)} MB` : undefined,
+            date: safeFormatISO(aTs),
+            rawTimestamp: aTs,
+          });
+        }
+      });
+    }
+
+    // 4. Creation fallback for older tasks without activityLog
+    if (!list.some((l) => l.type === 'created')) {
+      const createdTs = safeParseTimestamp(editingTask.createdAt, Date.now());
+      list.push({
+        id: `synth-created-${editingTask.id}`,
+        type: 'created',
+        user: editingTask.assigneeName || 'Equipe',
+        userInitials: editingTask.assigneeInitials || 'EQ',
+        title: 'Demanda criada',
+        details: 'Demanda adicionada ao quadro de tarefas',
+        date: safeFormatISO(createdTs),
+        rawTimestamp: createdTs,
+      });
+    }
+
+    // 5. Fallback for delivery if not recorded in activityLog
+    if (editingTask.deliveredAt && !list.some((l) => l.type === 'delivery')) {
       const delTimestamp = safeParseTimestamp(editingTask.lastMovedAt || editingTask.deliveredAt, Date.now());
       list.push({
         id: `synth-del-${editingTask.id}`,
         type: 'delivery',
-        user: editingTask.assigneeName || currentUser?.name || 'Membro',
-        userInitials: editingTask.assigneeInitials || currentUser?.initials || 'MB',
+        user: editingTask.assigneeName || 'Membro',
+        userInitials: editingTask.assigneeInitials || 'MB',
         title: 'Demanda entregue para aprovação',
         details: `Data registrada de entrega realizada: ${editingTask.deliveredAt}`,
         date: safeFormatISO(delTimestamp),
@@ -259,25 +389,24 @@ export const useTaskModalForm = ({
       });
     }
 
-    if (editingTask.lastMovedAt) {
+    // 6. Fallback for current status if not recorded in activityLog
+    if (editingTask.lastMovedAt && !list.some((l) => l.type === 'status')) {
       const stLabel = spineStatuses.find((s) => s.id === editingTask.status)?.label || editingTask.status;
-      if (!list.some((l) => l.type === 'status' && l.title.includes(stLabel))) {
-        const moveTimestamp = safeParseTimestamp(editingTask.lastMovedAt, Date.now());
-        list.push({
-          id: `synth-status-${editingTask.id}`,
-          type: 'status',
-          user: currentUser?.name || editingTask.assigneeName || 'Equipe',
-          userInitials: currentUser?.initials || editingTask.assigneeInitials || 'EQ',
-          title: `Status atual: "${stLabel}"`,
-          details: `Movida para a coluna ${stLabel}`,
-          date: safeFormatISO(moveTimestamp),
-          rawTimestamp: moveTimestamp,
-        });
-      }
+      const moveTimestamp = safeParseTimestamp(editingTask.lastMovedAt, Date.now());
+      list.push({
+        id: `synth-status-${editingTask.id}`,
+        type: 'status',
+        user: editingTask.assigneeName || 'Equipe',
+        userInitials: editingTask.assigneeInitials || 'EQ',
+        title: `Status atual: "${stLabel}"`,
+        details: `Movida para a coluna ${stLabel}`,
+        date: safeFormatISO(moveTimestamp),
+        rawTimestamp: moveTimestamp,
+      });
     }
 
     return list.sort((a, b) => b.rawTimestamp - a.rawTimestamp);
-  }, [editingTask, attachments, referenceImages, spineStatuses, currentUser]);
+  }, [editingTask, comments, attachments, spineStatuses]);
 
   const prevIsOpenRef = useRef(false);
   const prevEditingTaskIdRef = useRef<string | null>(null);
@@ -339,6 +468,7 @@ export const useTaskModalForm = ({
         setIsEditingDescription(!editingTask.description);
         setReferenceImages(editingTask.referenceImages || []);
         setComments(editingTask.comments || []);
+        setChecklists(editingTask.checklists || []);
         setAttachments(editingTask.attachments || []);
 
         const folderId = editingTask.driveFolderId;
@@ -395,12 +525,27 @@ export const useTaskModalForm = ({
             .catch((e) => console.warn('Could not sync delivered files from drive:', e));
         }
       } else if (isOpen) {
+        const actor = getCurrentActor();
+        const initialMember: TaskMember | null = actor.name && actor.name !== 'Membro' ? {
+          id: actor.id,
+          name: actor.name,
+          initials: actor.initials,
+          avatarUrl: actor.avatarUrl,
+        } : (employees[0] ? {
+          id: employees[0].id,
+          name: employees[0].name,
+          initials: employees[0].initials,
+          avatarUrl: employees[0].avatarUrl,
+        } : null);
+
+        const initialMembers = initialMember ? [initialMember] : [];
+
         setFormData({
           title: '',
-          description: '',
+          description: DEFAULT_TASK_DESCRIPTION,
           category: '',
-          assigneeId: employees[0]?.id || 'unassigned',
-          projectId: projects[0]?.id || '',
+          assigneeId: initialMember?.id || 'unassigned',
+          projectId: '',
           sprintId: currentSprint?.id || 'sprint-1',
           dueDate: '',
           deliveredAt: '',
@@ -411,10 +556,11 @@ export const useTaskModalForm = ({
         setCurrentDriveFolderId('');
         setCurrentDriveFolderUrl('');
         setSelectedLabels([]);
-        setTaskMembers([]);
+        setTaskMembers(initialMembers);
         setIsEditingDescription(true);
         setReferenceImages([]);
         setComments([]);
+        setChecklists([]);
         setAttachments([]);
       }
     }
@@ -431,10 +577,11 @@ export const useTaskModalForm = ({
     if (!editingTask || !newCommentText.trim()) return;
 
     setIsPostingComment(true);
+    const actor = getCurrentActor();
     const newComment: TaskComment = {
       id: `comment-${Date.now()}`,
-      authorName: currentUser?.name || 'Usuário',
-      authorInitials: currentUser?.initials || 'U',
+      authorName: actor.name || 'Usuário',
+      authorInitials: actor.initials || 'U',
       text: newCommentText.trim(),
       date: new Date().toISOString(),
     };
@@ -457,6 +604,50 @@ export const useTaskModalForm = ({
       setComments(nextComments);
       await updateTask(editingTask.id, { comments: nextComments });
       addToast('Comentário Excluído', 'Seu comentário foi removido.', 'info');
+    }
+  };
+
+  const handleAddChecklistItem = async (title: string) => {
+    if (!title.trim()) return;
+    const newItem: TaskChecklistItem = {
+      id: `check-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      title: title.trim(),
+      completed: false,
+    };
+    const nextList = [...checklists, newItem];
+    setChecklists(nextList);
+    if (editingTask) {
+      await updateTask(editingTask.id, {
+        checklists: nextList,
+        checklistsCount: nextList.length,
+      });
+      setEditingTask((prev) => (prev ? { ...prev, checklists: nextList, checklistsCount: nextList.length } : null));
+    }
+  };
+
+  const handleToggleChecklistItem = async (itemId: string) => {
+    const nextList = checklists.map((item) =>
+      item.id === itemId ? { ...item, completed: !item.completed } : item
+    );
+    setChecklists(nextList);
+    if (editingTask) {
+      await updateTask(editingTask.id, {
+        checklists: nextList,
+        checklistsCount: nextList.length,
+      });
+      setEditingTask((prev) => (prev ? { ...prev, checklists: nextList, checklistsCount: nextList.length } : null));
+    }
+  };
+
+  const handleDeleteChecklistItem = async (itemId: string) => {
+    const nextList = checklists.filter((item) => item.id !== itemId);
+    setChecklists(nextList);
+    if (editingTask) {
+      await updateTask(editingTask.id, {
+        checklists: nextList,
+        checklistsCount: nextList.length,
+      });
+      setEditingTask((prev) => (prev ? { ...prev, checklists: nextList, checklistsCount: nextList.length } : null));
     }
   };
 
@@ -554,7 +745,22 @@ export const useTaskModalForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim()) return;
+    if (!formData.title.trim()) {
+      addToast('Título Obrigatório ⚠️', 'Por favor, informe o título da tarefa antes de salvar.', 'warning');
+      return;
+    }
+
+    // Validação obrigatória de prazo previsto
+    if (!formData.dueDate || !formData.dueDate.trim() || formData.dueDate === 'Sem prazo') {
+      addToast('Prazo Previsto Obrigatório ⚠️', 'Por favor, informe o prazo previsto da tarefa antes de salvar.', 'error');
+      return;
+    }
+
+    // Validação obrigatória de cliente
+    if (selectedLabels.length === 0 && !formData.projectId) {
+      addToast('Cliente Obrigatório ⚠️', 'Por favor, selecione um cliente para a tarefa antes de salvar.', 'error');
+      return;
+    }
 
     const primaryAssignee = taskMembers[0] || (formData.assigneeId ? employees.find((e) => e.id === formData.assigneeId) : null);
 
@@ -590,6 +796,7 @@ export const useTaskModalForm = ({
       referenceImages,
       attachments,
       comments,
+      checklists,
       coverImageUrl: resolvedCover,
       driveFolderId: currentDriveFolderId,
       driveFolderUrl: currentDriveFolderUrl,
@@ -617,6 +824,8 @@ export const useTaskModalForm = ({
     newCommentText,
     setNewCommentText,
     isPostingComment,
+    checklists,
+    setChecklists,
     attachments,
     setAttachments,
     loadingAttachments,
@@ -643,6 +852,9 @@ export const useTaskModalForm = ({
     handleToggleLabel,
     handleAddComment,
     handleDeleteComment,
+    handleAddChecklistItem,
+    handleToggleChecklistItem,
+    handleDeleteChecklistItem,
     handleUploadReferenceImage,
     handleDeleteReferenceImage,
     handleSubmit,

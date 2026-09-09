@@ -29,7 +29,7 @@ export const TaskDescriptionSection: React.FC<{
   };
 
   return (
-    <div className="space-y-2 pt-2">
+    <div className="space-y-2 flex-1 flex flex-col min-w-0">
       <div className="flex items-center justify-between">
         <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
           <span>Descrição</span>
@@ -37,7 +37,7 @@ export const TaskDescriptionSection: React.FC<{
       </div>
 
       {isEditingDescription ? (
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1 flex flex-col">
           <TaskRichTextEditor
             value={description}
             onChange={onChange}
@@ -56,7 +56,7 @@ export const TaskDescriptionSection: React.FC<{
       ) : (
         <div
           onClick={() => setIsEditingDescription(true)}
-          className="p-4 bg-[#1C1C1C] text-slate-100 border border-[#2E2E2E] rounded-2xl cursor-pointer hover:border-[#E4007E] transition-colors group relative min-h-[120px] overflow-hidden break-words [overflow-wrap:anywhere]"
+          className="p-4 bg-[#1C1C1C] text-slate-100 border border-[#2E2E2E] rounded-2xl cursor-pointer hover:border-[#E4007E] transition-colors group relative min-h-[140px] flex-1 overflow-hidden break-words [overflow-wrap:anywhere]"
           title="Clique para editar"
         >
           <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity bg-[#2E2E2E] text-white text-[10px] font-bold px-2 py-0.5 rounded-lg border border-[#2E2E2E] flex items-center gap-1">

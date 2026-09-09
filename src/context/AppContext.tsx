@@ -25,6 +25,7 @@ import {
 import { AuthProvider, useAuth, CurrentUserType } from './AuthContext';
 import { EmployeesProvider, useEmployees } from './EmployeesContext';
 import { ProjectsProvider, useProjects, BrandMeta, encodeProjectDescription, decodeProjectDescription } from './ProjectsContext';
+import { decodeTaskDescriptionWithChecklist } from '../lib/taskUtils';
 import { TasksProvider, useTasks } from './TasksContext';
 
 export type { BrandMeta, CurrentUserType };
@@ -439,31 +440,40 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }
 
         if (allTasksData.length > 0) {
-          const loadedFromSb: Task[] = allTasksData.map((row: any) => ({
-            id: row.id,
-            title: row.title,
-            description: row.description || '',
-            category: row.category || 'Geral',
-            status: row.status as TaskStatus,
-            dueDate: row.due_date,
-            points: Number(row.points) || 0,
-            isFlagged: Boolean(row.is_flagged),
-            projectId: row.project_id,
-            projectName: row.project_name || 'General',
-            sprintId: row.sprint_id || 'sprint-1',
-            assigneeId: row.assignee_id,
-            assigneeName: row.assignee_name,
-            assigneeInitials: row.assignee_initials,
-            members: row.members || [],
-            labels: row.labels || [],
-            attachments: row.attachments || [],
-            referenceImages: row.reference_images || [],
-            comments: row.comments || [],
-            coverImageUrl: row.cover_image_url,
-            coverAttachmentId: row.cover_attachment_id,
-            lastMovedAt: Number(row.last_moved_at) || Date.now(),
-            createdAt: row.created_at ? row.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
-          }));
+          const loadedFromSb: Task[] = allTasksData.map((row: any) => {
+            const rawDesc = row.description || '';
+            const { cleanDescription, checklists: decodedChecklists } = decodeTaskDescriptionWithChecklist(rawDesc);
+            const resolvedChecklists = (row.checklists && row.checklists.length > 0) ? row.checklists : decodedChecklists;
+
+            return {
+              id: row.id,
+              title: row.title,
+              description: cleanDescription,
+              category: row.category || 'Geral',
+              status: row.status as TaskStatus,
+              dueDate: row.due_date,
+              points: Number(row.points) || 0,
+              isFlagged: Boolean(row.is_flagged),
+              projectId: row.project_id,
+              projectName: row.project_name || 'General',
+              sprintId: row.sprint_id || 'sprint-1',
+              assigneeId: row.assignee_id,
+              assigneeName: row.assignee_name,
+              assigneeInitials: row.assignee_initials,
+              members: row.members || [],
+              labels: row.labels || [],
+              attachments: row.attachments || [],
+              checklists: resolvedChecklists,
+              checklistsCount: Array.isArray(resolvedChecklists) ? resolvedChecklists.length : (row.checklists_count || 0),
+              referenceImages: row.reference_images || [],
+              comments: row.comments || [],
+              coverImageUrl: row.cover_image_url,
+              coverAttachmentId: row.cover_attachment_id,
+              lastMovedAt: Number(row.last_moved_at) || Date.now(),
+              activityLog: row.activity_log || row.activityLog || [],
+              createdAt: row.created_at ? row.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+            };
+          });
 
           tasksContext.setTasks(loadedFromSb);
         }

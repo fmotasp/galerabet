@@ -1,7 +1,7 @@
-import React from 'react';
-import { Search, Sparkles } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, Sparkles, Building2, ChevronDown, Check } from 'lucide-react';
 import { Input } from '../ui';
-import { PeriodFilter, DepartmentFilter } from './reportsUtils';
+import { PeriodFilter, DepartmentFilter, ReportClient } from './reportsUtils';
 
 interface ReportsFilterToolbarProps {
   period: PeriodFilter;
@@ -10,7 +10,7 @@ interface ReportsFilterToolbarProps {
   onDeptChange: (d: DepartmentFilter) => void;
   selectedClient: string;
   onClientChange: (c: string) => void;
-  registeredClients: { id: string; name: string }[];
+  registeredClients: ReportClient[];
   searchMember: string;
   onSearchChange: (s: string) => void;
 }
@@ -27,6 +27,23 @@ export const ReportsFilterToolbar: React.FC<ReportsFilterToolbarProps> = React.m
     searchMember,
     onSearchChange,
   }) => {
+    const [isClientDropdownOpen, setIsClientDropdownOpen] = useState(false);
+    const clientDropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          clientDropdownRef.current &&
+          !clientDropdownRef.current.contains(event.target as Node)
+        ) {
+          setIsClientDropdownOpen(false);
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const currentClient = registeredClients.find((c) => c.id === selectedClient);
     return (
       <div className="bg-[#181818] border border-[#2A2A2A] rounded-3xl p-4 sm:p-5 shadow-xl space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -109,19 +126,109 @@ export const ReportsFilterToolbar: React.FC<ReportsFilterToolbarProps> = React.m
               </button>
             </div>
 
-            {/* Filtro de Clientes */}
-            <select
-              value={selectedClient}
-              onChange={(e) => onClientChange(e.target.value)}
-              className="px-3 py-2 bg-[#222222] border border-[#303030] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-[#E4007E] cursor-pointer"
-            >
-              <option value="all">Todos os Clientes</option>
-              {registeredClients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            {/* Filtro de Clientes com Ícones */}
+            <div className="relative" ref={clientDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsClientDropdownOpen(!isClientDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-2 bg-[#222222] hover:bg-[#282828] border border-[#303030] hover:border-[#E4007E]/50 rounded-xl text-xs font-bold text-white transition-all cursor-pointer shadow-xs select-none"
+              >
+                {currentClient ? (
+                  <div className="flex items-center gap-2">
+                    {currentClient.icon ? (
+                      <img
+                        src={currentClient.icon}
+                        alt={currentClient.name}
+                        className="w-4 h-4 rounded-md object-contain shrink-0"
+                      />
+                    ) : (
+                      <span
+                        className="w-3.5 h-3.5 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0"
+                        style={{ backgroundColor: currentClient.color || '#10B981' }}
+                      >
+                        {currentClient.name.substring(0, 1).toUpperCase()}
+                      </span>
+                    )}
+                    <span className="truncate max-w-[130px]">{currentClient.name}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-slate-200">
+                    <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Todos os Clientes</span>
+                  </div>
+                )}
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
+                    isClientDropdownOpen ? 'rotate-180 text-white' : ''
+                  }`}
+                />
+              </button>
+
+              {isClientDropdownOpen && (
+                <div className="absolute left-0 mt-1.5 w-56 bg-[#1C1C1C] border border-[#2E2E2E] rounded-2xl shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClientChange('all');
+                      setIsClientDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedClient === 'all'
+                        ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
+                        : 'text-slate-300 hover:text-white hover:bg-[#282828]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 opacity-80" />
+                      <span>Todos os Clientes</span>
+                    </div>
+                    {selectedClient === 'all' && <Check className="w-3.5 h-3.5" />}
+                  </button>
+
+                  <div className="my-1 border-t border-[#2A2A2A]" />
+
+                  <div className="max-h-60 overflow-y-auto space-y-0.5 custom-scrollbar">
+                    {registeredClients.map((c) => {
+                      const isSelected = selectedClient === c.id;
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => {
+                            onClientChange(c.id);
+                            setIsClientDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
+                              : 'text-slate-300 hover:text-white hover:bg-[#282828]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {c.icon ? (
+                              <img
+                                src={c.icon}
+                                alt={c.name}
+                                className="w-4 h-4 rounded-md object-contain shrink-0"
+                              />
+                            ) : (
+                              <span
+                                className="w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0"
+                                style={{ backgroundColor: c.color || '#10B981' }}
+                              >
+                                {c.name.substring(0, 1).toUpperCase()}
+                              </span>
+                            )}
+                            <span className="truncate">{c.name}</span>
+                          </div>
+                          {isSelected && <Check className="w-3.5 h-3.5" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Busca rápida por Colaborador */}

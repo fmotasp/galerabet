@@ -4,6 +4,7 @@ import { CurrentUserType } from '../../context/AuthContext';
 import { isTaskAssignedToMe } from '../../lib/taskUtils';
 import { isTaskOverdue, isTaskCompleted, parseTaskDueDate } from '../../lib/taskDateUtils';
 import { useDebounce } from '../../hooks/useDebounce';
+import { getClientLogoFallback } from '../reports/reportsUtils';
 
 export interface UseTasksFilterProps {
   tasks: Task[];
@@ -66,15 +67,18 @@ export const useTasksFilter = ({
       new Map(
         projects.flatMap((p) => {
           if (p.clientIds && p.clientIds.length > 0) {
-            return p.clientIds.map((cId, idx) => [
-              cId,
-              {
-                id: cId,
-                name: p.clientNames?.[idx] || p.name,
-                color: p.color || '#10B981',
-                icon: p.logoUrl || undefined,
-              },
-            ]);
+            return p.clientIds.map((cId, idx) => {
+              const clientName = p.clientNames?.[idx] || p.name;
+              return [
+                cId,
+                {
+                  id: cId,
+                  name: clientName,
+                  color: p.color || '#10B981',
+                  icon: getClientLogoFallback(clientName, p.logoUrl),
+                },
+              ];
+            });
           }
           return [
             [
@@ -83,7 +87,7 @@ export const useTasksFilter = ({
                 id: p.id,
                 name: p.name,
                 color: p.color || '#10B981',
-                icon: p.logoUrl || undefined,
+                icon: getClientLogoFallback(p.name, p.logoUrl),
               },
             ],
           ];
@@ -150,6 +154,7 @@ export const useTasksFilter = ({
       } else if (selectedMember !== 'all') {
         const emp = employees.find((e) => e.id === selectedMember);
         const empName = emp ? emp.name.toLowerCase().trim() : '';
+        const empInitials = emp?.initials ? emp.initials.toUpperCase().trim() : '';
         matchesMember =
           t.assigneeId === selectedMember ||
           (empName && t.assigneeName && (t.assigneeName.toLowerCase().includes(empName) || empName.includes(t.assigneeName.toLowerCase()))) ||

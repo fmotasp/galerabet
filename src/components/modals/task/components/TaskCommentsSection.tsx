@@ -20,7 +20,7 @@ export const TaskCommentsSection: React.FC<{
   currentUser,
 }) => {
   return (
-    <div className="pt-5 border-t border-[#262626] space-y-4 relative z-0">
+    <div className="space-y-4 relative z-0 flex-1 flex flex-col min-w-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-[#E4007E]" />
