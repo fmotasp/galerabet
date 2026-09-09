@@ -30,13 +30,36 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  console.log(`[manage-employee] Nova requisição recebida: ${req.method} ${req.url}`);
+
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "https://vrokxasiciqcbbfoqrjp.supabase.co";
+    
+    // Obter service role key: suporte a SERVICE_ROLE_KEY (custom secret), SUPABASE_SERVICE_ROLE_KEY (padrão antigo) ou SUPABASE_SECRET_KEYS (novo padrão Supabase)
+    let serviceRoleKey =
+      Deno.env.get("SERVICE_ROLE_KEY") ||
+      Deno.env.get("APP_SERVICE_ROLE_KEY") ||
+      Deno.env.get("SP_SERVICE_ROLE_KEY") ||
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!serviceRoleKey) {
+      const secretKeysJson = Deno.env.get("SUPABASE_SECRET_KEYS");
+      if (secretKeysJson) {
+        try {
+          const parsed = JSON.parse(secretKeysJson);
+          if (typeof parsed === "object" && parsed !== null) {
+            serviceRoleKey = parsed.service_role || parsed.service_role_key || Object.values(parsed)[0];
+          }
+        } catch {
+          serviceRoleKey = secretKeysJson;
+        }
+      }
+    }
 
     if (!supabaseUrl || !serviceRoleKey) {
+      console.error("[manage-employee] ERRO CRÍTICO: Não foi possível resolver a service_role key em Deno.env!");
       return new Response(
-        JSON.stringify({ error: "Configuração do servidor incompleta." }),
+        JSON.stringify({ error: "Configuração do servidor incompleta: SERVICE_ROLE_KEY ausente nos Secrets." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -51,6 +74,7 @@ serve(async (req) => {
     // Validar autenticação do chamador
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
+      console.warn("[manage-employee] Header Authorization ausente.");
       return new Response(
         JSON.stringify({ error: "Autorização necessária." }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -234,12 +258,14 @@ serve(async (req) => {
         });
 
         if (createErr || !newUser.user) {
+          console.error("[manage-employee] Erro no admin.createUser:", createErr?.message, createErr);
           return new Response(
-            JSON.stringify({ error: `Falha ao criar acesso: ${createErr?.message || "Erro desconhecido"}` }),
+            JSON.stringify({ error: `Falha ao criar acesso no Supabase Auth: ${createErr?.message || "Erro desconhecido"}` }),
             { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
 
+        console.log(`[manage-employee] Conta Auth criada com sucesso: ID ${newUser.user.id}`);
         targetAuthUserId = newUser.user.id;
         newlyCreatedAuthUserId = newUser.user.id;
       }
