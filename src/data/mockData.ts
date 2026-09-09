@@ -10,6 +10,14 @@ export const DEFAULT_SPINE_STATUSES: SpineStatusConfig[] = [
     isDefault: true,
   },
   {
+    id: 'novos_pedidos',
+    label: 'Novos Pedidos',
+    color: 'text-cyan-300',
+    bg: 'bg-cyan-950/80 border border-cyan-700/60',
+    dotColor: '#06B6D4',
+    isDefault: true,
+  },
+  {
     id: 'in_progress',
     label: 'Em Produção',
     color: 'text-blue-300',
@@ -23,6 +31,22 @@ export const DEFAULT_SPINE_STATUSES: SpineStatusConfig[] = [
     color: 'text-amber-300',
     bg: 'bg-amber-950/80 border border-amber-700/60',
     dotColor: '#F59E0B',
+    isDefault: true,
+  },
+  {
+    id: 'ajustes',
+    label: 'Ajustes',
+    color: 'text-rose-300',
+    bg: 'bg-rose-950/80 border border-rose-700/60',
+    dotColor: '#E11D48',
+    isDefault: true,
+  },
+  {
+    id: 'postar',
+    label: 'Postar',
+    color: 'text-indigo-300',
+    bg: 'bg-indigo-950/80 border border-indigo-700/60',
+    dotColor: '#6366F1',
     isDefault: true,
   },
   {

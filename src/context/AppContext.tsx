@@ -146,7 +146,6 @@ export interface AppContextType {
 const STORAGE_KEYS = {
   SPRINTS: 'spine_sprints_v1',
   ACTIVITIES: 'spine_activities_v1',
-  STATUSES: 'spine_custom_statuses_v1',
 };
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -185,24 +184,68 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     );
   };
 
-  const [spineStatuses, setSpineStatuses] = useState<SpineStatusConfig[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.STATUSES);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return DEFAULT_SPINE_STATUSES;
-  });
+  const [spineStatuses, setSpineStatuses] = useState<SpineStatusConfig[]>(DEFAULT_SPINE_STATUSES);
 
-  useEffect(() => {
+  // Helper para persistir alterações de status diretamente no Supabase em tempo real
+  const persistStatusesToSupabase = async (nextStatuses: SpineStatusConfig[]) => {
     try {
-      localStorage.setItem(STORAGE_KEYS.STATUSES, JSON.stringify(spineStatuses));
-    } catch (e) {
-      console.warn('Failed to save spineStatuses to localStorage:', e);
+      await supabase.from('projects').upsert({
+        id: 'system-settings',
+        name: 'Configurações Globais do Sistema',
+        category: 'System',
+        color_palette: nextStatuses,
+        status: 'system',
+      });
+    } catch (err) {
+      console.error('[Supabase] Erro ao sincronizar status globais:', err);
     }
-  }, [spineStatuses]);
+  };
+
+  // Carrega status globais diretamente do Supabase e assina canal Realtime
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchGlobalStatuses = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('color_palette')
+          .eq('id', 'system-settings')
+          .maybeSingle();
+
+        if (!error && data && Array.isArray(data.color_palette) && data.color_palette.length > 0) {
+          if (isMounted) {
+            setSpineStatuses(data.color_palette as SpineStatusConfig[]);
+          }
+        }
+      } catch (err) {
+        console.warn('[Supabase] Aviso ao carregar status globais:', err);
+      }
+    };
+
+    fetchGlobalStatuses();
+
+    // Inscrição Realtime: qualquer alteração de status feita por qualquer usuário atualiza todos em tempo real
+    const channel = supabase
+      .channel('realtime:system-statuses')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'projects', filter: 'id=eq.system-settings' },
+        (payload: any) => {
+          if (payload.new && Array.isArray(payload.new.color_palette) && payload.new.color_palette.length > 0) {
+            if (isMounted) {
+              setSpineStatuses(payload.new.color_palette as SpineStatusConfig[]);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const addSpineStatus = (statusData: Omit<SpineStatusConfig, 'id'>) => {
     const newId = `status-${Date.now()}`;
@@ -211,14 +254,16 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       id: newId,
       isDefault: false,
     };
-    setSpineStatuses((prev) => [...prev, newStatus]);
+    const next = [...spineStatuses, newStatus];
+    setSpineStatuses(next);
+    persistStatusesToSupabase(next);
     addToast('Status Criado! 🏷️', `O status "${newStatus.label}" foi adicionado com sucesso.`, 'success');
   };
 
   const updateSpineStatus = (id: string, updates: Partial<SpineStatusConfig>) => {
-    setSpineStatuses((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
-    );
+    const next = spineStatuses.map((s) => (s.id === id ? { ...s, ...updates } : s));
+    setSpineStatuses(next);
+    persistStatusesToSupabase(next);
     addToast('Status Atualizado ✏️', 'As alterações de status foram salvas.', 'success');
   };
 
@@ -230,7 +275,9 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       prev.map((t) => (t.status === id ? { ...t, status: fallbackStatusId } : t))
     );
 
-    setSpineStatuses((prev) => prev.filter((s) => s.id !== id));
+    const next = spineStatuses.filter((s) => s.id !== id);
+    setSpineStatuses(next);
+    persistStatusesToSupabase(next);
     addToast(
       'Status Removido 🗑️',
       `O status "${statusToDelete.label}" foi removido e as tarefas foram migradas.`,
@@ -240,10 +287,12 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const reorderSpineStatuses = (newStatuses: SpineStatusConfig[]) => {
     setSpineStatuses(newStatuses);
+    persistStatusesToSupabase(newStatuses);
   };
 
   const resetSpineStatusesToDefault = () => {
     setSpineStatuses(DEFAULT_SPINE_STATUSES);
+    persistStatusesToSupabase(DEFAULT_SPINE_STATUSES);
     addToast('Status Restaurados 🔄', 'Os status voltaram para o padrão do sistema.', 'info');
   };
 

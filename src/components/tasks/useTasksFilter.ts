@@ -56,7 +56,7 @@ export const useTasksFilter = ({
   const [selectedMember, setSelectedMember] = useState<string>('all');
   const [isMemberDropdownOpen, setIsMemberDropdownOpen] = useState<boolean>(false);
   const [memberFilterSearch, setMemberFilterSearch] = useState<string>('');
-  const [showDoneColumn, setShowDoneColumn] = useState<boolean>(false);
+  const [showDoneColumn, setShowDoneColumn] = useState<boolean>(true);
   const [sortBy, setSortBy] = useState<'default' | 'title' | 'dueDate' | 'points'>('default');
   const [visibleTasksCount, setVisibleTasksCount] = useState<number>(10);
 
