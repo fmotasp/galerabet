@@ -139,7 +139,30 @@ export const EmployeeModal: React.FC = () => {
             },
           });
 
-          const funcErrorMsg = funcErr?.message || funcData?.error;
+          let funcErrorMsg = '';
+          if (funcErr) {
+            try {
+              if ((funcErr as any).context && typeof (funcErr as any).context.json === 'function') {
+                const errBody = await (funcErr as any).context.json();
+                funcErrorMsg = errBody?.error || funcErr.message;
+              } else if ((funcErr as any).context && typeof (funcErr as any).context.text === 'function') {
+                const errText = await (funcErr as any).context.text();
+                try {
+                  const parsed = JSON.parse(errText);
+                  funcErrorMsg = parsed?.error || errText;
+                } catch {
+                  funcErrorMsg = errText || funcErr.message;
+                }
+              } else {
+                funcErrorMsg = funcErr.message;
+              }
+            } catch {
+              funcErrorMsg = funcErr.message;
+            }
+          } else if (funcData?.error) {
+            funcErrorMsg = funcData.error;
+          }
+
           if (funcErrorMsg) {
             console.warn('[manage-employee] Aviso ao configurar acesso do colaborador existente:', funcErrorMsg);
             addToast(
@@ -182,7 +205,30 @@ export const EmployeeModal: React.FC = () => {
           },
         });
 
-        const funcErrorMsg = funcErr?.message || funcData?.error;
+        let funcErrorMsg = '';
+        if (funcErr) {
+          try {
+            if ((funcErr as any).context && typeof (funcErr as any).context.json === 'function') {
+              const errBody = await (funcErr as any).context.json();
+              funcErrorMsg = errBody?.error || funcErr.message;
+            } else if ((funcErr as any).context && typeof (funcErr as any).context.text === 'function') {
+              const errText = await (funcErr as any).context.text();
+              try {
+                const parsed = JSON.parse(errText);
+                funcErrorMsg = parsed?.error || errText;
+              } catch {
+                funcErrorMsg = errText || funcErr.message;
+              }
+            } else {
+              funcErrorMsg = funcErr.message;
+            }
+          } catch {
+            funcErrorMsg = funcErr.message;
+          }
+        } else if (funcData?.error) {
+          funcErrorMsg = funcData.error;
+        }
+
         if (funcErrorMsg) {
           console.warn('[manage-employee] Aviso ao provisionar credencial inicial:', funcErrorMsg);
           addToast(
