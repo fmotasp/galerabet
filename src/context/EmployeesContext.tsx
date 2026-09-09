@@ -11,10 +11,6 @@ export interface EmployeesContextType {
   setEmployees: React.Dispatch<React.SetStateAction<Employee[]>>;
 }
 
-const STORAGE_KEYS = {
-  EMPLOYEES: 'spine_employees_v1',
-};
-
 const EmployeesContext = createContext<EmployeesContextType | null>(null);
 
 export const EmployeesProvider: React.FC<{
@@ -22,25 +18,99 @@ export const EmployeesProvider: React.FC<{
   addToast: (title: string, message?: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   addActivity: (userName: string, userInitials: string, message: string, dotColor?: any) => void;
 }> = ({ children, addToast, addActivity }) => {
-  // Employees (Usuários/Membros) - Hidratação imediata de cache
-  const [employees, setEmployees] = useState<Employee[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.EMPLOYEES);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return INITIAL_EMPLOYEES;
+  const mapRowToEmployee = (row: any): Employee => ({
+    id: row.id,
+    auth_user_id: row.auth_user_id,
+    name: row.name || 'Colaborador',
+    role: row.role || 'Designer',
+    department: row.department || 'Design',
+    initials: row.initials || (row.name ? row.name.slice(0, 2).toUpperCase() : 'CO'),
+    status: row.status || 'online',
+    tags: Array.isArray(row.tags) ? row.tags : [],
+    currentWorkload: Number(row.current_workload ?? 50),
+    assignedTaskCount: 0,
+    collaboratorIds: [],
+    email: row.email || '',
+    username: row.username || '',
+    location: row.location || 'Brasil',
+    labelId: row.label_id || '',
+    labelColor: row.label_color || 'purple',
+    needsPasswordChange: Boolean(row.needs_password_change),
+    roleType: row.role_type || 'employee',
   });
 
+  // Employees (Usuários/Membros)
+  const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
+
+  // Carrega lista de funcionários diretamente do Supabase e sincroniza em tempo real
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.EMPLOYEES, JSON.stringify(employees));
-    } catch (e) {
-      console.warn('Failed to save employees to localStorage:', e);
-    }
-  }, [employees]);
+    let isMounted = true;
+
+    const fetchEmployeesFromSupabase = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('employees')
+          .select('*')
+          .order('name', { ascending: true });
+
+        if (error) {
+          console.error('[Supabase] Erro ao carregar funcionários:', error);
+          return;
+        }
+
+        if (data && isMounted) {
+          const mapped = data.map(mapRowToEmployee);
+          setEmployees(mapped);
+        }
+      } catch (err) {
+        console.error('[Supabase] Falha de conexão ao carregar funcionários:', err);
+      }
+    };
+
+    fetchEmployeesFromSupabase();
+
+    // Inscrição Realtime para novos funcionários, edições e exclusões
+    const channel = supabase
+      .channel('realtime:employees')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'employees' },
+        (payload) => {
+          if (!payload.new || !isMounted) return;
+          const newEmp = mapRowToEmployee(payload.new);
+          setEmployees((prev) => {
+            if (prev.some((e) => e.id === newEmp.id)) return prev;
+            return [...prev, newEmp].sort((a, b) => a.name.localeCompare(b.name));
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'employees' },
+        (payload) => {
+          if (!payload.new || !isMounted) return;
+          const updatedEmp = mapRowToEmployee(payload.new);
+          setEmployees((prev) =>
+            prev.map((e) => (e.id === updatedEmp.id ? { ...e, ...updatedEmp } : e))
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'employees' },
+        (payload) => {
+          if (!payload.old || !isMounted) return;
+          const deletedId = (payload.old as any).id;
+          setEmployees((prev) => prev.filter((e) => e.id !== deletedId));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // Employee Actions (Salva no Supabase + Local)
   const addEmployee = async (newEmpData: Omit<Employee, 'id'>) => {

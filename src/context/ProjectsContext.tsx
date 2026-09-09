@@ -55,10 +55,6 @@ export interface ProjectsContextType {
   setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
 }
 
-const STORAGE_KEYS = {
-  PROJECTS: 'spine_projects_v1',
-};
-
 const ProjectsContext = createContext<ProjectsContextType | null>(null);
 
 export const ProjectsProvider: React.FC<{
@@ -66,25 +62,112 @@ export const ProjectsProvider: React.FC<{
   addToast: (title: string, message?: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   addActivity: (userName: string, userInitials: string, message: string, dotColor?: any) => void;
 }> = ({ children, addToast, addActivity }) => {
-  // Projects / Clientes - Hidratação imediata de cache
-  const [projects, setProjects] = useState<Project[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return INITIAL_PROJECTS;
-  });
+  const mapRowToProject = (row: any): Project => {
+    const { cleanDescription, brandMeta } = decodeProjectDescription(row.description);
+    return {
+      id: row.id,
+      name: row.name || 'Cliente Sem Nome',
+      category: row.category || 'General',
+      description: cleanDescription || '',
+      clientId: row.client_id,
+      clientName: row.client_name,
+      clientIds: Array.isArray(row.client_ids) ? row.client_ids : [],
+      clientNames: Array.isArray(row.client_names) ? row.client_names : [],
+      status: (row.status as any) || 'active',
+      progress: Number(row.progress ?? 0),
+      currentSprint: row.current_sprint || 'Sprint Ativa',
+      iconType: (row.icon_type as any) || 'rocket',
+      iconColor: row.icon_color || '#10B981',
+      teamMemberIds: Array.isArray(row.team_member_ids) ? row.team_member_ids : [],
+      totalTasks: 0,
+      completedTasks: 0,
+      labelId: row.label_id,
+      labelColor: row.label_color,
+      logoUrl: row.logo_url,
+      colorPalette: Array.isArray(row.color_palette) ? row.color_palette : brandMeta.colorPalette || [],
+      brandManualUrl: row.brand_manual_url || brandMeta.brandManualUrl,
+      logosPackUrl: row.logos_pack_url || brandMeta.logosPackUrl,
+      typographyUrl: row.typography_url || brandMeta.typographyUrl,
+      additionalMaterialsUrl: row.additional_materials_url || brandMeta.additionalMaterialsUrl,
+    };
+  };
 
+  // Projects / Clientes
+  const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
+
+  // Carrega lista de clientes/projetos diretamente do Supabase e sincroniza em tempo real
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
-    } catch (e) {
-      console.warn('Failed to save projects to localStorage:', e);
-    }
-  }, [projects]);
+    let isMounted = true;
+
+    const fetchProjectsFromSupabase = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .neq('id', 'system-settings')
+          .order('name', { ascending: true });
+
+        if (error) {
+          console.error('[Supabase] Erro ao carregar projetos/clientes:', error);
+          return;
+        }
+
+        if (data && isMounted) {
+          const mapped = data.map(mapRowToProject);
+          setProjects(mapped);
+        }
+      } catch (err) {
+        console.error('[Supabase] Falha de conexão ao carregar projetos:', err);
+      }
+    };
+
+    fetchProjectsFromSupabase();
+
+    // Inscrição Realtime para novos projetos, atualizações e exclusões
+    const channel = supabase
+      .channel('realtime:projects')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'projects' },
+        (payload) => {
+          if (!payload.new || !isMounted) return;
+          if (payload.new.id === 'system-settings') return;
+          const newProj = mapRowToProject(payload.new);
+          setProjects((prev) => {
+            if (prev.some((p) => p.id === newProj.id)) return prev;
+            return [...prev, newProj].sort((a, b) => a.name.localeCompare(b.name));
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'projects' },
+        (payload) => {
+          if (!payload.new || !isMounted) return;
+          if (payload.new.id === 'system-settings') return;
+          const updatedProj = mapRowToProject(payload.new);
+          setProjects((prev) =>
+            prev.map((p) => (p.id === updatedProj.id ? { ...p, ...updatedProj } : p))
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'projects' },
+        (payload) => {
+          if (!payload.old || !isMounted) return;
+          if ((payload.old as any).id === 'system-settings') return;
+          const deletedId = (payload.old as any).id;
+          setProjects((prev) => prev.filter((p) => p.id !== deletedId));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // Project Actions (Salva no Supabase + Local)
   const addProject = async (newProjData: Omit<Project, 'id'>) => {
@@ -96,13 +179,7 @@ export const ProjectsProvider: React.FC<{
       completedTasks: 0,
     };
 
-    setProjects((prev) => {
-      const next = [newProj, ...prev];
-      try {
-        localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
+    setProjects((prev) => [newProj, ...prev]);
 
     const { cleanDescription } = decodeProjectDescription(newProj.description);
     const packedDescription = encodeProjectDescription(cleanDescription, {
@@ -169,20 +246,16 @@ export const ProjectsProvider: React.FC<{
   const updateProject = async (id: string, updates: Partial<Project>) => {
     let updatedMergedProj: Project | null = null;
 
-    setProjects((prev) => {
-      const next = prev.map((proj) => {
+    setProjects((prev) =>
+      prev.map((proj) => {
         if (proj.id === id) {
           const merged = { ...proj, ...updates };
           updatedMergedProj = merged;
           return merged;
         }
         return proj;
-      });
-      try {
-        localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
+      })
+    );
 
     const targetProj = updatedMergedProj || updates;
     const { cleanDescription } = decodeProjectDescription(targetProj.description || '');
