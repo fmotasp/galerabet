@@ -171,8 +171,8 @@ serve(async (req) => {
         );
       }
 
-      // R2 CORRIGIDO: A senha inicial é 100% determinada pelo backend.
-      const initialPassword = "1234";
+      // R2 CORRIGIDO: A senha inicial é 100% determinada pelo backend (mínimo 6 caracteres exigidos pelo Supabase Auth).
+      const initialPassword = "123456";
 
       // 3. Verifica se já existe um usuário com esse email em auth.users
       const { data: userList, error: listErr } = await adminClient.auth.admin.listUsers();
