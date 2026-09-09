@@ -498,7 +498,7 @@ export const useTaskModalForm = ({
         }
 
         if (driveFolderId) {
-          const upRes = await uploadFileToDrive(driveFolderId, file, 'briefing');
+          const upRes = await uploadFileToDrive(file, driveFolderId, 'reference');
           if (upRes && upRes.id) {
             driveFileId = upRes.id;
           }

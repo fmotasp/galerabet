@@ -411,22 +411,36 @@ export const createDriveFolder = async (
 
 // Upload a file directly to the appropriate subfolder inside the task folder
 export const uploadFileToDrive = async (
-  file: File,
-  taskFolderId: string,
-  fileType: 'reference' | 'final' | 'general' | 'psd' = 'general',
+  arg1: any,
+  arg2: any,
+  fileType: 'reference' | 'final' | 'general' | 'psd' | 'briefing' = 'general',
   accessToken?: string
 ): Promise<DriveFileItem | null> => {
   try {
+    // Normaliza ordem de argumentos caso venha invertido (ex: folderId, file)
+    let file: File = arg1;
+    let taskFolderId: string = arg2;
+
+    if (typeof arg1 === 'string' && arg2 && (typeof arg2 === 'object')) {
+      taskFolderId = arg1;
+      file = arg2;
+    }
+
+    if (!file || !taskFolderId) {
+      console.warn('uploadFileToDrive: arquivo ou pasta de destino não informados.');
+      return null;
+    }
+
+    const fileName = (file.name || 'arquivo').toLowerCase();
     const isPsd =
       fileType === 'psd' ||
-      file.name.toLowerCase().endsWith('.psd') ||
-      file.name.toLowerCase().endsWith('.psb') ||
-      file.type === 'image/vnd.adobe.photoshop' ||
-      file.type.includes('photoshop');
+      fileName.endsWith('.psd') ||
+      fileName.endsWith('.psb') ||
+      (file.type && (file.type === 'image/vnd.adobe.photoshop' || file.type.includes('photoshop')));
 
     // Determine appropriate subfolder: Briefing, PSD, or Arquivos Entregues
     const subfolderName =
-      fileType === 'reference'
+      fileType === 'reference' || fileType === 'briefing'
         ? 'Briefing'
         : isPsd
         ? 'PSD'
