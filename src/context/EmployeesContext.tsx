@@ -53,45 +53,56 @@ export const EmployeesProvider: React.FC<{
 
     // Persiste no Supabase com payload sanitizado
     try {
-      const dbPayload: any = {
+      // APENAS campos que existem na tabela employees do Supabase
+      const dbPayload: Record<string, any> = {
         id: newEmp.id,
-        name: newEmp.name,
-        email: newEmp.email,
-        role: newEmp.role,
-        department: newEmp.department,
-        initials: newEmp.initials,
-        status: newEmp.status,
+        name: newEmp.name || '',
+        email: newEmp.email || '',
+        role: newEmp.role || 'Colaborador',
+        department: newEmp.department || 'Design',
+        initials: newEmp.initials || '',
+        status: newEmp.status || 'online',
       };
 
-      if (newEmp.tags) dbPayload.tags = newEmp.tags;
-      if (newEmp.currentWorkload !== undefined) dbPayload.current_workload = newEmp.currentWorkload;
+      // Campos opcionais — só inclui se tiver valor válido
+      if (Array.isArray(newEmp.tags) && newEmp.tags.length > 0) dbPayload.tags = newEmp.tags;
+      if (typeof newEmp.currentWorkload === 'number') dbPayload.current_workload = newEmp.currentWorkload;
       if (newEmp.labelId) dbPayload.label_id = newEmp.labelId;
       if (newEmp.labelColor) dbPayload.label_color = newEmp.labelColor;
       if (newEmp.username) dbPayload.username = newEmp.username;
       if (newEmp.location) dbPayload.location = newEmp.location;
-      if (newEmp.needsPasswordChange !== undefined) dbPayload.needs_password_change = newEmp.needsPasswordChange;
+      if (typeof newEmp.needsPasswordChange === 'boolean') dbPayload.needs_password_change = newEmp.needsPasswordChange;
 
-      const { data, error } = await supabase.from('employees').insert(dbPayload);
+      console.log('[addEmployee] dbPayload sendo enviado:', JSON.stringify(dbPayload));
+
+      const { data, error } = await supabase.from('employees').insert(dbPayload).select();
       if (error) {
-        console.error('Supabase employee insert error details:', {
+        console.error('[addEmployee] Erro no insert principal:', {
           message: error.message,
           details: error.details,
           hint: error.hint,
           code: error.code,
+          payload: JSON.stringify(dbPayload),
         });
         // Tenta fallback com apenas os campos essenciais se alguma coluna opcional falhar
-        const basicPayload = {
+        const basicPayload: Record<string, any> = {
           id: newEmp.id,
-          name: newEmp.name,
-          email: newEmp.email,
-          role: newEmp.role,
-          department: newEmp.department,
-          initials: newEmp.initials,
-          status: newEmp.status,
+          name: newEmp.name || '',
+          email: newEmp.email || '',
+          role: newEmp.role || 'Colaborador',
+          department: newEmp.department || 'Design',
+          initials: newEmp.initials || '',
+          status: newEmp.status || 'online',
         };
+        console.log('[addEmployee] Tentando fallback com basicPayload:', JSON.stringify(basicPayload));
         const { error: fallbackErr } = await supabase.from('employees').insert(basicPayload);
         if (fallbackErr) {
-          console.error('Supabase employee basic insert error:', fallbackErr);
+          console.error('[addEmployee] Fallback também falhou:', {
+            message: fallbackErr.message,
+            details: fallbackErr.details,
+            hint: fallbackErr.hint,
+            code: fallbackErr.code,
+          });
           addToast('Erro Supabase ⚠️', `Falha ao gravar no Supabase: ${fallbackErr.message}`, 'error');
         } else {
           addToast('Funcionário Salvo ☁️', `${newEmp.name} gravado com sucesso.`, 'success');
