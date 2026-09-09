@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import {
   CheckSquare,
   ChevronDown,
@@ -63,6 +63,30 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
   setEditingTask,
   deleteTask,
 }) => {
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && sortedTasks.length > visibleTasksCount) {
+        onLoadMore();
+      }
+    },
+    [sortedTasks.length, visibleTasksCount, onLoadMore]
+  );
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1,
+    });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [handleObserver]);
+
   return (
     <div className="space-y-6 w-full">
       {/* Action Bar (Search, Counter, Export, Sort, Add) */}
@@ -324,14 +348,26 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
         </div>
       </div>
 
+
+      {/* Infinite Scroll Sentinel */}
+      <div ref={sentinelRef} className="h-1 w-full" aria-hidden="true" />
+
+      {/* Loading indicator */}
       {sortedTasks.length > visibleTasksCount && (
-        <div className="flex justify-center pt-2">
-          <button
-            onClick={onLoadMore}
-            className="px-6 py-2.5 bg-[#222222] hover:bg-[#E4007E] text-slate-200 hover:text-white rounded-2xl text-xs font-black transition-all shadow-xs flex items-center gap-1.5"
-          >
-            <span>Mostrar mais</span>
-          </button>
+        <div className="flex justify-center py-4">
+          <div className="flex items-center gap-2 text-xs text-slate-400 font-semibold">
+            <span className="w-4 h-4 border-2 border-[#E4007E] border-t-transparent rounded-full animate-spin" />
+            <span>Carregando mais demandas...</span>
+          </div>
+        </div>
+      )}
+
+      {/* End of list indicator */}
+      {paginatedTasks.length > 0 && sortedTasks.length <= visibleTasksCount && (
+        <div className="flex justify-center py-3">
+          <span className="text-[11px] text-slate-500 font-bold">
+            {sortedTasks.length} {sortedTasks.length === 1 ? 'demanda' : 'demandas'} — fim da lista
+          </span>
         </div>
       )}
     </div>

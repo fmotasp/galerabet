@@ -94,7 +94,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
           .filter((t) => t.status === col.id)
           .sort((a, b) => getTaskNumericTimestamp(b) - getTaskNumericTimestamp(a));
 
-        const limit = columnLimits[col.id] || 40;
+        const limit = columnLimits[col.id] || 10;
         const visibleTasks = columnTasks.slice(0, limit);
 
         return (
@@ -463,12 +463,12 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
                       e.stopPropagation();
                       setColumnLimits((prev) => ({
                         ...prev,
-                        [col.id]: (prev[col.id] || 40) + 40,
+                        [col.id]: (prev[col.id] || 10) + 10,
                       }));
                     }}
-                    className="w-full py-2.5 my-2 bg-[#202020] hover:bg-[#282828] text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all border border-[#333333] flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.99]"
+                    className="w-full py-2.5 my-2 bg-[#1a1a1a] hover:bg-[#E4007E]/10 text-slate-400 hover:text-[#E4007E] rounded-xl text-xs font-bold transition-all border border-[#333333] hover:border-[#E4007E]/40 flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.99]"
                   >
-                    <span>Carregar mais (+{columnTasks.length - limit} restantes)</span>
+                    <span>Ver mais · {columnTasks.length - limit} restantes</span>
                   </button>
                 )}
               </div>
