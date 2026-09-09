@@ -276,7 +276,19 @@ export const TaskMembersAndClients: React.FC<{
 
                   <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
                     {projects
-                      .filter((c) => c.name.toLowerCase().includes(labelSearchQuery.toLowerCase()))
+                      .filter((c) => {
+                        const id = (c.id || '').toLowerCase();
+                        const cat = (c.category || '').toLowerCase();
+                        const name = (c.name || '').toLowerCase();
+                        const isSystem =
+                          id === 'system-settings' ||
+                          id === 'google-drive-token' ||
+                          id.startsWith('system-') ||
+                          cat === 'system' ||
+                          name.includes('google drive') ||
+                          name.includes('auth token');
+                        return !isSystem && name.includes(labelSearchQuery.toLowerCase());
+                      })
                       .map((c) => {
                         const isSelected = selectedLabels.some(
                           (l) => l.toLowerCase() === c.name.toLowerCase()

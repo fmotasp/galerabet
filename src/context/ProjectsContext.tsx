@@ -92,6 +92,26 @@ export const ProjectsProvider: React.FC<{
     };
   };
 
+  const isSystemProject = (rowOrProj: any) => {
+    if (!rowOrProj) return true;
+    const id = (rowOrProj.id || '').toLowerCase();
+    const cat = (rowOrProj.category || '').toLowerCase();
+    const stat = (rowOrProj.status || '').toLowerCase();
+    const name = (rowOrProj.name || '').toLowerCase();
+
+    return (
+      id === 'system-settings' ||
+      id === 'google-drive-token' ||
+      id.startsWith('system-') ||
+      id.startsWith('google-drive') ||
+      cat === 'system' ||
+      stat === 'system' ||
+      name.includes('google drive') ||
+      name.includes('auth token') ||
+      name.includes('configurações globais')
+    );
+  };
+
   // Projects / Clientes
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
 
@@ -104,7 +124,6 @@ export const ProjectsProvider: React.FC<{
         const { data, error } = await supabase
           .from('projects')
           .select('*')
-          .neq('id', 'system-settings')
           .order('name', { ascending: true });
 
         if (error) {
@@ -113,7 +132,9 @@ export const ProjectsProvider: React.FC<{
         }
 
         if (data && isMounted) {
-          const mapped = data.map(mapRowToProject);
+          const mapped = data
+            .filter((row) => !isSystemProject(row))
+            .map(mapRowToProject);
           setProjects(mapped);
         }
       } catch (err) {
@@ -131,7 +152,7 @@ export const ProjectsProvider: React.FC<{
         { event: 'INSERT', schema: 'public', table: 'projects' },
         (payload) => {
           if (!payload.new || !isMounted) return;
-          if (payload.new.id === 'system-settings') return;
+          if (isSystemProject(payload.new)) return;
           const newProj = mapRowToProject(payload.new);
           setProjects((prev) => {
             if (prev.some((p) => p.id === newProj.id)) return prev;
@@ -144,7 +165,11 @@ export const ProjectsProvider: React.FC<{
         { event: 'UPDATE', schema: 'public', table: 'projects' },
         (payload) => {
           if (!payload.new || !isMounted) return;
-          if (payload.new.id === 'system-settings') return;
+          if (isSystemProject(payload.new)) {
+            // Se virou system, remove da lista de clientes
+            setProjects((prev) => prev.filter((p) => p.id !== payload.new.id));
+            return;
+          }
           const updatedProj = mapRowToProject(payload.new);
           setProjects((prev) =>
             prev.map((p) => (p.id === updatedProj.id ? { ...p, ...updatedProj } : p))
@@ -156,7 +181,6 @@ export const ProjectsProvider: React.FC<{
         { event: 'DELETE', schema: 'public', table: 'projects' },
         (payload) => {
           if (!payload.old || !isMounted) return;
-          if ((payload.old as any).id === 'system-settings') return;
           const deletedId = (payload.old as any).id;
           setProjects((prev) => prev.filter((p) => p.id !== deletedId));
         }
