@@ -30,7 +30,7 @@ export const EmployeeModal: React.FC = () => {
   const [validationError, setValidationError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const TRELLO_COLORS = [
+  const LABEL_COLORS = [
     { id: 'purple', name: 'Roxo', bg: 'bg-purple-600', hex: '#89609e' },
     { id: 'blue', name: 'Azul', bg: 'bg-blue-600', hex: '#0079bf' },
     { id: 'green', name: 'Verde', bg: 'bg-emerald-600', hex: '#61bd4f' },
@@ -313,7 +313,7 @@ export const EmployeeModal: React.FC = () => {
             Cor de Identificação (Avatar)
           </label>
           <div className="grid grid-cols-9 gap-1.5 p-2 bg-[#222222] rounded-xl border border-[#2A2A2A]">
-            {TRELLO_COLORS.map((c) => (
+            {LABEL_COLORS.map((c) => (
               <button
                 key={c.id}
                 type="button"

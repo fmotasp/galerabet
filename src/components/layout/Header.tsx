@@ -24,7 +24,6 @@ export const Header: React.FC = () => {
     setIsNewTaskModalOpen,
     activities,
     setActiveTab,
-    trelloSettings,
     currentUser,
     logout,
     isManagerOrAdmin,
@@ -102,7 +101,7 @@ export const Header: React.FC = () => {
           id="btn-open-search"
           onClick={() => setIsSearchModalOpen(true)}
           className="p-2 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-[#262626] transition-colors duration-150 flex items-center gap-2"
-          title="Buscar tarefas, cartões Trello..."
+          title="Buscar tarefas..."
         >
           <Search className="w-5 h-5" />
           <span className="hidden md:inline-block text-xs text-[#808080] bg-[#1C1C1C] px-1.5 py-0.5 rounded border border-[#303030]">

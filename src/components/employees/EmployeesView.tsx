@@ -14,18 +14,14 @@ import {
   Edit2,
   Users,
 } from 'lucide-react';
-import { useApp } from '../../context/AppContext';
+import { useApp, useEmployees, useTasks } from '../../context/AppContext';
 import { Employee } from '../../types';
 import { Button, Input, Avatar } from '../ui';
 
 export const EmployeesView: React.FC = () => {
-  const {
-    employees,
-    tasks,
-    setIsNewEmployeeModalOpen,
-    setEditingEmployee,
-    deleteEmployee,
-  } = useApp();
+  const { employees, deleteEmployee } = useEmployees();
+  const { tasks } = useTasks();
+  const { setIsNewEmployeeModalOpen, setEditingEmployee } = useApp();
 
   const [activeTab, setActiveTab] = useState<'all' | 'organization'>('all');
   const [selectedDept, setSelectedDept] = useState<string>('all');
@@ -108,20 +104,6 @@ export const EmployeesView: React.FC = () => {
           return true;
         }
       }
-      // 3. Nome da coluna no Trello
-      if (t.trelloListName) {
-        const lName = t.trelloListName.toLowerCase();
-        if (
-          lName.includes(empFirstName) ||
-          (empEmailName && lName.includes(empEmailName)) ||
-          (empFirstName === 'bismarques' && lName.includes('marques')) ||
-          (empFirstName === 'gerdson' && lName.includes('gerdeson')) ||
-          (empFirstName === 'felipe' && (lName.includes('fmota') || lName.includes('mota'))) ||
-          (empFirstName === 'daiane' && lName.includes('dai'))
-        ) {
-          return true;
-        }
-      }
       return false;
     });
   };
@@ -133,8 +115,7 @@ export const EmployeesView: React.FC = () => {
     const total = relevantTasks.length;
     const completed = relevantTasks.filter((t) => {
       const s = (t.status || '').toLowerCase();
-      const l = (t.trelloListName || '').toLowerCase();
-      return s === 'done' || s.includes('concl') || s.includes('finaliz') || s.includes('postad') || l.includes('concl') || l.includes('postar');
+      return s === 'done' || s.includes('concl') || s.includes('finaliz') || s.includes('postad');
     }).length;
     const inProgress = relevantTasks.filter((t) => {
       const s = (t.status || '').toLowerCase();
@@ -152,8 +133,7 @@ export const EmployeesView: React.FC = () => {
     if (empTasks.length === 0) return 0;
     const completed = empTasks.filter((t) => {
       const s = (t.status || '').toLowerCase();
-      const l = (t.trelloListName || '').toLowerCase();
-      return s === 'done' || s.includes('concl') || s.includes('finaliz') || s.includes('postad') || l.includes('concl') || l.includes('postar');
+      return s === 'done' || s.includes('concl') || s.includes('finaliz') || s.includes('postad');
     }).length;
     return Math.round((completed / empTasks.length) * 100);
   };

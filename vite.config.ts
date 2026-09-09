@@ -42,18 +42,6 @@ export default defineConfig(() => {
       },
     },
     server: {
-      proxy: {
-        '/trello-img': {
-          target: 'https://trello.com',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/trello-img/, ''),
-        },
-        '/trello-api': {
-          target: 'https://api.trello.com',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/trello-api/, ''),
-        },
-      },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',

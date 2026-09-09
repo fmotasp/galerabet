@@ -13,7 +13,6 @@ export interface TasksContextType {
   moveAllBacklogToDoneLocally: () => void;
   toggleFlagTask: (id: string) => Promise<void>;
   clearAllTasks: () => void;
-  clearTrelloTasks: () => void;
   resetSystemKeepCredentials: () => void;
   computedMetrics: {
     totalTasks: number;
@@ -29,7 +28,6 @@ export interface TasksContextType {
 
 const STORAGE_KEYS = {
   TASKS: 'spine_tasks_v1',
-  DELETED_TRELLO_TASKS: 'spine_deleted_trello_task_ids_v1',
 };
 
 const TasksContext = createContext<TasksContextType | null>(null);
@@ -43,13 +41,6 @@ export const TasksProvider: React.FC<{
   currentUser: any;
   addToast: (title: string, message?: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   addActivity: (userName: string, userInitials: string, message: string, dotColor?: any) => void;
-  pushTrelloMutation?: (
-    actionType: 'MOVE' | 'UPDATE' | 'DELETE' | 'CREATE',
-    task: Partial<Task> & { id?: string; title?: string; status?: TaskStatus },
-    extraParams?: { newStatus?: TaskStatus }
-  ) => Promise<void>;
-  deletedTrelloTaskIds: string[];
-  setDeletedTrelloTaskIds: React.Dispatch<React.SetStateAction<string[]>>;
   resetAllStores?: () => void;
 }> = ({
   children,
@@ -60,9 +51,6 @@ export const TasksProvider: React.FC<{
   currentUser,
   addToast,
   addActivity,
-  pushTrelloMutation = async () => {},
-  deletedTrelloTaskIds,
-  setDeletedTrelloTaskIds,
   resetAllStores,
 }) => {
   // Tasks (Demandas) - Hidratação imediata síncrona de cache para evitar tela zerada
@@ -77,10 +65,9 @@ export const TasksProvider: React.FC<{
     return INITIAL_TASKS;
   });
 
-  // LocalStorage persistence effects with QuotaExceeded protection & Payload Optimization
+  // LocalStorage persistence effects with QuotaExceeded protection
   useEffect(() => {
     try {
-      // Sanitize tasks for localStorage: strip heavy temporary base64 strings and redundant attachment previews
       const sanitizedTasks = tasks.map((t) => {
         const leanAttachments = (t.attachments || []).map((a) => ({
           id: a.id,
@@ -105,68 +92,23 @@ export const TasksProvider: React.FC<{
               driveFileId: r.driveFileId,
             };
           })
-          .filter((r) => r.url || r.driveFileId);
+          .filter((r) => r.url && !r.url.startsWith('data:'));
 
         return {
-          id: t.id,
-          title: t.title,
-          description: (t.description || '').length > 20000 ? (t.description || '').substring(0, 20000) : t.description,
-          category: t.category,
-          status: t.status,
-          dueDate: t.dueDate,
-          createdAt: t.createdAt,
-          assigneeId: t.assigneeId,
-          assigneeName: t.assigneeName,
-          assigneeInitials: t.assigneeInitials,
-          members: t.members,
-          projectId: t.projectId,
-          projectName: t.projectName,
-          sprintId: t.sprintId,
-          points: t.points,
-          isFlagged: t.isFlagged,
-          coverImageUrl: t.coverImageUrl,
-          coverAttachmentId: t.coverAttachmentId,
-          labels: t.labels,
-          commentsCount: t.commentsCount,
-          trelloListName: t.trelloListName,
-          trelloListId: t.trelloListId,
-          isDueComplete: t.isDueComplete,
-          dueComplete: t.dueComplete,
-          lastMovedAt: t.lastMovedAt,
+          ...t,
           attachments: leanAttachments,
           referenceImages: leanRefImages,
         };
       });
 
       localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(sanitizedTasks));
-    } catch (err) {
-      try {
-        const minimalTasks = tasks.map((t) => ({
-          id: t.id,
-          title: t.title,
-          description: (t.description || '').substring(0, 500),
-          category: t.category,
-          status: t.status,
-          dueDate: t.dueDate,
-          createdAt: t.createdAt,
-          assigneeId: t.assigneeId,
-          assigneeName: t.assigneeName,
-          assigneeInitials: t.assigneeInitials,
-          members: t.members,
-          projectId: t.projectId,
-          projectName: t.projectName,
-          sprintId: t.sprintId,
-          points: t.points,
-          isFlagged: t.isFlagged,
-          coverImageUrl: t.coverImageUrl,
-          coverAttachmentId: t.coverAttachmentId,
-          labels: t.labels,
-          commentsCount: t.commentsCount,
-          attachmentsCount: t.attachmentsCount,
-        }));
-        localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(minimalTasks));
-      } catch (innerErr) {
-        console.warn('LocalStorage quota fallback failed:', innerErr);
+    } catch (e: any) {
+      if (e.name === 'QuotaExceededError' || e.code === 22) {
+        console.warn('LocalStorage quota exceeded in TasksProvider, storing lightweight tasks.');
+        try {
+          const minimalTasks = tasks.map(({ referenceImages, attachments, comments, ...rest }) => rest);
+          localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(minimalTasks));
+        } catch {}
       }
     }
   }, [tasks]);
@@ -222,7 +164,6 @@ export const TasksProvider: React.FC<{
           ? {
               ...t,
               status: 'overdue',
-              trelloListName: 'Atrasadas / Urgente',
               lastMovedAt: now,
             }
           : t
@@ -249,64 +190,52 @@ export const TasksProvider: React.FC<{
 
   // Task Actions
   const addTask = async (newTaskData: Omit<Task, 'id' | 'createdAt'>) => {
-    const id = `task-${Date.now()}`;
+    const newId = `task-${Date.now()}`;
     const newTask: Task = {
       ...newTaskData,
-      id,
-      status: newTaskData.status || 'backlog',
-      lastMovedAt: Date.now(),
+      id: newId,
       createdAt: new Date().toISOString().split('T')[0],
+      commentsCount: 0,
+      attachmentsCount: 0,
+      lastMovedAt: Date.now(),
     };
+
     setTasks((prev) => [newTask, ...prev]);
 
     try {
-      const fullPayload = {
+      const payload = {
         id: newTask.id,
-        trello_id: null,
         title: newTask.title,
         description: newTask.description || '',
-        category: newTask.category || '',
-        status: newTask.status,
-        due_date: newTask.dueDate,
+        category: newTask.category || 'Geral',
+        status: newTask.status || 'backlog',
+        due_date: newTask.dueDate || null,
         points: newTask.points || 0,
-        is_flagged: newTask.isFlagged || false,
-        project_id: newTask.projectId,
-        project_name: newTask.projectName,
-        sprint_id: newTask.sprintId,
-        assignee_id: newTask.assigneeId,
-        assignee_name: newTask.assigneeName,
-        assignee_initials: newTask.assigneeInitials,
+        is_flagged: Boolean(newTask.isFlagged),
+        project_id: newTask.projectId || null,
+        project_name: newTask.projectName || 'General',
+        sprint_id: newTask.sprintId || 'sprint-1',
+        assignee_id: newTask.assigneeId || null,
+        assignee_name: newTask.assigneeName || null,
+        assignee_initials: newTask.assigneeInitials || null,
         members: newTask.members || [],
         labels: newTask.labels || [],
-        attachments: newTask.attachments || [],
         reference_images: newTask.referenceImages || [],
-        cover_image_url: newTask.coverImageUrl,
-        cover_attachment_id: newTask.coverAttachmentId,
+        attachments: newTask.attachments || [],
+        comments: newTask.comments || [],
+        cover_image_url: newTask.coverImageUrl || null,
+        cover_attachment_id: newTask.coverAttachmentId || null,
         last_moved_at: newTask.lastMovedAt,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase.from('tasks').upsert(fullPayload);
-
-      if (error) {
-        console.warn('Full payload error, trying base columns fallback:', error.message);
-        const basePayload = {
-          id: newTask.id,
-          title: newTask.title,
-          description: newTask.description || '',
-          status: newTask.status,
-          category: newTask.category || '',
-          due_date: newTask.dueDate,
-          assignee_id: newTask.assigneeId,
-          assignee_name: newTask.assigneeName,
-          project_id: newTask.projectId,
-        };
-        const resBase = await supabase.from('tasks').upsert(basePayload);
-        if (resBase.error) {
-          console.error('Supabase base insert error:', resBase.error.message);
-        }
+      const { error: sbErr } = await supabase.from('tasks').insert([payload]);
+      if (sbErr) {
+        console.error('[Supabase] Falha ao inserir tarefa:', sbErr.message);
       }
-    } catch (sbErr: any) {
-      console.warn('Supabase task insert exception:', sbErr);
+    } catch (sbErr) {
+      console.warn('Supabase task insert warning:', sbErr);
     }
 
     if (newTask.assigneeId) {
@@ -316,37 +245,31 @@ export const TasksProvider: React.FC<{
             ? {
                 ...emp,
                 assignedTaskCount: emp.assignedTaskCount + 1,
-                currentWorkload: Math.min(130, emp.currentWorkload + 10),
+                currentWorkload: Math.min(100, emp.currentWorkload + 15),
               }
             : emp
         )
       );
     }
 
-    addActivity('You', 'YO', `criou a tarefa "${newTask.title}"`, 'purple');
-    addToast('Tarefa Criada', `"${newTask.title}" cadastrada no sistema.`);
+    addActivity(currentUser?.name || 'Theo R.', currentUser?.initials || 'TR', `criou a tarefa "${newTask.title}"`, 'blue');
+    addToast('Task Created! 🚀', `"${newTask.title}" added to board.`);
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
     const now = Date.now();
-
-    setTasks((prev) => {
-      const next = prev.map((task) => {
-        if (task.id === id) {
-          const statusChanged = updates.status !== undefined && updates.status !== task.status;
-          return {
-            ...task,
-            ...updates,
-            lastMovedAt: statusChanged ? now : (task.lastMovedAt || now),
-          };
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id === id) {
+          const next = { ...t, ...updates };
+          if (updates.status && updates.status !== t.status) {
+            next.lastMovedAt = now;
+          }
+          return next;
         }
-        return task;
-      });
-      try {
-        localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
+        return t;
+      })
+    );
 
     try {
       const payload: any = {
@@ -381,8 +304,6 @@ export const TasksProvider: React.FC<{
       const { error: sbErr } = await supabase.from('tasks').update(payload).eq('id', id);
       if (sbErr) {
         console.error('[Supabase] Falha ao atualizar tarefa:', sbErr.message);
-      } else {
-        console.log(`[Supabase] Tarefa "${id}" atualizada com sucesso no banco.`);
       }
     } catch (sbErr) {
       console.warn('Supabase task update warning:', sbErr);
@@ -450,70 +371,65 @@ export const TasksProvider: React.FC<{
     let nextAssigneeId = targetTask.assigneeId;
     let nextAssigneeName = targetTask.assigneeName;
     let nextAssigneeInitials = targetTask.assigneeInitials;
+    let nextMembers = targetTask.members ? [...targetTask.members] : [];
 
-    if (!nextAssigneeName && targetTask.trelloListName) {
-      const foundEmp = employees.find((e) => {
-        const fName = e.name.toLowerCase().split(' ')[0].trim();
-        return fName.length > 2 && targetTask.trelloListName!.toLowerCase().includes(fName);
-      });
-      if (foundEmp) {
-        nextAssigneeId = foundEmp.id;
-        nextAssigneeName = foundEmp.name;
-        nextAssigneeInitials = foundEmp.initials;
+    const isReview = newStatus === 'in_review' || statusLabel.toLowerCase().includes('revis') || statusLabel.toLowerCase().includes('aprov');
+    if (isReview) {
+      const fabio = employees.find((e) => e.name.toLowerCase().includes('fabio mozart'));
+      if (fabio) {
+        nextAssigneeId = fabio.id;
+        nextAssigneeName = fabio.name;
+        nextAssigneeInitials = fabio.initials;
+        if (!nextMembers.some((m) => m.id === fabio.id)) {
+          nextMembers.push({
+            id: fabio.id,
+            name: fabio.name,
+            initials: fabio.initials,
+            avatarUrl: fabio.avatarUrl,
+          });
+        }
       }
     }
 
     setTasks((prev) =>
-      prev.map((t) =>
-        t.id === id
-          ? {
-              ...t,
-              status: newStatus,
-              trelloListName: statusLabel,
-              lastMovedAt: now,
-              deliveredAt: nextDeliveredAt,
-              assigneeId: nextAssigneeId,
-              assigneeName: nextAssigneeName,
-              assigneeInitials: nextAssigneeInitials,
-            }
-          : t
-      )
+      prev.map((t) => {
+        if (t.id === id) {
+          return {
+            ...t,
+            status: newStatus,
+            assigneeId: nextAssigneeId,
+            assigneeName: nextAssigneeName,
+            assigneeInitials: nextAssigneeInitials,
+            members: nextMembers,
+            lastMovedAt: now,
+            deliveredAt: nextDeliveredAt,
+          };
+        }
+        return t;
+      })
     );
-
-    if (!targetTask.assigneeId || targetTask.assigneeId === 'unassigned') {
-      try {
-        await supabase.rpc('claim_task', { p_task_id: id });
-      } catch (claimErr) {
-        console.warn('[Supabase] Aviso ao reivindicar demanda:', claimErr);
-      }
-    }
 
     try {
-      const updateObj: any = {
-        status: newStatus,
-        last_moved_at: now,
-        updated_at: new Date().toISOString(),
-      };
-      if (nextAssigneeId) updateObj.assignee_id = nextAssigneeId;
-      if (nextAssigneeName) updateObj.assignee_name = nextAssigneeName;
-      if (nextAssigneeInitials) updateObj.assignee_initials = nextAssigneeInitials;
-
-      const { error } = await supabase
+      const { error: sbErr } = await supabase
         .from('tasks')
-        .update(updateObj)
+        .update({
+          status: newStatus,
+          assignee_id: nextAssigneeId,
+          assignee_name: nextAssigneeName,
+          assignee_initials: nextAssigneeInitials,
+          members: nextMembers,
+          last_moved_at: now,
+          delivered_at: nextDeliveredAt,
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', id);
-      if (error) {
-        console.error('Supabase status move update error:', error);
+
+      if (sbErr) {
+        console.error('[Supabase] Falha ao atualizar status:', sbErr.message);
       }
     } catch (sbErr) {
-      console.warn('Supabase status move error:', sbErr);
+      console.warn('Supabase move status warning:', sbErr);
     }
-
-    pushTrelloMutation(
-      'MOVE',
-      { ...targetTask, status: newStatus, trelloListName: statusLabel, lastMovedAt: now, deliveredAt: nextDeliveredAt },
-      { newStatus }
-    );
 
     if (newStatus === 'done' || newStatus.toLowerCase().includes('concl') || newStatus.toLowerCase().includes('done')) {
       addActivity(targetTask.assigneeName || 'User', targetTask.assigneeInitials || 'US', `completed task "${targetTask.title}"`, 'green');
@@ -550,7 +466,7 @@ export const TasksProvider: React.FC<{
 
     addToast(
       'Backlog Movido para Concluídas ✅',
-      `${count} tarefas do Backlog foram marcadas como concluídas apenas no sistema (Trello permaneceu inalterado).`,
+      `${count} tarefas do Backlog foram marcadas como concluídas.`,
       'success'
     );
   };
@@ -585,30 +501,12 @@ export const TasksProvider: React.FC<{
   };
 
   const clearAllTasks = () => {
-    const trelloIds = tasks.filter((t) => t.id.startsWith('trello-')).map((t) => t.id);
-    const rawTrelloIds = trelloIds.map((id) => id.replace('trello-', ''));
-    setDeletedTrelloTaskIds((prev) => [...new Set([...prev, ...trelloIds, ...rawTrelloIds])]);
     setTasks([]);
     localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify([]));
-    
     supabase.from('tasks').delete().neq('id', '0').then();
 
     addActivity('Admin', 'AD', 'limpou todas as tarefas do sistema', 'orange');
     addToast('Tarefas Limpas', 'Todas as tarefas do sistema foram removidas com sucesso.', 'info');
-  };
-
-  const clearTrelloTasks = () => {
-    const trelloIds = tasks.filter((t) => t.id.startsWith('trello-')).map((t) => t.id);
-    const rawTrelloIds = trelloIds.map((id) => id.replace('trello-', ''));
-    setDeletedTrelloTaskIds((prev) => [...new Set([...prev, ...trelloIds, ...rawTrelloIds])]);
-    setTasks((prev) => prev.filter((t) => !t.id.startsWith('trello-')));
-    
-    if (trelloIds.length > 0) {
-      supabase.from('tasks').delete().in('id', trelloIds).then();
-    }
-
-    addActivity('Admin', 'AD', 'limpou as tarefas importadas do Trello', 'blue');
-    addToast('Tarefas do Trello Removidas', 'Todas as tarefas sincronizadas do Trello foram limpas.', 'info');
   };
 
   const resetSystemKeepCredentials = () => {
@@ -620,7 +518,7 @@ export const TasksProvider: React.FC<{
       resetAllStores();
     }
 
-    addToast('Sistema Limpo! 🧹', 'Todo o sistema foi resetado. Suas chaves de API do Trello foram mantidas intactas.', 'success');
+    addToast('Sistema Limpo! 🧹', 'Todo o sistema foi resetado com sucesso.', 'success');
   };
 
   // Visibility & computed metrics
@@ -655,7 +553,6 @@ export const TasksProvider: React.FC<{
         moveAllBacklogToDoneLocally,
         toggleFlagTask,
         clearAllTasks,
-        clearTrelloTasks,
         resetSystemKeepCredentials,
         computedMetrics,
         setTasks,

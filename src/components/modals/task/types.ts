@@ -1,4 +1,4 @@
-import { Task, Employee, Project, Sprint, SpineStatusConfig, TaskMember, TrelloComment, TrelloAttachment, TaskStatus } from '../../../types';
+import { Task, Employee, Project, Sprint, SpineStatusConfig, TaskMember, TaskComment, TaskAttachment, TaskStatus } from '../../../types';
 
 export interface TaskModalFormData {
   title: string;

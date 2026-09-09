@@ -32,8 +32,8 @@ const RegistrationsView = lazy(() =>
 const MaterialsView = lazy(() =>
   import('./components/materials/MaterialsView').then((m) => ({ default: m.MaterialsView }))
 );
-const TrelloIntegrationView = lazy(() =>
-  import('./components/settings/TrelloIntegrationView').then((m) => ({ default: m.TrelloIntegrationView }))
+const SettingsView = lazy(() =>
+  import('./components/settings/SettingsView').then((m) => ({ default: m.SettingsView }))
 );
 
 // Lazy Loaded Modals & Overlays
@@ -123,7 +123,7 @@ const MainLayout: React.FC = () => {
             {activeTab === 'projects' && (canManage ? <ProjectsView /> : <DashboardView />)}
             {activeTab === 'employees' && (canManage ? <EmployeesView /> : <DashboardView />)}
             {activeTab === 'reports' && (canManage ? <ReportsView /> : <DashboardView />)}
-            {activeTab === 'settings' && (canManage ? <TrelloIntegrationView /> : <DashboardView />)}
+            {activeTab === 'settings' && (canManage ? <SettingsView /> : <DashboardView />)}
           </Suspense>
         </main>
       </div>

@@ -10,11 +10,11 @@ import {
   Edit2,
   Type,
 } from 'lucide-react';
-import { useApp } from '../../context/AppContext';
+import { useApp, useProjects } from '../../context/AppContext';
 
 export const MaterialsView: React.FC = () => {
+  const { projects } = useProjects();
   const {
-    projects,
     setIsNewProjectModalOpen,
     setEditingProject,
     addToast,

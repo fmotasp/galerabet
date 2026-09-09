@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Task, TrelloAttachment } from '../../../../types';
+import { Task, TaskAttachment } from '../../../../types';
 import {
   createDriveFolder,
   uploadFileToDrive,
@@ -18,7 +18,6 @@ export const useTaskDriveFiles = ({
   setAttachments,
   updateTask,
   setEditingTask,
-  deleteTrelloAttachment,
   addToast,
 }: {
   editingTask: Task | null;
@@ -26,11 +25,10 @@ export const useTaskDriveFiles = ({
   setCurrentDriveFolderId: (id: string) => void;
   currentDriveFolderUrl: string;
   setCurrentDriveFolderUrl: (url: string) => void;
-  attachments: TrelloAttachment[];
-  setAttachments: React.Dispatch<React.SetStateAction<TrelloAttachment[]>>;
+  attachments: TaskAttachment[];
+  setAttachments: React.Dispatch<React.SetStateAction<TaskAttachment[]>>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
   setEditingTask: React.Dispatch<React.SetStateAction<Task | null>>;
-  deleteTrelloAttachment: (taskId: string, attachmentId: string) => Promise<boolean>;
   addToast: (title: string, message?: string, type?: any) => void;
 }) => {
   const [selectedAttachmentFiles, setSelectedAttachmentFiles] = useState<File[]>([]);
@@ -75,6 +73,8 @@ export const useTaskDriveFiles = ({
       console.warn('Google drive folder creation error:', err);
     }
 
+    const createdAttachments: TaskAttachment[] = [];
+
     for (const file of selectedAttachmentFiles) {
       try {
         const isPsd =
@@ -104,7 +104,7 @@ export const useTaskDriveFiles = ({
           });
         }
 
-        const newAtt: TrelloAttachment = {
+        const newAtt: TaskAttachment = {
           id: `att-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           name: file.name,
           url: driveFileId
@@ -115,80 +115,99 @@ export const useTaskDriveFiles = ({
           bytes: file.size,
           mimeType: file.type,
           isUpload: true,
-          date: new Date().toISOString(),
         };
-
-        nextAtts.push(newAtt);
+        createdAttachments.push(newAtt);
       } catch (uploadErr) {
-        console.error('Failed to upload file:', file.name, uploadErr);
+        console.error('Falha ao subir arquivo individual:', file.name, uploadErr);
         addToast('Erro no Upload ❌', `Falha ao enviar "${file.name}".`, 'error');
       } finally {
         setUploadProgressCount((prev) => prev + 1);
       }
     }
 
-    setAttachments(nextAtts);
-    await updateTask(editingTask.id, {
-      attachments: nextAtts,
-      driveFolderId: driveFolderId || currentDriveFolderId || editingTask.driveFolderId,
-      driveFolderUrl: driveFolderUrl || currentDriveFolderUrl || editingTask.driveFolderUrl,
-    });
+    if (createdAttachments.length > 0) {
+      setAttachments((prev) => [...createdAttachments, ...prev]);
+
+      if (editingTask) {
+        const nextAttachments = [...createdAttachments, ...attachments];
+        updateTask(editingTask.id, {
+          attachments: nextAttachments,
+          driveFolderId,
+          driveFolderUrl,
+          hasAttachments: true,
+        });
+        setEditingTask((prev) =>
+          prev
+            ? {
+                ...prev,
+                attachments: nextAttachments,
+                driveFolderId,
+                driveFolderUrl,
+                hasAttachments: true,
+              }
+            : null
+        );
+      }
+
+      addToast(
+        'Upload Concluído! 🚀',
+        `${createdAttachments.length} arquivo(s) salvos com sucesso.`,
+        'success'
+      );
+    }
 
     setSelectedAttachmentFiles([]);
     setIsPostingAttachment(false);
     setUploadTotalCount(0);
     setUploadProgressCount(0);
-    addToast('Arquivos Salvos', 'Todos os arquivos selecionados foram anexados.', 'success');
   };
 
   const handleOpenDeliveredFolder = async () => {
     if (!editingTask) return;
-    setOpeningDriveFolder(true);
-    addToast('Google Drive 📁', 'Abrindo pasta de Arquivos Entregues...', 'info');
-    const newTab = window.open('', '_blank');
-
     try {
-      let folderId = currentDriveFolderId || editingTask.driveFolderId;
-      let folderUrl = currentDriveFolderUrl || editingTask.driveFolderUrl;
+      setOpeningDriveFolder(true);
+      let targetUrl = currentDriveFolderUrl;
 
-      if (!folderId) {
-        const taskName = editingTask.title || 'Demanda';
-        const folderRes = await createDriveFolder(taskName);
-        if (folderRes) {
-          folderId = folderRes.id;
-          folderUrl = folderRes.webViewLink;
-          setCurrentDriveFolderId(folderId);
-          setCurrentDriveFolderUrl(folderUrl);
-          await updateTask(editingTask.id, {
-            driveFolderId: folderId,
-            driveFolderUrl: folderUrl,
-          });
-        }
+      if (!targetUrl && currentDriveFolderId) {
+        targetUrl = `https://drive.google.com/drive/folders/${currentDriveFolderId}`;
       }
 
-      if (folderId) {
-        const url = await getTaskDeliveredFolderUrl(folderId);
-        if (newTab) {
-          newTab.location.href = url;
-        } else {
-          window.open(url, '_blank');
-        }
+      if (!targetUrl) {
+        targetUrl = await getTaskDeliveredFolderUrl(editingTask);
+      }
+
+      if (targetUrl) {
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        return;
+      }
+
+      const newTab = window.open('about:blank', '_blank');
+      const folder = await createDriveFolder(editingTask.title, editingTask.code);
+      setCurrentDriveFolderId(folder.id);
+      setCurrentDriveFolderUrl(folder.url);
+
+      updateTask(editingTask.id, {
+        driveFolderId: folder.id,
+        driveFolderUrl: folder.url,
+      });
+
+      if (newTab) {
+        newTab.location.href = folder.url;
       } else {
-        if (newTab) newTab.close();
-        addToast('Erro no Drive', 'Não foi possível conectar ao Google Drive.', 'error');
+        window.open(folder.url, '_blank', 'noopener,noreferrer');
       }
+      addToast('Pasta Criada', 'Pasta criada no Google Drive com sucesso.', 'success');
     } catch (err) {
-      console.warn('Error navigating to delivered folder:', err);
-      if (newTab) newTab.close();
+      console.error('Erro ao abrir pasta no Drive:', err);
       addToast('Erro ao abrir pasta', 'Verifique a conexão com o Google Drive.', 'error');
     } finally {
       setOpeningDriveFolder(false);
     }
   };
 
-  const handleDownloadSingleFile = async (att: TrelloAttachment) => {
+  const handleDownloadSingleFile = async (att: TaskAttachment) => {
     addToast('Baixando 📥', `Iniciando download de "${att.name}"...`, 'info');
-    const extractDriveId = (item: TrelloAttachment): string | null => {
+    const extractDriveId = (item: TaskAttachment): string | null => {
       if (item.driveFileId) return item.driveFileId;
       if (!item.url) return null;
       const matchId = item.url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
@@ -277,15 +296,10 @@ export const useTaskDriveFiles = ({
         }
       }
 
-      if (editingTask.id && editingTask.id.startsWith('trello-')) {
-        setAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
-        await deleteTrelloAttachment(editingTask.id, attachmentId);
-      } else {
-        const nextAtts = attachments.filter((a) => a.id !== attachmentId);
-        setAttachments(nextAtts);
-        await updateTask(editingTask.id, { attachments: nextAtts });
-        addToast('Anexo Removido', 'Arquivo excluído dos entregues.', 'info');
-      }
+      const nextAtts = attachments.filter((a) => a.id !== attachmentId);
+      setAttachments(nextAtts);
+      await updateTask(editingTask.id, { attachments: nextAtts });
+      addToast('Anexo Removido', 'Arquivo excluído dos entregues.', 'info');
     } finally {
       setDeletingFileIds((prev) => prev.filter((id) => id !== attachmentId));
     }

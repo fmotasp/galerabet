@@ -222,7 +222,7 @@ export const TaskModalHeader: React.FC<{
               }`}
             >
               <Paperclip className={`w-4 h-4 ${activeDrawerTab === 'attachments' ? 'text-[#E4007E]' : ''}`} />
-              <span>{editingTask.id.startsWith('trello-') ? 'Anexos do Trello' : 'Arquivos Entregues'}</span>
+              <span>Arquivos Entregues</span>
               <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${activeDrawerTab === 'attachments' ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white font-black' : 'bg-[#1C1C1C] border border-[#303030] text-white'}`}>
                 {attachments.length}
               </span>

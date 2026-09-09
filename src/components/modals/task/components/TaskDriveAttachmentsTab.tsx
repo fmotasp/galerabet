@@ -13,11 +13,11 @@ import {
   Download,
   Loader2,
 } from 'lucide-react';
-import { Task, TrelloAttachment } from '../../../../types';
+import { Task, TaskAttachment } from '../../../../types';
 
 export const TaskDriveAttachmentsTab: React.FC<{
   editingTask: Task;
-  attachments: TrelloAttachment[];
+  attachments: TaskAttachment[];
   loadingAttachments: boolean;
   selectedAttachmentFiles: File[];
   setSelectedAttachmentFiles: React.Dispatch<React.SetStateAction<File[]>>;
@@ -32,7 +32,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
   handleUploadSelectedFileAttachment: (e?: React.FormEvent) => Promise<void>;
   handleDeleteAttachment: (attachmentId: string) => Promise<void>;
   handleRenameAttachment: (attId: string, currentName: string) => Promise<void>;
-  handleDownloadSingleFile: (att: TrelloAttachment) => Promise<void>;
+  handleDownloadSingleFile: (att: TaskAttachment) => Promise<void>;
   handleToggleCoverImage: (imgUrl: string) => Promise<void>;
   setActiveDrawerTab: (tab: 'details' | 'attachments' | 'history') => void;
   setNewCommentText: React.Dispatch<React.SetStateAction<string>>;
@@ -70,12 +70,10 @@ export const TaskDriveAttachmentsTab: React.FC<{
         <div>
           <h3 className="text-base font-extrabold text-white tracking-tight flex items-center gap-2">
             <Paperclip className="w-5 h-5 text-[#E4007E]" />
-            <span>{editingTask.id.startsWith('trello-') ? 'Anexos do Trello' : 'Arquivos Entregues'} ({attachments.length})</span>
+            <span>Arquivos Entregues ({attachments.length})</span>
           </h3>
           <p className="text-xs text-slate-300 mt-0.5">
-            {editingTask.id.startsWith('trello-')
-              ? 'Arquivos, imagens e documentos anexados diretamente ao cartão do Trello.'
-              : 'Envie e gerencie os arquivos finais e entregas da demanda.'}
+            Envie e gerencie os arquivos finais e entregas da demanda.
           </p>
         </div>
 
@@ -108,7 +106,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
       <div className="p-4 bg-[#1C1C1C] border border-[#2E2E2E] rounded-2xl space-y-3">
         <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
           <Paperclip className="w-4 h-4 text-[#E4007E]" />
-          <span>{editingTask.id.startsWith('trello-') ? 'Anexar Arquivo do Computador ao Trello' : 'Anexar Arquivo Final da Demanda'}</span>
+          <span>Anexar Arquivo Final da Demanda</span>
         </h4>
 
         {/* File Upload Box */}
@@ -140,9 +138,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
               <>
                 <span className="text-xs font-bold text-[#E4007E]">Clique para selecionar arquivos (ZIP, Imagens, PSD, Vídeos, PDF, Docs, etc.)</span>
                 <span className="text-[11px] text-slate-300">
-                  {editingTask.id.startsWith('trello-')
-                    ? 'Envio de arquivo direto para o Trello'
-                    : 'Arquivos .PSD e .ZIP são suportados e sincronizados com a pasta da demanda no Google Drive'}
+                  Arquivos .PSD e .ZIP são suportados e sincronizados com a pasta da demanda no Google Drive
                 </span>
               </>
             )}
@@ -181,18 +177,16 @@ export const TaskDriveAttachmentsTab: React.FC<{
         <div className="p-8 bg-[#1C1C1C]/40 border border-dashed border-[#2E2E2E] rounded-2xl text-center space-y-2">
           <Paperclip className="w-8 h-8 text-slate-500 mx-auto" />
           <p className="text-xs font-bold text-white">
-            {editingTask.id.startsWith('trello-') ? 'Nenhum anexo encontrado' : 'Nenhum arquivo entregue'}
+            Nenhum arquivo entregue
           </p>
           <p className="text-[11px] text-slate-400">
-            {editingTask.id.startsWith('trello-')
-              ? 'Os arquivos anexados a este cartão no Trello aparecerão listados aqui.'
-              : 'Os designers podem subir as imagens, artes finais e arquivos PSD aqui para outros usuários baixarem.'}
+            Os designers podem subir as imagens, artes finais e arquivos PSD aqui para outros usuários baixarem.
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {attachments.map((att) => {
-            const extractDriveId = (item: TrelloAttachment): string | null => {
+            const extractDriveId = (item: TaskAttachment): string | null => {
               if (item.driveFileId) return item.driveFileId;
               if (!item.url) return null;
               const matchId = item.url.match(/[?&]id=([a-zA-Z0-9_-]+)/);

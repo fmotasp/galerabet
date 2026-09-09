@@ -65,20 +65,6 @@ export const EmployeeDetailModal: React.FC = () => {
         });
         if (isMember) return true;
       }
-      // 3. Coluna nominal no Trello
-      if (t.trelloListName) {
-        const lName = t.trelloListName.toLowerCase();
-        if (
-          (empFirstName.length > 2 && lName.includes(empFirstName)) ||
-          (empEmailPrefix.length > 2 && lName.includes(empEmailPrefix)) ||
-          (empFirstName === 'bismarques' && lName.includes('marques')) ||
-          (empFirstName === 'gerdson' && lName.includes('gerdeson')) ||
-          (empFirstName === 'felipe' && (lName.includes('fmota') || lName.includes('mota'))) ||
-          (empFirstName === 'daiane' && lName.includes('dai'))
-        ) {
-          return true;
-        }
-      }
       return false;
     });
   }, [emp, tasks]);
@@ -93,8 +79,7 @@ export const EmployeeDetailModal: React.FC = () => {
   });
   const reviewTasks = allEmpTasks.filter((t) => {
     const s = (t.status || '').toLowerCase();
-    const l = (t.trelloListName || '').toLowerCase();
-    return !isTaskCompleted(t) && (s === 'in_review' || s.includes('revis') || s.includes('aprov') || l.includes('revis') || l.includes('aprov'));
+    return !isTaskCompleted(t) && (s === 'in_review' || s.includes('revis') || s.includes('aprov'));
   });
   const backlogTasks = allEmpTasks.filter((t) => {
     const s = (t.status || '').toLowerCase();

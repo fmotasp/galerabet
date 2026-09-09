@@ -25,13 +25,13 @@ export type TaskCategory = 'Frontend' | 'Backend' | 'Infra' | 'Mobile' | 'Legal'
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
 
-export interface TrelloLabel {
+export interface TaskLabel {
   id: string;
   name: string;
   color: string;
 }
 
-export interface TrelloComment {
+export interface TaskComment {
   id: string;
   authorName: string;
   authorInitials: string;
@@ -39,7 +39,7 @@ export interface TrelloComment {
   date: string;
 }
 
-export interface TrelloAttachment {
+export interface TaskAttachment {
   id: string;
   name: string;
   url: string;
@@ -62,27 +62,27 @@ export interface TaskMember {
 export interface Task {
   id: string;
   title: string;
-  description?: string;
-  category: TaskCategory | string;
-  assigneeId: string;
-  assigneeName: string;
-  assigneeInitials: string;
-  assigneeAvatar?: string;
-  members?: TaskMember[];
-  projectId: string;
-  projectName: string;
-  sprintId: string;
-  dueDate: string;
-  deliveredAt?: string;
+  description: string;
   status: TaskStatus;
-  points: number;
+  priority: TaskPriority;
+  dueDate: string; // e.g. "May 12" or "2026-05-12"
+  deliveredAt?: string; // Data real de entrega
+  assigneeId?: string;
+  assigneeName?: string;
+  assigneeInitials?: string;
+  projectId?: string;
+  projectName?: string;
+  sprintId?: string;
+  tags: string[];
+  points?: number;
   isFlagged?: boolean;
+  members?: TaskMember[];
   isMine?: boolean;
   createdAt?: string;
   lastMovedAt?: number;
-  labels?: TrelloLabel[];
-  comments?: TrelloComment[];
-  attachments?: TrelloAttachment[];
+  labels?: TaskLabel[];
+  comments?: TaskComment[];
+  attachments?: TaskAttachment[];
   referenceImages?: Array<{ id: string; name: string; url: string; date?: string; driveFileId?: string }>;
   finalImages?: Array<{ id: string; name: string; url: string; date?: string; driveFileId?: string }>;
   driveFolderId?: string;
@@ -101,10 +101,9 @@ export interface Task {
   commentsCount?: number;
   attachmentsCount?: number;
   checklistsCount?: number;
-  trelloListName?: string;
-  trelloListId?: string;
   isDueComplete?: boolean;
   dueComplete?: boolean;
+  category?: string;
   activityLog?: TaskActivityItem[];
 }
 
@@ -165,7 +164,7 @@ export interface Employee {
   initials: string;
   status: 'online' | 'busy' | 'away' | 'offline';
   tags: string[];
-  currentWorkload: number; // percentage, e.g. 85, 110, 45
+  currentWorkload: number;
   assignedTaskCount: number;
   collaboratorIds: string[];
   email: string;
@@ -181,8 +180,8 @@ export interface Employee {
 
 export interface Sprint {
   id: string;
-  name: string; // e.g. "Sprint 3 · May 2026"
-  period: string; // e.g. "May 1-15"
+  name: string;
+  period: string;
   goal: string;
   totalTasks: number;
   completedTasks: number;
@@ -201,25 +200,6 @@ export interface ActivityItem {
   highlightText?: string;
   timeAgo: string;
   dotColor: 'blue' | 'orange' | 'green' | 'purple';
-}
-
-export interface BoardMappingRule {
-  id: string;
-  trelloList: string;
-  spineStatus: TaskStatus;
-}
-
-export interface TrelloSettings {
-  isConnected: boolean;
-  workspaceName: string;
-  apiKey: string;
-  serverToken: string;
-  autoSync: boolean;
-  syncMemberAssignments: boolean;
-  importLabelsAndTags: boolean;
-  targetBoard: string;
-  boardMappings: BoardMappingRule[];
-  lastSyncedAt?: string;
 }
 
 export interface ToastNotification {

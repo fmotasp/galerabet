@@ -7,7 +7,7 @@ export interface TasksHeaderProps {
   onNewTask: () => void;
 }
 
-export const TasksHeader: React.FC<TasksHeaderProps> = ({
+export const TasksHeader: React.FC<TasksHeaderProps> = React.memo(({
   viewMode,
   onViewModeChange,
   onNewTask,
@@ -62,4 +62,4 @@ export const TasksHeader: React.FC<TasksHeaderProps> = ({
       </div>
     </div>
   );
-};
+});

@@ -2,12 +2,10 @@ import { Task } from '../types';
 import { CurrentUserType } from '../context/AuthContext';
 
 /**
- * Verifica se uma tarefa está atribuída ao usuário atual através de múltiplos critérios:
+ * Verifica se uma tarefa está atribuída ao usuário atual através dos seguintes critérios:
  * 1. Flag isMine
- * 2. Assignee direto (ID, employeeId, trelloMemberId, nome, username, prefixo de email, iniciais)
+ * 2. Assignee direto (ID, employeeId, nome, username, prefixo de email, iniciais)
  * 3. Lista de membros da tarefa
- * 4. Metadados do Trello (idMembers se presentes na tarefa)
- * 5. Nome da lista/coluna do Trello (coluna nominal)
  */
 export const isTaskAssignedToMe = (
   task: Task,
@@ -23,14 +21,12 @@ export const isTaskAssignedToMe = (
   const myUsername = (currentUser.username || '').toLowerCase().trim();
   const myEmailPrefix = (currentUser.email || '').split('@')[0].toLowerCase().trim();
   const myInitials = (currentUser.initials || '').toUpperCase().trim();
-  const myTrelloId = (currentUser.trelloMemberId || '').toLowerCase().trim();
 
   // 1. Direct assignee check
   if (task.assigneeId) {
     const aId = task.assigneeId.toString().toLowerCase().trim();
     if (myId && aId === myId) return true;
     if (myEmployeeId && aId === myEmployeeId) return true;
-    if (myTrelloId && aId === myTrelloId) return true;
   }
 
   if (task.assigneeName) {
@@ -51,7 +47,6 @@ export const isTaskAssignedToMe = (
       const mId = (m.id || '').toString().toLowerCase().trim();
       if (myId && mId === myId) return true;
       if (myEmployeeId && mId === myEmployeeId) return true;
-      if (myTrelloId && mId === myTrelloId) return true;
 
       const mName = (m.name || '').toLowerCase().trim();
       if (myName && (mName.includes(myName) || myName.includes(mName))) return true;
@@ -64,28 +59,6 @@ export const isTaskAssignedToMe = (
       return false;
     });
     if (isMemberMatch) return true;
-  }
-
-  // 3. Trello idMembers if present
-  const trelloMembers = (task as any).idMembers;
-  if (trelloMembers && Array.isArray(trelloMembers)) {
-    if (myTrelloId && trelloMembers.includes(myTrelloId)) return true;
-    if (myId && trelloMembers.includes(myId)) return true;
-  }
-
-  // 4. Trello List Name (coluna nominal no Trello)
-  if (task.trelloListName) {
-    const lName = task.trelloListName.toLowerCase();
-    if (
-      (myFirstName && myFirstName.length > 2 && lName.includes(myFirstName)) ||
-      (myEmailPrefix && myEmailPrefix.length > 2 && lName.includes(myEmailPrefix)) ||
-      (myFirstName === 'bismarques' && lName.includes('marques')) ||
-      (myFirstName === 'gerdson' && lName.includes('gerdeson')) ||
-      (myFirstName === 'felipe' && (lName.includes('fmota') || lName.includes('mota'))) ||
-      (myFirstName === 'daiane' && lName.includes('dai'))
-    ) {
-      return true;
-    }
   }
 
   return false;

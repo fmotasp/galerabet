@@ -18,7 +18,6 @@ export interface CurrentUserType {
   needsPasswordChange?: boolean;
   employeeId?: string;
   username?: string;
-  trelloMemberId?: string;
   [key: string]: any;
 }
 

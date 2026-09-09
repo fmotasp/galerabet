@@ -58,7 +58,7 @@ export const CommandPaletteModal: React.FC = () => {
     {
       id: 'action-new-task',
       title: 'Criar Nova Tarefa',
-      subtitle: 'Adicionar cartão ao Kanban ou Trello',
+      subtitle: 'Adicionar tarefa ao quadro',
       icon: Plus,
       color: 'bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white',
       onSelect: () => {

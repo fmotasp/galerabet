@@ -1,6 +1,6 @@
 {
   "name": "Spine",
-  "description": "Functional team roster, sprint analytics, task tracking, and project management platform with Trello integration.",
+  "description": "Functional team roster, sprint analytics, task tracking, and project management platform.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

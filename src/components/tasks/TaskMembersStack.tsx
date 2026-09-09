@@ -5,7 +5,7 @@ export interface TaskMembersStackProps {
   task: Task;
 }
 
-export const TaskMembersStack: React.FC<TaskMembersStackProps> = ({ task }) => {
+export const TaskMembersStack: React.FC<TaskMembersStackProps> = React.memo(({ task }) => {
   const [expanded, setExpanded] = useState(false);
 
   const rawList =
@@ -95,4 +95,4 @@ export const TaskMembersStack: React.FC<TaskMembersStackProps> = ({ task }) => {
       )}
     </div>
   );
-};
+});

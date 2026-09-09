@@ -1,9 +1,9 @@
 import React from 'react';
 import { MessageSquare, Send, Trash2 } from 'lucide-react';
-import { TrelloComment } from '../../../../types';
+import { TaskComment } from '../../../../types';
 
 export const TaskCommentsSection: React.FC<{
-  comments: TrelloComment[];
+  comments: TaskComment[];
   newCommentText: string;
   setNewCommentText: React.Dispatch<React.SetStateAction<string>>;
   isPostingComment: boolean;

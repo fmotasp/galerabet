@@ -21,8 +21,7 @@ export const EmployeesProvider: React.FC<{
   children: React.ReactNode;
   addToast: (title: string, message?: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   addActivity: (userName: string, userInitials: string, message: string, dotColor?: any) => void;
-  deleteTrelloLabel?: (labelId: string) => Promise<boolean>;
-}> = ({ children, addToast, addActivity, deleteTrelloLabel }) => {
+}> = ({ children, addToast, addActivity }) => {
   // Employees (Usuários/Membros) - Hidratação imediata de cache
   const [employees, setEmployees] = useState<Employee[]>(() => {
     try {
@@ -43,7 +42,7 @@ export const EmployeesProvider: React.FC<{
     }
   }, [employees]);
 
-  // Employee Actions (Salva no Supabase + Local + Trello)
+  // Employee Actions (Salva no Supabase + Local)
   const addEmployee = async (newEmpData: Omit<Employee, 'id'>) => {
     const id = `emp-${Date.now()}`;
     const newEmp: Employee = {
@@ -141,9 +140,6 @@ export const EmployeesProvider: React.FC<{
 
   const deleteEmployee = async (id: string) => {
     const empToDelete = employees.find((e) => e.id === id);
-    if (empToDelete?.labelId && deleteTrelloLabel) {
-      deleteTrelloLabel(empToDelete.labelId);
-    }
     setEmployees((prev) => prev.filter((e) => e.id !== id));
 
     // Remove do Supabase
@@ -153,7 +149,7 @@ export const EmployeesProvider: React.FC<{
       console.warn('Supabase employee delete warning:', sbErr);
     }
 
-    addToast('Funcionário Removido', `Removido ${empToDelete?.name || 'colaborador'} e sua etiqueta no Trello.`, 'info');
+    addToast('Funcionário Removido', `Removido ${empToDelete?.name || 'colaborador'}.`, 'info');
   };
 
   return (

@@ -147,17 +147,14 @@ export function parseTaskDueDate(dateStr?: string | null): Date | null {
  * Checks if a task is completed, delivered, or in final approval/posting status (Aprovar, Postar & Concluída).
  * Note: Tasks in review ('in_review', 'revisão', etc.) are NOT considered completed.
  */
-export function isTaskCompleted(task: { status?: string; deliveredAt?: string; trelloListName?: string }): boolean {
+export function isTaskCompleted(task: { status?: string; deliveredAt?: string }): boolean {
   const s = (task.status || '').toLowerCase().trim();
-  const l = ((task as any).trelloListName || '').toLowerCase().trim();
 
-  // If the task or list is explicitly in review, it is NEVER completed
+  // If the task is explicitly in review, it is NEVER completed
   if (
     s === 'in_review' ||
     s.includes('revis') ||
-    s.includes('review') ||
-    l.includes('revis') ||
-    l.includes('review')
+    s.includes('review')
   ) {
     return false;
   }
@@ -176,18 +173,7 @@ export function isTaskCompleted(task: { status?: string; deliveredAt?: string; t
     s.includes('publica') ||
     s.includes('entreg');
 
-  // Coluna do Trello check
-  const isListDone =
-    l.includes('postar') ||
-    l.includes('postad') ||
-    l.includes('concl') ||
-    l.includes('final') ||
-    l.includes('done') ||
-    l.includes('aprov') ||
-    l.includes('publica') ||
-    l.includes('entreg');
-
-  if (isStatusDone || isListDone) return true;
+  if (isStatusDone) return true;
 
   // deliveredAt check (only if not in active progress/backlog)
   if (task.deliveredAt && task.deliveredAt.trim() !== '') {
@@ -203,10 +189,9 @@ export function isTaskCompleted(task: { status?: string; deliveredAt?: string; t
 /**
  * Checks if a task is currently in progress (Em Progresso / Em Produção ou Em Revisão).
  */
-export function isTaskInProgress(task: { status?: string; deliveredAt?: string; trelloListName?: string }): boolean {
+export function isTaskInProgress(task: { status?: string; deliveredAt?: string }): boolean {
   if (isTaskCompleted(task)) return false;
   const s = (task.status || '').toLowerCase().trim();
-  const l = ((task as any).trelloListName || '').toLowerCase().trim();
 
   return (
     s === 'in_progress' ||
@@ -216,13 +201,7 @@ export function isTaskInProgress(task: { status?: string; deliveredAt?: string; 
     s.includes('doing') ||
     s.includes('revis') ||
     s.includes('review') ||
-    s.includes('produz') ||
-    l.includes('progresso') ||
-    l.includes('andamento') ||
-    l.includes('doing') ||
-    l.includes('revis') ||
-    l.includes('review') ||
-    l.includes('produz')
+    s.includes('produz')
   );
 }
 

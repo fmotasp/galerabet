@@ -65,8 +65,7 @@ export const ProjectsProvider: React.FC<{
   children: React.ReactNode;
   addToast: (title: string, message?: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   addActivity: (userName: string, userInitials: string, message: string, dotColor?: any) => void;
-  deleteTrelloLabel?: (labelId: string) => Promise<boolean>;
-}> = ({ children, addToast, addActivity, deleteTrelloLabel }) => {
+}> = ({ children, addToast, addActivity }) => {
   // Projects / Clientes - Hidratação imediata de cache
   const [projects, setProjects] = useState<Project[]>(() => {
     try {
@@ -87,7 +86,7 @@ export const ProjectsProvider: React.FC<{
     }
   }, [projects]);
 
-  // Project Actions (Salva no Supabase + Local + Trello)
+  // Project Actions (Salva no Supabase + Local)
   const addProject = async (newProjData: Omit<Project, 'id'>) => {
     const id = `proj-${Date.now()}`;
     const newProj: Project = {
@@ -239,9 +238,6 @@ export const ProjectsProvider: React.FC<{
 
   const deleteProject = async (id: string) => {
     const projToDelete = projects.find((p) => p.id === id);
-    if (projToDelete?.labelId && deleteTrelloLabel) {
-      deleteTrelloLabel(projToDelete.labelId);
-    }
     setProjects((prev) => prev.filter((p) => p.id !== id));
 
     // Remove do Supabase
@@ -251,7 +247,7 @@ export const ProjectsProvider: React.FC<{
       console.warn('Supabase project delete warning:', sbErr);
     }
 
-    addToast('Cliente / Projeto Excluído', `Removido "${projToDelete?.name || 'cliente'}" e sua etiqueta no Trello.`, 'info');
+    addToast('Cliente / Projeto Excluído', `Removido "${projToDelete?.name || 'cliente'}".`, 'info');
   };
 
   return (

@@ -112,19 +112,6 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
             });
             if (isMember) return true;
           }
-          if (task.trelloListName) {
-            const lName = task.trelloListName.toLowerCase();
-            if (
-              (empFirstName.length > 2 && lName.includes(empFirstName)) ||
-              (empEmailPrefix.length > 2 && lName.includes(empEmailPrefix)) ||
-              (empFirstName === 'bismarques' && lName.includes('marques')) ||
-              (empFirstName === 'gerdson' && lName.includes('gerdeson')) ||
-              (empFirstName === 'felipe' && (lName.includes('fmota') || lName.includes('mota'))) ||
-              (empFirstName === 'daiane' && lName.includes('dai'))
-            ) {
-              return true;
-            }
-          }
           return false;
         });
 

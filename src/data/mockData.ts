@@ -1,67 +1,36 @@
-import { Employee, Project, Task, Sprint, ActivityItem, TrelloSettings, SpineStatusConfig } from '../types';
+import { Employee, Project, Task, Sprint, ActivityItem, SpineStatusConfig } from '../types';
 
 export const DEFAULT_SPINE_STATUSES: SpineStatusConfig[] = [
   {
     id: 'backlog',
     label: 'Backlog',
-    color: 'text-slate-600',
-    bg: 'bg-slate-100',
+    color: 'text-slate-300',
+    bg: 'bg-slate-800/80 border border-slate-700',
     dotColor: '#64748B',
-    gradient: 'from-slate-500 to-slate-700',
-    isDefault: true,
-  },
-  {
-    id: 'novos_pedidos',
-    label: 'Novos Pedidos',
-    color: 'text-cyan-400',
-    bg: 'bg-cyan-500/20',
-    dotColor: '#06B6D4',
-    gradient: 'from-cyan-500 to-blue-600',
     isDefault: true,
   },
   {
     id: 'in_progress',
-    label: 'Em Progresso',
-    color: 'text-[#5D55F9]',
-    bg: 'bg-[#ECEBFF]',
-    dotColor: '#5D55F9',
-    gradient: 'from-sky-400 via-blue-500 to-sky-600',
+    label: 'Em Produção',
+    color: 'text-blue-300',
+    bg: 'bg-blue-950/80 border border-blue-700/60',
+    dotColor: '#3B82F6',
     isDefault: true,
   },
   {
-    id: 'overdue',
-    label: 'Atrasadas / Urgente',
-    color: 'text-[#E11D48]',
-    bg: 'bg-[#FFE4E6]',
-    dotColor: '#E11D48',
-    gradient: 'from-rose-500 to-red-600',
-    isDefault: true,
-  },
-  {
-    id: 'aprovar',
-    label: 'Aprovar',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/20',
+    id: 'in_review',
+    label: 'Em Aprovação',
+    color: 'text-amber-300',
+    bg: 'bg-amber-950/80 border border-amber-700/60',
     dotColor: '#F59E0B',
-    gradient: 'from-amber-500 to-yellow-600',
-    isDefault: true,
-  },
-  {
-    id: 'postar',
-    label: 'Postar',
-    color: 'text-indigo-400',
-    bg: 'bg-indigo-500/20',
-    dotColor: '#6366F1',
-    gradient: 'from-indigo-500 to-purple-600',
     isDefault: true,
   },
   {
     id: 'done',
-    label: 'Concluídas',
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-100',
+    label: 'Concluído',
+    color: 'text-emerald-300',
+    bg: 'bg-emerald-950/80 border border-emerald-700/60',
     dotColor: '#10B981',
-    gradient: 'from-emerald-500 to-green-600',
     isDefault: true,
   },
 ];
@@ -70,7 +39,7 @@ export const INITIAL_SPRINT: Sprint = {
   id: 'sprint-active',
   name: 'Sprint Ativa',
   period: 'Atual',
-  goal: 'Sincronizado diretamente do Trello',
+  goal: 'Foco nas entregas prioritárias da equipe',
   totalTasks: 0,
   completedTasks: 0,
   overdueTasks: 0,
@@ -88,16 +57,3 @@ export const INITIAL_PROJECTS: Project[] = [];
 export const INITIAL_TASKS: Task[] = [];
 
 export const INITIAL_ACTIVITIES: ActivityItem[] = [];
-
-export const INITIAL_TRELLO_SETTINGS: TrelloSettings = {
-  isConnected: false,
-  workspaceName: '',
-  apiKey: '',
-  serverToken: '',
-  autoSync: true,
-  syncMemberAssignments: true,
-  importLabelsAndTags: false,
-  targetBoard: '',
-  boardMappings: [],
-  lastSyncedAt: undefined,
-};

@@ -175,20 +175,6 @@ export const RegistrationsView: React.FC = () => {
           return true;
         }
       }
-      // 3. Nome da coluna no Trello
-      if (t.trelloListName) {
-        const lName = t.trelloListName.toLowerCase();
-        if (
-          lName.includes(empFirstName) ||
-          (empEmailName && lName.includes(empEmailName)) ||
-          (empFirstName === 'bismarques' && lName.includes('marques')) ||
-          (empFirstName === 'gerdson' && lName.includes('gerdeson')) ||
-          (empFirstName === 'felipe' && (lName.includes('fmota') || lName.includes('mota'))) ||
-          (empFirstName === 'daiane' && lName.includes('dai'))
-        ) {
-          return true;
-        }
-      }
       return false;
     });
   };
@@ -198,8 +184,7 @@ export const RegistrationsView: React.FC = () => {
     if (empTasks.length === 0) return 0;
     const completed = empTasks.filter((t) => {
       const s = (t.status || '').toLowerCase();
-      const l = (t.trelloListName || '').toLowerCase();
-      return s === 'done' || s.includes('concl') || s.includes('finaliz') || s.includes('postad') || l.includes('concl') || l.includes('postar');
+      return s === 'done' || s.includes('concl') || s.includes('finaliz') || s.includes('postad');
     }).length;
     return Math.round((completed / empTasks.length) * 100);
   };

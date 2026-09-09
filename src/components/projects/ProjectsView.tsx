@@ -15,18 +15,17 @@ import {
   Search,
   Filter,
 } from 'lucide-react';
-import { useApp } from '../../context/AppContext';
+import { useApp, useProjects, useEmployees, useTasks } from '../../context/AppContext';
 import { Project } from '../../types';
 
 export const ProjectsView: React.FC = () => {
+  const { projects, deleteProject } = useProjects();
+  const { employees } = useEmployees();
+  const { tasks } = useTasks();
   const {
-    projects,
-    employees,
-    tasks,
     setIsNewProjectModalOpen,
     setSelectedProjectForDetail,
     setEditingProject,
-    deleteProject,
     setActiveTab,
   } = useApp();
 
@@ -86,7 +85,7 @@ export const ProjectsView: React.FC = () => {
     }
   };
 
-  // Filter out mockup projects - display only real imported Trello projects
+  // Filter out mockup projects - display only real registered projects
   const filteredProjects = projects
     .filter((project) => !['proj-orion', 'proj-bloom', 'proj-nexus', 'proj-pulse', 'proj-shield', 'proj-aurora', 'proj-apex'].includes(project.id))
     .filter((project) => {
