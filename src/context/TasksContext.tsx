@@ -308,9 +308,7 @@ export const TasksProvider: React.FC<{
     );
 
     try {
-      const payload: any = {
-        updated_at: new Date().toISOString(),
-      };
+      const payload: any = {};
       if (updates.status !== undefined) {
         payload.status = updates.status;
         payload.last_moved_at = now;
@@ -340,6 +338,9 @@ export const TasksProvider: React.FC<{
       const { error: sbErr } = await supabase.from('tasks').update(payload).eq('id', id);
       if (sbErr) {
         console.error('[Supabase] Falha ao atualizar tarefa:', sbErr.message);
+        if (updates.status !== undefined) {
+          await supabase.from('tasks').update({ status: updates.status, last_moved_at: now }).eq('id', id);
+        }
       }
     } catch (sbErr) {
       console.warn('Supabase task update warning:', sbErr);
@@ -446,21 +447,34 @@ export const TasksProvider: React.FC<{
     );
 
     try {
+      const updatePayload: Record<string, any> = {
+        status: newStatus,
+        last_moved_at: now,
+      };
+
+      if (isReview && nextAssigneeId !== targetTask.assigneeId) {
+        updatePayload.assignee_id = nextAssigneeId;
+        updatePayload.assignee_name = nextAssigneeName;
+        updatePayload.assignee_initials = nextAssigneeInitials;
+        updatePayload.members = nextMembers;
+      }
+
       const { error: sbErr } = await supabase
         .from('tasks')
-        .update({
-          status: newStatus,
-          assignee_id: nextAssigneeId,
-          assignee_name: nextAssigneeName,
-          assignee_initials: nextAssigneeInitials,
-          members: nextMembers,
-          last_moved_at: now,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updatePayload)
         .eq('id', id);
 
       if (sbErr) {
         console.error('[Supabase] Falha ao atualizar status:', sbErr.message);
+        // Fallback mínimo apenas com o status caso alguma coluna cause rejeição
+        const { error: fallbackErr } = await supabase
+          .from('tasks')
+          .update({ status: newStatus })
+          .eq('id', id);
+
+        if (fallbackErr) {
+          console.error('[Supabase] Fallback de status também falhou:', fallbackErr.message);
+        }
       }
     } catch (sbErr) {
       console.warn('Supabase move status warning:', sbErr);

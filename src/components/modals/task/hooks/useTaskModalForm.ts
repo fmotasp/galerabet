@@ -521,6 +521,7 @@ export const useTaskModalForm = ({
       if (editingTask) {
         await updateTask(editingTask.id, {
           referenceImages: nextRefs,
+          coverImageUrl: editingTask.coverImageUrl || newRef.url,
         });
       }
 
@@ -566,6 +567,9 @@ export const useTaskModalForm = ({
       };
     });
 
+    const firstRefUrl = (referenceImages && referenceImages.length > 0) ? referenceImages[0].url : undefined;
+    const resolvedCover = editingTask?.coverImageUrl || firstRefUrl;
+
     const taskPayload = {
       title: formData.title,
       description: formData.description,
@@ -586,6 +590,7 @@ export const useTaskModalForm = ({
       referenceImages,
       attachments,
       comments,
+      coverImageUrl: resolvedCover,
       driveFolderId: currentDriveFolderId,
       driveFolderUrl: currentDriveFolderUrl,
     };
