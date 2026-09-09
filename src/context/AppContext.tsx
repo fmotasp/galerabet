@@ -37,6 +37,7 @@ export { useTasks } from './TasksContext';
 export interface AppContextType {
   activeTab: NavigationTab;
   setActiveTab: (tab: NavigationTab) => void;
+  isAuthChecking: boolean;
   isSidebarCollapsed: boolean;
   setIsSidebarCollapsed: (collapsed: boolean | ((prev: boolean) => boolean)) => void;
   isMobileSidebarOpen: boolean;
@@ -156,7 +157,51 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const employeesContext = useEmployees();
   const projectsContext = useProjects();
 
-  const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
+  const VALID_TABS: NavigationTab[] = [
+    'dashboard',
+    'tasks',
+    'projects',
+    'employees',
+    'registrations',
+    'reports',
+    'materials',
+    'settings',
+  ];
+
+  const getInitialTab = (): NavigationTab => {
+    try {
+      const hash = window.location.hash.replace('#', '') as NavigationTab;
+      if (VALID_TABS.includes(hash)) return hash;
+
+      const saved = sessionStorage.getItem('spine_active_tab') as NavigationTab;
+      if (saved && VALID_TABS.includes(saved)) return saved;
+    } catch {}
+    return 'dashboard';
+  };
+
+  const [activeTab, setActiveTabState] = useState<NavigationTab>(getInitialTab);
+
+  const setActiveTab = useCallback((tab: NavigationTab) => {
+    setActiveTabState(tab);
+    try {
+      sessionStorage.setItem('spine_active_tab', tab);
+      if (window.location.hash !== `#${tab}`) {
+        window.history.replaceState(null, '', `#${tab}`);
+      }
+    } catch {}
+  }, []);
+
+  // Sincroniza se o usuário usar os botões de voltar/avançar do navegador
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '') as NavigationTab;
+      if (VALID_TABS.includes(hash) && hash !== activeTab) {
+        setActiveTabState(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [activeTab]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -437,6 +482,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       value={{
         activeTab,
         setActiveTab,
+        isAuthChecking: auth.isAuthChecking,
         isSidebarCollapsed,
         setIsSidebarCollapsed,
         isMobileSidebarOpen,

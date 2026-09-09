@@ -23,6 +23,7 @@ export interface CurrentUserType {
 
 export interface AuthContextType {
   currentUser: CurrentUserType | null;
+  isAuthChecking: boolean;
   pendingPasswordChangeUser: any | null;
   setPendingPasswordChangeUser: (user: any | null) => void;
   setCurrentUser: (user: any) => void;
@@ -50,6 +51,17 @@ const getTodayDateStr = (): string => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Current Authenticated User sincronizado com Supabase Auth
   const [pendingPasswordChangeUser, setPendingPasswordChangeUser] = useState<any | null>(null);
+
+  // Indica se a sessão inicial ainda está sendo validada no Supabase (evita flash da tela de login no F5)
+  const [isAuthChecking, setIsAuthChecking] = useState<boolean>(() => {
+    try {
+      const hasSbToken = Object.keys(localStorage).some((k) => k.startsWith('sb-') && k.endsWith('-auth-token'));
+      const hasSavedUser = Boolean(localStorage.getItem('spine_logged_user'));
+      return hasSbToken || hasSavedUser;
+    } catch {
+      return false;
+    }
+  });
 
   const [currentUser, setCurrentUserState] = useState<any>(() => {
     const saved = localStorage.getItem('spine_logged_user');
@@ -156,26 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!isMounted) return;
-      if (session?.user) {
-        const appUser = await fetchProfileForAuthUser(session.user);
-        if (isMounted && appUser) {
-          if (appUser.needsPasswordChange) {
-            setCurrentUserState(null);
-            setPendingPasswordChangeUser(appUser);
-          } else {
-            setCurrentUserState(appUser);
-            setPendingPasswordChangeUser(null);
-          }
-        }
-      } else if (!localStorage.getItem('spine_logged_user')) {
-        setCurrentUserState(null);
-        setPendingPasswordChangeUser(null);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!isMounted) return;
-      if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') {
+      try {
         if (session?.user) {
           const appUser = await fetchProfileForAuthUser(session.user);
           if (isMounted && appUser) {
@@ -187,14 +180,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setPendingPasswordChangeUser(null);
             }
           }
-        }
-      } else if (event === 'SIGNED_OUT') {
-        if (isMounted) {
+        } else if (!localStorage.getItem('spine_logged_user')) {
           setCurrentUserState(null);
           setPendingPasswordChangeUser(null);
-          localStorage.removeItem('spine_logged_user');
-          localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
         }
+      } finally {
+        if (isMounted) setIsAuthChecking(false);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+      try {
+        if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'TOKEN_REFRESHED') {
+          if (session?.user) {
+            const appUser = await fetchProfileForAuthUser(session.user);
+            if (isMounted && appUser) {
+              if (appUser.needsPasswordChange) {
+                setCurrentUserState(null);
+                setPendingPasswordChangeUser(appUser);
+              } else {
+                setCurrentUserState(appUser);
+                setPendingPasswordChangeUser(null);
+              }
+            }
+          }
+        } else if (event === 'SIGNED_OUT') {
+          if (isMounted) {
+            setCurrentUserState(null);
+            setPendingPasswordChangeUser(null);
+            localStorage.removeItem('spine_logged_user');
+            localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
+          }
+        }
+      } finally {
+        if (isMounted) setIsAuthChecking(false);
       }
     });
 
@@ -357,6 +377,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         currentUser,
+        isAuthChecking,
         setCurrentUser,
         pendingPasswordChangeUser,
         setPendingPasswordChangeUser,

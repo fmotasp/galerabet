@@ -72,7 +72,24 @@ const ViewLoadingFallback: React.FC = () => (
 );
 
 const MainLayout: React.FC = () => {
-  const { activeTab, currentUser, isManagerOrAdmin, isInitialLoading } = useApp();
+  const { activeTab, currentUser, isManagerOrAdmin, isInitialLoading, isAuthChecking } = useApp();
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-[#101010] flex flex-col items-center justify-center p-6 select-none">
+        <div className="flex flex-col items-center gap-6 max-w-sm text-center animate-in fade-in duration-150">
+          <img
+            src="/login-logo.png"
+            alt="RioSãoPaulo"
+            className="w-48 h-auto object-contain drop-shadow-2xl animate-pulse"
+          />
+          <div className="w-52 h-1.5 bg-[#222222] rounded-full overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-[#E4007E] to-[#E94E18] animate-pulse rounded-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!currentUser) {
     return (
