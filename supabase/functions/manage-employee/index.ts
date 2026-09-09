@@ -353,6 +353,7 @@ serve(async (req) => {
           password: password,
           user_metadata: {
             needs_password_change: false,
+            current_password: password,
           },
         }
       );
@@ -367,7 +368,7 @@ serve(async (req) => {
       // Sincroniza também na tabela employees com privilégio de service_role
       await adminClient
         .from("employees")
-        .update({ needs_password_change: false })
+        .update({ needs_password_change: false, password: password })
         .eq("id", employee_id);
 
       return new Response(

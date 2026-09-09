@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Palette, UserCheck, AlertCircle } from 'lucide-react';
+import { Trash2, Palette, UserCheck, AlertCircle, KeyRound, Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Employee } from '../../types';
 import { supabase } from '../../lib/supabase';
@@ -19,9 +19,12 @@ export const EmployeeModal: React.FC = () => {
 
   const isOpen = isNewEmployeeModalOpen || editingEmployee !== null;
 
+  const [showPassword, setShowPassword] = useState(true);
+  const [copiedPassword, setCopiedPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     role: 'Designer',
     department: 'Design',
     labelColor: 'purple',
@@ -44,22 +47,50 @@ export const EmployeeModal: React.FC = () => {
 
   useEffect(() => {
     if (editingEmployee) {
+      const currentPassword = editingEmployee.password || (editingEmployee.needsPasswordChange !== false ? '123456' : '');
       setFormData({
         name: editingEmployee.name,
         email: editingEmployee.email || '',
+        password: currentPassword,
         role: editingEmployee.role || 'Designer',
         department: editingEmployee.department || 'Design',
         labelColor: editingEmployee.labelColor || 'purple',
       });
+
+      // Busca a senha mais recente direto no Supabase caso não esteja salva em memória
+      const loadEmployeePassword = async () => {
+        try {
+          let query = supabase.from('employees').select('password, needs_password_change');
+          if (editingEmployee.id) {
+            query = query.eq('id', editingEmployee.id);
+          } else if (editingEmployee.email) {
+            query = query.ilike('email', editingEmployee.email.trim());
+          }
+          const { data } = await query.maybeSingle();
+          if (data) {
+            if (data.password) {
+              setFormData((prev) => ({ ...prev, password: data.password }));
+            } else if (data.needs_password_change) {
+              setFormData((prev) => ({ ...prev, password: prev.password || '123456' }));
+            }
+          }
+        } catch (err) {
+          console.warn('[EmployeeModal] Erro ao buscar senha:', err);
+        }
+      };
+      loadEmployeePassword();
     } else {
       setFormData({
         name: '',
         email: '',
+        password: '123456',
         role: 'Designer',
         department: 'Design',
         labelColor: 'purple',
       });
     }
+    setShowPassword(true);
+    setCopiedPassword(false);
     setValidationError('');
     setIsSubmitting(false);
   }, [editingEmployee, isOpen]);
@@ -73,12 +104,21 @@ export const EmployeeModal: React.FC = () => {
     setEditingEmployee(null);
   };
 
+  const handleCopyPassword = () => {
+    if (!formData.password) return;
+    navigator.clipboard.writeText(formData.password);
+    setCopiedPassword(true);
+    setTimeout(() => setCopiedPassword(false), 2000);
+    addToast('Senha Copiada 📋', 'Senha copiada para a área de transferência.', 'info');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError('');
 
     const cleanName = formData.name.trim();
     const cleanEmail = formData.email.trim().toLowerCase();
+    const cleanPassword = formData.password.trim();
 
     if (!cleanName) {
       setValidationError('Nome é obrigatório.');
@@ -87,6 +127,11 @@ export const EmployeeModal: React.FC = () => {
 
     if (!cleanEmail || !cleanEmail.includes('@')) {
       setValidationError('E-mail válido é obrigatório.');
+      return;
+    }
+
+    if (cleanPassword && cleanPassword.length < 6) {
+      setValidationError('A senha deve conter pelo menos 6 caracteres.');
       return;
     }
 
@@ -99,11 +144,10 @@ export const EmployeeModal: React.FC = () => {
       .toUpperCase()
       .slice(0, 2);
 
-    // Objeto Employee: NUNCA inclui campo password
-    // Novos funcionários recebem needsPasswordChange = true para forçar troca no primeiro acesso
     const empPayload = {
       name: cleanName,
       email: cleanEmail,
+      password: cleanPassword || '123456',
       role: formData.role.trim() || 'Colaborador',
       department: (formData.department.trim() || 'Design') as Employee['department'],
       initials,
@@ -119,10 +163,28 @@ export const EmployeeModal: React.FC = () => {
 
     try {
       if (editingEmployee) {
-        // Modo Edição: Atualiza os dados normais do funcionário
+        // Modo Edição: Atualiza os dados do funcionário (incluindo senha)
         await updateEmployee(editingEmployee.id, empPayload);
 
-        // Se for um funcionário legado ou sem vínculo ao Supabase Auth, provisiona o acesso com a senha padrão 1234
+        // Se o funcionário possui conta no Auth e a senha foi alterada, sincroniza no Supabase Auth
+        if (editingEmployee.auth_user_id && cleanPassword && cleanPassword.length >= 6) {
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const authHeaders = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+            await supabase.functions.invoke('manage-employee', {
+              headers: authHeaders,
+              body: {
+                operation: 'update_password',
+                employee_id: editingEmployee.id,
+                password: cleanPassword,
+              },
+            });
+          } catch (authErr) {
+            console.warn('[manage-employee] Falha ao sincronizar senha no Auth:', authErr);
+          }
+        }
+
+        // Se for um funcionário legado ou sem vínculo ao Supabase Auth, provisiona o acesso
         if (!editingEmployee.auth_user_id) {
           const { data: { session } } = await supabase.auth.getSession();
           const authHeaders = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
@@ -133,7 +195,7 @@ export const EmployeeModal: React.FC = () => {
               operation: 'create',
               employee_id: editingEmployee.id,
               email: cleanEmail,
-              password: '123456',
+              password: cleanPassword || '123456',
               name: cleanName,
               role: empPayload.role,
             },
@@ -185,21 +247,20 @@ export const EmployeeModal: React.FC = () => {
       } else {
         // Modo Criação: Cadastra o funcionário no banco
         const createdEmp = await addEmployee(empPayload);
-        const employeeId = createdEmp?.id || `emp-${Date.now()}`;
+        const employeeId = (createdEmp as any)?.id || `emp-${Date.now()}`;
 
         // Obtém a sessão atual para enviar o token de autorização explicitamente
         const { data: { session } } = await supabase.auth.getSession();
         const authHeaders = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
 
-        // Chama a Edge Function para criar/vincular a identidade no Supabase Auth com senha inicial 1234
-        // e needs_password_change = true
+        // Chama a Edge Function para criar/vincular a identidade no Supabase Auth com senha definida
         const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
           headers: authHeaders,
           body: {
             operation: 'create',
             employee_id: employeeId,
             email: cleanEmail,
-            password: '123456',
+            password: cleanPassword || '123456',
             name: cleanName,
             role: empPayload.role,
           },
@@ -302,6 +363,85 @@ export const EmployeeModal: React.FC = () => {
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
           />
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+              <KeyRound className="w-3.5 h-3.5 text-[#E4007E]" />
+              <span>{editingEmployee ? 'Senha Atual do Colaborador' : 'Senha de Acesso (Login)'}</span>
+            </label>
+            {editingEmployee && (
+              <span className="text-[10px] font-medium">
+                {formData.password === '123456' ? (
+                  <span className="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                    Padrão inicial (123456)
+                  </span>
+                ) : formData.password ? (
+                  <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                    Nova senha pessoal ativa
+                  </span>
+                ) : (
+                  <span className="text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-md border border-sky-500/20">
+                    Senha alterada pelo usuário
+                  </span>
+                )}
+              </span>
+            )}
+          </div>
+          <div className="relative flex items-center">
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              disabled={isSubmitting}
+              placeholder={
+                editingEmployee
+                  ? formData.password
+                    ? ''
+                    : editingEmployee.needsPasswordChange !== false
+                    ? 'Padrão: 123456'
+                    : 'Senha personalizada (digite nova para redefinir)'
+                  : 'Padrão: 123456'
+              }
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E] pr-20 font-mono tracking-wider text-xs sm:text-sm"
+            />
+            <div className="absolute right-2 flex items-center gap-1 text-slate-400">
+              {formData.password && (
+                <button
+                  type="button"
+                  onClick={handleCopyPassword}
+                  title="Copiar senha"
+                  className="p-1.5 hover:text-white rounded-lg hover:bg-[#2A2A2A] transition-colors cursor-pointer"
+                >
+                  {copiedPassword ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+                className="p-1.5 hover:text-white rounded-lg hover:bg-[#2A2A2A] transition-colors cursor-pointer"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-3.5 h-3.5 text-[#E4007E]" />
+                ) : (
+                  <Eye className="w-3.5 h-3.5" />
+                )}
+              </button>
+            </div>
+          </div>
+          {editingEmployee && (
+            <p className="mt-1.5 text-[11px] text-slate-400">
+              {formData.password
+                ? 'Esta é a senha atual de login deste membro. Você pode visualizá-la, copiá-la ou alterá-la digitando uma nova senha.'
+                : 'O colaborador já alterou a senha inicial no Supabase Auth. Digite uma nova senha caso queira redefini-la agora.'}
+            </p>
+          )}
         </div>
 
         <div>

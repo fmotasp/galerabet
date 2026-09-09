@@ -31,6 +31,7 @@ export const EmployeesProvider: React.FC<{
     assignedTaskCount: 0,
     collaboratorIds: [],
     email: row.email || '',
+    password: row.password || '',
     username: row.username || '',
     location: row.location || 'Brasil',
     labelId: row.label_id || '',
@@ -142,6 +143,7 @@ export const EmployeesProvider: React.FC<{
       if (newEmp.username) dbPayload.username = newEmp.username;
       if (newEmp.location) dbPayload.location = newEmp.location;
       if (typeof newEmp.needsPasswordChange === 'boolean') dbPayload.needs_password_change = newEmp.needsPasswordChange;
+      if (newEmp.password) dbPayload.password = newEmp.password;
 
       console.log('[addEmployee] dbPayload sendo enviado:', JSON.stringify(dbPayload));
 
@@ -210,6 +212,7 @@ export const EmployeesProvider: React.FC<{
       if (updates.labelId !== undefined) payload.label_id = updates.labelId;
       if (updates.labelColor !== undefined) payload.label_color = updates.labelColor;
       if (updates.needsPasswordChange !== undefined) payload.needs_password_change = updates.needsPasswordChange;
+      if (updates.password !== undefined) payload.password = updates.password;
 
       await supabase.from('employees').upsert(payload);
     } catch (sbErr) {

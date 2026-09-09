@@ -169,6 +169,17 @@ export const LoginView: React.FC = () => {
         }
       }
 
+      // Sincroniza a senha na tabela employees para que administradores possam visualizá-la
+      if (profile?.id && cleanPass && profile.password !== cleanPass) {
+        supabase
+          .from('employees')
+          .update({ password: cleanPass })
+          .eq('id', profile.id)
+          .then(() => {
+            if (updateEmployee) updateEmployee(profile.id, { password: cleanPass });
+          });
+      }
+
       const isUserAdmin =
         profile?.role_type === 'admin' ||
         profile?.role?.toLowerCase() === 'admin' ||
@@ -252,6 +263,7 @@ export const LoginView: React.FC = () => {
         password: cleanNew,
         data: {
           needs_password_change: false,
+          current_password: cleanNew,
         },
       });
 
@@ -262,27 +274,37 @@ export const LoginView: React.FC = () => {
         return;
       }
 
-      // 2. Atualiza a flag needs_password_change na tabela employees (sem armazenar texto puro!)
+      // 2. Atualiza a flag needs_password_change e a nova senha na tabela employees
       const targetEmpId = firstAccessUser.profile?.id || firstAccessUser.id;
+      const empUpdatePayload = {
+        needs_password_change: false,
+        password: cleanNew,
+      };
+
       if (targetEmpId) {
         const { error: empErr } = await supabase
           .from('employees')
-          .update({
-            needs_password_change: false,
-          })
+          .update(empUpdatePayload)
           .eq('id', targetEmpId);
 
         if (empErr) {
-          console.warn('[Supabase] Erro ao sincronizar flag no banco de employees:', empErr);
-          // Alerta o usuário mas não impede login se a senha no Auth já foi trocada
-          addToast('Aviso', 'Sua senha foi alterada no Auth, mas houve lentidão ao atualizar o cadastro.', 'warning');
+          console.warn('[Supabase] Erro ao sincronizar flag no banco de employees por ID:', empErr);
         }
+      }
 
-        if (updateEmployee) {
-          updateEmployee(targetEmpId, {
-            needsPasswordChange: false,
-          });
-        }
+      if (firstAccessUser.email) {
+        await supabase
+          .from('employees')
+          .update(empUpdatePayload)
+          .ilike('email', firstAccessUser.email.trim())
+          .catch(() => {});
+      }
+
+      if (updateEmployee && targetEmpId) {
+        updateEmployee(targetEmpId, {
+          needsPasswordChange: false,
+          password: cleanNew,
+        });
       }
 
       // 3. Monta usuário logado
