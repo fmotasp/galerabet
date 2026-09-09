@@ -52,29 +52,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Current Authenticated User sincronizado com Supabase Auth
   const [pendingPasswordChangeUser, setPendingPasswordChangeUser] = useState<any | null>(null);
 
-  // Indica se a sessão inicial ainda está sendo validada no Supabase (evita flash da tela de login no F5)
-  const [isAuthChecking, setIsAuthChecking] = useState<boolean>(() => {
-    try {
-      const hasSbToken = Object.keys(localStorage).some((k) => k.startsWith('sb-') && k.endsWith('-auth-token'));
-      const hasSavedUser = Boolean(localStorage.getItem('spine_logged_user'));
-      return hasSbToken || hasSavedUser;
-    } catch {
-      return false;
-    }
-  });
-
   const [currentUser, setCurrentUserState] = useState<any>(() => {
-    const saved = localStorage.getItem('spine_logged_user');
-    const loginDate = localStorage.getItem(STORAGE_KEYS.LOGIN_DATE);
-    const today = getTodayDateStr();
+    try {
+      const saved = localStorage.getItem('spine_logged_user');
+      const loginDate = localStorage.getItem(STORAGE_KEYS.LOGIN_DATE);
+      const today = getTodayDateStr();
 
-    if (saved) {
-      if (loginDate && loginDate !== today) {
-        localStorage.removeItem('spine_logged_user');
-        localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
-        return null;
-      }
-      try {
+      if (saved) {
+        if (loginDate && loginDate !== today) {
+          localStorage.removeItem('spine_logged_user');
+          localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
+          return null;
+        }
         const parsed = JSON.parse(saved);
         if (parsed?.needsPasswordChange) {
           localStorage.removeItem('spine_logged_user');
@@ -82,11 +71,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return null;
         }
         return parsed;
-      } catch {
-        return null;
       }
+    } catch {
+      return null;
     }
     return null;
+  });
+
+  // Se já temos o usuário hidratado do cache, isAuthChecking é false imediatamente.
+  // Caso contrário, é true até o Supabase resolver getSession().
+  const [isAuthChecking, setIsAuthChecking] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('spine_logged_user');
+      return !saved;
+    } catch {
+      return true;
+    }
   });
 
   const fetchProfileForAuthUser = async (authUser: any) => {
@@ -178,6 +178,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             } else {
               setCurrentUserState(appUser);
               setPendingPasswordChangeUser(null);
+              try {
+                localStorage.setItem('spine_logged_user', JSON.stringify(appUser));
+                localStorage.setItem(STORAGE_KEYS.LOGIN_DATE, getTodayDateStr());
+              } catch {}
             }
           }
         } else if (!localStorage.getItem('spine_logged_user')) {
@@ -202,6 +206,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               } else {
                 setCurrentUserState(appUser);
                 setPendingPasswordChangeUser(null);
+                try {
+                  localStorage.setItem('spine_logged_user', JSON.stringify(appUser));
+                  localStorage.setItem(STORAGE_KEYS.LOGIN_DATE, getTodayDateStr());
+                } catch {}
               }
             }
           }
@@ -226,7 +234,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setCurrentUser = (user: any) => {
     if (user && !user.needsPasswordChange) {
-      localStorage.setItem(STORAGE_KEYS.LOGIN_DATE, getTodayDateStr());
+      try {
+        localStorage.setItem(STORAGE_KEYS.LOGIN_DATE, getTodayDateStr());
+        localStorage.setItem('spine_logged_user', JSON.stringify(user));
+      } catch {}
       setCurrentUserState(user);
       setPendingPasswordChangeUser(null);
     } else if (user && user.needsPasswordChange) {
