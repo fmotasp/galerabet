@@ -5,6 +5,7 @@ import {
   loadLoginArtFromIndexedDB,
   deleteLoginArtFromIndexedDB,
 } from '../lib/indexedDbStorage';
+import { decodeEmployeeLocationWithAvatar } from '../lib/taskUtils';
 
 export interface CurrentUserType {
   id: string;
@@ -143,6 +144,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         !hasAlreadyChangedPassword &&
         (Boolean(profile?.needs_password_change) || Boolean(authUser.user_metadata?.needs_password_change));
 
+      const decodedProfileAvatar = profile?.location ? decodeEmployeeLocationWithAvatar(profile.location).avatarUrl : '';
+      const resolvedAvatarUrl = profile?.avatar_url || profile?.avatarUrl || decodedProfileAvatar || '';
+
       return {
         id: profile?.id || authUser.id,
         authUserId: authUser.id,
@@ -150,7 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: authUser.email || profile?.email || '',
         role: userRole,
         roleType: isUserAdmin ? ('admin' as const) : ('employee' as const),
-        avatarUrl: profile?.avatar_url || profile?.avatarUrl || '',
+        avatarUrl: resolvedAvatarUrl,
         initials: profile?.initials || (isUserAdmin ? 'AD' : 'CB'),
         department: profile?.department,
         needsPasswordChange: needsChange,

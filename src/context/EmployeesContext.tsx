@@ -2,6 +2,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Employee } from '../types';
 import { INITIAL_EMPLOYEES } from '../data/mockData';
+import {
+  encodeEmployeeLocationWithAvatar,
+  decodeEmployeeLocationWithAvatar,
+} from '../lib/taskUtils';
 
 export interface EmployeesContextType {
   employees: Employee[];
@@ -18,27 +22,34 @@ export const EmployeesProvider: React.FC<{
   addToast: (title: string, message?: string, type?: 'success' | 'error' | 'info' | 'warning') => void;
   addActivity: (userName: string, userInitials: string, message: string, dotColor?: any) => void;
 }> = ({ children, addToast, addActivity }) => {
-  const mapRowToEmployee = (row: any): Employee => ({
-    id: row.id,
-    auth_user_id: row.auth_user_id,
-    name: row.name || 'Colaborador',
-    role: row.role || 'Designer',
-    department: row.department || 'Design',
-    initials: row.initials || (row.name ? row.name.slice(0, 2).toUpperCase() : 'CO'),
-    status: row.status || 'online',
-    tags: Array.isArray(row.tags) ? row.tags : [],
-    currentWorkload: Number(row.current_workload ?? 50),
-    assignedTaskCount: 0,
-    collaboratorIds: [],
-    email: row.email || '',
-    password: row.password || '',
-    username: row.username || '',
-    location: row.location || 'Brasil',
-    labelId: row.label_id || '',
-    labelColor: row.label_color || 'purple',
-    needsPasswordChange: Boolean(row.needs_password_change),
-    roleType: row.role_type || 'employee',
-  });
+  const mapRowToEmployee = (row: any): Employee => {
+    const rawLocation = row.location || 'Brasil';
+    const { cleanLocation, avatarUrl: decodedAvatarUrl } = decodeEmployeeLocationWithAvatar(rawLocation);
+    const resolvedAvatarUrl = row.avatar_url || decodedAvatarUrl || '';
+
+    return {
+      id: row.id,
+      auth_user_id: row.auth_user_id,
+      name: row.name || 'Colaborador',
+      role: row.role || 'Designer',
+      department: row.department || 'Design',
+      initials: row.initials || (row.name ? row.name.slice(0, 2).toUpperCase() : 'CO'),
+      status: row.status || 'online',
+      tags: Array.isArray(row.tags) ? row.tags : [],
+      currentWorkload: Number(row.current_workload ?? 50),
+      assignedTaskCount: 0,
+      collaboratorIds: [],
+      email: row.email || '',
+      password: row.password || '',
+      username: row.username || '',
+      location: cleanLocation,
+      labelId: row.label_id || '',
+      labelColor: row.label_color || 'purple',
+      needsPasswordChange: Boolean(row.needs_password_change),
+      roleType: row.role_type || 'employee',
+      avatarUrl: resolvedAvatarUrl,
+    };
+  };
 
   // Employees (Usuários/Membros)
   const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
@@ -144,6 +155,9 @@ export const EmployeesProvider: React.FC<{
       if (newEmp.location) dbPayload.location = newEmp.location;
       if (typeof newEmp.needsPasswordChange === 'boolean') dbPayload.needs_password_change = newEmp.needsPasswordChange;
       if (newEmp.password) dbPayload.password = newEmp.password;
+      // Codifica avatarUrl em location (persistência garantida sem depender de coluna avatar_url)
+      const encodedLoc = encodeEmployeeLocationWithAvatar(newEmp.location || 'Brasil', newEmp.avatarUrl || '');
+      dbPayload.location = encodedLoc;
 
       console.log('[addEmployee] dbPayload sendo enviado:', JSON.stringify(dbPayload));
 
@@ -165,6 +179,7 @@ export const EmployeesProvider: React.FC<{
           department: newEmp.department || 'Design',
           initials: newEmp.initials || '',
           status: newEmp.status || 'online',
+          location: encodedLoc,
         };
         console.log('[addEmployee] Tentando fallback com basicPayload:', JSON.stringify(basicPayload));
         const { error: fallbackErr } = await supabase.from('employees').insert(basicPayload);
@@ -198,6 +213,11 @@ export const EmployeesProvider: React.FC<{
 
     // Atualiza no Supabase
     try {
+      const currentEmp = employees.find((e) => e.id === id);
+      const baseLoc = updates.location !== undefined ? updates.location : (currentEmp?.location || 'Brasil');
+      const baseAvatar = updates.avatarUrl !== undefined ? updates.avatarUrl : (currentEmp?.avatarUrl || '');
+      const encodedLoc = encodeEmployeeLocationWithAvatar(baseLoc, baseAvatar);
+
       const payload: any = { id };
       if (updates.name !== undefined) payload.name = updates.name;
       if (updates.role !== undefined) payload.role = updates.role;
@@ -208,15 +228,18 @@ export const EmployeesProvider: React.FC<{
       if (updates.currentWorkload !== undefined) payload.current_workload = updates.currentWorkload;
       if (updates.email !== undefined) payload.email = updates.email;
       if (updates.username !== undefined) payload.username = updates.username;
-      if (updates.location !== undefined) payload.location = updates.location;
+      payload.location = encodedLoc;
       if (updates.labelId !== undefined) payload.label_id = updates.labelId;
       if (updates.labelColor !== undefined) payload.label_color = updates.labelColor;
       if (updates.needsPasswordChange !== undefined) payload.needs_password_change = updates.needsPasswordChange;
       if (updates.password !== undefined) payload.password = updates.password;
 
-      await supabase.from('employees').upsert(payload);
+      const { error: sbErr } = await supabase.from('employees').upsert(payload);
+      if (sbErr) {
+        console.warn('Supabase employee update warning:', sbErr.message);
+      }
     } catch (sbErr) {
-      console.warn('Supabase employee update warning:', sbErr);
+      console.warn('Supabase employee update exception:', sbErr);
     }
 
     addToast('Perfil Atualizado', 'Dados do funcionário salvos no Supabase.');

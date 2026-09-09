@@ -643,3 +643,91 @@ export const deleteDriveFolder = async (
     return false;
   }
 };
+
+// Upload employee avatar photo to Google Drive under Funcionarios/{employeeName}/
+export const uploadEmployeeAvatarToDrive = async (
+  file: File,
+  employeeName: string,
+  accessToken?: string
+): Promise<{ url: string; fileId: string } | null> => {
+  try {
+    const token = accessToken || await getValidAccessToken(undefined, true);
+    if (!token) return null;
+
+    const rootId = GOOGLE_DRIVE_CONFIG.ROOT_FOLDER_ID;
+
+    // 1. Get or create "Funcionarios" root folder
+    let funcionariosFolder = await findDriveFolderByName('Funcionarios', rootId, token, true);
+    if (!funcionariosFolder) {
+      const res = await driveFetch('https://www.googleapis.com/drive/v3/files?fields=id,webViewLink', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Funcionarios',
+          mimeType: 'application/vnd.google-apps.folder',
+          parents: rootId ? [rootId] : [],
+        }),
+      }, token, true);
+      if (!res.ok) return null;
+      const d = await res.json();
+      funcionariosFolder = { id: d.id, webViewLink: d.webViewLink || '' };
+    }
+
+    // 2. Get or create subfolder with employee name
+    const safeName = employeeName.trim() || 'Funcionario';
+    let empFolder = await findDriveFolderByName(safeName, funcionariosFolder.id, token, true);
+    if (!empFolder) {
+      const res = await driveFetch('https://www.googleapis.com/drive/v3/files?fields=id,webViewLink', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: safeName,
+          mimeType: 'application/vnd.google-apps.folder',
+          parents: [funcionariosFolder.id],
+        }),
+      }, token, true);
+      if (!res.ok) return null;
+      const d = await res.json();
+      empFolder = { id: d.id, webViewLink: d.webViewLink || '' };
+    }
+
+    // 3. Upload photo file into employee folder
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const fileName = `avatar.${ext}`;
+    const metadata = {
+      name: fileName,
+      parents: [empFolder.id],
+      description: `Avatar de ${safeName}`,
+    };
+
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', file);
+
+    const uploadRes = await driveFetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name',
+      { method: 'POST', body: form },
+      token,
+      true
+    );
+    if (!uploadRes.ok) return null;
+    const uploadData = await uploadRes.json();
+    const fileId = uploadData.id;
+
+    // 4. Make file publicly readable
+    try {
+      await driveFetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'reader', type: 'anyone' }),
+      }, token);
+    } catch {}
+
+    // 5. Return public URL
+    const url = `https://lh3.googleusercontent.com/d/${fileId}`;
+    return { url, fileId };
+  } catch (err) {
+    console.error('Error uploading employee avatar:', err);
+    return null;
+  }
+};

@@ -45,11 +45,33 @@ export const Avatar: React.FC<AvatarProps> = ({
   style = {},
   ...props
 }) => {
+  const [imgSrc, setImgSrc] = useState<string | null | undefined>(src);
   const [hasError, setHasError] = useState(false);
+
+  React.useEffect(() => {
+    setImgSrc(src);
+    setHasError(false);
+  }, [src]);
+
   const initials = getInitials(name || alt);
   const { container, text, dot } = sizeStyles[size];
 
   const ringClass = ring ? 'ring-2 ring-[#E4007E]/60' : '';
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    const current = target.src;
+    const driveMatch =
+      current.match(/[?&]id=([a-zA-Z0-9_-]+)/) ||
+      current.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+      current.match(/\/d\/([a-zA-Z0-9_-]+)/);
+
+    if (driveMatch && driveMatch[1] && !current.includes('thumbnail?id=')) {
+      setImgSrc(`https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w400`);
+    } else {
+      setHasError(true);
+    }
+  };
 
   return (
     <div
@@ -57,11 +79,11 @@ export const Avatar: React.FC<AvatarProps> = ({
       style={style}
       {...props}
     >
-      {src && !hasError ? (
+      {imgSrc && !hasError ? (
         <img
-          src={src}
+          src={imgSrc}
           alt={alt || name || 'Avatar'}
-          onError={() => setHasError(true)}
+          onError={handleImageError}
           className="w-full h-full rounded-full object-cover shadow-xs"
         />
       ) : (

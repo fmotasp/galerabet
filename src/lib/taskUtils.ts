@@ -91,3 +91,29 @@ export const decodeTaskDescriptionWithChecklist = (
 
   return { cleanDescription, checklists };
 };
+
+export const encodeEmployeeLocationWithAvatar = (
+  location: string = 'Brasil',
+  avatarUrl: string = ''
+): string => {
+  const cleanLoc = (location || 'Brasil').replace(/\n?<!-- __AVATAR_URL__[\s\S]*?-->/g, '').trim() || 'Brasil';
+  if (!avatarUrl) return cleanLoc;
+  return `${cleanLoc}\n<!-- __AVATAR_URL__ ${avatarUrl.trim()} -->`.trim();
+};
+
+export const decodeEmployeeLocationWithAvatar = (
+  rawLocation: string = ''
+): { cleanLocation: string; avatarUrl: string } => {
+  if (!rawLocation) return { cleanLocation: 'Brasil', avatarUrl: '' };
+  const match = rawLocation.match(/<!-- __AVATAR_URL__ ([\s\S]*?) -->/);
+  let avatarUrl = '';
+  let cleanLocation = rawLocation;
+
+  if (match && match[1]) {
+    avatarUrl = match[1].trim();
+    cleanLocation = rawLocation.replace(match[0], '').trim() || 'Brasil';
+  }
+
+  return { cleanLocation, avatarUrl };
+};
+

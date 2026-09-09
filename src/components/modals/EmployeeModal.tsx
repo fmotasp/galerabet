@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Trash2, Palette, UserCheck, AlertCircle, KeyRound, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Trash2, Palette, UserCheck, AlertCircle, KeyRound, Eye, EyeOff, Copy, Check, Camera, Upload, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Employee } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { Button, Input, Modal } from '../ui';
+import { uploadEmployeeAvatarToDrive } from '../../lib/googleDrive';
 
 export const EmployeeModal: React.FC = () => {
   const {
@@ -15,6 +16,8 @@ export const EmployeeModal: React.FC = () => {
     updateEmployee,
     deleteEmployee,
     addToast,
+    currentUser,
+    setCurrentUser,
   } = useApp();
 
   const isOpen = isNewEmployeeModalOpen || editingEmployee !== null;
@@ -32,6 +35,13 @@ export const EmployeeModal: React.FC = () => {
 
   const [validationError, setValidationError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Avatar state
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarPreview, setAvatarPreview] = useState('');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const LABEL_COLORS = [
     { id: 'purple', name: 'Roxo', bg: 'bg-purple-600', hex: '#89609e' },
@@ -56,6 +66,9 @@ export const EmployeeModal: React.FC = () => {
         department: editingEmployee.department || 'Design',
         labelColor: editingEmployee.labelColor || 'purple',
       });
+      setAvatarUrl(editingEmployee.avatarUrl || '');
+      setAvatarPreview(editingEmployee.avatarUrl || '');
+      setAvatarFile(null);
 
       // Busca a senha mais recente direto no Supabase caso não esteja salva em memória
       const loadEmployeePassword = async () => {
@@ -88,6 +101,9 @@ export const EmployeeModal: React.FC = () => {
         department: 'Design',
         labelColor: 'purple',
       });
+      setAvatarUrl('');
+      setAvatarPreview('');
+      setAvatarFile(null);
     }
     setShowPassword(true);
     setCopiedPassword(false);
@@ -112,6 +128,31 @@ export const EmployeeModal: React.FC = () => {
     addToast('Senha Copiada 📋', 'Senha copiada para a área de transferência.', 'info');
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      addToast('Formato inválido ⚠️', 'Selecione apenas arquivos de imagem (JPG, PNG, WebP).', 'warning');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      addToast('Arquivo muito grande ⚠️', 'A foto deve ter no máximo 5MB.', 'warning');
+      return;
+    }
+    setAvatarFile(file);
+    // Local preview while uploading
+    const reader = new FileReader();
+    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarFile(null);
+    setAvatarPreview('');
+    setAvatarUrl('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError('');
@@ -130,12 +171,45 @@ export const EmployeeModal: React.FC = () => {
       return;
     }
 
-    if (cleanPassword && cleanPassword.length < 6) {
+    // Se for novo colaborador e não preencheu, o default é '123456'
+    if (!editingEmployee && cleanPassword && cleanPassword.length < 6) {
       setValidationError('A senha deve conter pelo menos 6 caracteres.');
       return;
     }
 
+    // Se estiver editando e o usuário digitou uma senha menor que 6 caracteres (e não deixou em branco)
+    if (editingEmployee && cleanPassword && cleanPassword.length < 6) {
+      // Se a senha carregada do banco já tinha menos de 6 caracteres (como f3l1p) e o usuário não mexeu nela, não bloqueia
+      const originalPassword = (editingEmployee.password || '').trim();
+      if (cleanPassword !== originalPassword) {
+        setValidationError('A nova senha deve conter pelo menos 6 caracteres.');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
+
+    // Upload avatar to Google Drive if a new file was selected
+    let finalAvatarUrl = avatarUrl;
+    if (avatarFile) {
+      setIsUploadingAvatar(true);
+      try {
+        addToast('Enviando foto... 📸', 'Fazendo upload para o Google Drive.', 'info');
+        const result = await uploadEmployeeAvatarToDrive(avatarFile, cleanName);
+        if (result) {
+          finalAvatarUrl = result.url;
+          setAvatarUrl(result.url);
+          addToast('Foto enviada! ✅', 'Avatar salvo no Google Drive.', 'success');
+        } else {
+          addToast('Aviso ⚠️', 'Não foi possível enviar a foto. Verifique a autenticação do Google Drive.', 'warning');
+        }
+      } catch (uploadErr) {
+        console.warn('Avatar upload error:', uploadErr);
+        addToast('Erro no upload ⚠️', 'Falha ao enviar a foto. O cadastro será salvo sem foto.', 'warning');
+      } finally {
+        setIsUploadingAvatar(false);
+      }
+    }
 
     const initials = cleanName
       .split(' ')
@@ -159,12 +233,22 @@ export const EmployeeModal: React.FC = () => {
       location: editingEmployee ? editingEmployee.location : 'Brasil',
       labelColor: formData.labelColor,
       needsPasswordChange: editingEmployee ? (editingEmployee.needsPasswordChange ?? false) : true,
+      avatarUrl: finalAvatarUrl || undefined,
     };
 
     try {
       if (editingEmployee) {
         // Modo Edição: Atualiza os dados do funcionário (incluindo senha)
         await updateEmployee(editingEmployee.id, empPayload);
+
+        // Se estiver editando o usuário logado atualmente, atualiza o currentUser na hora
+        if (currentUser && (currentUser.id === editingEmployee.id || currentUser.email?.toLowerCase() === cleanEmail)) {
+          setCurrentUser({
+            ...currentUser,
+            ...empPayload,
+            avatarUrl: finalAvatarUrl || currentUser.avatarUrl,
+          });
+        }
 
         // Se o funcionário possui conta no Auth e a senha foi alterada, sincroniza no Supabase Auth
         if (editingEmployee.auth_user_id && cleanPassword && cleanPassword.length >= 6) {
@@ -334,6 +418,100 @@ export const EmployeeModal: React.FC = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Avatar Section */}
+        <div className="flex items-center gap-4 p-3 bg-[#1E1E1E] rounded-2xl border border-[#2A2A2A]">
+          {/* Avatar Preview */}
+          <div className="relative shrink-0">
+            {avatarPreview ? (
+              <img
+                src={avatarPreview}
+                alt="Avatar"
+                className="w-16 h-16 rounded-2xl object-cover border-2 border-[#E4007E]/50 shadow-lg"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  const current = target.src;
+                  const driveMatch =
+                    current.match(/[?&]id=([a-zA-Z0-9_-]+)/) ||
+                    current.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+                    current.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                  if (driveMatch && driveMatch[1] && !current.includes('thumbnail?id=')) {
+                    target.src = `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w400`;
+                  } else {
+                    setAvatarPreview('');
+                  }
+                }}
+              />
+            ) : (
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg border-2 border-[#333333]"
+                style={{
+                  backgroundColor:
+                    LABEL_COLORS.find((c) => c.id === formData.labelColor)?.hex || '#89609e',
+                }}
+              >
+                {formData.name
+                  ? formData.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+                  : '??'}
+              </div>
+            )}
+            {/* Camera overlay button */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isSubmitting || isUploadingAvatar}
+              className="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-[#E4007E] rounded-full flex items-center justify-center shadow-md hover:bg-[#c2006b] transition-colors cursor-pointer"
+              title="Trocar foto"
+            >
+              <Camera className="w-3 h-3 text-white" />
+            </button>
+          </div>
+
+          {/* Upload controls */}
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-slate-200 mb-1">
+              {avatarPreview ? 'Foto selecionada' : 'Foto de perfil'}
+            </p>
+            <p className="text-[11px] text-slate-400 mb-2 leading-relaxed">
+              {avatarFile
+                ? `📎 ${avatarFile.name} · será enviada para o Drive`
+                : avatarUrl
+                ? '✅ Foto salva no Google Drive'
+                : 'JPG, PNG ou WebP · máx. 5MB · salvo no Google Drive'}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isSubmitting || isUploadingAvatar}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2A2A2A] hover:bg-[#333333] border border-[#383838] text-slate-200 hover:text-white rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
+              >
+                <Upload className="w-3 h-3" />
+                <span>{avatarPreview ? 'Trocar foto' : 'Enviar foto'}</span>
+              </button>
+              {avatarPreview && (
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  disabled={isSubmitting}
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-slate-400 hover:text-rose-400 rounded-xl text-[11px] font-bold transition-colors cursor-pointer hover:bg-rose-950/20"
+                >
+                  <X className="w-3 h-3" />
+                  <span>Remover</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+        </div>
+
         <div>
           <label className="block text-xs font-bold text-slate-300 mb-1.5">
             Nome Completo <span className="text-rose-500">*</span>
