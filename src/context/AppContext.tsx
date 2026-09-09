@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import {
   NavigationTab,
@@ -295,9 +295,9 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setToasts((prev) => [...prev, newToast]);
   };
 
-  const removeToast = (id: string) => {
+  const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  }, []);
 
   const [isInitialLoading, setIsInitialLoading] = useState<boolean>(() => {
     try {
