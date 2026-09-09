@@ -28,6 +28,7 @@ import { useApp } from '../../context/AppContext';
 import { Task, Employee } from '../../types';
 import { getLabelColorHex } from '../tasks/TasksView';
 import { isTaskOverdue, isTaskCompleted, isTaskInProgress, parseTaskDueDate } from '../../lib/taskDateUtils';
+import { Button, Input, Avatar } from '../ui';
 
 type PeriodFilter = 'all' | '7d' | '30d' | 'month' | 'sprint';
 type DepartmentFilter = 'all' | 'design' | 'videomaker';
@@ -509,22 +510,25 @@ export const ReportsView: React.FC = () => {
 
         {/* Ações de Exportação */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          <button
+          <Button
+            variant="secondary"
             onClick={handleExportCSV}
-            className="px-4 py-2.5 bg-[#181818] hover:bg-[#262626] text-white border border-[#2A2A2A] hover:border-[#E4007E] rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95"
+            leftIcon={<FileSpreadsheet className="w-4 h-4 text-[#E4007E]" />}
+            className="text-xs font-bold"
             title="Exportar dados para planilha Excel / CSV"
+            aria-label="Exportar dados para planilha Excel / CSV"
           >
-            <FileSpreadsheet className="w-4 h-4 text-[#E4007E]" />
             <span>Exportar CSV</span>
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handlePrint}
-            className="px-4 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-[#E4007E]/25 flex items-center gap-2 cursor-pointer active:scale-95"
+            leftIcon={<Printer className="w-4 h-4" />}
+            className="text-xs font-black"
             title="Imprimir ou Salvar em PDF"
+            aria-label="Imprimir ou Salvar em PDF"
           >
-            <Printer className="w-4 h-4" />
             <span>Imprimir / PDF</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -612,14 +616,14 @@ export const ReportsView: React.FC = () => {
           </div>
 
           {/* Busca rápida por Colaborador */}
-          <div className="relative w-full md:w-64">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
+          <div className="w-full md:w-64">
+            <Input
               type="text"
               placeholder="Buscar colaborador..."
               value={searchMember}
               onChange={(e) => setSearchMember(e.target.value)}
-              className="w-full pl-9 pr-3.5 py-2 bg-[#222222] border border-[#303030] rounded-xl text-xs text-white placeholder-slate-400 font-medium focus:outline-none focus:border-[#E4007E] transition-all"
+              leftIcon={<Search className="w-3.5 h-3.5" />}
+              className="!py-2 !bg-[#222222] !border-[#303030] text-xs font-medium placeholder-slate-400"
             />
           </div>
         </div>

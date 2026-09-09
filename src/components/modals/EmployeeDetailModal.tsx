@@ -4,22 +4,18 @@ import {
   Mail,
   MapPin,
   CheckCircle2,
-  Clock,
   Edit2,
   Plus,
-  Flame,
   Layers,
-  Sparkles,
   MessageSquare,
   Paperclip,
-  CheckSquare,
-  AlertTriangle,
   Folder,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { Task, TaskStatus } from '../../types';
+import { Task } from '../../types';
 import { isTaskCompleted, isTaskOverdue, getTaskOverdueDays } from '../../lib/taskDateUtils';
 import { getLabelColorHex } from '../tasks/TasksView';
+import { Button, Badge, Avatar } from '../ui';
 
 export const EmployeeDetailModal: React.FC = () => {
   const {
@@ -27,7 +23,6 @@ export const EmployeeDetailModal: React.FC = () => {
     setSelectedEmployeeForDetail,
     setEditingEmployee,
     tasks,
-    projects,
     setEditingTask,
     setIsNewTaskModalOpen,
   } = useApp();
@@ -129,48 +124,53 @@ export const EmployeeDetailModal: React.FC = () => {
     }
   })();
 
-  const getStatusBadge = (task: Task) => {
+  const renderStatusBadge = (task: Task) => {
     const isDone = isTaskCompleted(task);
     if (isDone) {
       return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-950/80 text-emerald-300 border border-emerald-800 flex items-center gap-1">
+        <Badge variant="success" size="sm" className="flex items-center gap-1">
           <CheckCircle2 className="w-3 h-3" />
           <span>Concluída / Postar</span>
-        </span>
+        </Badge>
       );
     }
     const overdueDays = getTaskOverdueDays(task);
     if (overdueDays > 0) {
       return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-950/80 text-rose-300 border border-rose-800">
+        <Badge variant="danger" size="sm">
           Atrasada ({overdueDays}d)
-        </span>
+        </Badge>
       );
     }
     const s = (task.status || '').toLowerCase();
     if (s === 'in_progress' || s.includes('doing') || s.includes('andamento')) {
       return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#E4007E]/20 text-[#E4007E] border border-[#E4007E]/40">
+        <Badge variant="primary" size="sm">
           Em Produção
-        </span>
+        </Badge>
       );
     }
     if (s === 'in_review' || s.includes('revis') || s.includes('aprov')) {
       return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-950/80 text-amber-300 border border-amber-800">
+        <Badge variant="warning" size="sm">
           Em Revisão
-        </span>
+        </Badge>
       );
     }
     return (
-      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-slate-800 text-slate-300 border border-slate-700">
+      <Badge variant="default" size="sm">
         Backlog
-      </span>
+      </Badge>
     );
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Detalhes de ${emp.name}`}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
+    >
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"
@@ -178,36 +178,34 @@ export const EmployeeDetailModal: React.FC = () => {
       />
 
       {/* Modal Card */}
-      <div className="relative bg-[#181818] rounded-3xl shadow-2xl border border-[#2E2E2E] max-w-3xl w-full p-6 sm:p-8 z-10 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto space-y-6 text-white">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative bg-[#181818] rounded-3xl shadow-2xl border border-[#2E2E2E] max-w-3xl w-full p-6 sm:p-8 z-10 animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto space-y-6 text-white"
+      >
         {/* Glow de fundo */}
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#E4007E]/15 rounded-full blur-3xl pointer-events-none" />
 
         {/* 1. Header do Perfil */}
         <div className="flex items-start justify-between pb-6 border-b border-[#282828] relative z-10">
           <div className="flex items-center gap-4">
-            <div className="relative">
-              {emp.avatarUrl ? (
-                <img
-                  src={emp.avatarUrl}
-                  alt={emp.name}
-                  className="w-20 h-20 rounded-2xl object-cover ring-2 ring-[#E4007E]/60 shadow-lg"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#222222] to-[#121212] border-2 border-[#E4007E]/50 text-[#E4007E] font-black text-2xl flex items-center justify-center shadow-lg">
-                  {emp.initials}
-                </div>
-              )}
-              <span className="absolute -bottom-1.5 -right-1.5 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-[#181818]" />
-            </div>
+            <Avatar
+              src={emp.avatarUrl}
+              name={emp.name}
+              alt={emp.name}
+              size="xl"
+              ring
+              status={emp.status === 'online' ? 'online' : emp.status === 'busy' ? 'busy' : 'offline'}
+              className="!w-20 !h-20 rounded-2xl shadow-lg [&>img]:rounded-2xl [&>div]:rounded-2xl [&>div]:text-2xl [&>div]:bg-gradient-to-tr [&>div]:from-[#222222] [&>div]:to-[#121212] [&>div]:border-2 [&>div]:border-[#E4007E]/50 [&>div]:text-[#E4007E]"
+            />
 
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                   {emp.name}
                 </h2>
-                <span className="text-[10px] bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] font-black px-2.5 py-0.5 rounded-full uppercase">
+                <Badge variant="primary" size="sm">
                   {emp.role || 'Colaborador'}
-                </span>
+                </Badge>
               </div>
               <p className="text-xs text-slate-400 font-medium mt-0.5">
                 Departamento: <strong className="text-slate-200">{emp.department || 'Criação'}</strong>
@@ -229,22 +227,29 @@ export const EmployeeDetailModal: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={() => {
                 setSelectedEmployeeForDetail(null);
                 setEditingEmployee(emp);
               }}
-              className="p-2 text-slate-400 hover:text-white rounded-xl bg-[#222222] hover:bg-[#2A2A2A] border border-[#303030] transition-colors cursor-pointer"
+              className="bg-[#222222] hover:bg-[#2A2A2A] border-[#303030]"
               title="Editar Perfil"
+              aria-label="Editar Perfil"
             >
               <Edit2 className="w-4 h-4" />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={() => setSelectedEmployeeForDetail(null)}
-              className="p-2 text-slate-400 hover:text-white rounded-xl bg-[#222222] hover:bg-[#2A2A2A] border border-[#303030] transition-colors cursor-pointer"
+              className="bg-[#222222] hover:bg-[#2A2A2A] border-[#303030]"
+              title="Fechar Detalhes"
+              aria-label="Fechar Detalhes"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -289,16 +294,18 @@ export const EmployeeDetailModal: React.FC = () => {
               </h3>
             </div>
 
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => {
                 setSelectedEmployeeForDetail(null);
                 setIsNewTaskModalOpen(true);
               }}
-              className="text-xs font-black text-white bg-gradient-to-r from-[#E4007E] to-[#E94E18] px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm hover:opacity-90 transition-opacity cursor-pointer self-start sm:self-auto"
+              leftIcon={<Plus className="w-3.5 h-3.5" />}
+              className="self-start sm:self-auto font-black shadow-xs"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Nova Tarefa</span>
-            </button>
+              Nova Tarefa
+            </Button>
           </div>
 
           {/* Filtro de Abas por Status */}
@@ -451,7 +458,7 @@ export const EmployeeDetailModal: React.FC = () => {
                       <span className="text-[11px] text-slate-300 font-bold">
                         {t.dueDate && t.dueDate !== 'Sem prazo' ? t.dueDate : 'Sem prazo'}
                       </span>
-                      {getStatusBadge(t)}
+                      {renderStatusBadge(t)}
                     </div>
                   </div>
                 );

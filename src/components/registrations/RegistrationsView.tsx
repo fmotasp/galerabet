@@ -4,9 +4,6 @@ import {
   Plus,
   Search,
   Tag,
-  Mail,
-  MapPin,
-  Briefcase,
   Edit2,
   Trash2,
   ExternalLink,
@@ -23,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Employee, Project } from '../../types';
+import { Button, Input, Badge, Avatar } from '../ui';
 
 export const RegistrationsView: React.FC = () => {
   const {
@@ -32,7 +30,6 @@ export const RegistrationsView: React.FC = () => {
     setIsNewEmployeeModalOpen,
     setEditingEmployee,
     deleteEmployee,
-    setSelectedEmployeeForDetail,
     setIsNewProjectModalOpen,
     setEditingProject,
     deleteProject,
@@ -42,7 +39,7 @@ export const RegistrationsView: React.FC = () => {
 
   const [activeSubTab, setActiveSubTab] = useState<'employees' | 'clients'>('employees');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedDept, setSelectedDept] = useState<string>('All');
+  const [selectedDept] = useState<string>('All');
   const [selectedTagFilter, setSelectedTagFilter] = useState<string>('All');
 
   // Modal rápido para gerenciar etiquetas de um funcionário específico
@@ -131,26 +128,24 @@ export const RegistrationsView: React.FC = () => {
 
   const getAvatarBorderColor = (index: number) => {
     const borders = [
-      'ring-[#FFB903] text-[#FFB903]',
-      'ring-blue-500 text-blue-500',
-      'ring-emerald-500 text-emerald-500',
-      'ring-purple-500 text-purple-500',
-      'ring-rose-500 text-rose-500',
-      'ring-sky-400 text-sky-400',
+      'ring-[#FFB903]',
+      'ring-blue-500',
+      'ring-emerald-500',
+      'ring-purple-500',
+      'ring-rose-500',
+      'ring-sky-400',
     ];
     return borders[index % borders.length];
   };
 
-  const getStatusDot = (status?: Employee['status']) => {
+  const getStatusDot = (status?: Employee['status']): 'online' | 'busy' | 'offline' => {
     switch (status) {
       case 'online':
-        return 'bg-emerald-500 ring-white dark:ring-[#181818]';
+        return 'online';
       case 'busy':
-        return 'bg-amber-500 ring-white dark:ring-[#181818]';
-      case 'away':
-        return 'bg-purple-500 ring-white dark:ring-[#181818]';
+        return 'busy';
       default:
-        return 'bg-blue-500 ring-white dark:ring-[#181818]';
+        return 'offline';
     }
   };
 
@@ -232,23 +227,27 @@ export const RegistrationsView: React.FC = () => {
         {/* Action Button */}
         <div className="flex items-center gap-3">
           {activeSubTab === 'employees' ? (
-            <button
+            <Button
               id="btn-cadastrar-funcionario"
+              variant="primary"
+              size="md"
               onClick={() => setIsNewEmployeeModalOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-sm font-black shadow-lg shadow-[#E4007E]/25 transition-all active:scale-98 cursor-pointer"
+              leftIcon={<Plus className="w-4 h-4 stroke-[3]" />}
+              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-sm font-black"
             >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Novo Funcionário</span>
-            </button>
+              Novo Funcionário
+            </Button>
           ) : (
-            <button
+            <Button
               id="btn-cadastrar-cliente"
+              variant="primary"
+              size="md"
               onClick={() => setIsNewProjectModalOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-sm font-black shadow-lg shadow-[#E4007E]/25 transition-all active:scale-98 cursor-pointer"
+              leftIcon={<Plus className="w-4 h-4 stroke-[3]" />}
+              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-sm font-black"
             >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Novo Cliente</span>
-            </button>
+              Novo Cliente
+            </Button>
           )}
         </div>
       </div>
@@ -288,14 +287,14 @@ export const RegistrationsView: React.FC = () => {
         </div>
 
         {/* Search Input */}
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
+        <div className="w-full sm:w-80">
+          <Input
             type="text"
             placeholder={activeSubTab === 'employees' ? 'Buscar funcionário, cargo ou tag...' : 'Buscar cliente...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-[#181818] border border-[#2A2A2A] focus:border-[#E4007E] rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 font-medium focus:outline-none transition-all shadow-inner"
+            leftIcon={<Search className="w-4 h-4" />}
+            className="!bg-[#181818] !border-[#2A2A2A] focus:!border-[#E4007E] py-2 text-xs sm:text-sm font-medium"
           />
         </div>
       </div>
@@ -344,13 +343,15 @@ export const RegistrationsView: React.FC = () => {
               <p className="text-xs text-slate-400 mt-1">
                 Clique no botão "Novo Funcionário" acima para cadastrar seu primeiro membro da equipe.
               </p>
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => setIsNewEmployeeModalOpen(true)}
-                className="mt-4 px-4 py-2 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-xs font-bold inline-flex items-center gap-2 cursor-pointer shadow-md shadow-[#E4007E]/25"
+                leftIcon={<Plus className="w-4 h-4" />}
+                className="mt-4 px-4 py-2 font-bold shadow-md shadow-[#E4007E]/25 text-xs"
               >
-                <Plus className="w-4 h-4" />
                 Cadastrar Agora
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -369,30 +370,34 @@ export const RegistrationsView: React.FC = () => {
                     {/* Top Right Actions */}
                     <div className="absolute top-4 right-4 z-10">
                       <div className="flex items-center gap-1">
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
                             setEditingEmployee(emp);
                           }}
-                          className="p-1.5 text-slate-400 hover:text-[#E4007E] rounded-lg hover:bg-[#262626] transition-colors cursor-pointer"
+                          className="p-1.5 text-slate-400 hover:text-[#E4007E] rounded-lg hover:bg-[#262626]"
                           title="Editar Membro"
+                          aria-label="Editar Membro"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
                             if (window.confirm(`Deseja realmente excluir ${emp.name}?`)) {
                               deleteEmployee(emp.id);
                             }
                           }}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10"
                           title="Excluir Membro"
+                          aria-label="Excluir Membro"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
 
@@ -401,25 +406,15 @@ export const RegistrationsView: React.FC = () => {
                       {/* Avatar with Ring & Status Dot */}
                       <div className="relative mb-3.5">
                         <div className={`p-1 rounded-full ring-2 ${borderRing} transition-transform group-hover:scale-105 duration-300`}>
-                          {emp.avatarUrl ? (
-                            <img
-                              src={emp.avatarUrl}
-                              alt={emp.name}
-                              className="w-16 h-16 rounded-full object-cover shadow-md"
-                            />
-                          ) : (
-                            <div className="w-16 h-16 rounded-full bg-[#222222] text-[#E4007E] border border-[#303030] font-black text-lg flex items-center justify-center shadow-md uppercase">
-                              {emp.initials || emp.name.slice(0, 2)}
-                            </div>
-                          )}
+                          <Avatar
+                            src={emp.avatarUrl}
+                            name={emp.name}
+                            alt={emp.name}
+                            size="xl"
+                            status={getStatusDot(emp.status)}
+                            className="!w-16 !h-16 shadow-md [&>div]:bg-[#222222] [&>div]:text-[#E4007E] [&>div]:border [&>div]:border-[#303030] [&>div]:text-lg [&>div]:font-black"
+                          />
                         </div>
-                        {/* Status Dot */}
-                        <span
-                          className={`absolute top-0 right-0 w-3.5 h-3.5 rounded-full ring-2 ${getStatusDot(
-                            emp.status
-                          )}`}
-                          title={`Status: ${emp.status || 'Ativo'}`}
-                        />
                       </div>
 
                       {/* Name */}
@@ -478,13 +473,15 @@ export const RegistrationsView: React.FC = () => {
               <p className="text-xs text-slate-400 mt-1">
                 Clique no botão "Novo Cliente" acima para cadastrar seu primeiro cliente.
               </p>
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => setIsNewProjectModalOpen(true)}
-                className="mt-4 px-4 py-2 bg-[#E4007E] hover:bg-[#c2006b] text-white rounded-xl text-xs font-bold inline-flex items-center gap-2 cursor-pointer"
+                leftIcon={<Plus className="w-4 h-4" />}
+                className="mt-4 px-4 py-2 font-bold text-xs"
               >
-                <Plus className="w-4 h-4" />
                 Cadastrar Agora
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -532,24 +529,30 @@ export const RegistrationsView: React.FC = () => {
 
                         {/* Actions */}
                         <div className="flex items-center gap-1">
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setEditingProject(proj)}
-                            className="p-1.5 text-white hover:text-[#FFBA00] rounded-lg hover:bg-slate-800 transition-colors"
+                            className="p-1.5 text-white hover:text-[#FFBA00] rounded-lg hover:bg-slate-800"
                             title="Editar cliente"
+                            aria-label="Editar cliente"
                           >
                             <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => {
                               if (window.confirm(`Deseja realmente excluir o cliente ${proj.name}?`)) {
                                 deleteProject(proj.id);
                               }
                             }}
-                            className="p-1.5 text-white hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors"
+                            className="p-1.5 text-white hover:text-rose-400 rounded-lg hover:bg-rose-500/10"
                             title="Excluir cliente"
+                            aria-label="Excluir cliente"
                           >
                             <Trash2 className="w-4 h-4" />
-                          </button>
+                          </Button>
                         </div>
                       </div>
 
@@ -573,22 +576,16 @@ export const RegistrationsView: React.FC = () => {
                           {(proj.teamMemberIds || []).slice(0, 5).map((mId) => {
                             const emp = employees.find((e) => e.id === mId);
                             if (!emp) return null;
-                            return emp.avatarUrl ? (
-                              <img
+                            return (
+                              <Avatar
                                 key={emp.id}
                                 src={emp.avatarUrl}
+                                name={emp.name}
                                 alt={emp.name}
-                                className="w-7 h-7 rounded-full ring-2 ring-[#011C39] object-cover"
+                                size="sm"
+                                className="!w-7 !h-7 ring-2 ring-[#011C39]"
                                 title={emp.name}
                               />
-                            ) : (
-                              <div
-                                key={emp.id}
-                                className="w-7 h-7 rounded-full bg-slate-700 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-[#011C39]"
-                                title={emp.name}
-                              >
-                                {emp.initials}
-                              </div>
                             );
                           })}
                         </div>
@@ -642,12 +639,15 @@ export const RegistrationsView: React.FC = () => {
                   Etiquetas de {tagModalEmployee.name}
                 </h3>
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setTagModalEmployee(null)}
                 className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                aria-label="Fechar"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             {/* Tags Atuais */}
@@ -658,20 +658,22 @@ export const RegistrationsView: React.FC = () => {
               <div className="flex flex-wrap gap-2 min-h-10 p-3 bg-[#011427] rounded-xl border border-slate-800">
                 {tagModalEmployee.tags && tagModalEmployee.tags.length > 0 ? (
                   tagModalEmployee.tags.map((tag) => (
-                    <span
+                    <Badge
                       key={tag}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-indigo-950 text-indigo-300 border border-indigo-800"
+                      size="sm"
+                      className="bg-indigo-950 text-indigo-300 border-indigo-800 font-bold uppercase tracking-wider inline-flex items-center gap-1.5 px-3 py-1 rounded-lg"
                     >
                       {tag}
                       <button
                         type="button"
                         onClick={() => handleRemoveTagFromEmployee(tagModalEmployee, tag)}
-                        className="hover:text-rose-400"
+                        className="hover:text-rose-400 cursor-pointer"
                         title="Remover tag"
+                        aria-label={`Remover tag ${tag}`}
                       >
                         <X className="w-3 h-3 stroke-[3]" />
                       </button>
-                    </span>
+                    </Badge>
                   ))
                 ) : (
                   <span className="text-xs text-slate-500 italic">Nenhuma etiqueta atribuída</span>
@@ -685,7 +687,7 @@ export const RegistrationsView: React.FC = () => {
                 Adicionar Nova Etiqueta:
               </label>
               <div className="flex items-center gap-2">
-                <input
+                <Input
                   type="text"
                   placeholder="Ex: REACT, DESIGNER, MOTION..."
                   value={newTagInput}
@@ -696,26 +698,28 @@ export const RegistrationsView: React.FC = () => {
                       handleAddTagToEmployee(tagModalEmployee);
                     }
                   }}
-                  className="flex-1 p-2.5 bg-[#222222] border border-[#2A2A2A] focus:border-[#E4007E] rounded-xl text-xs text-white uppercase placeholder-slate-500 font-bold focus:outline-none"
+                  className="flex-1 py-2 text-xs text-white uppercase placeholder-slate-500 font-bold !bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
                 />
-                <button
-                  type="button"
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => handleAddTagToEmployee(tagModalEmployee)}
-                  className="px-4 py-2.5 bg-[#E4007E] hover:bg-[#c2006b] text-white rounded-xl text-xs font-black"
+                  className="px-4 py-2.5 text-xs font-black shrink-0"
                 >
                   Adicionar
-                </button>
+                </Button>
               </div>
             </div>
 
             <div className="mt-6 pt-4 border-t border-[#2A2A2A] flex justify-end">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setTagModalEmployee(null)}
-                className="px-4 py-2 bg-[#222222] hover:bg-[#2A2A2A] text-white rounded-xl text-xs font-bold"
+                className="px-4 py-2 text-white text-xs font-bold bg-[#222222] hover:bg-[#2A2A2A]"
               >
                 Concluir
-              </button>
+              </Button>
             </div>
           </div>
         </div>

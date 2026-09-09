@@ -16,13 +16,13 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Employee } from '../../types';
+import { Button, Input, Avatar } from '../ui';
 
 export const EmployeesView: React.FC = () => {
   const {
     employees,
     tasks,
     setIsNewEmployeeModalOpen,
-    setSelectedEmployeeForDetail,
     setEditingEmployee,
     deleteEmployee,
   } = useApp();
@@ -160,26 +160,24 @@ export const EmployeesView: React.FC = () => {
 
   const getAvatarBorderColor = (index: number) => {
     const borders = [
-      'ring-[#E4007E] text-[#E4007E]',
-      'ring-blue-500 text-blue-500',
-      'ring-emerald-500 text-emerald-500',
-      'ring-purple-500 text-purple-500',
-      'ring-rose-500 text-rose-500',
-      'ring-sky-400 text-sky-400',
+      'ring-[#E4007E]',
+      'ring-blue-500',
+      'ring-emerald-500',
+      'ring-purple-500',
+      'ring-rose-500',
+      'ring-sky-400',
     ];
     return borders[index % borders.length];
   };
 
-  const getStatusDot = (status?: Employee['status']) => {
+  const getStatusDot = (status?: Employee['status']): 'online' | 'busy' | 'offline' => {
     switch (status) {
       case 'online':
-        return 'bg-emerald-500 ring-white dark:ring-[#181818]';
+        return 'online';
       case 'busy':
-        return 'bg-amber-500 ring-white dark:ring-[#181818]';
-      case 'away':
-        return 'bg-purple-500 ring-white dark:ring-[#181818]';
+        return 'busy';
       default:
-        return 'bg-blue-500 ring-white dark:ring-[#181818]';
+        return 'offline';
     }
   };
 
@@ -222,25 +220,27 @@ export const EmployeesView: React.FC = () => {
 
             {/* Right: Search Input + New Employee Button */}
             <div className="flex items-center gap-3">
-              <div className="relative w-full md:w-64">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
+              <div className="w-full md:w-64">
+                <Input
                   type="text"
                   placeholder="Buscar por nome..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#181818] border border-slate-800 focus:border-[#E4007E] rounded-2xl text-xs font-semibold text-white placeholder-slate-400 focus:outline-none transition-all shadow-inner"
+                  leftIcon={<Search className="w-4 h-4" />}
+                  className="py-2.5 bg-[#181818] !border-slate-800 focus:!border-[#E4007E] rounded-2xl text-xs font-semibold"
                 />
               </div>
 
-              <button
+              <Button
                 id="btn-add-employee"
+                variant="primary"
+                size="md"
                 onClick={() => setIsNewEmployeeModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-2xl text-xs font-black shadow-md shadow-[#E4007E]/25 transition-all shrink-0 cursor-pointer active:scale-95"
+                leftIcon={<Plus className="w-4 h-4 stroke-[3]" />}
+                className="px-4 py-2.5 rounded-2xl text-xs font-black shadow-md shadow-[#E4007E]/25 shrink-0"
               >
-                <Plus className="w-4 h-4 stroke-[3]" />
-                <span>Novo Membro</span>
-              </button>
+                Novo Membro
+              </Button>
             </div>
           </div>
 
@@ -305,7 +305,7 @@ export const EmployeesView: React.FC = () => {
                 <div className="relative">
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
+                    onChange={(e) => setSortBy(e.target.value as 'all' | 'name')}
                     className="appearance-none bg-[#222222] hover:bg-[#022852] border border-slate-700/80 text-white text-xs font-bold py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-[#E4007E] cursor-pointer transition-colors"
                   >
                     <option value="all">Padrão</option>
@@ -325,6 +325,7 @@ export const EmployeesView: React.FC = () => {
                       : 'text-slate-400 hover:text-white'
                   }`}
                   title="Visualização em Grade"
+                  aria-label="Visualização em Grade"
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
                 </button>
@@ -336,6 +337,7 @@ export const EmployeesView: React.FC = () => {
                       : 'text-slate-400 hover:text-white'
                   }`}
                   title="Visualização em Lista"
+                  aria-label="Visualização em Lista"
                 >
                   <ListIcon className="w-3.5 h-3.5" />
                 </button>
@@ -379,30 +381,34 @@ export const EmployeesView: React.FC = () => {
                     {/* Top Right Context Options */}
                     <div className="absolute top-4 right-4 z-10">
                       <div className="flex items-center gap-1">
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
                             setEditingEmployee(emp);
                           }}
-                          className="p-1.5 text-slate-400 hover:text-[#E4007E] rounded-lg hover:bg-slate-800/80 transition-colors cursor-pointer"
+                          className="p-1.5 text-slate-400 hover:text-[#E4007E] rounded-lg hover:bg-slate-800/80"
                           title="Editar Membro"
+                          aria-label="Editar Membro"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
                             if (window.confirm(`Deseja realmente excluir ${emp.name}?`)) {
                               deleteEmployee(emp.id);
                             }
                           }}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10"
                           title="Excluir Membro"
+                          aria-label="Excluir Membro"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
 
@@ -411,25 +417,15 @@ export const EmployeesView: React.FC = () => {
                       {/* Avatar with Ring & Status Indicator Dot */}
                       <div className="relative mb-3.5">
                         <div className={`p-1 rounded-full ring-2 ${borderRing} transition-transform group-hover:scale-105 duration-300`}>
-                          {emp.avatarUrl ? (
-                            <img
-                              src={emp.avatarUrl}
-                              alt={emp.name}
-                              className="w-16 h-16 rounded-full object-cover shadow-md"
-                            />
-                          ) : (
-                            <div className="w-16 h-16 rounded-full bg-[#01264E] text-white font-black text-lg flex items-center justify-center shadow-md uppercase">
-                              {emp.initials || emp.name.slice(0, 2)}
-                            </div>
-                          )}
+                          <Avatar
+                            src={emp.avatarUrl}
+                            name={emp.name}
+                            alt={emp.name}
+                            size="xl"
+                            status={getStatusDot(emp.status)}
+                            className="!w-16 !h-16 shadow-md [&>div]:bg-[#01264E] [&>div]:text-white [&>div]:text-lg [&>div]:font-black"
+                          />
                         </div>
-                        {/* Status Dot */}
-                        <span
-                          className={`absolute top-0 right-0 w-3.5 h-3.5 rounded-full ring-2 ${getStatusDot(
-                            emp.status
-                          )}`}
-                          title={`Status: ${emp.status || 'Ativo'}`}
-                        />
                       </div>
 
                       {/* Name */}
@@ -501,13 +497,13 @@ export const EmployeesView: React.FC = () => {
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-slate-800 overflow-hidden shrink-0 flex items-center justify-center font-bold text-white">
-                              {emp.avatarUrl ? (
-                                <img src={emp.avatarUrl} alt={emp.name} className="w-full h-full object-cover" />
-                              ) : (
-                                emp.initials || emp.name.slice(0, 2)
-                              )}
-                            </div>
+                            <Avatar
+                              src={emp.avatarUrl}
+                              name={emp.name}
+                              alt={emp.name}
+                              size="md"
+                              className="!w-9 !h-9 bg-slate-800 text-white font-bold"
+                            />
                             <div>
                               <div className="font-bold text-white">{emp.name}</div>
                               <div className="text-[11px] text-slate-400">{emp.email || `${emp.name.toLowerCase().replace(/\s+/g, '.')}@gmail.com`}</div>
@@ -526,20 +522,28 @@ export const EmployeesView: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1.5">
-                            <button
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() => setEditingEmployee(emp)}
                               className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                              title="Editar"
+                              aria-label="Editar"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() => {
                                 if (window.confirm(`Deseja excluir ${emp.name}?`)) deleteEmployee(emp.id);
                               }}
                               className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10"
+                              title="Excluir"
+                              aria-label="Excluir"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -569,20 +573,25 @@ export const EmployeesView: React.FC = () => {
                 </p>
               </div>
 
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => {
                   if (sidebarEmployee) setEditingEmployee(sidebarEmployee);
                 }}
-                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800"
                 title="Configurações / Detalhes"
+                aria-label="Configurações / Detalhes"
               >
                 <Settings className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
 
             {/* Circular Gauge / Radial Progress */}
             <div className="flex items-center justify-between py-2">
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => {
                   if (employees.length > 0) {
                     const currIdx = employees.findIndex((e) => e.id === sidebarEmployee?.id);
@@ -590,10 +599,12 @@ export const EmployeesView: React.FC = () => {
                     setSelectedSidebarEmployeeId(employees[prevIdx].id);
                   }
                 }}
-                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer"
+                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80"
+                title="Anterior"
+                aria-label="Anterior"
               >
                 <ChevronLeft className="w-5 h-5" />
-              </button>
+              </Button>
 
               {/* Radial Progress Ring */}
               <div className="relative w-36 h-36 flex items-center justify-center">
@@ -634,7 +645,9 @@ export const EmployeesView: React.FC = () => {
                 </div>
               </div>
 
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => {
                   if (employees.length > 0) {
                     const currIdx = employees.findIndex((e) => e.id === sidebarEmployee?.id);
@@ -642,10 +655,12 @@ export const EmployeesView: React.FC = () => {
                     setSelectedSidebarEmployeeId(employees[nextIdx].id);
                   }
                 }}
-                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer"
+                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80"
+                title="Próximo"
+                aria-label="Próximo"
               >
                 <ChevronRight className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             {/* Projects / Demandas Metric 2x2 Grid */}

@@ -18,7 +18,9 @@ import { useApp } from '../../context/AppContext';
 import { Task, TaskStatus, Employee } from '../../types';
 import { getLabelColorHex } from '../tasks/TasksView';
 import { isTaskOverdue, isTaskCompleted, isTaskInProgress, getTaskOverdueDays, parseTaskDueDate } from '../../lib/taskDateUtils';
+import { isTaskAssignedToMe } from '../../lib/taskUtils';
 import { CreativeRankingWidget } from './CreativeRankingWidget';
+import { Button, Avatar } from '../ui';
 
 export const DashboardView: React.FC = () => {
   const {
@@ -48,78 +50,6 @@ export const DashboardView: React.FC = () => {
   const [isTasksExpanded, setIsTasksExpanded] = useState(false);
   const [isWorkloadExpanded, setIsWorkloadExpanded] = useState(false);
 
-  const isTaskAssignedToMe = (task: Task) => {
-    if (!currentUser) return false;
-    if (task.isMine) return true;
-
-    const myId = (currentUser.id || '').toString().toLowerCase().trim();
-    const myEmployeeId = (currentUser.employeeId || '').toString().toLowerCase().trim();
-    const myName = (currentUser.name || '').toLowerCase().trim();
-    const myFirstName = myName.split(' ')[0].trim();
-    const myUsername = (currentUser.username || '').toLowerCase().trim();
-    const myEmailPrefix = (currentUser.email || '').split('@')[0].toLowerCase().trim();
-    const myInitials = (currentUser.initials || '').toUpperCase().trim();
-    const myTrelloId = (currentUser.trelloMemberId || '').toLowerCase().trim();
-
-    // 1. Assignee direto
-    if (task.assigneeId) {
-      const aId = task.assigneeId.toString().toLowerCase().trim();
-      if (myId && aId === myId) return true;
-      if (myEmployeeId && aId === myEmployeeId) return true;
-      if (myTrelloId && aId === myTrelloId) return true;
-    }
-
-    if (task.assigneeName) {
-      const aName = task.assigneeName.toLowerCase().trim();
-      if (myName && (aName.includes(myName) || myName.includes(aName))) return true;
-      if (myFirstName && myFirstName.length > 2 && (aName.includes(myFirstName) || myFirstName.includes(aName))) return true;
-      if (myUsername && (aName.includes(myUsername) || myUsername.includes(aName))) return true;
-      if (myEmailPrefix && (aName.includes(myEmailPrefix) || myEmailPrefix.includes(aName))) return true;
-    }
-
-    if (myInitials && task.assigneeInitials && task.assigneeInitials.toUpperCase().trim() === myInitials) {
-      return true;
-    }
-
-    // 2. Lista de membros da tarefa
-    if (task.members && task.members.length > 0) {
-      const isMemberMatch = task.members.some((m) => {
-        const mId = (m.id || '').toString().toLowerCase().trim();
-        if (myId && mId === myId) return true;
-        if (myEmployeeId && mId === myEmployeeId) return true;
-        if (myTrelloId && mId === myTrelloId) return true;
-
-        const mName = (m.name || '').toLowerCase().trim();
-        if (myName && (mName.includes(myName) || myName.includes(mName))) return true;
-        if (myFirstName && myFirstName.length > 2 && (mName.includes(myFirstName) || myFirstName.includes(mName))) return true;
-        if (myUsername && (mName.includes(myUsername) || myUsername.includes(mName))) return true;
-
-        const mInitials = (m.initials || '').toUpperCase().trim();
-        if (myInitials && mInitials === myInitials) return true;
-
-        return false;
-      });
-      if (isMemberMatch) return true;
-    }
-
-    // 3. Coluna nominal no Trello
-    if (task.trelloListName) {
-      const lName = task.trelloListName.toLowerCase();
-      if (
-        (myFirstName && myFirstName.length > 2 && lName.includes(myFirstName)) ||
-        (myEmailPrefix && myEmailPrefix.length > 2 && lName.includes(myEmailPrefix)) ||
-        (myFirstName === 'bismarques' && lName.includes('marques')) ||
-        (myFirstName === 'gerdson' && lName.includes('gerdeson')) ||
-        (myFirstName === 'felipe' && (lName.includes('fmota') || lName.includes('mota'))) ||
-        (myFirstName === 'daiane' && lName.includes('dai'))
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  };
-
   const isTaskAlerted = (task: Task): boolean => {
     if (isTaskCompleted(task)) return false;
     if (task.isFlagged || isTaskOverdue(task) || task.status === 'blocked') {
@@ -139,7 +69,7 @@ export const DashboardView: React.FC = () => {
 
   // Filter tasks based on activeFilter
   const filteredTasks = tasks.filter((task) => {
-    if (activeFilter === 'mine') return isTaskAssignedToMe(task);
+    if (activeFilter === 'mine') return isTaskAssignedToMe(task, currentUser);
     if (activeFilter === 'flagged') return isTaskAlerted(task);
     return true;
   });
@@ -402,14 +332,14 @@ export const DashboardView: React.FC = () => {
             </button>
           </div>
 
-          <button
+          <Button
             id="btn-dashboard-new-task"
             onClick={() => setIsNewTaskModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-xs sm:text-sm font-black shadow-md shadow-[#E4007E]/25 transition-all active:scale-98 cursor-pointer"
+            leftIcon={<Plus className="w-4 h-4 stroke-[3]" />}
+            className="text-xs sm:text-sm shadow-md shadow-[#E4007E]/25"
           >
-            <Plus className="w-4 h-4 stroke-[3]" />
             <span>Nova Tarefa</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -421,9 +351,15 @@ export const DashboardView: React.FC = () => {
             <span className="text-3xl font-black text-white tracking-tight">
               {dashboardMetrics.totalTasks}
             </span>
-            <button className="text-slate-400 hover:text-white p-1 transition-colors cursor-pointer">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-slate-400 hover:text-white p-1"
+              title="Mais opções"
+              aria-label="Mais opções"
+            >
               <MoreHorizontal className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
           <span className="text-xs text-slate-300 font-bold uppercase tracking-wider mt-1">total de tarefas</span>
           <div className="mt-4 pt-3 border-t border-[#2A2A2A] flex items-center justify-between text-xs">
@@ -440,9 +376,15 @@ export const DashboardView: React.FC = () => {
             <span className="text-3xl font-black text-[#10B981] tracking-tight">
               {dashboardMetrics.completedTasks}
             </span>
-            <button className="text-slate-400 hover:text-white p-1 transition-colors cursor-pointer">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-slate-400 hover:text-white p-1"
+              title="Mais opções"
+              aria-label="Mais opções"
+            >
               <MoreHorizontal className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
           <span className="text-xs text-slate-300 font-bold uppercase tracking-wider mt-1">concluídas</span>
           <div className="mt-4 pt-3 border-t border-[#2A2A2A] flex items-center justify-between text-xs">
@@ -461,9 +403,15 @@ export const DashboardView: React.FC = () => {
             <span className="text-3xl font-black text-rose-400 tracking-tight">
               {dashboardMetrics.overdueTasks}
             </span>
-            <button className="text-slate-400 hover:text-white p-1 transition-colors cursor-pointer">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-slate-400 hover:text-white p-1"
+              title="Mais opções"
+              aria-label="Mais opções"
+            >
               <MoreHorizontal className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
           <span className="text-xs text-slate-300 font-bold uppercase tracking-wider mt-1">atrasadas</span>
           <div className="mt-4 pt-3 border-t border-[#2A2A2A] flex items-center justify-between text-xs">
@@ -490,13 +438,16 @@ export const DashboardView: React.FC = () => {
                   {filteredTasks.length} tarefas
                 </span>
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setIsNewTaskModalOpen(true)}
-                className="text-slate-400 hover:text-white p-1 transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-white p-1"
                 title="Adicionar tarefa"
+                aria-label="Adicionar tarefa"
               >
                 <MoreHorizontal className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             {/* Task rows */}
@@ -614,17 +565,13 @@ export const DashboardView: React.FC = () => {
                         <div className="flex items-center justify-between mb-2 gap-2">
                           {/* Member Info */}
                           <div className="flex items-center gap-3 min-w-0">
-                            {emp.avatarUrl ? (
-                              <img
-                                src={emp.avatarUrl}
-                                alt={emp.name}
-                                className="w-9 h-9 rounded-full object-cover ring-1 ring-[#E4007E]/40 shrink-0"
-                              />
-                            ) : (
-                              <div className="w-9 h-9 rounded-full bg-[#222222] border border-[#E4007E]/40 flex items-center justify-center font-bold text-xs text-[#E4007E] shadow-xs shrink-0">
-                                {emp.initials}
-                              </div>
-                            )}
+                            <Avatar
+                              src={emp.avatarUrl}
+                              name={emp.name}
+                              alt={emp.name}
+                              size="md"
+                              className="!w-9 !h-9 ring-1 ring-[#E4007E]/40 shrink-0 [&>div]:bg-[#222222] [&>div]:border [&>div]:border-[#E4007E]/40 [&>div]:text-[#E4007E] [&>div]:font-bold [&>div]:text-xs shadow-xs"
+                            />
                             <div className="min-w-0">
                               <div className="font-bold text-white text-xs sm:text-sm group-hover:text-[#E4007E] transition-colors truncate">
                                 {emp.name}
@@ -713,9 +660,15 @@ export const DashboardView: React.FC = () => {
           <div className="bg-[#181818] rounded-2xl p-6 border border-[#2A2A2A] shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-white text-base">Visão Geral da Sprint</h3>
-              <button className="text-slate-400 hover:text-white p-1 transition-colors cursor-pointer">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-slate-400 hover:text-white p-1"
+                title="Mais opções"
+                aria-label="Mais opções"
+              >
                 <MoreHorizontal className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-6">

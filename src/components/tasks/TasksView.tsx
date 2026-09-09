@@ -28,6 +28,9 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Task, TaskStatus } from '../../types';
 import { getTaskOverdueDays, isTaskOverdue, isTaskCompleted, parseTaskDueDate } from '../../lib/taskDateUtils';
+import { isTaskAssignedToMe } from '../../lib/taskUtils';
+import { TaskMembersStack } from './TaskMembersStack';
+import { TasksHeader } from './TasksHeader';
 
 const CARD_THEMES = [
   {
@@ -172,98 +175,6 @@ const extractImageUrl = (desc?: string): string | null => {
   return match ? match[0] : null;
 };
 
-const TaskMembersStack: React.FC<{ task: Task }> = ({ task }) => {
-  const [expanded, setExpanded] = useState(false);
-
-  const rawList =
-    task.members && task.members.length > 0
-      ? task.members
-      : task.assigneeId && task.assigneeId !== 'unassigned' && task.assigneeName !== 'Sem membro'
-      ? [
-          {
-            id: task.assigneeId,
-            name: task.assigneeName,
-            initials: task.assigneeInitials,
-          },
-        ]
-      : [];
-
-  const membersList = rawList.filter(
-    (m) =>
-      m &&
-      m.id !== 'unassigned' &&
-      m.name !== 'Sem membro' &&
-      m.initials !== 'SM' &&
-      m.name?.trim().length > 0
-  );
-
-  if (membersList.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="relative inline-block">
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          setExpanded(!expanded);
-        }}
-        className="flex items-center -space-x-1.5 cursor-pointer group/stack"
-        title="Clique para expandir membros"
-      >
-        {membersList.map((m, idx) =>
-          m.avatarUrl ? (
-            <img
-              key={m.id || idx}
-              src={m.avatarUrl}
-              alt={m.name}
-              className="w-7 h-7 rounded-full object-cover ring-2 ring-[#E4007E]/50 shadow-sm transition-transform group-hover/stack:scale-105"
-              style={{ zIndex: membersList.length - idx }}
-            />
-          ) : (
-            <div
-              key={m.id || idx}
-              className="w-7 h-7 rounded-full bg-[#222222] border border-[#303030] ring-2 ring-[#181818] text-[#E4007E] font-black text-[10px] flex items-center justify-center shadow-sm transition-transform group-hover/stack:scale-105"
-              style={{ zIndex: membersList.length - idx }}
-            >
-              {m.initials}
-            </div>
-          )
-        )}
-      </div>
-
-      {expanded && (
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="absolute left-0 bottom-full mb-2 w-52 bg-[#181818] rounded-2xl shadow-2xl border border-[#303030] p-3 z-30 animate-in fade-in zoom-in-95 duration-150 text-white"
-        >
-          <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 pb-2 mb-2 border-b border-slate-800">
-            <span>Membros ({membersList.length})</span>
-            <button
-              onClick={() => setExpanded(false)}
-              className="text-slate-400 hover:text-white p-0.5"
-            >
-              ✕
-            </button>
-          </div>
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {membersList.map((m, idx) => (
-              <div key={m.id || idx} className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-[#011C39] border border-[#02376F] text-white font-black text-[10px] flex items-center justify-center shrink-0">
-                  {m.initials}
-                </div>
-                <span className="text-xs font-bold text-white truncate">
-                  {m.name}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
 export const TasksView: React.FC = () => {
   const {
     tasks,
@@ -323,84 +234,6 @@ export const TasksView: React.FC = () => {
       })
     ).values()
   );
-
-  const isTaskAssignedToMe = (task: Task) => {
-    if (!currentUser) return false;
-    if (task.isMine) return true;
-
-    const myId = (currentUser.id || '').toString().toLowerCase().trim();
-    const myEmployeeId = (currentUser.employeeId || '').toString().toLowerCase().trim();
-    const myName = (currentUser.name || '').toLowerCase().trim();
-    const myFirstName = myName.split(' ')[0].trim();
-    const myUsername = (currentUser.username || '').toLowerCase().trim();
-    const myEmailPrefix = (currentUser.email || '').split('@')[0].toLowerCase().trim();
-    const myInitials = (currentUser.initials || '').toUpperCase().trim();
-    const myTrelloId = (currentUser.trelloMemberId || '').toLowerCase().trim();
-
-    // 1. Direct assignee check
-    if (task.assigneeId) {
-      const aId = task.assigneeId.toString().toLowerCase().trim();
-      if (myId && aId === myId) return true;
-      if (myEmployeeId && aId === myEmployeeId) return true;
-      if (myTrelloId && aId === myTrelloId) return true;
-    }
-
-    if (task.assigneeName) {
-      const aName = task.assigneeName.toLowerCase().trim();
-      if (myName && (aName.includes(myName) || myName.includes(aName))) return true;
-      if (myFirstName && myFirstName.length > 2 && (aName.includes(myFirstName) || myFirstName.includes(aName))) return true;
-      if (myUsername && (aName.includes(myUsername) || myUsername.includes(aName))) return true;
-      if (myEmailPrefix && (aName.includes(myEmailPrefix) || myEmailPrefix.includes(aName))) return true;
-    }
-
-    if (myInitials && task.assigneeInitials && task.assigneeInitials.toUpperCase().trim() === myInitials) {
-      return true;
-    }
-
-    // 2. Members list check (onde o usuário está como membro da tarefa)
-    if (task.members && task.members.length > 0) {
-      const isMemberMatch = task.members.some((m) => {
-        const mId = (m.id || '').toString().toLowerCase().trim();
-        if (myId && mId === myId) return true;
-        if (myEmployeeId && mId === myEmployeeId) return true;
-        if (myTrelloId && mId === myTrelloId) return true;
-
-        const mName = (m.name || '').toLowerCase().trim();
-        if (myName && (mName.includes(myName) || myName.includes(mName))) return true;
-        if (myFirstName && myFirstName.length > 2 && (mName.includes(myFirstName) || myFirstName.includes(mName))) return true;
-        if (myUsername && (mName.includes(myUsername) || myUsername.includes(mName))) return true;
-
-        const mInitials = (m.initials || '').toUpperCase().trim();
-        if (myInitials && mInitials === myInitials) return true;
-
-        return false;
-      });
-      if (isMemberMatch) return true;
-    }
-
-    // 3. Trello idMembers if present
-    if ((task as any).idMembers && Array.isArray((task as any).idMembers)) {
-      if (myTrelloId && (task as any).idMembers.includes(myTrelloId)) return true;
-      if (myId && (task as any).idMembers.includes(myId)) return true;
-    }
-
-    // 4. Trello List Name (coluna nominal no Trello)
-    if (task.trelloListName) {
-      const lName = task.trelloListName.toLowerCase();
-      if (
-        (myFirstName && myFirstName.length > 2 && lName.includes(myFirstName)) ||
-        (myEmailPrefix && myEmailPrefix.length > 2 && lName.includes(myEmailPrefix)) ||
-        (myFirstName === 'bismarques' && lName.includes('marques')) ||
-        (myFirstName === 'gerdson' && lName.includes('gerdeson')) ||
-        (myFirstName === 'felipe' && (lName.includes('fmota') || lName.includes('mota'))) ||
-        (myFirstName === 'daiane' && lName.includes('dai'))
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  };
 
   const isDoneStatus = (statusId: string, label: string = '') => {
     const s = (statusId || '').toLowerCase();
@@ -502,7 +335,7 @@ export const TasksView: React.FC = () => {
     // Member filter
     let matchesMember = true;
     if (selectedMember === 'mine') {
-      matchesMember = isTaskAssignedToMe(t);
+      matchesMember = isTaskAssignedToMe(t, currentUser);
     } else if (selectedMember !== 'all') {
       const emp = employees.find((e) => e.id === selectedMember);
       const empName = emp ? emp.name.toLowerCase().trim() : '';
@@ -541,7 +374,7 @@ export const TasksView: React.FC = () => {
     // Quick Active Filter (Cmd+K / Palette Filter: All, Mine, Flagged/Alerts)
     let matchesActiveFilter = true;
     if (activeFilter === 'mine') {
-      matchesActiveFilter = isTaskAssignedToMe(t);
+      matchesActiveFilter = isTaskAssignedToMe(t, currentUser);
     } else if (activeFilter === 'flagged') {
       const overdue = isTaskOverdue(t);
       const isUrgent = Boolean(t.isFlagged);
@@ -636,54 +469,11 @@ export const TasksView: React.FC = () => {
   return (
     <div className="space-y-6 w-full px-4 sm:px-8 pb-12 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-white tracking-tight">Tarefas</h1>
-          <p className="text-sm text-slate-400 mt-1">Acompanhe suas demandas, tarefas e entregas em tempo real.</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* View mode toggle */}
-          <div className="flex items-center bg-[#181818] p-1 rounded-2xl border border-[#2A2A2A]">
-            <button
-              onClick={() => setViewMode('kanban')}
-              aria-label="Visualização em Quadro Kanban"
-              className={`p-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                viewMode === 'kanban'
-                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-              title="Visualização em Quadro Kanban"
-            >
-              <Kanban className="w-4 h-4" />
-              <span className="hidden sm:inline">Quadro</span>
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              aria-label="Visualização em Lista / Tabela"
-              className={`p-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                viewMode === 'list'
-                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-              title="Visualização em Lista"
-            >
-              <List className="w-4 h-4" />
-              <span className="hidden sm:inline">Lista</span>
-            </button>
-          </div>
-
-          <button
-            id="btn-tasks-new-task"
-            onClick={() => setIsNewTaskModalOpen(true)}
-            aria-label="Adicionar Nova Tarefa"
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-2xl text-xs font-black shadow-md shadow-[#E4007E]/25 transition-all active:scale-98 cursor-pointer"
-          >
-            <Plus className="w-4 h-4 stroke-[3]" />
-            <span>Nova Tarefa</span>
-          </button>
-        </div>
-      </div>
+      <TasksHeader
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onNewTask={() => setIsNewTaskModalOpen(true)}
+      />
 
       {/* Filter Toolbar - Filtro de Cliente e Membros */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-[#181818] p-3 rounded-2xl border border-[#2A2A2A]">
