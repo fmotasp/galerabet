@@ -19,11 +19,17 @@ import {
 
 export const DashboardView: React.FC = () => {
   // Contextos especializados
-  const { tasks, setIsNewTaskModalOpen, setEditingTask } = useTasks();
-  const { employees, setSelectedEmployeeForDetail } = useEmployees();
+  const { tasks } = useTasks();
+  const { employees } = useEmployees();
   const { projects } = useProjects();
   const { currentUser, isManagerOrAdmin } = useAuth();
-  const { activeFilter, setActiveFilter } = useApp();
+  const {
+    activeFilter,
+    setActiveFilter,
+    setIsNewTaskModalOpen,
+    setEditingTask,
+    setSelectedEmployeeForDetail,
+  } = useApp();
 
   // Filtragem de tarefas de acordo com o filtro ativo ('all' | 'flagged' | 'mine')
   const filteredTasks = useMemo(() => {

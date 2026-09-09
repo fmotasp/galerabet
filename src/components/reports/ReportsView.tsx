@@ -22,10 +22,10 @@ import { ReportsEmployeeCard } from './ReportsEmployeeCard';
 
 export const ReportsView: React.FC = () => {
   // Contextos especializados
-  const { tasks, setEditingTask } = useTasks();
+  const { tasks } = useTasks();
   const { projects } = useProjects();
   const { employees } = useEmployees();
-  const { spineStatuses } = useApp();
+  const { spineStatuses, setEditingTask } = useApp();
 
   const [period, setPeriod] = useState<PeriodFilter>('all');
   const [selectedDept, setSelectedDept] = useState<DepartmentFilter>('all');
