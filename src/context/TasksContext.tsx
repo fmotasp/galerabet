@@ -419,7 +419,6 @@ export const TasksProvider: React.FC<{
           assignee_initials: nextAssigneeInitials,
           members: nextMembers,
           last_moved_at: now,
-          delivered_at: nextDeliveredAt,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
