@@ -1,138 +1,182 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { Users } from 'lucide-react';
-import { useApp } from '../../context/AppContext';
-import { useTasks } from '../../context/TasksContext';
-import { useProjects } from '../../context/ProjectsContext';
-import { useEmployees } from '../../context/EmployeesContext';
-import { Task } from '../../types';
-import {
-  PeriodFilter,
-  DepartmentFilter,
-  getRegisteredClients,
-  filterReportTasks,
-  filterReportEmployees,
-  computeProductivityStats,
-  computeGlobalSummary,
-  exportReportsToCSV,
-} from './reportsUtils';
-import { ReportsHeader } from './ReportsHeader';
-import { ReportsFilterToolbar } from './ReportsFilterToolbar';
-import { ReportsGlobalKPIs } from './ReportsGlobalKPIs';
-import { ReportsEmployeeCard } from './ReportsEmployeeCard';
+import React from 'react';
+import { Download, FileText, Loader2, Clock, CheckCircle2, AlertTriangle, Trophy } from 'lucide-react';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { 
+  PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend, 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
+  LineChart, Line
+} from 'recharts';
+
+import { useReportsData } from './hooks/useReportsData';
+import { exportReportsToCSV } from './utils/reportsExportUtils';
+import { ReportPDF } from './components/ReportPDF';
+import { Button } from '../ui';
 
 export const ReportsView: React.FC = () => {
-  // Contextos especializados
-  const { tasks } = useTasks();
-  const { projects } = useProjects();
-  const { employees } = useEmployees();
-  const { spineStatuses, setEditingTask } = useApp();
+  const { data, isLoading } = useReportsData();
 
-  const [period, setPeriod] = useState<PeriodFilter>('all');
-  const [selectedDept, setSelectedDept] = useState<DepartmentFilter>('all');
-  const [selectedClient, setSelectedClient] = useState<string>('all');
-  const [searchMember, setSearchMember] = useState<string>('');
-  const [expandedEmployeeId, setExpandedEmployeeId] = useState<string | null>(null);
+  if (isLoading || !data) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-[#E4007E]" />
+        <p>Carregando Dashboard Enterprise...</p>
+      </div>
+    );
+  }
 
-  // Lista dinâmica de clientes cadastrados + projetos e categorias
-  const registeredClients = useMemo(() => {
-    return getRegisteredClients(projects, tasks);
-  }, [projects, tasks]);
-
-  // Filtro de tarefas por período e cliente
-  const filteredTasks = useMemo(() => {
-    return filterReportTasks(tasks, selectedClient, period, registeredClients);
-  }, [tasks, selectedClient, period, registeredClients]);
-
-  // Lista de colaboradores relevantes (Designers e Video Makers)
-  const reportEmployees = useMemo(() => {
-    return filterReportEmployees(employees, selectedDept, searchMember);
-  }, [employees, selectedDept, searchMember]);
-
-  // Cálculo individual das métricas de produtividade por colaborador
-  const productivityStats = useMemo(() => {
-    return computeProductivityStats(reportEmployees, filteredTasks);
-  }, [reportEmployees, filteredTasks]);
-
-  // Totais Gerais para os KPIs do topo
-  const globalSummary = useMemo(() => {
-    return computeGlobalSummary(productivityStats);
-  }, [productivityStats]);
-
-  // Callbacks memoizados para ações
-  const handleExportCSV = useCallback(() => {
-    exportReportsToCSV(productivityStats);
-  }, [productivityStats]);
-
-  const handlePrint = useCallback(() => {
-    window.print();
-  }, []);
-
-  const handleToggleExpand = useCallback((id: string) => {
-    setExpandedEmployeeId((prev) => (prev === id ? null : id));
-  }, []);
-
-  const handleTaskClick = useCallback(
-    (task: Task) => {
-      setEditingTask(task);
-    },
-    [setEditingTask]
-  );
+  const handleExportCSV = () => {
+    exportReportsToCSV(data);
+  };
 
   return (
-    <div className="space-y-8 w-full max-w-7xl mx-auto px-4 sm:px-8 pb-16 animate-in fade-in duration-200">
-      {/* 1. Header do Relatório */}
-      <ReportsHeader onExportCSV={handleExportCSV} onPrint={handlePrint} />
+    <div className="flex-1 flex flex-col bg-[#101010] p-6 lg:p-8 overflow-y-auto">
+      
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-black text-white">Dashboard de Gestão</h1>
+          <p className="text-slate-400 text-sm">Resumo executivo do mês atual</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={handleExportCSV} 
+            variant="outline" 
+            className="border-[#2A2A2A] text-slate-300 hover:text-white"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Exportar CSV
+          </Button>
+          
+          <PDFDownloadLink 
+            document={<ReportPDF data={data} />} 
+            fileName={`dashboard_${new Date().getTime()}.pdf`}
+          >
+            {({ loading }) => (
+              <Button 
+                variant="primary" 
+                className="bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white border-0 shadow-lg"
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
+                Gerar PDF
+              </Button>
+            )}
+          </PDFDownloadLink>
+        </div>
+      </div>
 
-      {/* 2. Barra de Filtros Globais */}
-      <ReportsFilterToolbar
-        period={period}
-        onPeriodChange={setPeriod}
-        selectedDept={selectedDept}
-        onDeptChange={setSelectedDept}
-        selectedClient={selectedClient}
-        onClientChange={setSelectedClient}
-        registeredClients={registeredClients}
-        searchMember={searchMember}
-        onSearchChange={setSearchMember}
-      />
-
-      {/* 3. Cards de Resumo Executivo Geral (KPIs Globais) */}
-      <ReportsGlobalKPIs summary={globalSummary} />
-
-      {/* 4. Lista e Cards Detalhados por Colaborador */}
-      <div className="space-y-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-extrabold text-white flex items-center gap-2">
-            <Users className="w-5 h-5 text-[#E4007E]" />
-            <span>Desempenho e Capacidade por Colaborador ({productivityStats.length})</span>
-          </h2>
-          <span className="text-xs text-slate-400 font-medium">
-            Clique no colaborador para ver as tarefas detalhadas
-          </span>
+      {/* KPIS GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+        
+        <div className="bg-[#181818] border border-[#2A2A2A] rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold text-slate-400 uppercase">Lead Time Médio</span>
+            <div className="text-2xl font-black text-white mt-1">{data.kpis.leadTime} dias</div>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
+            <Clock className="w-5 h-5" />
+          </div>
         </div>
 
-        {productivityStats.length === 0 ? (
-          <div className="bg-[#181818] border border-[#2A2A2A] rounded-3xl p-12 text-center text-slate-400 space-y-2 shadow-xl">
-            <Users className="w-12 h-12 mx-auto text-slate-600 mb-2" />
-            <h3 className="text-base font-bold text-white">Nenhum colaborador encontrado</h3>
-            <p className="text-xs text-slate-400">
-              Verifique os filtros selecionados ou cadastre novos colaboradores na equipe.
-            </p>
+        <div className="bg-[#181818] border border-[#2A2A2A] rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold text-slate-400 uppercase">Entrega no Prazo</span>
+            <div className="text-2xl font-black text-emerald-400 mt-1">{data.kpis.onTimeRate}%</div>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {productivityStats.map((stat) => (
-              <ReportsEmployeeCard
-                key={stat.employee.id}
-                stat={stat}
-                isExpanded={expandedEmployeeId === stat.employee.id}
-                spineStatuses={spineStatuses}
-                onToggleExpand={handleToggleExpand}
-                onTaskClick={handleTaskClick}
-              />
-            ))}
+          <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+            <CheckCircle2 className="w-5 h-5" />
           </div>
-        )}
+        </div>
+
+        <div className="bg-[#181818] border border-[#2A2A2A] rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold text-slate-400 uppercase">Gargalo Atual</span>
+            <div className="text-2xl font-black text-rose-400 mt-1">{data.kpis.bottleneck}</div>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-400">
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-[#181818] border border-[#2A2A2A] rounded-2xl p-5 flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold text-slate-400 uppercase">Top Performer</span>
+            <div className="text-xl font-black text-amber-400 mt-1">{data.kpis.topPerformer}</div>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400">
+            <Trophy className="w-5 h-5" />
+          </div>
+        </div>
+
+      </div>
+
+      {/* CHARTS GRID */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 flex-1 min-h-[400px]">
+        
+        {/* Gráfico 1: Status */}
+        <div className="bg-[#181818] border border-[#2A2A2A] rounded-2xl p-5 flex flex-col">
+          <h3 className="text-sm font-bold text-white mb-4">Distribuição por Status</h3>
+          <div className="flex-1 w-full min-h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data.statusDistribution}
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {data.statusDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <RechartsTooltip 
+                  contentStyle={{ backgroundColor: '#222', borderColor: '#333', color: '#fff', borderRadius: '8px' }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Gráfico 2: Workload */}
+        <div className="bg-[#181818] border border-[#2A2A2A] rounded-2xl p-5 flex flex-col">
+          <h3 className="text-sm font-bold text-white mb-4">Carga de Trabalho (Pendentes)</h3>
+          <div className="flex-1 w-full min-h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data.workload} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <XAxis dataKey="name" stroke="#666" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#666" fontSize={11} tickLine={false} axisLine={false} />
+                <RechartsTooltip 
+                  cursor={{ fill: '#222' }}
+                  contentStyle={{ backgroundColor: '#222', borderColor: '#333', color: '#fff', borderRadius: '8px' }}
+                />
+                <Bar dataKey="pendentes" fill="#E4007E" radius={[4, 4, 0, 0]} barSize={32} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Gráfico 3: Burnup */}
+        <div className="bg-[#181818] border border-[#2A2A2A] rounded-2xl p-5 flex flex-col">
+          <h3 className="text-sm font-bold text-white mb-4">Volume de Entregas (7 dias)</h3>
+          <div className="flex-1 w-full min-h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={data.burnup} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <XAxis dataKey="date" stroke="#666" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#666" fontSize={11} tickLine={false} axisLine={false} />
+                <RechartsTooltip 
+                  contentStyle={{ backgroundColor: '#222', borderColor: '#333', color: '#fff', borderRadius: '8px' }}
+                />
+                <Line type="monotone" dataKey="concluidas" stroke="#10B981" strokeWidth={3} dot={{ r: 4, fill: '#10B981', strokeWidth: 0 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
       </div>
     </div>
   );

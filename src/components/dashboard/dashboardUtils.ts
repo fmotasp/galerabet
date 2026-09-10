@@ -158,27 +158,24 @@ export const computeWorkloadMembers = (
   const workloadMembers = employees
     .filter((emp) => {
       const roleLower = (emp.role || '').toLowerCase();
-      const nameLower = (emp.name || '').toLowerCase();
-      const isDesignerOrVideoMaker =
+      const deptLower = (emp.department || '').toLowerCase();
+      const roleType = (emp.roleType || '').toLowerCase();
+      
+      const isCreative =
         roleLower.includes('designer') ||
-        roleLower.includes('video maker') ||
-        roleLower.includes('videomaker') ||
-        nameLower.includes('rafael barbosa') ||
-        nameLower.includes('matheus bahia') ||
-        nameLower.includes('davi soares') ||
-        nameLower.includes('gerson') ||
-        nameLower.includes('gerdson') ||
-        nameLower.includes('dai pessi') ||
-        nameLower.includes('bismarques') ||
-        nameLower.includes('felipe mota') ||
-        nameLower.includes('marcos roberto');
+        roleLower.includes('video') ||
+        roleLower.includes('arte') ||
+        roleLower.includes('criativ') ||
+        deptLower.includes('design') ||
+        deptLower.includes('video');
 
       const isGestor =
         roleLower.includes('gestor') ||
-        nameLower.includes('fabio mozart') ||
-        nameLower.includes('giovanni dias');
+        roleLower.includes('admin') ||
+        roleType === 'manager' ||
+        roleType === 'admin';
 
-      return isDesignerOrVideoMaker && !isGestor;
+      return isCreative && !isGestor;
     })
     .map((emp) => {
       const empFirstName = emp.name.toLowerCase().split(' ')[0];
@@ -194,7 +191,10 @@ export const computeWorkloadMembers = (
 
       const totalDemands = allEmpTasks.length;
       const activeDemands = getActiveWorkloadCount(emp, filteredTasks);
-      const maxIdealCapacity = 4;
+      
+      // Capacidade baseada no currentWorkload (padrão é 5 tarefas se não tiver definido, ex: 50/10)
+      const empWorkload = typeof emp.currentWorkload === 'number' ? emp.currentWorkload : 50;
+      const maxIdealCapacity = Math.max(2, Math.round(empWorkload / 10));
       const availableCapacity = Math.max(0, maxIdealCapacity - activeDemands);
 
       return {

@@ -4,7 +4,13 @@ import { CurrentUserType } from '../../context/AuthContext';
 import { isTaskAssignedToMe } from '../../lib/taskUtils';
 import { isTaskOverdue, isTaskCompleted, parseTaskDueDate } from '../../lib/taskDateUtils';
 import { useDebounce } from '../../hooks/useDebounce';
-import { getClientLogoFallback } from '../reports/reportsUtils';
+export const getClientLogoFallback = (projectName?: string) => {
+  const name = (projectName || '').toLowerCase();
+  if (name.includes('f12')) return '/icones/icon_f12.png';
+  if (name.includes('galera')) return '/icones/icon_galera.png';
+  if (name.includes('luva')) return '/icones/icon_luva.png';
+  return '';
+};
 
 export interface UseTasksFilterProps {
   tasks: Task[];

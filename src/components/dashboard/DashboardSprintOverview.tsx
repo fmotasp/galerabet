@@ -99,10 +99,6 @@ export const DashboardSprintOverview: React.FC<DashboardSprintOverviewProps> = R
               <span className="font-bold text-white">{metrics.backlogTasks}</span>
             </div>
 
-            <div className="flex items-center justify-between text-slate-400 pt-2 border-t border-[#2A2A2A] font-medium">
-              <span>dias restantes</span>
-              <span className="font-bold text-white">7 dias</span>
-            </div>
           </div>
         </div>
       </div>

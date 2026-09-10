@@ -448,7 +448,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
 
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="px-2 py-0.5 rounded-full bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] font-black text-[10px]">
-                      {item.completed} fev.
+                      {item.completed} entregas
                     </span>
                     <span className="text-[10px] font-bold text-emerald-400">
                       {item.rate}%
