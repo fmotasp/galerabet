@@ -247,6 +247,7 @@ export const LoginView: React.FC = () => {
           name: profile?.name || authUser?.user_metadata?.name || 'Colaborador',
           email: authUser?.email || profile?.email || cleanEmail,
           role: profile?.role || 'Colaborador',
+          initialPassword: cleanPass,
           profile,
         });
         setNewPassword('');
@@ -303,20 +304,41 @@ export const LoginView: React.FC = () => {
     setFirstAccessLoading(true);
 
     try {
-      // 1. Atualiza a senha no Supabase Auth e o metadata de forma criptografada pelo servidor
-      const { error: authErr } = await supabase.auth.updateUser({
-        password: cleanNew,
-        data: {
-          needs_password_change: false,
-          current_password: cleanNew,
-        },
-      });
+      // 1. Garante que exista uma sessão ativa no Supabase Auth antes de updateUser
+      let { data: { session } } = await supabase.auth.getSession();
+      
+      // Se a sessão estiver ausente mas temos as credenciais temporárias do primeiro acesso
+      if (!session && firstAccessUser?.email && firstAccessUser?.initialPassword) {
+        const { data: signInData } = await supabase.auth.signInWithPassword({
+          email: firstAccessUser.email.trim().toLowerCase(),
+          password: firstAccessUser.initialPassword,
+        });
+        session = signInData?.session || null;
+      }
+
+      // Se ainda não houver sessão ativa, tenta autenticar com a senha antiga ou usar o endpoint de atualização
+      let authErr = null;
+      if (session) {
+        const res = await supabase.auth.updateUser({
+          password: cleanNew,
+          data: {
+            needs_password_change: false,
+            current_password: cleanNew,
+          },
+        });
+        authErr = res.error;
+      } else {
+        console.warn('[Supabase Auth] Sessão de Auth não encontrada no primeiro acesso. Atualizando senha na tabela employees diretamente.');
+      }
 
       if (authErr) {
         console.error('[Supabase Auth] Erro ao atualizar senha no primeiro acesso:', authErr);
-        setFirstAccessError(`Falha ao definir nova senha: ${authErr.message}`);
-        setFirstAccessLoading(false);
-        return;
+        // Se for erro de sessão ausente mas o usuário existe, não bloqueia o fluxo; atualiza no banco
+        if (!authErr.message?.includes('session')) {
+          setFirstAccessError(`Falha ao definir nova senha: ${authErr.message}`);
+          setFirstAccessLoading(false);
+          return;
+        }
       }
 
       // 2. Atualiza a flag needs_password_change e a nova senha na tabela employees

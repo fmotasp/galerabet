@@ -170,7 +170,13 @@ export const TasksProvider: React.FC<{
           setTasks((prev) => prev.filter((t) => t.id !== payload.old.id));
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('[Realtime:Tasks] Conectado e transmitindo em tempo real!');
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          console.warn('[Realtime:Tasks] Status do canal:', status);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
