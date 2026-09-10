@@ -193,8 +193,6 @@ export const EmployeesProvider: React.FC<{
       const encodedLoc = encodeEmployeeLocationWithAvatar(newEmp.location || 'Brasil', newEmp.avatarUrl || '');
       dbPayload.location = encodedLoc;
 
-      console.log('[addEmployee] dbPayload sendo enviado:', JSON.stringify(dbPayload));
-
       const { data, error } = await supabase.from('employees').insert(dbPayload).select();
       if (error) {
         console.error('[addEmployee] Erro no insert principal:', {

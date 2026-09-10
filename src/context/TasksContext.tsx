@@ -133,7 +133,54 @@ export const TasksProvider: React.FC<{
     };
   };
 
-  // Inscrição em tempo real (Supabase Realtime WebSockets) para os 15+ usuários simultâneos
+  // Busca direta e completa de tarefas no Supabase
+  const fetchTasksFromSupabase = useCallback(async () => {
+    try {
+      let allTasksData: any[] = [];
+      let from = 0;
+      const batchSize = 1000;
+      let hasMore = true;
+
+      while (hasMore && from < 10000) {
+        const { data, error } = await supabase
+          .from('tasks')
+          .select('*')
+          .order('last_moved_at', { ascending: false })
+          .range(from, from + batchSize - 1);
+
+        if (error) {
+          console.warn('[Supabase] Erro ao buscar tarefas do banco:', error.message);
+          break;
+        }
+
+        if (!data || data.length === 0) {
+          hasMore = false;
+          break;
+        }
+
+        allTasksData = allTasksData.concat(data);
+        if (data.length < batchSize) {
+          hasMore = false;
+        } else {
+          from += batchSize;
+        }
+      }
+
+      if (allTasksData.length > 0) {
+        const mapped = allTasksData.map(mapRowToTask);
+        setTasks(mapped);
+      }
+    } catch (err) {
+      console.warn('[Supabase] Falha ao carregar tarefas:', err);
+    }
+  }, []);
+
+  // Busca inicial imediata ao montar o contexto
+  useEffect(() => {
+    fetchTasksFromSupabase();
+  }, [fetchTasksFromSupabase]);
+
+  // Inscrição em tempo real (Supabase Realtime WebSockets) para todos os usuários
   useEffect(() => {
     const channel = supabase
       .channel('realtime:tasks')
@@ -170,18 +217,21 @@ export const TasksProvider: React.FC<{
           setTasks((prev) => prev.filter((t) => t.id !== payload.old.id));
         }
       )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('[Realtime:Tasks] Conectado e transmitindo em tempo real!');
-        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-          console.warn('[Realtime:Tasks] Status do canal:', status);
-        }
-      });
+      .subscribe();
+
+    // Quando o usuário volta para a aba ou desbloqueia o computador, sincroniza com o banco
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchTasksFromSupabase();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [fetchTasksFromSupabase]);
 
   // Cache inteligente e seguro no LocalStorage (armazena apenas as 50 mais recentes para evitar QuotaExceededError em 10.000+ tarefas)
   useEffect(() => {

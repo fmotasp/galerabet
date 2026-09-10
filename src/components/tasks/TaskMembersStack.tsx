@@ -42,16 +42,6 @@ export const TaskMembersStack: React.FC<TaskMembersStackProps> = ({ task }) => {
       );
 
       const resolvedAvatar = m.avatarUrl || matchedEmp?.avatarUrl || '';
-      
-      if (m.initials === 'FM') {
-        console.log('[DEBUG] TaskMembersStack mapping FM:', {
-          m_id: m.id,
-          m_name: m.name,
-          matchedEmp_id: matchedEmp?.id,
-          matchedEmp_avatar: matchedEmp?.avatarUrl,
-          resolvedAvatar
-        });
-      }
 
       return {
         ...m,

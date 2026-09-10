@@ -152,43 +152,30 @@ export const LoginView: React.FC = () => {
 
       // 3. Busca o perfil do colaborador associado ao auth_user_id ou email
       if (!profile && authUser) {
-        console.log('[Login Debug] authUser exists, ID:', authUser.id, 'Email:', authUser.email);
-        const { data: byAuthId, error: authIdErr } = await supabase
+        const { data: byAuthId } = await supabase
           .from('employees')
           .select('*')
           .eq('auth_user_id', authUser.id)
           .maybeSingle();
 
-        if (authIdErr) console.warn('[Login Debug] Error checking by auth_user_id:', authIdErr.message);
-
         if (byAuthId) {
           profile = byAuthId;
-          console.log('[Login Debug] Profile found by auth_user_id:', byAuthId.id);
         } else if (authUser.email) {
-          console.log('[Login Debug] Not found by auth_user_id. Trying by email:', authUser.email.trim());
           // Fallback por email: vincula automaticamente auth_user_id no primeiro login
-          const { data: byEmail, error: emailErr } = await supabase
+          const { data: byEmail } = await supabase
             .from('employees')
             .select('*')
             .ilike('email', authUser.email.trim())
             .maybeSingle();
 
-          if (emailErr) console.warn('[Login Debug] Error checking by email:', emailErr.message);
-
           if (byEmail) {
             profile = byEmail;
-            console.log('[Login Debug] Profile found by email:', byEmail.id);
             if (!byEmail.auth_user_id) {
               await supabase
                 .from('employees')
                 .update({ auth_user_id: authUser.id })
                 .eq('id', byEmail.id);
             }
-          } else {
-             console.warn('[Login Debug] No profile found by email either. RLS issue? Or email not in DB?');
-             // Tentativa desesperada sem filtro de email (se RLS permitir)
-             const { data: allEmps } = await supabase.from('employees').select('id, email, username');
-             console.log('[Login Debug] All employees fetched to verify:', allEmps);
           }
         }
       }
