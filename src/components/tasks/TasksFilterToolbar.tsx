@@ -87,11 +87,24 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                   <img
                     src={client.icon}
                     alt={client.name}
-                    className="w-4 h-4 rounded-md object-contain"
+                    className="w-4 h-4 rounded-md object-contain shrink-0 drop-shadow-xs"
+                    onError={(e) => {
+                      // Se a imagem falhar, esconde e mostra fallback
+                      const target = e.currentTarget;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent && !parent.querySelector('.client-fallback-badge')) {
+                        const span = document.createElement('span');
+                        span.className = 'client-fallback-badge w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0';
+                        span.style.backgroundColor = client.color || '#10B981';
+                        span.textContent = client.name.substring(0, 1).toUpperCase();
+                        parent.insertBefore(span, target);
+                      }
+                    }}
                   />
                 ) : (
                   <span
-                    className="w-3.5 h-3.5 rounded-md flex items-center justify-center text-[9px] font-black text-white"
+                    className="w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0"
                     style={{ backgroundColor: client.color }}
                   >
                     {client.name.substring(0, 1).toUpperCase()}

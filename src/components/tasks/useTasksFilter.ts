@@ -4,7 +4,8 @@ import { CurrentUserType } from '../../context/AuthContext';
 import { isTaskAssignedToMe } from '../../lib/taskUtils';
 import { isTaskOverdue, isTaskCompleted, parseTaskDueDate } from '../../lib/taskDateUtils';
 import { useDebounce } from '../../hooks/useDebounce';
-export const getClientLogoFallback = (projectName?: string) => {
+export const getClientLogoFallback = (projectName?: string, logoUrl?: string) => {
+  if (logoUrl && logoUrl.trim()) return logoUrl.trim();
   const name = (projectName || '').toLowerCase();
   if (name.includes('f12')) return '/icones/icon_f12.png';
   if (name.includes('galera')) return '/icones/icon_galera.png';
