@@ -112,15 +112,7 @@ export const ReportsView: React.FC = () => {
 
       const hasCreativeMember = Array.isArray(t.members) && t.members.some((m) => creativeEmployeeIds.has(m.id) || creativeEmployeeNames.has(m.name.toLowerCase().trim()));
 
-      const isExplicitlyNonCreative =
-        !hasCreativeAssignee &&
-        !hasCreativeMember &&
-        ((t.assigneeId && nonCreativeEmployeeIds.has(t.assigneeId)) ||
-         (t.assigneeName && nonCreativeEmployeeNames.has(t.assigneeName.toLowerCase().trim())));
-
-      if (isExplicitlyNonCreative) {
-        return false;
-      }
+      // isExplicitlyNonCreative removido para contabilizar todas as demandas do fluxo (backlog, novos pedidos, etc), independente de quem assumiu a tarefa
 
       // Filtro de Período
       if (periodFilter !== 'all') {
