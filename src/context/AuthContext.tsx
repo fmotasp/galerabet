@@ -39,7 +39,10 @@ const AuthContext = createContext<AuthContextType | null>(null);
 const STORAGE_KEYS = {
   LOGIN_ART_URL: 'spine_login_art_url_v1',
   LOGIN_DATE: 'spine_login_date_v1',
+  AUTH_EPOCH: 'spine_auth_epoch_v2026_09_10_1',
 };
+
+const GLOBAL_AUTH_EPOCH = '2026_09_10_force_relogin_v1';
 
 const getTodayDateStr = (): string => {
   const now = new Date();
@@ -55,6 +58,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [currentUser, setCurrentUserState] = useState<any>(() => {
     try {
+      // Invalidação global de sessões antigas
+      const localEpoch = localStorage.getItem(STORAGE_KEYS.AUTH_EPOCH);
+      if (localEpoch !== GLOBAL_AUTH_EPOCH) {
+        localStorage.removeItem('spine_logged_user');
+        localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);
+        localStorage.setItem(STORAGE_KEYS.AUTH_EPOCH, GLOBAL_AUTH_EPOCH);
+        // Desloga do Supabase localmente também
+        supabase.auth.signOut().catch(() => {});
+        return null;
+      }
+
       const saved = localStorage.getItem('spine_logged_user');
       const loginDate = localStorage.getItem(STORAGE_KEYS.LOGIN_DATE);
       const today = getTodayDateStr();
@@ -170,9 +184,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let isMounted = true;
 
+    // Se acabou de resetar a época de autenticação, força logout do cliente Supabase
+    if (localStorage.getItem(STORAGE_KEYS.AUTH_EPOCH) === GLOBAL_AUTH_EPOCH && !localStorage.getItem('spine_logged_user')) {
+      supabase.auth.signOut().catch(() => {});
+    }
+
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!isMounted) return;
       try {
+        // Se a época não bate ou o cache foi limpo pelo epoch reset, ignora sessão residual
+        if (!localStorage.getItem('spine_logged_user') && !session?.user) {
+          setCurrentUserState(null);
+          setPendingPasswordChangeUser(null);
+          return;
+        }
+
         if (session?.user) {
           const appUser = await fetchProfileForAuthUser(session.user);
           if (isMounted && appUser) {
