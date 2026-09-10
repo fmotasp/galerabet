@@ -2,6 +2,7 @@ import React from 'react';
 import { Users, Star, ChevronDown, Check, CheckCircle2 } from 'lucide-react';
 import { Employee } from '../../types';
 import { CurrentUserType } from '../../context/AuthContext';
+import { isDesignerOrVideomaker } from '../../lib/taskUtils';
 
 export interface RegisteredClient {
   id: string;
@@ -208,8 +209,9 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
 
                   <div className="h-px bg-white/5 my-1.5" />
 
-                  {/* Employees list */}
+                  {/* Employees list: apenas Designers e Videomakers */}
                   {employees
+                    .filter((emp) => isDesignerOrVideomaker(emp))
                     .filter((emp) =>
                       emp.name.toLowerCase().includes(memberFilterSearch.toLowerCase()) ||
                       (emp.role && emp.role.toLowerCase().includes(memberFilterSearch.toLowerCase()))

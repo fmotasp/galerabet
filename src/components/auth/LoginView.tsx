@@ -252,8 +252,10 @@ export const LoginView: React.FC = () => {
 
       const authenticatedUser = {
         id: profile?.id || authUser?.id || 'emp-user',
+        employeeId: profile?.id,
         authUserId: authUser?.id || profile?.auth_user_id || profile?.id,
         name: userName,
+        username: profile?.username || (cleanEmail || authUser?.email)?.split('@')[0] || '',
         email: authUser?.email || profile?.email || cleanEmail,
         role: userRole,
         roleType: isUserAdmin ? ('admin' as const) : ('employee' as const),

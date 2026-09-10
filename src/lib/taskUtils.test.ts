@@ -81,4 +81,33 @@ describe('isTaskAssignedToMe', () => {
     });
     expect(isTaskAssignedToMe(task, baseUser)).toBe(false);
   });
+
+  it('retorna apenas as tarefas de Felipe mesmo se ele tiver role admin', () => {
+    const felipeUser: CurrentUserType = {
+      id: 'felipe-uuid',
+      employeeId: 'emp-felipe',
+      name: 'Felipe Mota',
+      email: 'felipe@empresa.com',
+      role: 'Designer',
+      roleType: 'admin',
+      initials: 'FM',
+      username: 'felipe',
+    };
+
+    const myTask = createBaseTask({
+      id: 'task-felipe',
+      assigneeName: 'Felipe Mota',
+      assigneeId: 'emp-felipe',
+    });
+
+    const otherTask = createBaseTask({
+      id: 'task-other',
+      assigneeName: 'Rafael Barbosa',
+      assigneeId: 'emp-rafael',
+    });
+
+    expect(isTaskAssignedToMe(myTask, felipeUser)).toBe(true);
+    expect(isTaskAssignedToMe(otherTask, felipeUser)).toBe(false);
+  });
 });
+

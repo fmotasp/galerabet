@@ -64,6 +64,60 @@ export const isTaskAssignedToMe = (
   return false;
 };
 
+/**
+ * Helper para identificar colaboradores exclusivos de Design e Audiovisual/Vídeo (Designers e Videomakers)
+ */
+export const isDesignerOrVideomaker = (emp: {
+  role?: string;
+  department?: string;
+  tags?: string[];
+}): boolean => {
+  const role = (emp.role || '').toLowerCase();
+  const dept = (emp.department || '').toLowerCase();
+  const tags = (emp.tags || []).map((t) => t.toLowerCase());
+
+  // Excluir expressamente Marketing, Social Media, Conteúdo se não tiver menção a Design/Vídeo
+  const isMarketingOrOther =
+    (role.includes('marketing') ||
+      dept.includes('marketing') ||
+      role.includes('social media') ||
+      dept.includes('social media') ||
+      role.includes('conteúdo') ||
+      role.includes('conteudo') ||
+      dept.includes('conteúdo') ||
+      dept.includes('conteudo') ||
+      role.includes('redator') ||
+      role.includes('copywriter')) &&
+    !role.includes('design') &&
+    !role.includes('video') &&
+    !role.includes('vídeo') &&
+    !role.includes('audiovisual');
+
+  if (isMarketingOrOther) return false;
+
+  const matchesDesign =
+    role.includes('design') ||
+    dept.includes('design') ||
+    tags.some((t) => t.includes('design'));
+
+  const matchesVideo =
+    role.includes('video') ||
+    role.includes('vídeo') ||
+    role.includes('audiovisual') ||
+    role.includes('audio visual') ||
+    role.includes('videomaker') ||
+    role.includes('video maker') ||
+    role.includes('motion') ||
+    role.includes('editor') ||
+    role.includes('filmmaker') ||
+    dept.includes('video') ||
+    dept.includes('vídeo') ||
+    dept.includes('audiovisual') ||
+    tags.some((t) => t.includes('video') || t.includes('audio') || t.includes('motion'));
+
+  return matchesDesign || matchesVideo;
+};
+
 export const encodeTaskDescriptionWithChecklist = (
   description: string = '',
   checklists: { id: string; title: string; completed: boolean }[] = []

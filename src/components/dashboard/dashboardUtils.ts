@@ -192,9 +192,9 @@ export const computeWorkloadMembers = (
       const totalDemands = allEmpTasks.length;
       const activeDemands = getActiveWorkloadCount(emp, filteredTasks);
       
-      // Capacidade baseada no currentWorkload (padrão é 5 tarefas se não tiver definido, ex: 50/10)
-      const empWorkload = typeof emp.currentWorkload === 'number' ? emp.currentWorkload : 50;
-      const maxIdealCapacity = Math.max(2, Math.round(empWorkload / 10));
+      // Capacidade baseada no workloadCapacity ou currentWorkload (padrão é 4 ou currentWorkload / 10)
+      const rawCap = (emp as any).workloadCapacity ?? (typeof emp.currentWorkload === 'number' ? Math.round(emp.currentWorkload / 10) : 4);
+      const maxIdealCapacity = Math.max(2, rawCap);
       const availableCapacity = Math.max(0, maxIdealCapacity - activeDemands);
 
       return {

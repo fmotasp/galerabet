@@ -163,8 +163,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return {
         id: profile?.id || authUser.id,
+        employeeId: profile?.id,
         authUserId: authUser.id,
         name: userName,
+        username: profile?.username || authUser.email?.split('@')[0] || '',
         email: authUser.email || profile?.email || '',
         role: userRole,
         roleType: isUserAdmin ? ('admin' as const) : ('employee' as const),

@@ -198,6 +198,17 @@ export const useTaskModalForm = ({
         assigneeName: nextMembers[0]?.name || 'Sem membro',
         assigneeInitials: nextMembers[0]?.initials || 'SM',
       });
+      setEditingTask((prev) =>
+        prev
+          ? {
+              ...prev,
+              members: nextMembers,
+              assigneeId: primaryAssigneeId,
+              assigneeName: nextMembers[0]?.name || 'Sem membro',
+              assigneeInitials: nextMembers[0]?.initials || 'SM',
+            }
+          : null
+      );
     }
   };
 
@@ -218,6 +229,17 @@ export const useTaskModalForm = ({
         assigneeName: nextMembers[0]?.name || 'Sem membro',
         assigneeInitials: nextMembers[0]?.initials || 'SM',
       });
+      setEditingTask((prev) =>
+        prev
+          ? {
+              ...prev,
+              members: nextMembers,
+              assigneeId: primaryAssigneeId,
+              assigneeName: nextMembers[0]?.name || 'Sem membro',
+              assigneeInitials: nextMembers[0]?.initials || 'SM',
+            }
+          : null
+      );
     }
   };
 
