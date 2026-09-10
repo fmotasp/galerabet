@@ -136,43 +136,50 @@ export const TasksProvider: React.FC<{
 
   // Busca direta e completa de tarefas no Supabase
   const fetchTasksFromSupabase = useCallback(async () => {
+    console.log('[Supabase Tasks] Iniciando busca direta na tabela tasks...');
     try {
-      let allTasksData: any[] = [];
-      let from = 0;
-      const batchSize = 1000;
-      let hasMore = true;
+      // 1. Tenta buscar todas as tarefas ordenadas por last_moved_at
+      let { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .order('last_moved_at', { ascending: false });
 
-      while (hasMore && from < 10000) {
-        const { data, error } = await supabase
-          .from('tasks')
-          .select('*')
-          .order('last_moved_at', { ascending: false })
-          .range(from, from + batchSize - 1);
+      console.log('[Supabase Tasks] Resposta com order:', { count: data?.length, error });
 
-        if (error) {
-          console.warn('[Supabase] Erro ao buscar tarefas do banco:', error.message);
-          break;
-        }
-
-        if (!data || data.length === 0) {
-          hasMore = false;
-          break;
-        }
-
-        allTasksData = allTasksData.concat(data);
-        if (data.length < batchSize) {
-          hasMore = false;
-        } else {
-          from += batchSize;
+      // Fallback: se last_moved_at falhar (ex: campo com tipo diferente ou nulls), busca sem order
+      if (error || !data || data.length === 0) {
+        console.log('[Supabase Tasks] Tentando fallback select(*) sem order...');
+        const fallbackRes = await supabase.from('tasks').select('*');
+        console.log('[Supabase Tasks] Resposta fallback sem order:', { count: fallbackRes.data?.length, error: fallbackRes.error });
+        if (fallbackRes.data && fallbackRes.data.length > 0) {
+          data = fallbackRes.data;
+          error = fallbackRes.error;
         }
       }
 
-      if (allTasksData.length > 0) {
-        const mapped = allTasksData.map(mapRowToTask);
+      if (error) {
+        console.error('[Supabase Tasks] ERRO ao buscar tarefas do banco:', error);
+        return;
+      }
+
+      if (data && Array.isArray(data)) {
+        console.log(`[Supabase Tasks] ✅ Sucesso: ${data.length} tarefas recebidas do Supabase!`);
+        const mapped = data.map(mapRowToTask);
         setTasks(mapped);
+        // Atualiza cache local apenas com a resposta oficial do Supabase
+        try {
+          const topRecentTasks = mapped.slice(0, 50).map(({ referenceImages, attachments, comments, ...rest }) => ({
+            ...rest,
+            checklists: rest.checklists || [],
+            attachments: (attachments || []).slice(0, 3).map((a) => ({ id: a.id, name: a.name })),
+          }));
+          localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(topRecentTasks));
+        } catch {}
+      } else {
+        console.warn('[Supabase Tasks] Supabase retornou array vazio ou nulo.');
       }
     } catch (err) {
-      console.warn('[Supabase] Falha ao carregar tarefas:', err);
+      console.error('[Supabase Tasks] Falha de exceção ao carregar tarefas:', err);
     }
   }, []);
 
