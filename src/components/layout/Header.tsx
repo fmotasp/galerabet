@@ -14,8 +14,11 @@ import {
   Radio,
   Sun,
   Moon,
+  CloudUpload,
+  RefreshCw,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { supabase } from '../../lib/supabase';
 
 export const Header: React.FC = () => {
   const {
@@ -27,7 +30,80 @@ export const Header: React.FC = () => {
     currentUser,
     logout,
     isManagerOrAdmin,
+    addToast,
   } = useApp();
+
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncLocalToSupabase = async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    addToast('Sincronizando... ⏳', 'Lendo tarefas locais e enviando para o Supabase...', 'info');
+
+    try {
+      const raw = localStorage.getItem('spine_tasks_v1');
+      if (!raw) {
+        addToast('Atenção ⚠️', 'Nenhuma tarefa encontrada no cache local deste navegador.', 'warning');
+        setIsSyncing(false);
+        return;
+      }
+
+      const tasks = JSON.parse(raw);
+      if (!Array.isArray(tasks) || tasks.length === 0) {
+        addToast('Atenção ⚠️', 'Lista de tarefas locais vazia.', 'warning');
+        setIsSyncing(false);
+        return;
+      }
+
+      let successCount = 0;
+      for (const t of tasks) {
+        if (!t || !t.id) continue;
+        const payload: Record<string, any> = {
+          id: t.id,
+          title: t.title || 'Sem título',
+          description: t.description || '',
+          category: t.category || 'Geral',
+          status: t.status || 'backlog',
+          due_date: t.dueDate || null,
+          points: Number(t.points) || 0,
+          is_flagged: Boolean(t.isFlagged),
+          project_id: t.projectId || null,
+          project_name: t.projectName || 'General',
+          sprint_id: t.sprintId || 'sprint-1',
+          assignee_id: t.assigneeId || null,
+          assignee_name: t.assigneeName || null,
+          assignee_initials: t.assigneeInitials || null,
+          members: t.members || [],
+          labels: t.labels || [],
+          reference_images: t.referenceImages || [],
+          attachments: t.attachments || [],
+          comments: t.comments || [],
+          checklists: t.checklists || [],
+          last_moved_at: t.lastMovedAt || Date.now(),
+          activity_log: t.activityLog || [],
+          updated_at: new Date().toISOString(),
+        };
+
+        const { error } = await supabase.from('tasks').upsert([payload]);
+        if (!error) {
+          successCount++;
+        } else {
+          console.warn('[Sync] Falha ao sincronizar tarefa:', t.id, error.message);
+        }
+      }
+
+      addToast(
+        'Sincronização Concluída! 🚀',
+        `${successCount} tarefas foram enviadas com sucesso para o Supabase!`,
+        'success'
+      );
+    } catch (err: any) {
+      console.error('[Sync] Erro:', err);
+      addToast('Erro na Sincronização ❌', err?.message || 'Falha ao sincronizar tarefas.', 'error');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -106,6 +182,19 @@ export const Header: React.FC = () => {
           <Search className="w-5 h-5" />
           <span className="hidden md:inline-block text-xs text-[#808080] bg-[#1C1C1C] px-1.5 py-0.5 rounded border border-[#303030]">
             ⌘K
+          </span>
+        </button>
+
+        {/* Botão de Sincronização Local -> Supabase */}
+        <button
+          onClick={handleSyncLocalToSupabase}
+          disabled={isSyncing}
+          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 border border-[#E4007E]/40 hover:border-[#E4007E] text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:shadow-[#E4007E]/20 active:scale-95 disabled:opacity-50"
+          title="Enviar tarefas salvas neste navegador para o banco de dados do Supabase"
+        >
+          <CloudUpload className={`w-4 h-4 text-[#E4007E] ${isSyncing ? 'animate-bounce' : ''}`} />
+          <span className="hidden sm:inline">
+            {isSyncing ? 'Sincronizando...' : 'Sincronizar com Nuvem'}
           </span>
         </button>
 
