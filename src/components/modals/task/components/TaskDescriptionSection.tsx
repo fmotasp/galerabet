@@ -22,7 +22,7 @@ export const TaskDescriptionSection: React.FC<{
 
     return (
       <div
-        className="leading-relaxed text-xs text-slate-100 font-medium space-y-1.5 prose-sm max-w-none break-words break-all whitespace-pre-wrap [overflow-wrap:anywhere] [&_b]:font-black [&_strong]:font-black [&_strong]:text-white [&_b]:text-white [&_h1]:text-base [&_h1]:font-black [&_h1]:text-white [&_h2]:text-sm [&_h2]:font-extrabold [&_h2]:text-white [&_h3]:text-xs [&_h3]:font-bold [&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5 [&_a]:text-indigo-400 [&_a]:underline"
+        className="leading-relaxed text-xs text-slate-100 font-medium space-y-1.5 prose-sm max-w-none break-words break-all whitespace-pre-wrap [overflow-wrap:anywhere] [&_b]:font-black [&_strong]:font-black [&_strong]:text-white [&_b]:text-white [&_h1]:text-base [&_h1]:font-black [&_h1]:text-white [&_h2]:text-sm [&_h2]:font-extrabold [&_h2]:text-white [&_h3]:text-xs [&_h3]:font-bold [&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5 [&_a]:text-sky-400 [&_a]:hover:text-sky-300 [&_a]:underline [&_a]:cursor-pointer [&_a]:font-semibold"
         dangerouslySetInnerHTML={{ __html: htmlContent }}
       />
     );
@@ -55,7 +55,13 @@ export const TaskDescriptionSection: React.FC<{
         </div>
       ) : (
         <div
-          onClick={() => setIsEditingDescription(true)}
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.closest('a')) {
+              return;
+            }
+            setIsEditingDescription(true);
+          }}
           className="p-4 bg-[#1C1C1C] text-slate-100 border border-[#2E2E2E] rounded-2xl cursor-pointer hover:border-[#E4007E] transition-colors group relative min-h-[140px] flex-1 overflow-hidden break-words [overflow-wrap:anywhere]"
           title="Clique para editar"
         >

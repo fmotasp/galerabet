@@ -112,8 +112,28 @@ export const ProjectsProvider: React.FC<{
     );
   };
 
+  const STORAGE_KEY_PROJECTS = 'spine_projects_v1';
+
   // Projects / Clientes
-  const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
+  const [projects, setProjects] = useState<Project[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PROJECTS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return INITIAL_PROJECTS;
+  });
+
+  // Salva no LocalStorage sempre que os projetos mudarem
+  useEffect(() => {
+    try {
+      if (projects && projects.length > 0) {
+        localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(projects));
+      }
+    } catch {}
+  }, [projects]);
 
   // Carrega lista de clientes/projetos diretamente do Supabase e sincroniza em tempo real
   useEffect(() => {
@@ -132,10 +152,17 @@ export const ProjectsProvider: React.FC<{
         }
 
         if (data && isMounted) {
-          const mapped = data
-            .filter((row) => !isSystemProject(row))
-            .map(mapRowToProject);
-          setProjects(mapped);
+          if (data.length > 0) {
+            const mapped = data
+              .filter((row) => !isSystemProject(row))
+              .map(mapRowToProject);
+            setProjects(mapped);
+            try {
+              localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(mapped));
+            } catch {}
+          } else {
+            console.warn('[Supabase] Array vazio retornado para projetos (possível bloqueio por RLS). Mantendo cache local.');
+          }
         }
       } catch (err) {
         console.error('[Supabase] Falha de conexão ao carregar projetos:', err);
@@ -187,8 +214,15 @@ export const ProjectsProvider: React.FC<{
       )
       .subscribe();
 
+    // Também ouve evento customizado de login para recarregar imediatamente
+    const handleLoginEvent = () => {
+      fetchProjectsFromSupabase();
+    };
+    window.addEventListener('spine_user_logged_in', handleLoginEvent);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('spine_user_logged_in', handleLoginEvent);
       supabase.removeChannel(channel);
     };
   }, []);

@@ -244,6 +244,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch {}
       setCurrentUserState(user);
       setPendingPasswordChangeUser(null);
+      try {
+        window.dispatchEvent(new Event('spine_user_logged_in'));
+      } catch {}
     } else if (user && user.needsPasswordChange) {
       localStorage.removeItem('spine_logged_user');
       localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);

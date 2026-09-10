@@ -211,6 +211,18 @@ export const RegistrationsView: React.FC = () => {
 
         {/* Action Button */}
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="md"
+            onClick={() => {
+              window.dispatchEvent(new Event('spine_user_logged_in'));
+            }}
+            title="Atualizar lista de funcionários e clientes do banco de dados"
+            className="px-3.5 py-2.5 text-xs font-bold text-slate-300 hover:text-white bg-[#222222] hover:bg-[#2c2c2c] border border-[#333333] rounded-xl"
+          >
+            Sincronizar
+          </Button>
+
           {activeSubTab === 'employees' ? (
             <Button
               id="btn-cadastrar-funcionario"

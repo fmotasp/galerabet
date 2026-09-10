@@ -294,6 +294,12 @@ export const ReportsView: React.FC = () => {
       const overdue = clientTasks.filter((t) => !isTaskDoneOrInReview(t) && isTaskOverdue(t)).length;
       const pending = clientTasks.length - completed;
 
+      // Contagem detalhada por todas as colunas / status do pipeline
+      const statusCounts: Record<string, number> = {};
+      spineStatuses.forEach((st) => {
+        statusCounts[st.id] = clientTasks.filter((t) => (t.status || 'backlog') === st.id).length;
+      });
+
       return {
         id: p.id,
         name: p.name,
@@ -304,10 +310,11 @@ export const ReportsView: React.FC = () => {
         pending,
         overdue,
         completionRate: clientTasks.length > 0 ? Math.round((completed / clientTasks.length) * 100) : 0,
+        statusCounts,
       };
     }).filter((c) => c.total > 0 || selectedClientId === c.id)
       .sort((a, b) => b.total - a.total);
-  }, [projects, filteredTasks, selectedClientId]);
+  }, [projects, filteredTasks, selectedClientId, spineStatuses]);
 
   // 5. Funil de Gargalos por Status
   const statusFunnel = useMemo(() => {
@@ -348,11 +355,13 @@ export const ReportsView: React.FC = () => {
     });
     rows.push('');
 
-    // Volume por Cliente
-    rows.push('--- DEMANDAS POR CLIENTE ---');
-    rows.push('Cliente;Total Demandas;Concluidas;Pendentes;Atrasadas;Taxa Conclusao');
+    // Volume por Cliente com contagem por coluna
+    rows.push('--- DEMANDAS POR CLIENTE (CONTAGEM POR COLUNAS) ---');
+    const statusHeaders = spineStatuses.map((s) => s.label).join(';');
+    rows.push(`Cliente;Total Demandas;Concluidas;Pendentes;Atrasadas;Taxa Conclusao;${statusHeaders}`);
     clientDistribution.forEach((c) => {
-      rows.push(`"${c.name}";${c.total};${c.completed};${c.pending};${c.overdue};${c.completionRate}%`);
+      const statusCols = spineStatuses.map((s) => c.statusCounts[s.id] || 0).join(';');
+      rows.push(`"${c.name}";${c.total};${c.completed};${c.pending};${c.overdue};${c.completionRate}%;${statusCols}`);
     });
     rows.push('');
 
@@ -672,6 +681,38 @@ export const ReportsView: React.FC = () => {
                     {client.overdue > 0 && (
                       <span className="text-rose-400 font-bold">Atrasadas: {client.overdue}</span>
                     )}
+                  </div>
+
+                  {/* Distribuição detalhada por todas as colunas / status */}
+                  <div className="pt-2 border-t border-[#222222]">
+                    <div className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1.5 flex items-center justify-between">
+                      <span>Status das Colunas:</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {spineStatuses.map((st) => {
+                        const count = client.statusCounts[st.id] || 0;
+                        return (
+                          <div
+                            key={st.id}
+                            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors ${
+                              count > 0
+                                ? 'bg-[#181818] border-[#333333] text-white'
+                                : 'bg-[#141414]/50 border-transparent text-slate-500'
+                            }`}
+                            title={`${st.label}: ${count} tarefas`}
+                          >
+                            <span
+                              className="w-1.5 h-1.5 rounded-full shrink-0"
+                              style={{ backgroundColor: count > 0 ? (st.dotColor || st.color || '#E4007E') : '#444444' }}
+                            />
+                            <span>{st.label}:</span>
+                            <span className={count > 0 ? 'text-[#E4007E] font-black' : 'text-slate-500 font-medium'}>
+                              {count}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               ))

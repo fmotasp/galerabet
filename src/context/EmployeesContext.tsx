@@ -51,8 +51,28 @@ export const EmployeesProvider: React.FC<{
     };
   };
 
+  const STORAGE_KEY_EMPLOYEES = 'spine_employees_v1';
+
   // Employees (Usuários/Membros)
-  const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
+  const [employees, setEmployees] = useState<Employee[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_EMPLOYEES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return INITIAL_EMPLOYEES;
+  });
+
+  // Salva no LocalStorage sempre que os funcionários mudarem
+  useEffect(() => {
+    try {
+      if (employees && employees.length > 0) {
+        localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(employees));
+      }
+    } catch {}
+  }, [employees]);
 
   // Carrega lista de funcionários diretamente do Supabase e sincroniza em tempo real
   useEffect(() => {
@@ -71,8 +91,15 @@ export const EmployeesProvider: React.FC<{
         }
 
         if (data && isMounted) {
-          const mapped = data.map(mapRowToEmployee);
-          setEmployees(mapped);
+          if (data.length > 0) {
+            const mapped = data.map(mapRowToEmployee);
+            setEmployees(mapped);
+            try {
+              localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(mapped));
+            } catch {}
+          } else {
+            console.warn('[Supabase] Array vazio retornado para employees (possível bloqueio por RLS). Mantendo cache local.');
+          }
         }
       } catch (err) {
         console.error('[Supabase] Falha de conexão ao carregar funcionários:', err);
@@ -118,8 +145,15 @@ export const EmployeesProvider: React.FC<{
       )
       .subscribe();
 
+    // Também ouve evento customizado de login para recarregar imediatamente
+    const handleLoginEvent = () => {
+      fetchEmployeesFromSupabase();
+    };
+    window.addEventListener('spine_user_logged_in', handleLoginEvent);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('spine_user_logged_in', handleLoginEvent);
       supabase.removeChannel(channel);
     };
   }, []);

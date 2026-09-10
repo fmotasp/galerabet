@@ -406,6 +406,8 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   });
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadInitialSupabaseData = async () => {
       try {
         let allTasksData: any[] = [];
@@ -414,7 +416,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         let hasMore = true;
 
         // Busca paginada em blocos para contornar o limite de 1.000 do PostgREST e carregar até 10.000+ tarefas
-        while (hasMore && from < 10000) {
+        while (hasMore && from < 10000 && isMounted) {
           const { data, error } = await supabase
             .from('tasks')
             .select('*')
@@ -439,19 +441,23 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           }
         }
 
-        if (allTasksData.length > 0) {
+        if (allTasksData.length > 0 && isMounted) {
           const loadedFromSb: Task[] = allTasksData.map(mapDbRowToTask);
           tasksContext.setTasks(loadedFromSb);
         }
       } catch (e) {
         console.warn('Initial Supabase load error:', e);
       } finally {
-        setIsInitialLoading(false);
+        if (isMounted) setIsInitialLoading(false);
       }
     };
 
     loadInitialSupabaseData();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [auth.currentUser?.id]);
 
   const mapDbRowToTask = (row: any): Task => {
     const rawDesc = row.description || '';

@@ -31,7 +31,15 @@ export const markdownToHtml = (md: string = ''): string => {
 
   // Images & Links
   html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" style="max-width:100%; border-radius: 12px; margin: 8px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" />');
-  html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 font-bold underline">$1</a>');
+  html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 font-bold underline break-all">$1</a>');
+
+  // Autolink plain URLs (http, https, or www) that are not already inside an HTML tag attribute or link
+  // Matches URLs separated by whitespace or start/end of line
+  html = html.replace(/(^|[\s>(])((?:https?:\/\/|www\.)[^\s<)]+)/gi, (match, prefix, url) => {
+    // Avoid double linking if preceded by href=" or src="
+    const href = url.startsWith('http') ? url : `https://${url}`;
+    return `${prefix}<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-sky-300 font-bold underline break-all">${url}</a>`;
+  });
 
   // Bullet lists (- item or * item)
   html = html.replace(/^\s*[-*]\s+(.*$)/gim, '<div class="flex items-start gap-2 my-0.5"><span class="text-indigo-500 font-bold">•</span><span>$1</span></div>');
