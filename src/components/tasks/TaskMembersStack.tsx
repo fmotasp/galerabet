@@ -7,7 +7,7 @@ export interface TaskMembersStackProps {
   task: Task;
 }
 
-export const TaskMembersStack: React.FC<TaskMembersStackProps> = React.memo(({ task }) => {
+export const TaskMembersStack: React.FC<TaskMembersStackProps> = ({ task }) => {
   const [expanded, setExpanded] = useState(false);
   const { employees } = useEmployees();
 
@@ -35,18 +35,24 @@ export const TaskMembersStack: React.FC<TaskMembersStackProps> = React.memo(({ t
     )
     .map((m) => {
       // Procura o colaborador cadastrado no sistema para obter a foto de avatar mais atualizada
-      const mId = (m.id || '').toString().toLowerCase().trim();
-      const mName = (m.name || '').toLowerCase().trim();
-      const mInitials = (m.initials || '').toUpperCase().trim();
-
-      const matchedEmp = employees.find((emp) => {
-        if (mId && emp.id && emp.id.toLowerCase().trim() === mId) return true;
-        if (mName && emp.name && emp.name.toLowerCase().trim() === mName) return true;
-        if (mInitials && emp.initials && emp.initials.toUpperCase().trim() === mInitials) return true;
-        return false;
-      });
+      const matchedEmp = employees.find(
+        (emp) =>
+          (m.id && emp.id && emp.id === m.id) ||
+          (m.name && emp.name && emp.name.toLowerCase().trim() === m.name.toLowerCase().trim())
+      );
 
       const resolvedAvatar = m.avatarUrl || matchedEmp?.avatarUrl || '';
+      
+      if (m.initials === 'FM') {
+        console.log('[DEBUG] TaskMembersStack mapping FM:', {
+          m_id: m.id,
+          m_name: m.name,
+          matchedEmp_id: matchedEmp?.id,
+          matchedEmp_avatar: matchedEmp?.avatarUrl,
+          resolvedAvatar
+        });
+      }
+
       return {
         ...m,
         avatarUrl: resolvedAvatar,
@@ -122,4 +128,4 @@ export const TaskMembersStack: React.FC<TaskMembersStackProps> = React.memo(({ t
       )}
     </div>
   );
-});
+};
