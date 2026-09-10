@@ -9,6 +9,7 @@ import {
 import { Task, TaskStatus, Project, SpineStatusConfig } from '../../types';
 import { getTaskOverdueDays } from '../../lib/taskDateUtils';
 import { TaskMembersStack } from './TaskMembersStack';
+import { compareTaskDueDatesAscending } from './useTasksFilter';
 
 export interface TasksKanbanColumn {
   id: TaskStatus;
@@ -92,7 +93,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
       {columns.map((col) => {
         const columnTasks = filteredTasks
           .filter((t) => t.status === col.id)
-          .sort((a, b) => getTaskNumericTimestamp(b) - getTaskNumericTimestamp(a));
+          .sort(compareTaskDueDatesAscending);
 
         const limit = columnLimits[col.id] || 10;
         const visibleTasks = columnTasks.slice(0, limit);

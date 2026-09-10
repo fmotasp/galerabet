@@ -49,6 +49,28 @@ export const getTaskNumericTimestamp = (t: Task): number => {
   return 0;
 };
 
+/**
+ * Ordena tarefas em ordem crescente de prazo previsto (dueDate):
+ * - Tarefas com prazo mais próximo/urgente vêm primeiro (topo)
+ * - Tarefas sem prazo vão para o final
+ * - Desempate por última movimentação/criação
+ */
+export const compareTaskDueDatesAscending = (a: Task, b: Task): number => {
+  const dateA = parseTaskDueDate(a.dueDate);
+  const dateB = parseTaskDueDate(b.dueDate);
+
+  if (dateA && dateB) {
+    const diff = dateA.getTime() - dateB.getTime();
+    if (diff !== 0) return diff;
+  } else if (dateA && !dateB) {
+    return -1; // Com data no topo
+  } else if (!dateA && dateB) {
+    return 1; // Sem data abaixo
+  }
+
+  return getTaskNumericTimestamp(b) - getTaskNumericTimestamp(a);
+};
+
 export const useTasksFilter = ({
   tasks,
   projects,
@@ -257,19 +279,17 @@ export const useTasksFilter = ({
     });
   }, [tasks, selectedClient, registeredClients, selectedMember, currentUser, employees, debouncedSearchQuery, activeFilter]);
 
-  // Sort tasks
+  // Sort tasks: Sempre em ordem crescente pela data (prazo previsto) no topo por padrão
   const sortedTasks = useMemo(() => {
     return [...filteredTasks].sort((a, b) => {
       if (sortBy === 'title') {
         return a.title.localeCompare(b.title);
       }
-      if (sortBy === 'dueDate') {
-        return (a.dueDate || '').localeCompare(b.dueDate || '');
-      }
       if (sortBy === 'points') {
         return (b.points || 0) - (a.points || 0);
       }
-      return getTaskNumericTimestamp(b) - getTaskNumericTimestamp(a);
+      // 'default' e 'dueDate': ordenação crescente por prazo previsto
+      return compareTaskDueDatesAscending(a, b);
     });
   }, [filteredTasks, sortBy]);
 
