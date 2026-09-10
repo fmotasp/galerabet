@@ -25,6 +25,7 @@ export interface TasksContextType {
     escalatedCount: number;
   };
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+  fetchTasksFromSupabase: () => Promise<void>;
 }
 
 const STORAGE_KEYS = {
@@ -804,6 +805,7 @@ export const TasksProvider: React.FC<{
         resetSystemKeepCredentials,
         computedMetrics,
         setTasks,
+        fetchTasksFromSupabase,
       }}
     >
       {children}

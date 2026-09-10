@@ -143,6 +143,7 @@ export interface AppContextType {
   loginArtUrl: string;
   updateLoginArtUrl: (url: string) => void;
   isInitialLoading: boolean;
+  fetchTasksFromSupabase: () => Promise<void>;
 }
 
 const STORAGE_KEYS = {
@@ -598,6 +599,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         loginArtUrl: auth.loginArtUrl,
         updateLoginArtUrl: auth.updateLoginArtUrl,
         isInitialLoading,
+        fetchTasksFromSupabase: tasksContext.fetchTasksFromSupabase,
       }}
     >
       {children}

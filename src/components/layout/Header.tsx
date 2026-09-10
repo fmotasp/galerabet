@@ -32,9 +32,24 @@ export const Header: React.FC = () => {
     logout,
     isManagerOrAdmin,
     addToast,
+    fetchTasksFromSupabase,
   } = useApp();
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefreshSupabase = async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await fetchTasksFromSupabase();
+      addToast('Atualizado! 🔄', 'Tarefas recarregadas diretamente do Supabase.', 'success');
+    } catch {
+      addToast('Erro ❌', 'Não foi possível atualizar as tarefas agora.', 'error');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const handleSyncLocalToSupabase = async () => {
     if (isSyncing) return;
@@ -197,6 +212,16 @@ export const Header: React.FC = () => {
           <span className="hidden md:inline-block text-xs text-[#808080] bg-[#1C1C1C] px-1.5 py-0.5 rounded border border-[#303030]">
             ⌘K
           </span>
+        </button>
+
+        {/* Botão de Atualizar do Supabase */}
+        <button
+          onClick={handleRefreshSupabase}
+          disabled={isRefreshing}
+          className="p-2 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-[#262626] transition-colors duration-150 cursor-pointer"
+          title="Recarregar tarefas do Supabase"
+        >
+          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-[#E4007E]' : ''}`} />
         </button>
 
         {/* Botão de Sincronização Local -> Supabase */}
