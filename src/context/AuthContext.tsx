@@ -239,6 +239,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 try {
                   localStorage.setItem('spine_logged_user', JSON.stringify(appUser));
                   localStorage.setItem(STORAGE_KEYS.LOGIN_DATE, getTodayDateStr());
+                  window.dispatchEvent(new Event('spine_user_logged_in'));
                 } catch {}
               }
             }

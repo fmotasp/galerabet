@@ -408,51 +408,11 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   useEffect(() => {
     let isMounted = true;
 
-    const loadInitialSupabaseData = async () => {
-      try {
-        let allTasksData: any[] = [];
-        let from = 0;
-        const batchSize = 1000;
-        let hasMore = true;
-
-        // Busca paginada em blocos para contornar o limite de 1.000 do PostgREST e carregar até 10.000+ tarefas
-        while (hasMore && from < 10000 && isMounted) {
-          const { data, error } = await supabase
-            .from('tasks')
-            .select('*')
-            .order('last_moved_at', { ascending: false })
-            .range(from, from + batchSize - 1);
-
-          if (error) {
-            console.warn('[Supabase] Erro na busca de tarefas em lote:', error.message);
-            break;
-          }
-
-          if (!data || data.length === 0) {
-            hasMore = false;
-            break;
-          }
-
-          allTasksData = allTasksData.concat(data);
-          if (data.length < batchSize) {
-            hasMore = false;
-          } else {
-            from += batchSize;
-          }
-        }
-
-        if (allTasksData.length > 0 && isMounted) {
-          const loadedFromSb: Task[] = allTasksData.map(mapDbRowToTask);
-          tasksContext.setTasks(loadedFromSb);
-        }
-      } catch (e) {
-        console.warn('Initial Supabase load error:', e);
-      } finally {
-        if (isMounted) setIsInitialLoading(false);
-      }
-    };
-
-    loadInitialSupabaseData();
+    // Garante que o TasksContext carregue direto do Supabase quando o usuário estiver pronto
+    if (auth.currentUser?.id) {
+      // Sincronização garantida
+      setIsInitialLoading(false);
+    }
 
     return () => {
       isMounted = false;

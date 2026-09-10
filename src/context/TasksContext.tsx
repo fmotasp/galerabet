@@ -227,11 +227,25 @@ export const TasksProvider: React.FC<{
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // Quando qualquer usuário faz login ou troca de conta, busca imediatamente todas as tarefas do Supabase
+    const handleLoginEvent = () => {
+      fetchTasksFromSupabase();
+    };
+    window.addEventListener('spine_user_logged_in', handleLoginEvent);
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('spine_user_logged_in', handleLoginEvent);
       supabase.removeChannel(channel);
     };
   }, [fetchTasksFromSupabase]);
+
+  // Se o currentUser mudar (ex: login efetuado), dispara a busca no Supabase
+  useEffect(() => {
+    if (currentUser?.id) {
+      fetchTasksFromSupabase();
+    }
+  }, [currentUser?.id, fetchTasksFromSupabase]);
 
   // Cache inteligente e seguro no LocalStorage (armazena apenas as 50 mais recentes para evitar QuotaExceededError em 10.000+ tarefas)
   useEffect(() => {
