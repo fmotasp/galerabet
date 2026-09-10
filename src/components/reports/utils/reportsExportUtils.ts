@@ -14,7 +14,7 @@ export const exportReportsToCSV = (data: ReportsData) => {
   
   const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', `relatorio_gestao_${new Date().getTime()}.csv`);
+  link.setAttribute('download', `relatorio_criacao_video_${new Date().getTime()}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

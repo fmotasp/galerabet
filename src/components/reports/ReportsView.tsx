@@ -1,6 +1,5 @@
 import React from 'react';
 import { Download, FileText, Loader2, Clock, CheckCircle2, AlertTriangle, Trophy } from 'lucide-react';
-import { PDFDownloadLink } from '@react-pdf/renderer';
 import { 
   PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend, 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
@@ -9,8 +8,18 @@ import {
 
 import { useReportsData } from './hooks/useReportsData';
 import { exportReportsToCSV } from './utils/reportsExportUtils';
-import { ReportPDF } from './components/ReportPDF';
 import { Button } from '../ui';
+
+const STATUS_COLORS: Record<string, string> = {
+  'backlog': '#94A3B8',         // Slate 400
+  'novos pedidos': '#F472B6',   // Pink 400
+  'em andamento': '#3B82F6',    // Blue 500
+  'em produção': '#6366F1',     // Indigo 500
+  'ajustes': '#F59E0B',         // Amber 500
+  'aprovar': '#0EA5E9',         // Sky 500
+  'postar': '#8B5CF6',          // Violet 500
+  'concluidos': '#10B981',      // Emerald 500
+};
 
 export const ReportsView: React.FC = () => {
   const { data, isLoading } = useReportsData();
@@ -34,8 +43,8 @@ export const ReportsView: React.FC = () => {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-black text-white">Dashboard de Gestão</h1>
-          <p className="text-slate-400 text-sm">Resumo executivo do mês atual</p>
+          <h1 className="text-2xl font-black text-white">Dashboard de Criação e Audiovisual</h1>
+          <p className="text-slate-400 text-sm">Métricas exclusivas das equipes de Design e Vídeo</p>
         </div>
         <div className="flex items-center gap-3">
           <Button 
@@ -47,21 +56,14 @@ export const ReportsView: React.FC = () => {
             Exportar CSV
           </Button>
           
-          <PDFDownloadLink 
-            document={<ReportPDF data={data} />} 
-            fileName={`dashboard_${new Date().getTime()}.pdf`}
-          >
-            {({ loading }) => (
-              <Button 
-                variant="primary" 
-                className="bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white border-0 shadow-lg"
-                disabled={loading}
-              >
-                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
-                Gerar PDF
-              </Button>
-            )}
-          </PDFDownloadLink>
+            <Button 
+              variant="primary" 
+              className="bg-rose-500 hover:bg-rose-600 text-white border-none px-4"
+              onClick={() => window.print()}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Imprimir Relatório
+            </Button>
         </div>
       </div>
 
@@ -126,9 +128,12 @@ export const ReportsView: React.FC = () => {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {data.statusDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
+                  {data.statusDistribution.map((entry, index) => {
+                    const colorKey = entry.name.toLowerCase();
+                    return (
+                      <Cell key={`cell-${index}`} fill={STATUS_COLORS[colorKey] || '#888888'} />
+                    );
+                  })}
                 </Pie>
                 <RechartsTooltip 
                   contentStyle={{ backgroundColor: '#222', borderColor: '#333', color: '#fff', borderRadius: '8px' }}

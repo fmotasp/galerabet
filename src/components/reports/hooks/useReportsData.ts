@@ -12,7 +12,6 @@ export interface ReportsKPIs {
 export interface TaskStatusDistribution {
   name: string;
   value: number;
-  color: string;
 }
 
 export interface WorkloadDistribution {
