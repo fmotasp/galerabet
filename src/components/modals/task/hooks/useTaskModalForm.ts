@@ -131,7 +131,7 @@ export const useTaskModalForm = ({
   const handleShareTask = async () => {
     if (!editingTask) return;
     try {
-      const taskUrl = `${window.location.origin}/?task=${editingTask.id}`;
+      const taskUrl = `${window.location.origin}${window.location.pathname}?task=${encodeURIComponent(editingTask.id)}`;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(taskUrl);
       } else {
@@ -146,7 +146,7 @@ export const useTaskModalForm = ({
         textArea.remove();
       }
       setCopiedLink(true);
-      addToast('Link da Tarefa Copiado!', 'O link direto desta tarefa foi copiado para sua área de transferência.', 'success');
+      addToast('Link da Tarefa Copiado! 🔗', 'O link direto desta tarefa foi copiado para sua área de transferência.', 'success');
       setTimeout(() => setCopiedLink(false), 2500);
     } catch (err) {
       addToast('Erro ao copiar link', 'Não foi possível copiar o link automaticamente.', 'error');
@@ -157,6 +157,16 @@ export const useTaskModalForm = ({
     setIsNewTaskModalOpen(false);
     setEditingTask(null);
     setActiveDrawerTab('details');
+
+    // Remove ?task= da URL para manter a barra de endereços limpa ao fechar
+    try {
+      if (window.location.search.includes('task=')) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('task');
+        const cleanUrl = url.pathname + (url.search ? url.search : '') + (url.hash ? url.hash : '');
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    } catch {}
   };
 
   const handleAddMember = (empId: string) => {

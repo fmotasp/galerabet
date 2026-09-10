@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import {
   NavigationTab,
@@ -440,41 +440,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }
 
         if (allTasksData.length > 0) {
-          const loadedFromSb: Task[] = allTasksData.map((row: any) => {
-            const rawDesc = row.description || '';
-            const { cleanDescription, checklists: decodedChecklists } = decodeTaskDescriptionWithChecklist(rawDesc);
-            const resolvedChecklists = (row.checklists && row.checklists.length > 0) ? row.checklists : decodedChecklists;
-
-            return {
-              id: row.id,
-              title: row.title,
-              description: cleanDescription,
-              category: row.category || 'Geral',
-              status: row.status as TaskStatus,
-              dueDate: row.due_date,
-              points: Number(row.points) || 0,
-              isFlagged: Boolean(row.is_flagged),
-              projectId: row.project_id,
-              projectName: row.project_name || 'General',
-              sprintId: row.sprint_id || 'sprint-1',
-              assigneeId: row.assignee_id,
-              assigneeName: row.assignee_name,
-              assigneeInitials: row.assignee_initials,
-              members: row.members || [],
-              labels: row.labels || [],
-              attachments: row.attachments || [],
-              checklists: resolvedChecklists,
-              checklistsCount: Array.isArray(resolvedChecklists) ? resolvedChecklists.length : (row.checklists_count || 0),
-              referenceImages: row.reference_images || [],
-              comments: row.comments || [],
-              coverImageUrl: row.cover_image_url,
-              coverAttachmentId: row.cover_attachment_id,
-              lastMovedAt: Number(row.last_moved_at) || Date.now(),
-              activityLog: row.activity_log || row.activityLog || [],
-              createdAt: row.created_at ? row.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
-            };
-          });
-
+          const loadedFromSb: Task[] = allTasksData.map(mapDbRowToTask);
           tasksContext.setTasks(loadedFromSb);
         }
       } catch (e) {
@@ -486,6 +452,111 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     loadInitialSupabaseData();
   }, []);
+
+  const mapDbRowToTask = (row: any): Task => {
+    const rawDesc = row.description || '';
+    const { cleanDescription, checklists: decodedChecklists } = decodeTaskDescriptionWithChecklist(rawDesc);
+    const resolvedChecklists = (row.checklists && row.checklists.length > 0) ? row.checklists : decodedChecklists;
+
+    return {
+      id: row.id,
+      title: row.title,
+      description: cleanDescription,
+      category: row.category || 'Geral',
+      status: row.status as TaskStatus,
+      dueDate: row.due_date,
+      points: Number(row.points) || 0,
+      isFlagged: Boolean(row.is_flagged),
+      projectId: row.project_id,
+      projectName: row.project_name || 'General',
+      sprintId: row.sprint_id || 'sprint-1',
+      assigneeId: row.assignee_id,
+      assigneeName: row.assignee_name,
+      assigneeInitials: row.assignee_initials,
+      members: row.members || [],
+      labels: row.labels || [],
+      attachments: row.attachments || [],
+      checklists: resolvedChecklists,
+      checklistsCount: Array.isArray(resolvedChecklists) ? resolvedChecklists.length : (row.checklists_count || 0),
+      referenceImages: row.reference_images || [],
+      comments: row.comments || [],
+      coverImageUrl: row.cover_image_url,
+      coverAttachmentId: row.cover_attachment_id,
+      lastMovedAt: Number(row.last_moved_at) || Date.now(),
+      activityLog: (row.activity_log || row.activityLog || []).filter((act: any) => {
+        const userName = (act.user || '').trim().toLowerCase();
+        const userIn = (act.userInitials || '').trim().toUpperCase();
+        return userName !== 'sistema' && userIn !== 'SYS' && userName !== 'equipe' && userIn !== 'EQ';
+      }),
+      createdAt: row.created_at ? row.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+    };
+  };
+
+  const openedSharedTaskIdRef = useRef<string | null>(null);
+
+  // Deep Link: Abre automaticamente os detalhes da tarefa compartilhada (?task=id)
+  useEffect(() => {
+    const getSharedId = (): string | null => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromSearch = urlParams.get('task');
+        if (fromSearch) return fromSearch;
+
+        if (window.location.hash.includes('task=')) {
+          const hashParts = window.location.hash.split('?');
+          if (hashParts[1]) {
+            const fromHash = new URLSearchParams(hashParts[1]).get('task');
+            if (fromHash) return fromHash;
+          }
+        }
+
+        const fromStorage = sessionStorage.getItem('pending_shared_task_id');
+        if (fromStorage) return fromStorage;
+      } catch {}
+      return null;
+    };
+
+    const sharedTaskId = getSharedId();
+    if (!sharedTaskId) return;
+
+    // Se o usuário ainda não estiver logado, armazena no sessionStorage para abrir pós-login
+    if (!auth.currentUser) {
+      sessionStorage.setItem('pending_shared_task_id', sharedTaskId);
+      return;
+    }
+
+    // Se já abriu essa tarefa nesta sessão, não abre em loop
+    if (openedSharedTaskIdRef.current === sharedTaskId) return;
+
+    // 1. Procura na lista já carregada de tarefas
+    const localTask = tasksContext.tasks.find((t) => t.id === sharedTaskId);
+    if (localTask) {
+      openedSharedTaskIdRef.current = sharedTaskId;
+      sessionStorage.removeItem('pending_shared_task_id');
+      setActiveTab('tasks');
+      setEditingTask(localTask);
+      addToast('Tarefa Compartilhada 🔗', `Abrindo detalhes de "${localTask.title}"`, 'info');
+      return;
+    }
+
+    // 2. Se não estiver no cache local inicial, busca diretamente no Supabase pelo ID
+    supabase
+      .from('tasks')
+      .select('*')
+      .eq('id', sharedTaskId)
+      .single()
+      .then(({ data, error }) => {
+        if (!error && data) {
+          const mapped = mapDbRowToTask(data);
+          openedSharedTaskIdRef.current = sharedTaskId;
+          sessionStorage.removeItem('pending_shared_task_id');
+          setActiveTab('tasks');
+          setEditingTask(mapped);
+          addToast('Tarefa Compartilhada 🔗', `Abrindo detalhes de "${mapped.title}"`, 'info');
+        }
+      })
+      .catch((err) => console.warn('Erro ao carregar tarefa compartilhada:', err));
+  }, [auth.currentUser, tasksContext.tasks]);
 
   return (
     <AppContext.Provider
