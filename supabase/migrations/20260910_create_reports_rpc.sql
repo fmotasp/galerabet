@@ -4,11 +4,26 @@
 CREATE OR REPLACE VIEW reports_creative_tasks AS
 SELECT t.*
 FROM tasks t
-INNER JOIN employees e ON t.assignee_id::text = e.id::text
 WHERE 
   (
-    e.role ILIKE 'designer' OR 
-    e.role ILIKE 'videomaker'
+    -- Verifica se o responsável principal (assignee) tem o cargo
+    EXISTS (
+      SELECT 1 FROM employees e 
+      WHERE e.id::text = t.assignee_id::text 
+        AND (e.role ILIKE '%designer%' OR e.role ILIKE '%videomaker%')
+    )
+    OR 
+    -- Verifica se algum dos membros da tarefa tem o cargo
+    EXISTS (
+      SELECT 1 FROM jsonb_array_elements(
+        CASE 
+          WHEN jsonb_typeof(t.members) = 'array' THEN t.members 
+          ELSE '[]'::jsonb 
+        END
+      ) AS m
+      INNER JOIN employees e ON (m->>'id')::text = e.id::text
+      WHERE (e.role ILIKE '%designer%' OR e.role ILIKE '%videomaker%')
+    )
   )
   AND lower(t.status) IN (
     'backlog', 
