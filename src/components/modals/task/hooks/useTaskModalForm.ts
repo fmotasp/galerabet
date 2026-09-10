@@ -435,7 +435,21 @@ export const useTaskModalForm = ({
         setCurrentDriveFolderUrl(editingTask.driveFolderUrl || '');
 
         if (editingTask.members && editingTask.members.length > 0) {
-          setTaskMembers(editingTask.members);
+          // Enriquecer membros com avatarUrl atualizado dos funcionários cadastrados
+          const enrichedMembers = editingTask.members.map((m) => {
+            const matchedEmp = employees.find(
+              (emp) =>
+                (m.id && emp.id && emp.id === m.id) ||
+                (m.name && emp.name && emp.name.toLowerCase().trim() === m.name.toLowerCase().trim())
+            );
+            return {
+              ...m,
+              avatarUrl: m.avatarUrl || matchedEmp?.avatarUrl || '',
+              name: m.name || matchedEmp?.name || 'Membro',
+              initials: m.initials || matchedEmp?.initials || 'MB',
+            };
+          });
+          setTaskMembers(enrichedMembers);
         } else if (editingTask.assigneeId && editingTask.assigneeId !== 'unassigned') {
           const foundEmp = employees.find((e) => e.id === editingTask.assigneeId);
           setTaskMembers([

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, X, Check, Building2, ChevronDown } from 'lucide-react';
 import { Employee, Project, TaskMember } from '../../../../types';
+import { Avatar } from '../../../ui/Avatar';
 
 export const TaskMembersAndClients: React.FC<{
   taskMembers: TaskMember[];
@@ -37,29 +38,35 @@ export const TaskMembersAndClients: React.FC<{
           Membros
         </label>
         <div className="flex items-center gap-2 flex-wrap">
-          {taskMembers.map((m) => (
-            <div
-              key={m.id}
-              className="relative group cursor-pointer"
-              onClick={() => handleRemoveMember(m.id)}
-              title={`${m.name} (Clique para remover)`}
-            >
-              {m.avatarUrl ? (
-                <img
-                  src={m.avatarUrl}
+          {taskMembers.map((m) => {
+            // Cruza com funcionários cadastrados para obter avatar atualizado
+            const matchedEmp = employees.find(
+              (emp) =>
+                (m.id && emp.id && emp.id === m.id) ||
+                (m.name && emp.name && emp.name.toLowerCase().trim() === m.name.toLowerCase().trim())
+            );
+            const resolvedAvatar = m.avatarUrl || matchedEmp?.avatarUrl || '';
+            return (
+              <div
+                key={m.id}
+                className="relative group cursor-pointer"
+                onClick={() => handleRemoveMember(m.id)}
+                title={`${m.name} (Clique para remover)`}
+              >
+                <Avatar
+                  src={resolvedAvatar}
+                  name={m.name}
                   alt={m.name}
-                  className="w-9 h-9 rounded-full object-cover ring-2 ring-[#E4007E]/60 group-hover:ring-rose-500 transition-all shadow-xs"
+                  size="sm"
+                  ring
+                  className="!w-9 !h-9 ring-2 ring-[#E4007E]/60 group-hover:ring-rose-500 transition-all shadow-xs text-xs font-black"
                 />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-[#2E2E2E] ring-2 ring-[#E4007E]/60 group-hover:ring-rose-500 text-white font-black text-xs flex items-center justify-center shadow-xs transition-all">
-                  {m.initials}
+                <div className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <X className="w-2.5 h-2.5" />
                 </div>
-              )}
-              <div className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <X className="w-2.5 h-2.5" />
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* Add Member Button with Popover */}
           <div className="relative">
@@ -131,25 +138,16 @@ export const TaskMembersAndClients: React.FC<{
                               }`}
                             >
                               <div className="flex items-center gap-2.5 min-w-0">
-                                {emp.avatarUrl ? (
-                                  <img
-                                    src={emp.avatarUrl}
-                                    alt={emp.name}
-                                    className={`w-7 h-7 rounded-full object-cover ring-2 ${
-                                      isSelected ? 'ring-[#E4007E]' : 'ring-[#2E2E2E]'
-                                    }`}
-                                  />
-                                ) : (
-                                  <div
-                                    className={`w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center ring-2 ${
-                                      isSelected
-                                        ? 'bg-[#2E2E2E] ring-[#E4007E] text-[#E4007E]'
-                                        : 'bg-[#1C1C1C] ring-[#2E2E2E] text-slate-300'
-                                    }`}
-                                  >
-                                    {emp.initials}
-                                  </div>
-                                )}
+                                <Avatar
+                                  src={emp.avatarUrl}
+                                  name={emp.name}
+                                  alt={emp.name}
+                                  size="xs"
+                                  ring
+                                  className={`!w-7 !h-7 ring-2 font-bold text-xs ${
+                                    isSelected ? 'ring-[#E4007E]' : 'ring-[#2E2E2E]'
+                                  }`}
+                                />
                                 <div className="truncate">
                                   <span className="font-bold text-xs block truncate text-slate-200">
                                     {emp.name}
