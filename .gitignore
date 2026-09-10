@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# macOS
+.DS_Store
+._*
+__MACOSX/
