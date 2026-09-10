@@ -166,11 +166,24 @@ export const ReportsView: React.FC = () => {
     });
   }, [tasks, periodFilter, selectedClientId, selectedMemberId, projects, creativeEmployees, creativeEmployeeIds, creativeEmployeeNames, nonCreativeEmployeeIds, nonCreativeEmployeeNames]);
 
+  // Helper: tarefa entregue (concluída ou enviada para aprovação)
+  const isTaskDoneOrInReview = (t: Task): boolean => {
+    const s = (t.status || '').toLowerCase().trim();
+    return (
+      isTaskCompleted(t) ||
+      s === 'in_review' ||
+      s === 'postar' ||
+      s.includes('aprov') ||
+      s.includes('revis') ||
+      Boolean(t.deliveredAt)
+    );
+  };
+
   // 2. Cálculos de SLA e Cumprimento de Prazos
   const metrics = useMemo(() => {
     const total = filteredTasks.length;
-    const completed = filteredTasks.filter((t) => isTaskCompleted(t));
-    const active = filteredTasks.filter((t) => !isTaskCompleted(t));
+    const completed = filteredTasks.filter(isTaskDoneOrInReview);
+    const active = filteredTasks.filter((t) => !isTaskDoneOrInReview(t));
     const overdueActive = active.filter((t) => isTaskOverdue(t));
 
     // SLA de tarefas concluídas
@@ -231,18 +244,19 @@ export const ReportsView: React.FC = () => {
         (t) =>
           t.assigneeId === emp.id ||
           (Array.isArray(t.members) && t.members.some((m) => m.id === emp.id)) ||
-          (t.assigneeName && t.assigneeName.toLowerCase().trim() === empName)
+          (t.assigneeName && t.assigneeName.toLowerCase().trim() === empName) ||
+          (t.activityLog && t.activityLog.some((a) => (a.user || '').toLowerCase().trim() === empName))
       );
 
-      const completed = empTasks.filter((t) => isTaskCompleted(t));
-      const inProgress = empTasks.filter((t) => t.status === 'in_progress' || t.status === 'in_review');
+      const completed = empTasks.filter(isTaskDoneOrInReview);
+      const inProgress = empTasks.filter((t) => t.status === 'in_progress');
       const inAdjustments = empTasks.filter(
         (t) =>
           t.status === 'ajustes' ||
           (t.activityLog && t.activityLog.some((a) => a.type === 'status_changed' && (a.details?.includes('Ajustes') || a.description?.includes('Ajustes'))))
       );
       const points = completed.reduce((sum, t) => sum + (t.points || 1), 0);
-      const overdue = empTasks.filter((t) => !isTaskCompleted(t) && isTaskOverdue(t)).length;
+      const overdue = empTasks.filter((t) => !isTaskDoneOrInReview(t) && isTaskOverdue(t)).length;
 
       return {
         id: emp.id,
@@ -276,8 +290,8 @@ export const ReportsView: React.FC = () => {
         );
       });
 
-      const completed = clientTasks.filter((t) => isTaskCompleted(t)).length;
-      const overdue = clientTasks.filter((t) => !isTaskCompleted(t) && isTaskOverdue(t)).length;
+      const completed = clientTasks.filter(isTaskDoneOrInReview).length;
+      const overdue = clientTasks.filter((t) => !isTaskDoneOrInReview(t) && isTaskOverdue(t)).length;
       const pending = clientTasks.length - completed;
 
       return {

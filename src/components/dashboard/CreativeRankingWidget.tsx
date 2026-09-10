@@ -112,11 +112,34 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
             });
             if (isMember) return true;
           }
+
+          // Também verifica se esteve atribuída ou participou da criação/execução no histórico
+          if (task.activityLog && task.activityLog.length > 0) {
+            const hasActivity = task.activityLog.some((a) => {
+              const uName = (a.user || '').toLowerCase().trim();
+              return uName === empFullName || (empFirstName.length > 2 && uName.includes(empFirstName));
+            });
+            if (hasActivity) return true;
+          }
+
           return false;
         });
 
+        // Contabiliza tarefas concluídas E tarefas que estão em aprovação/entregues
+        const isTaskDoneOrInReview = (t: Task): boolean => {
+          const s = (t.status || '').toLowerCase().trim();
+          return (
+            isTaskCompleted(t) ||
+            s === 'in_review' ||
+            s === 'postar' ||
+            s.includes('aprov') ||
+            s.includes('revis') ||
+            Boolean(t.deliveredAt)
+          );
+        };
+
         const total = empTasks.length;
-        const completed = empTasks.filter((t) => isTaskCompleted(t)).length;
+        const completed = empTasks.filter(isTaskDoneOrInReview).length;
 
         const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
