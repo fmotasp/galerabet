@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabase';
+import { encodeTaskDescriptionWithChecklist } from '../../lib/taskUtils';
 
 export const Header: React.FC = () => {
   const {
@@ -58,10 +59,17 @@ export const Header: React.FC = () => {
       let successCount = 0;
       for (const t of tasks) {
         if (!t || !t.id) continue;
+
+        // O Supabase armazena checklists codificados na coluna description para compatibilidade de schema
+        const safeDescription = encodeTaskDescriptionWithChecklist(
+          t.description || '',
+          t.checklists || []
+        );
+
         const payload: Record<string, any> = {
           id: t.id,
           title: t.title || 'Sem título',
-          description: t.description || '',
+          description: safeDescription,
           category: t.category || 'Geral',
           status: t.status || 'backlog',
           due_date: t.dueDate || null,
@@ -78,7 +86,6 @@ export const Header: React.FC = () => {
           reference_images: t.referenceImages || [],
           attachments: t.attachments || [],
           comments: t.comments || [],
-          checklists: t.checklists || [],
           last_moved_at: t.lastMovedAt || Date.now(),
           activity_log: t.activityLog || [],
           updated_at: new Date().toISOString(),
@@ -88,7 +95,14 @@ export const Header: React.FC = () => {
         if (!error) {
           successCount++;
         } else {
-          console.warn('[Sync] Falha ao sincronizar tarefa:', t.id, error.message);
+          // Fallback mínimo sem activity_log se necessário
+          const { activity_log, ...fallbackPayload } = payload;
+          const { error: fallbackError } = await supabase.from('tasks').upsert([fallbackPayload]);
+          if (!fallbackError) {
+            successCount++;
+          } else {
+            console.warn('[Sync] Falha ao sincronizar tarefa:', t.id, fallbackError.message);
+          }
         }
       }
 
