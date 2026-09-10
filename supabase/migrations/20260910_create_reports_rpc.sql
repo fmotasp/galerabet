@@ -69,7 +69,7 @@ BEGIN
       WHEN 'in_review' THEN 'Em Aprovação'
       WHEN 'ajustes' THEN 'Ajustes'
       WHEN 'postar' THEN 'Postar'
-      ELSE initcap(status)
+      ELSE initcap(lower(status))
     END INTO v_bottleneck
   FROM reports_creative_tasks
   WHERE lower(status) != 'done'
