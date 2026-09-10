@@ -60,7 +60,16 @@ export const TasksProvider: React.FC<{
       const saved = localStorage.getItem(STORAGE_KEYS.TASKS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((t: Task) => ({
+            ...t,
+            activityLog: (t.activityLog || []).filter((act: any) => {
+              const userName = (act.user || '').trim().toLowerCase();
+              const userIn = (act.userInitials || '').trim().toUpperCase();
+              return userName !== 'sistema' && userIn !== 'SYS' && userName !== 'equipe' && userIn !== 'EQ';
+            }),
+          }));
+        }
       }
     } catch {}
     return INITIAL_TASKS;
@@ -115,7 +124,11 @@ export const TasksProvider: React.FC<{
       coverImageUrl: row.cover_image_url,
       coverAttachmentId: row.cover_attachment_id,
       lastMovedAt: Number(row.last_moved_at) || Date.now(),
-      activityLog: row.activity_log || row.activityLog || [],
+      activityLog: (row.activity_log || row.activityLog || []).filter((act: any) => {
+        const userName = (act.user || '').trim().toLowerCase();
+        const userIn = (act.userInitials || '').trim().toUpperCase();
+        return userName !== 'sistema' && userIn !== 'SYS' && userName !== 'equipe' && userIn !== 'EQ';
+      }),
       createdAt: row.created_at ? row.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
     };
   };
@@ -257,18 +270,23 @@ export const TasksProvider: React.FC<{
   const addTask = async (newTaskData: Omit<Task, 'id' | 'createdAt'>) => {
     const newId = `task-${Date.now()}`;
     const actor = getCurrentActor();
-    const initialActivityLog = [
+    const hasRealActor = actor.name && actor.name !== 'Membro' && actor.name !== 'Equipe';
+    const authorName = hasRealActor ? actor.name : (newTaskData.assigneeName && newTaskData.assigneeName !== 'Sem membro' ? newTaskData.assigneeName : '');
+    const authorInitials = hasRealActor ? actor.initials : (newTaskData.assigneeInitials && newTaskData.assigneeInitials !== 'SM' ? newTaskData.assigneeInitials : '');
+    const authorAvatar = hasRealActor ? actor.avatarUrl : undefined;
+
+    const initialActivityLog = authorName ? [
       {
         id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
         type: 'created' as const,
-        user: actor.name || newTaskData.assigneeName || 'Equipe',
-        userInitials: actor.initials || newTaskData.assigneeInitials || 'EQ',
-        avatarUrl: actor.avatarUrl,
+        user: authorName,
+        userInitials: authorInitials || authorName.substring(0, 2).toUpperCase(),
+        avatarUrl: authorAvatar,
         description: `Demanda criada`,
         timestamp: new Date().toISOString(),
         details: `Criada no quadro`,
       },
-    ];
+    ] : [];
 
     const newTask: Task = {
       ...newTaskData,

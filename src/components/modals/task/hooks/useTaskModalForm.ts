@@ -296,6 +296,13 @@ export const useTaskModalForm = ({
     // 1. Process explicit activityLog items if recorded
     if (editingTask.activityLog && editingTask.activityLog.length > 0) {
       editingTask.activityLog.forEach((act) => {
+        const userName = (act.user || '').trim().toLowerCase();
+        const userIn = (act.userInitials || '').trim().toUpperCase();
+        // Ignorar registros automáticos do sistema ou genéricos como Equipe
+        if (userName === 'sistema' || userIn === 'SYS' || userName === 'equipe' || userIn === 'EQ') {
+          return;
+        }
+
         const ts = safeParseTimestamp(act.timestamp, Date.now());
         let itemType: TimelineActionItem['type'] = 'general';
         if (act.type === 'created') itemType = 'created';
@@ -309,8 +316,8 @@ export const useTaskModalForm = ({
         list.push({
           id: act.id,
           type: itemType,
-          user: act.user || editingTask.assigneeName || 'Equipe',
-          userInitials: act.userInitials || editingTask.assigneeInitials || 'EQ',
+          user: act.user || editingTask.assigneeName || 'Membro',
+          userInitials: act.userInitials || editingTask.assigneeInitials || 'MB',
           avatarUrl: act.avatarUrl,
           title: act.description,
           details: act.details,
@@ -348,8 +355,8 @@ export const useTaskModalForm = ({
           list.push({
             id: attId,
             type: 'file',
-            user: editingTask.assigneeName || 'Equipe',
-            userInitials: editingTask.assigneeInitials || 'EQ',
+            user: editingTask.assigneeName || 'Membro',
+            userInitials: editingTask.assigneeInitials || 'MB',
             title: `Arquivo anexado: "${a.name}"`,
             details: a.bytes ? `${(a.bytes / (1024 * 1024)).toFixed(2)} MB` : undefined,
             date: safeFormatISO(aTs),
@@ -359,54 +366,8 @@ export const useTaskModalForm = ({
       });
     }
 
-    // 4. Creation fallback for older tasks without activityLog
-    if (!list.some((l) => l.type === 'created')) {
-      const createdTs = safeParseTimestamp(editingTask.createdAt, Date.now());
-      list.push({
-        id: `synth-created-${editingTask.id}`,
-        type: 'created',
-        user: editingTask.assigneeName || 'Equipe',
-        userInitials: editingTask.assigneeInitials || 'EQ',
-        title: 'Demanda criada',
-        details: 'Demanda adicionada ao quadro de tarefas',
-        date: safeFormatISO(createdTs),
-        rawTimestamp: createdTs,
-      });
-    }
-
-    // 5. Fallback for delivery if not recorded in activityLog
-    if (editingTask.deliveredAt && !list.some((l) => l.type === 'delivery')) {
-      const delTimestamp = safeParseTimestamp(editingTask.lastMovedAt || editingTask.deliveredAt, Date.now());
-      list.push({
-        id: `synth-del-${editingTask.id}`,
-        type: 'delivery',
-        user: editingTask.assigneeName || 'Membro',
-        userInitials: editingTask.assigneeInitials || 'MB',
-        title: 'Demanda entregue para aprovação',
-        details: `Data registrada de entrega realizada: ${editingTask.deliveredAt}`,
-        date: safeFormatISO(delTimestamp),
-        rawTimestamp: delTimestamp,
-      });
-    }
-
-    // 6. Fallback for current status if not recorded in activityLog
-    if (editingTask.lastMovedAt && !list.some((l) => l.type === 'status')) {
-      const stLabel = spineStatuses.find((s) => s.id === editingTask.status)?.label || editingTask.status;
-      const moveTimestamp = safeParseTimestamp(editingTask.lastMovedAt, Date.now());
-      list.push({
-        id: `synth-status-${editingTask.id}`,
-        type: 'status',
-        user: editingTask.assigneeName || 'Equipe',
-        userInitials: editingTask.assigneeInitials || 'EQ',
-        title: `Status atual: "${stLabel}"`,
-        details: `Movida para a coluna ${stLabel}`,
-        date: safeFormatISO(moveTimestamp),
-        rawTimestamp: moveTimestamp,
-      });
-    }
-
     return list.sort((a, b) => b.rawTimestamp - a.rawTimestamp);
-  }, [editingTask, comments, attachments, spineStatuses]);
+  }, [editingTask, comments, attachments]);
 
   const prevIsOpenRef = useRef(false);
   const prevEditingTaskIdRef = useRef<string | null>(null);
