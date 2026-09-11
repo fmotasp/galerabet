@@ -57,19 +57,41 @@ describe('isTaskAssignedToMe', () => {
     expect(isTaskAssignedToMe(task, baseUser)).toBe(true);
   });
 
-  it('retorna true quando assigneeInitials bater com as iniciais do usuário', () => {
-    const task = createBaseTask({ assigneeInitials: 'FM' });
-    expect(isTaskAssignedToMe(task, baseUser)).toBe(true);
-  });
-
-  it('retorna true quando o usuário estiver na lista de members da tarefa', () => {
+  it('retorna true quando o usuário estiver na lista de members da tarefa pelo id', () => {
     const task = createBaseTask({
       members: [
         { id: 'random-1', name: 'Alguém', initials: 'AL' },
-        { id: 'user-123', name: 'Fabio', initials: 'FM' },
+        { id: 'user-123', name: 'Fabio Mota', initials: 'FM' },
       ],
     });
     expect(isTaskAssignedToMe(task, baseUser)).toBe(true);
+  });
+
+  it('retorna true quando o usuário estiver na lista de members da tarefa pelo nome completo', () => {
+    const task = createBaseTask({
+      members: [
+        { id: 'diff-id', name: 'Fabio Mota', initials: 'FM' },
+      ],
+    });
+    expect(isTaskAssignedToMe(task, baseUser)).toBe(true);
+  });
+
+  it('retorna false quando o usuário apenas realizou ações no histórico ou não estiver em members nem assignee', () => {
+    const task = createBaseTask({
+      assigneeId: 'other-id',
+      assigneeName: 'Carlos Silva',
+      members: [{ id: 'other-member', name: 'Outro Membro', initials: 'OM' }],
+      activityLog: [
+        {
+          id: 'act-1',
+          user: 'Fabio Mota',
+          type: 'status_changed',
+          description: 'Alterou status para Em Aprovação',
+          timestamp: '2026-09-11',
+        },
+      ],
+    });
+    expect(isTaskAssignedToMe(task, baseUser)).toBe(false);
   });
 
   it('retorna false quando nenhum critério for satisfeito', () => {

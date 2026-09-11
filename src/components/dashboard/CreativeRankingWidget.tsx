@@ -95,7 +95,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
           }
           if (task.assigneeName) {
             const aName = task.assigneeName.toLowerCase().trim();
-            if (aName === empFullName || (empFirstName.length > 2 && aName.includes(empFirstName))) {
+            if (aName === empFullName) {
               return true;
             }
           }
@@ -104,22 +104,9 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
               if (!m) return false;
               const mId = (m.id || '').toLowerCase().trim();
               const mName = (m.name || '').toLowerCase().trim();
-              return (
-                mId === empId ||
-                mName === empFullName ||
-                (empFirstName.length > 2 && mName.includes(empFirstName))
-              );
+              return mId === empId || mName === empFullName;
             });
             if (isMember) return true;
-          }
-
-          // Também verifica se esteve atribuída ou participou da criação/execução no histórico
-          if (task.activityLog && task.activityLog.length > 0) {
-            const hasActivity = task.activityLog.some((a) => {
-              const uName = (a.user || '').toLowerCase().trim();
-              return uName === empFullName || (empFirstName.length > 2 && uName.includes(empFirstName));
-            });
-            if (hasActivity) return true;
           }
 
           return false;

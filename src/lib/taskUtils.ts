@@ -22,7 +22,7 @@ export const isTaskAssignedToMe = (
   const myEmailPrefix = (currentUser.email || '').split('@')[0].toLowerCase().trim();
   const myInitials = (currentUser.initials || '').toUpperCase().trim();
 
-  // 1. Direct assignee check
+  // 1. Direct assignee check (por ID exato ou nome completo exato)
   if (task.assigneeId) {
     const aId = task.assigneeId.toString().toLowerCase().trim();
     if (myId && aId === myId) return true;
@@ -31,30 +31,21 @@ export const isTaskAssignedToMe = (
 
   if (task.assigneeName) {
     const aName = task.assigneeName.toLowerCase().trim();
-    if (myName && (aName.includes(myName) || myName.includes(aName))) return true;
-    if (myFirstName && myFirstName.length > 2 && (aName.includes(myFirstName) || myFirstName.includes(aName))) return true;
-    if (myUsername && (aName.includes(myUsername) || myUsername.includes(aName))) return true;
-    if (myEmailPrefix && (aName.includes(myEmailPrefix) || myEmailPrefix.includes(aName))) return true;
+    if (myName && aName === myName) return true;
+    if (myUsername && aName === myUsername) return true;
   }
 
-  if (myInitials && task.assigneeInitials && task.assigneeInitials.toUpperCase().trim() === myInitials) {
-    return true;
-  }
-
-  // 2. Members list check (onde o usuário está como membro da tarefa)
+  // 2. Members list check (onde o usuário está explicitamente selecionado em members[])
   if (task.members && task.members.length > 0) {
     const isMemberMatch = task.members.some((m) => {
+      if (!m) return false;
       const mId = (m.id || '').toString().toLowerCase().trim();
       if (myId && mId === myId) return true;
       if (myEmployeeId && mId === myEmployeeId) return true;
 
       const mName = (m.name || '').toLowerCase().trim();
-      if (myName && (mName.includes(myName) || myName.includes(mName))) return true;
-      if (myFirstName && myFirstName.length > 2 && (mName.includes(myFirstName) || myFirstName.includes(mName))) return true;
-      if (myUsername && (mName.includes(myUsername) || myUsername.includes(mName))) return true;
-
-      const mInitials = (m.initials || '').toUpperCase().trim();
-      if (myInitials && mInitials === myInitials) return true;
+      if (myName && mName === myName) return true;
+      if (myUsername && mName === myUsername) return true;
 
       return false;
     });

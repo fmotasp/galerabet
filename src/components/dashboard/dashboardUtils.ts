@@ -121,11 +121,12 @@ export const getActiveWorkloadCount = (emp: Employee, filteredTasks: Task[]): nu
       return false;
     }
 
-    // Verifica se a tarefa pertence a este funcionário
+    // Verifica se a tarefa pertence a este funcionário estritamente
+    const empFullName = emp.name.toLowerCase().trim();
     const isAssigned =
       (t.assigneeId && t.assigneeId === emp.id) ||
-      (t.assigneeName && t.assigneeName.toLowerCase().includes(empFirstName)) ||
-      (t.members && t.members.some((m) => m.name.toLowerCase().includes(empFirstName) || m.id === emp.id));
+      (t.assigneeName && t.assigneeName.toLowerCase().trim() === empFullName) ||
+      (t.members && t.members.some((m) => m && (m.id === emp.id || (m.name && m.name.toLowerCase().trim() === empFullName))));
 
     if (!isAssigned) return false;
 
@@ -178,14 +179,14 @@ export const computeWorkloadMembers = (
       return isCreative && !isGestor;
     })
     .map((emp) => {
-      const empFirstName = emp.name.toLowerCase().split(' ')[0];
+      const empFullName = emp.name.toLowerCase().trim();
       const empId = emp.id.toLowerCase().trim();
 
       const allEmpTasks = filteredTasks.filter((t) => {
         const isAssigned =
           (t.assigneeId && (t.assigneeId === emp.id || t.assigneeId.toLowerCase().trim() === empId)) ||
-          (t.assigneeName && t.assigneeName.toLowerCase().includes(empFirstName)) ||
-          (t.members && t.members.some((m) => m.name.toLowerCase().includes(empFirstName) || m.id === emp.id));
+          (t.assigneeName && t.assigneeName.toLowerCase().trim() === empFullName) ||
+          (t.members && t.members.some((m) => m && (m.id === emp.id || (m.name && m.name.toLowerCase().trim() === empFullName))));
         return Boolean(isAssigned);
       });
 

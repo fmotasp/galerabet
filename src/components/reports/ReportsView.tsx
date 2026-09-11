@@ -235,9 +235,8 @@ export const ReportsView: React.FC = () => {
       const empTasks = filteredTasks.filter(
         (t) =>
           t.assigneeId === emp.id ||
-          (Array.isArray(t.members) && t.members.some((m) => m.id === emp.id)) ||
-          (t.assigneeName && t.assigneeName.toLowerCase().trim() === empName) ||
-          (t.activityLog && t.activityLog.some((a) => (a.user || '').toLowerCase().trim() === empName))
+          (Array.isArray(t.members) && t.members.some((m) => m.id === emp.id || (m.name && m.name.toLowerCase().trim() === empName))) ||
+          (t.assigneeName && t.assigneeName.toLowerCase().trim() === empName)
       );
 
       const completed = empTasks.filter(isTaskDoneOrInReview);

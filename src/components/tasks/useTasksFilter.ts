@@ -176,46 +176,33 @@ export const useTasksFilter = ({
           allTagNames.some((tag) => tag.includes(targetName) || targetName.includes(tag));
       }
 
-      // Member filter — verifica se o membro participa da tarefa (assignee ou members[])
+      // Member filter — filtra estritamente se o usuário está selecionado em members[] ou é o assignee direto
       let matchesMember = true;
       if (selectedMember === 'mine') {
         matchesMember = isTaskAssignedToMe(t, currentUser);
       } else if (selectedMember !== 'all') {
         const emp = employees.find((e) => e.id === selectedMember);
+        const empId = selectedMember.toLowerCase().trim();
         const empName = emp ? emp.name.toLowerCase().trim() : '';
-        const empInitials = emp?.initials ? emp.initials.toUpperCase().trim() : '';
 
-        // 1. Assignee direto pelo ID (mais confiável)
-        const isAssignee = t.assigneeId === selectedMember;
-
-        // 2. Membro no array members[] pelo ID exato
-        const isMemberById = Array.isArray(t.members) && t.members.some((m) => m.id === selectedMember);
-
-        // 3. Fallback: nome/iniciais do assignee (quando id pode ter sido salvo diferente)
-        const isAssigneeByName =
-          !isAssignee &&
-          empName.length > 0 &&
-          t.assigneeName != null &&
-          t.assigneeName.toLowerCase().trim() === empName;
-
-        const isAssigneeByInitials =
-          !isAssignee &&
-          empInitials.length > 0 &&
-          t.assigneeInitials != null &&
-          t.assigneeInitials.toUpperCase().trim() === empInitials;
-
-        // 4. Fallback: nome/iniciais dentro do members[] (quando id pode estar ausente)
-        const isMemberByNameOrInitials =
-          !isMemberById &&
+        // 1. Membro explicitamente no array members[]
+        const isMemberInMembersList =
           Array.isArray(t.members) &&
-          t.members.some(
-            (m) =>
-              (empName.length > 0 && m.name != null && m.name.toLowerCase().trim() === empName) ||
-              (empInitials.length > 0 && m.initials != null && m.initials.toUpperCase().trim() === empInitials)
-          );
+          t.members.some((m) => {
+            if (!m) return false;
+            const mId = (m.id || '').toString().toLowerCase().trim();
+            if (mId && mId === empId) return true;
+            const mName = (m.name || '').toLowerCase().trim();
+            if (empName && mName && mName === empName) return true;
+            return false;
+          });
 
-        matchesMember =
-          isAssignee || isMemberById || isAssigneeByName || isAssigneeByInitials || isMemberByNameOrInitials;
+        // 2. Assignee direto pelo ID ou Nome exato (caso o campo principal assigneeId tenha sido usado)
+        const isDirectAssignee =
+          (t.assigneeId != null && t.assigneeId.toString().toLowerCase().trim() === empId) ||
+          (empName.length > 0 && t.assigneeName != null && t.assigneeName.toLowerCase().trim() === empName);
+
+        matchesMember = isMemberInMembersList || isDirectAssignee;
       }
 
       // Search filter (com debounce para alta performance na digitação)
