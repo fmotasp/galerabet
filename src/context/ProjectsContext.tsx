@@ -317,29 +317,30 @@ export const ProjectsProvider: React.FC<{
   };
 
   const updateProject = async (id: string, updates: Partial<Project>) => {
-    let updatedMergedProj: Project | null = null;
+    const existingProj = projects.find((p) => p.id === id);
+    const mergedProj: Project = existingProj
+      ? { ...existingProj, ...updates }
+      : ({ id, ...updates } as Project);
 
     setProjects((prev) =>
-      prev.map((proj) => {
-        if (proj.id === id) {
-          const merged = { ...proj, ...updates };
-          updatedMergedProj = merged;
-          return merged;
-        }
-        return proj;
-      })
+      prev.map((proj) => (proj.id === id ? mergedProj : proj))
     );
 
-    const targetProj = updatedMergedProj || updates;
-    const { cleanDescription } = decodeProjectDescription(targetProj.description || '');
+    // Salva imediatamente no localStorage para não perder em refresh
+    try {
+      const updatedList = projects.map((proj) => (proj.id === id ? mergedProj : proj));
+      localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(updatedList));
+    } catch {}
+
+    const { cleanDescription } = decodeProjectDescription(mergedProj.description || '');
     const packedDescription = encodeProjectDescription(cleanDescription, {
-      colorPalette: targetProj.colorPalette,
-      brandManualUrl: targetProj.brandManualUrl,
-      logosPackUrl: targetProj.logosPackUrl,
-      typographyUrl: targetProj.typographyUrl,
-      additionalMaterialsUrl: targetProj.additionalMaterialsUrl,
-      kvDriveUrl: targetProj.kvDriveUrl,
-      kvDriveItems: targetProj.kvDriveItems,
+      colorPalette: mergedProj.colorPalette,
+      brandManualUrl: mergedProj.brandManualUrl,
+      logosPackUrl: mergedProj.logosPackUrl,
+      typographyUrl: mergedProj.typographyUrl,
+      additionalMaterialsUrl: mergedProj.additionalMaterialsUrl,
+      kvDriveUrl: mergedProj.kvDriveUrl,
+      kvDriveItems: mergedProj.kvDriveItems,
     });
 
     // Atualiza no Supabase

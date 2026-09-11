@@ -124,6 +124,9 @@ export const KvsView: React.FC = () => {
       }
 
       setKvEntries(entriesList);
+      try {
+        localStorage.setItem('spine_kvs_cache_entries', JSON.stringify(entriesList));
+      } catch {}
     } catch (err) {
       console.error('Erro ao listar KVs:', err);
     } finally {
@@ -131,11 +134,29 @@ export const KvsView: React.FC = () => {
     }
   };
 
+  // Carrega cache imediato na inicialização
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem('spine_kvs_cache_entries');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setKvEntries(parsed);
+        }
+      }
+    } catch {}
+  }, []);
+
+  // Monitora alterações nos links de KVs dos clientes
+  const clientsKvSignature = useMemo(() => {
+    return clients.map((c) => `${c.id}:${c.kvDriveUrl || ''}:${(c.kvDriveItems || []).length}`).join('|');
+  }, [clients]);
+
   useEffect(() => {
     if (clients.length > 0) {
       loadKvsData();
     }
-  }, [clients.length]);
+  }, [clientsKvSignature]);
 
   // Abertura do modal para adicionar link de KV
   const handleOpenAddModal = (clientId?: string) => {
