@@ -52,68 +52,134 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
   onShowDoneColumnToggle,
   totalFilteredTasks,
 }) => {
+  const [isClientDropdownOpen, setIsClientDropdownOpen] = React.useState(false);
+  const [clientFilterSearch, setClientFilterSearch] = React.useState('');
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 bg-[#181818] p-3 rounded-2xl border border-[#2A2A2A]">
       <div className="flex flex-wrap items-center gap-3">
-        {/* Client Filter (Icon Buttons) */}
-        <div className="flex flex-wrap items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030] overflow-x-auto">
+        {/* Client Filter Dropdown */}
+        <div className="relative">
           <button
-            onClick={() => onClientChange('all')}
-            aria-label="Filtrar por todos os clientes"
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              selectedClient === 'all'
-                ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                : 'text-slate-300 hover:text-white'
-            }`}
+            type="button"
+            onClick={() => setIsClientDropdownOpen(!isClientDropdownOpen)}
+            className="flex items-center justify-between min-w-[160px] gap-2.5 bg-[#222222] hover:bg-[#2A2A2A] border border-[#303030] text-white rounded-xl px-3.5 py-2 text-xs font-bold transition-all active:scale-98 cursor-pointer"
           >
-            Todos os Clientes
+            <div className="flex items-center gap-2 truncate">
+              {selectedClient === 'all' ? (
+                <span>Todos os Clientes</span>
+              ) : (
+                (() => {
+                  const client = registeredClients.find(c => c.id === selectedClient);
+                  if (!client) return <span>Todos os Clientes</span>;
+                  return (
+                    <>
+                      {client.icon ? (
+                        <img
+                          src={client.icon}
+                          alt={client.name}
+                          className="w-4 h-4 rounded-md object-contain shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <span
+                          className="w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0"
+                          style={{ backgroundColor: client.color }}
+                        >
+                          {client.name.substring(0, 1).toUpperCase()}
+                        </span>
+                      )}
+                      <span className="truncate max-w-[100px]">{client.name}</span>
+                    </>
+                  );
+                })()
+              )}
+            </div>
+            <ChevronDown className={`w-3.5 h-3.5 text-[#A0A0A0] transition-transform duration-200 ${isClientDropdownOpen ? 'rotate-180 text-[#E4007E]' : ''}`} />
           </button>
 
-          {registeredClients.map((client) => {
-            const isSelected = selectedClient === client.id;
-            return (
-              <button
-                key={client.id}
-                onClick={() => onClientChange(isSelected ? 'all' : client.id)}
-                aria-label={`Filtrar por cliente ${client.name}`}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                    : 'text-slate-300 hover:text-white hover:bg-[#303030]'
-                }`}
-                title={`Filtrar por ${client.name}`}
-              >
-                {client.icon ? (
-                  <img
-                    src={client.icon}
-                    alt={client.name}
-                    className="w-4 h-4 rounded-md object-contain shrink-0 drop-shadow-xs"
-                    onError={(e) => {
-                      // Se a imagem falhar, esconde e mostra fallback
-                      const target = e.currentTarget;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent && !parent.querySelector('.client-fallback-badge')) {
-                        const span = document.createElement('span');
-                        span.className = 'client-fallback-badge w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0';
-                        span.style.backgroundColor = client.color || '#10B981';
-                        span.textContent = client.name.substring(0, 1).toUpperCase();
-                        parent.insertBefore(span, target);
-                      }
-                    }}
+          {isClientDropdownOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsClientDropdownOpen(false)}
+              />
+              <div className="absolute left-0 top-full mt-2 w-64 bg-[#1C1C1C] rounded-2xl border border-[#303030] shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="relative mb-2 px-1">
+                  <input
+                    type="text"
+                    placeholder="Buscar cliente..."
+                    value={clientFilterSearch}
+                    onChange={(e) => setClientFilterSearch(e.target.value)}
+                    className="w-full p-2 bg-[#141414] border border-[#2A2A2A] rounded-xl text-xs text-white placeholder-slate-500 font-medium focus:outline-none focus:border-[#E4007E] transition-all"
                   />
-                ) : (
-                  <span
-                    className="w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0"
-                    style={{ backgroundColor: client.color }}
+                </div>
+                
+                <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
+                  <div
+                    onClick={() => {
+                      onClientChange('all');
+                      setIsClientDropdownOpen(false);
+                    }}
+                    className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all ${
+                      selectedClient === 'all'
+                        ? 'bg-[#E4007E]/15 text-[#E4007E] font-bold border border-[#E4007E]/30'
+                        : 'text-[#A0A0A0] hover:bg-[#262626] hover:text-white'
+                    }`}
                   >
-                    {client.name.substring(0, 1).toUpperCase()}
-                  </span>
-                )}
-                <span>{client.name}</span>
-              </button>
-            );
-          })}
+                    <span className="text-xs font-semibold">Todos os Clientes</span>
+                    {selectedClient === 'all' && <Check className="w-3.5 h-3.5 text-[#E4007E] stroke-[3]" />}
+                  </div>
+                  
+                  <div className="h-px bg-white/5 my-1.5" />
+
+                  {registeredClients
+                    .filter(c => c.name.toLowerCase().includes(clientFilterSearch.toLowerCase()))
+                    .map((client) => {
+                      const isSelected = selectedClient === client.id;
+                      return (
+                        <div
+                          key={client.id}
+                          onClick={() => {
+                            onClientChange(isSelected ? 'all' : client.id);
+                            setIsClientDropdownOpen(false);
+                          }}
+                          className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all ${
+                            isSelected
+                              ? 'bg-[#E4007E]/15 text-[#E4007E] font-bold border border-[#E4007E]/30'
+                              : 'text-[#A0A0A0] hover:bg-[#262626] hover:text-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            {client.icon ? (
+                              <img
+                                src={client.icon}
+                                alt={client.name}
+                                className="w-5 h-5 rounded-md object-contain shrink-0"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <span
+                                className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black text-white shrink-0"
+                                style={{ backgroundColor: client.color }}
+                              >
+                                {client.name.substring(0, 1).toUpperCase()}
+                              </span>
+                            )}
+                            <span className="text-xs font-semibold truncate">{client.name}</span>
+                          </div>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-[#E4007E] stroke-[3] shrink-0" />}
+                        </div>
+                      );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Custom Modern Member Filter Dropdown */}
