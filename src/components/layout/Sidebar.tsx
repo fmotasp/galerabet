@@ -126,18 +126,40 @@ export const Sidebar: React.FC = () => {
         {sidebarContent}
       </aside>
 
-      {/* Mobile Drawer */}
-      {isMobileSidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
-            onClick={() => setIsMobileSidebarOpen(false)}
-          />
-          <div className="fixed inset-y-0 left-0 max-w-xs w-full bg-[#141414] shadow-2xl z-10 animate-in slide-in-from-left duration-200">
-            {sidebarContent}
-          </div>
-        </div>
-      )}
+      {/* Mobile Bottom Navigation */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#141414] border-t border-[#262626] z-40 px-2 py-2 flex items-center justify-around pb-safe">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNavClick(item.id)}
+              className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 ${
+                isActive
+                  ? 'text-[#E4007E]'
+                  : 'text-[#A0A0A0] hover:text-white'
+              }`}
+            >
+              <Icon className={`w-5 h-5 ${isActive ? 'text-[#E4007E]' : 'text-[#A0A0A0]'}`} />
+              <span className="text-[9px] mt-1 font-semibold">{item.label.split(' ')[0]}</span>
+            </button>
+          );
+        })}
+        {canManage && (
+          <button
+            onClick={() => handleNavClick('settings')}
+            className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 ${
+              activeTab === 'settings'
+                ? 'text-[#E4007E]'
+                : 'text-[#A0A0A0] hover:text-white'
+            }`}
+          >
+            <Settings className={`w-5 h-5 ${activeTab === 'settings' ? 'text-[#E4007E]' : 'text-[#A0A0A0]'}`} />
+            <span className="text-[9px] mt-1 font-semibold">Ajustes</span>
+          </button>
+        )}
+      </div>
     </>
   );
 };

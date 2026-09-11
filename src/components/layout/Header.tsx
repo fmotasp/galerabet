@@ -74,16 +74,18 @@ export const Header: React.FC = () => {
 
   return (
     <header className="h-14 px-4 sm:px-8 border-b border-[#262626] bg-[#141414]/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
-      {/* Left section: Hamburger / Toggle */}
+      {/* Left section: Mobile Logo (since Sidebar is now bottom nav) */}
       <div className="flex items-center gap-3">
-        <button
-          id="btn-toggle-menu"
-          onClick={() => setIsMobileSidebarOpen(true)}
-          className="lg:hidden p-2 rounded-lg text-[#A0A0A0] hover:text-white hover:bg-[#262626] transition-colors duration-150"
-          aria-label="Toggle navigation menu"
+        <div 
+          className="lg:hidden w-8 h-8 rounded-xl bg-transparent flex items-center justify-center overflow-hidden cursor-pointer"
+          onClick={() => setActiveTab('dashboard')}
         >
-          <Menu className="w-5 h-5" />
-        </button>
+          <img
+            src="/sidebar-icon.png"
+            alt="Logo"
+            className="w-full h-full object-contain"
+          />
+        </div>
       </div>
 
       {/* Right section: Search, Notifications, Dark Mode, User profile */}

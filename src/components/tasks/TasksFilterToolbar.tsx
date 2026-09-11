@@ -56,7 +56,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
     <div className="flex flex-wrap items-center justify-between gap-3 bg-[#181818] p-3 rounded-2xl border border-[#2A2A2A]">
       <div className="flex flex-wrap items-center gap-3">
         {/* Client Filter (Icon Buttons) */}
-        <div className="flex items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030]">
+        <div className="flex flex-wrap items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030] overflow-x-auto">
           <button
             onClick={() => onClientChange('all')}
             aria-label="Filtrar por todos os clientes"
