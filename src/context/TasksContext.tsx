@@ -139,19 +139,21 @@ export const TasksProvider: React.FC<{
   const fetchTasksFromSupabase = useCallback(async () => {
     console.log('[Supabase Tasks] Iniciando busca direta na tabela tasks...');
     try {
-      // 1. Tenta buscar todas as tarefas ordenadas por last_moved_at
+      const TASK_SELECT_FIELDS = `id, title, description, category, status, due_date, points, is_flagged, project_id, project_name, sprint_id, assignee_id, assignee_name, assignee_initials, members, labels, attachments, reference_images, comments, cover_attachment_id, last_moved_at, activity_log, created_at, updated_at`;
+
+      // 1. Tenta buscar todas as tarefas com campos otimizados (evita timeout por cover_image_url com base64 gigante)
       let { data, error } = await supabase
         .from('tasks')
-        .select('*')
+        .select(TASK_SELECT_FIELDS)
         .order('last_moved_at', { ascending: false })
         .limit(1000);
 
       console.log('[Supabase Tasks] Resposta com order:', { count: data?.length, error });
 
-      // Fallback: se last_moved_at falhar (ex: campo com tipo diferente ou nulls), busca sem order
+      // Fallback: se falhar com order, tenta sem order
       if (error || !data || data.length === 0) {
-        console.log('[Supabase Tasks] Tentando fallback select(*) sem order...');
-        const fallbackRes = await supabase.from('tasks').select('*').limit(1000);
+        console.log('[Supabase Tasks] Tentando fallback sem order...');
+        const fallbackRes = await supabase.from('tasks').select(TASK_SELECT_FIELDS).limit(1000);
         console.log('[Supabase Tasks] Resposta fallback sem order:', { count: fallbackRes.data?.length, error: fallbackRes.error });
         if (fallbackRes.data && fallbackRes.data.length > 0) {
           data = fallbackRes.data;
