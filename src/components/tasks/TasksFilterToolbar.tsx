@@ -184,7 +184,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
         </div>
 
           {/* Desktop Filter (Icon Buttons) */}
-          <div className="hidden md:flex flex-nowrap items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030] overflow-x-auto max-w-[600px] scrollbar-thin">
+          <div className="hidden md:flex flex-nowrap items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030] overflow-hidden">
             <button
               onClick={() => onClientChange('all')}
               aria-label="Filtrar por todos os clientes"
