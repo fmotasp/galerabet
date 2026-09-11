@@ -23,6 +23,7 @@ export const TaskModal: React.FC = () => {
     addTask,
     updateTask,
     deleteTask,
+    moveTaskStatus,
     projects,
     employees,
     currentSprint,
@@ -40,10 +41,13 @@ export const TaskModal: React.FC = () => {
     formData,
     setFormData,
     comments,
+    setComments,
+    loadingComments,
     newCommentText,
     setNewCommentText,
     isPostingComment,
     checklists,
+    setChecklists,
     handleAddChecklistItem,
     handleToggleChecklistItem,
     handleDeleteChecklistItem,
@@ -66,8 +70,10 @@ export const TaskModal: React.FC = () => {
     taskMembers,
     timelineActions,
     handleShareTask,
+    handleCopyTaskLink,
     handleClose,
     handleAddMember,
+    handleMemberClick,
     handleRemoveMember,
     handleToggleLabel,
     handleAddComment,
@@ -75,6 +81,7 @@ export const TaskModal: React.FC = () => {
     handleUploadReferenceImage,
     handleDeleteReferenceImage,
     handleSubmit,
+    handleStatusChange,
   } = useTaskModalForm({
     isOpen,
     editingTask,
@@ -86,6 +93,7 @@ export const TaskModal: React.FC = () => {
     currentUser,
     addTask,
     updateTask,
+    moveTaskStatus,
     setIsNewTaskModalOpen,
     addToast,
   });
@@ -174,6 +182,7 @@ export const TaskModal: React.FC = () => {
                 formData={formData}
                 setFormData={setFormData}
                 spineStatuses={spineStatuses}
+                onStatusChange={handleStatusChange}
               />
 
               <TaskMembersAndClients

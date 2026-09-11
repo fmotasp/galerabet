@@ -487,6 +487,20 @@ export const TasksProvider: React.FC<{
       })
     );
 
+    // Sincroniza cache local imediatamente para persistir no F5
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.TASKS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const updatedCache = parsed.map((t: any) =>
+            t.id === id ? { ...t, ...updates, activityLog: nextActivityLog } : t
+          );
+          localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(updatedCache));
+        }
+      }
+    } catch {}
+
     try {
       const payload: any = {};
       if (updates.status !== undefined) {
@@ -602,6 +616,18 @@ export const TasksProvider: React.FC<{
     if (isReview) {
       const fabio = employees.find((e) => e.name.toLowerCase().includes('fabio mozart'));
       if (fabio) {
+        // Mantém o autor original no array de membros da tarefa
+        if (targetTask.assigneeId && targetTask.assigneeId !== fabio.id) {
+          if (!nextMembers.some((m) => m.id === targetTask.assigneeId)) {
+            nextMembers.push({
+              id: targetTask.assigneeId,
+              name: targetTask.assigneeName || 'Membro',
+              initials: targetTask.assigneeInitials || 'MB',
+              avatarUrl: targetTask.members?.find((m) => m.id === targetTask.assigneeId)?.avatarUrl,
+            });
+          }
+        }
+
         nextAssigneeId = fabio.id;
         nextAssigneeName = fabio.name;
         nextAssigneeInitials = fabio.initials;
@@ -652,6 +678,20 @@ export const TasksProvider: React.FC<{
         return t;
       })
     );
+
+    // Sincroniza cache local imediatamente para persistir no F5
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.TASKS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const updatedCache = parsed.map((t: any) =>
+            t.id === id ? { ...t, status: newStatus, lastMovedAt: now } : t
+          );
+          localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(updatedCache));
+        }
+      }
+    } catch {}
 
     try {
       const updatePayload: Record<string, any> = {

@@ -6,7 +6,8 @@ export const TaskStatusAndDates: React.FC<{
   formData: TaskModalFormData;
   setFormData: React.Dispatch<React.SetStateAction<TaskModalFormData>>;
   spineStatuses: SpineStatusConfig[];
-}> = ({ formData, setFormData, spineStatuses }) => {
+  onStatusChange?: () => void;
+}> = ({ formData, setFormData, spineStatuses, onStatusChange }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
       {/* Status da tarefa */}
@@ -17,6 +18,7 @@ export const TaskStatusAndDates: React.FC<{
         <select
           value={formData.status}
           onChange={(e) => {
+            onStatusChange?.();
             const newStatus = e.target.value as TaskStatus;
             const statusLabel = spineStatuses.find((s) => s.id === newStatus)?.label || newStatus;
             const isReview =

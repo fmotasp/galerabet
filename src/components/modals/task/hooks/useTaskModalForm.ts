@@ -20,6 +20,7 @@ export const useTaskModalForm = ({
   currentUser,
   addTask,
   updateTask,
+  moveTaskStatus,
   setIsNewTaskModalOpen,
   addToast,
 }: {
@@ -33,6 +34,7 @@ export const useTaskModalForm = ({
   currentUser: any;
   addTask: (task: any) => Promise<void> | void;
   updateTask: (id: string, updates: any) => Promise<void> | void;
+  moveTaskStatus?: (id: string, newStatus: TaskStatus) => Promise<void> | void;
   setIsNewTaskModalOpen: (open: boolean) => void;
   addToast: (title: string, message?: string, type?: any) => void;
 }) => {
@@ -403,12 +405,14 @@ export const useTaskModalForm = ({
 
   const prevIsOpenRef = useRef(false);
   const prevEditingTaskIdRef = useRef<string | null>(null);
+  const isStatusDirtyRef = useRef(false);
 
   useEffect(() => {
     const justOpened = isOpen && !prevIsOpenRef.current;
     const taskChanged = editingTask?.id !== prevEditingTaskIdRef.current;
 
     if (justOpened || taskChanged) {
+      isStatusDirtyRef.current = false;
       if (editingTask) {
         setFormData({
           title: editingTask.title || '',
@@ -576,6 +580,16 @@ export const useTaskModalForm = ({
     prevEditingTaskIdRef.current = editingTask?.id || null;
   }, [isOpen, editingTask?.id]);
 
+  // Sincroniza o status do formulário se a tarefa for alterada externamente (ex: Realtime/Kanban) sem sujar o form
+  useEffect(() => {
+    if (editingTask && !isStatusDirtyRef.current && editingTask.status && editingTask.status !== formData.status) {
+      setFormData((prev) => ({
+        ...prev,
+        status: editingTask.status,
+      }));
+    }
+  }, [editingTask?.status]);
+
   const handleAddComment = async (e?: React.FormEvent | React.MouseEvent | React.KeyboardEvent) => {
     if (e) {
       e.preventDefault();
@@ -596,9 +610,8 @@ export const useTaskModalForm = ({
     setComments(nextComments);
     await updateTask(editingTask.id, {
       comments: nextComments,
-      status: editingTask.status || formData.status,
     });
-    setEditingTask((prev) => (prev ? { ...prev, comments: nextComments, status: prev.status || editingTask.status } : null));
+    setEditingTask((prev) => (prev ? { ...prev, comments: nextComments } : null));
     setNewCommentText('');
     addToast('Comentário Adicionado', 'Seu comentário foi salvo.', 'success');
     setIsPostingComment(false);
@@ -783,6 +796,9 @@ export const useTaskModalForm = ({
     const firstRefUrl = (referenceImages && referenceImages.length > 0) ? referenceImages[0].url : undefined;
     const resolvedCover = editingTask?.coverImageUrl || firstRefUrl;
 
+    const isStatusChanged = isStatusDirtyRef.current && editingTask && formData.status !== editingTask.status;
+    const resolvedStatus = isStatusDirtyRef.current ? formData.status : (editingTask?.status || formData.status);
+
     const taskPayload = {
       title: formData.title,
       description: formData.description,
@@ -796,7 +812,7 @@ export const useTaskModalForm = ({
       sprintId: formData.sprintId,
       dueDate: formData.dueDate,
       deliveredAt: formData.deliveredAt,
-      status: formData.status,
+      status: resolvedStatus,
       points: Number(formData.points) || 1,
       isFlagged: formData.isFlagged,
       labels: labelsPayload,
@@ -810,6 +826,9 @@ export const useTaskModalForm = ({
     };
 
     if (editingTask) {
+      if (isStatusChanged && moveTaskStatus) {
+        await moveTaskStatus(editingTask.id, formData.status);
+      }
       await updateTask(editingTask.id, taskPayload);
       addToast('Alterações Salvas! ✅', `Tarefa "${taskPayload.title}" atualizada no Sistema e Supabase.`, 'success');
     } else {
@@ -865,5 +884,8 @@ export const useTaskModalForm = ({
     handleUploadReferenceImage,
     handleDeleteReferenceImage,
     handleSubmit,
+    handleStatusChange: () => {
+      isStatusDirtyRef.current = true;
+    },
   };
 };
