@@ -797,9 +797,8 @@ export const useTaskModalForm = ({
     const resolvedCover = editingTask?.coverImageUrl || firstRefUrl;
 
     const isStatusChanged = isStatusDirtyRef.current && editingTask && formData.status !== editingTask.status;
-    const resolvedStatus = isStatusDirtyRef.current ? formData.status : (editingTask?.status || formData.status);
 
-    const taskPayload = {
+    const taskPayload: any = {
       title: formData.title,
       description: formData.description,
       category: selectedLabels.join(', ') || formData.category || 'Geral',
@@ -812,7 +811,7 @@ export const useTaskModalForm = ({
       sprintId: formData.sprintId,
       dueDate: formData.dueDate,
       deliveredAt: formData.deliveredAt,
-      status: resolvedStatus,
+      
       points: Number(formData.points) || 1,
       isFlagged: formData.isFlagged,
       labels: labelsPayload,
@@ -824,6 +823,9 @@ export const useTaskModalForm = ({
       driveFolderId: currentDriveFolderId,
       driveFolderUrl: currentDriveFolderUrl,
     };
+    if (isStatusDirtyRef.current || !editingTask) {
+      taskPayload.status = formData.status;
+    }
 
     if (editingTask) {
       if (isStatusChanged && moveTaskStatus) {

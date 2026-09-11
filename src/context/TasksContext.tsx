@@ -540,8 +540,19 @@ export const TasksProvider: React.FC<{
         console.warn('[Supabase] Tentando atualizar sem campos adicionais devido a:', sbErr.message);
         const { activity_log, checklists, ...fallbackPayload } = payload;
         const { error: retryErr } = await supabase.from('tasks').update(fallbackPayload).eq('id', id);
-        if (retryErr && updates.status !== undefined) {
-          await supabase.from('tasks').update({ status: updates.status, last_moved_at: now }).eq('id', id);
+        if (retryErr) {
+          console.error('[Supabase] Fallback update failed:', retryErr.message);
+          // Try absolute bare minimum if status was provided
+          if (updates.status !== undefined) {
+             const { error: thirdErr } = await supabase.from('tasks').update({ status: updates.status, last_moved_at: now }).eq('id', id);
+             if (thirdErr) {
+                setTasks((prev) => prev.map((t) => (t.id === id ? targetTask : t)));
+                addToast('Erro ao Salvar ⚠️', 'Falha ao salvar no servidor.', 'error');
+             }
+          } else {
+             setTasks((prev) => prev.map((t) => (t.id === id ? targetTask : t)));
+             addToast('Erro ao Salvar ⚠️', 'Falha ao salvar no servidor.', 'error');
+          }
         }
       }
     } catch (sbErr) {
@@ -707,21 +718,19 @@ export const TasksProvider: React.FC<{
         updatePayload.members = nextMembers;
       }
 
-      const { error: sbErr } = await supabase
-        .from('tasks')
-        .update(updatePayload)
-        .eq('id', id);
-
+      const { error: sbErr } = await supabase.from('tasks').update(updatePayload).eq('id', id);
+      
       if (sbErr) {
         console.error('[Supabase] Falha ao atualizar status:', sbErr.message);
-        // Fallback mínimo apenas com o status caso alguma coluna cause rejeição
-        const { error: fallbackErr } = await supabase
-          .from('tasks')
-          .update({ status: newStatus })
-          .eq('id', id);
-
+        const { error: fallbackErr } = await supabase.from('tasks').update({ status: newStatus, last_moved_at: now }).eq('id', id);
+        
         if (fallbackErr) {
-          console.error('[Supabase] Fallback de status também falhou:', fallbackErr.message);
+          console.error('[Supabase] Fallback de status falhou:', fallbackErr.message);
+          
+          // ROLLBACK
+          setTasks((prev) => prev.map((t) => (t.id === id ? targetTask : t)));
+          addToast('Erro ao Mover ⚠️', 'Falha ao salvar no servidor. A tarefa voltou ao status anterior.', 'error');
+          return;
         }
       }
     } catch (sbErr) {
