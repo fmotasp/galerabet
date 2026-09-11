@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import { realtimeHub } from '../lib/realtimeHub';
 import {
   NavigationTab,
   Task,
@@ -272,25 +273,22 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     fetchGlobalStatuses();
 
-    // Inscrição Realtime: qualquer alteração de status feita por qualquer usuário atualiza todos em tempo real
-    const channel = supabase
-      .channel('realtime:system-statuses')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'projects', filter: 'id=eq.system-settings' },
-        (payload: any) => {
-          if (payload.new && Array.isArray(payload.new.color_palette) && payload.new.color_palette.length > 0) {
-            if (isMounted) {
-              setSpineStatuses(payload.new.color_palette as SpineStatusConfig[]);
-            }
+    // Inscrição Realtime unificada: atualiza status de todos em tempo real
+    const unsubscribe = realtimeHub.subscribe(
+      'projects',
+      (payload: any) => {
+        if (payload.new && Array.isArray(payload.new.color_palette) && payload.new.color_palette.length > 0) {
+          if (isMounted) {
+            setSpineStatuses(payload.new.color_palette as SpineStatusConfig[]);
           }
         }
-      )
-      .subscribe();
+      },
+      'id=eq.system-settings'
+    );
 
     return () => {
       isMounted = false;
-      supabase.removeChannel(channel);
+      unsubscribe();
     };
   }, []);
 

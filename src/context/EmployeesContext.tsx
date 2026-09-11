@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { realtimeHub } from '../lib/realtimeHub';
 import { Employee } from '../types';
 import { INITIAL_EMPLOYEES } from '../data/mockData';
 import {
@@ -108,42 +109,25 @@ export const EmployeesProvider: React.FC<{
 
     fetchEmployeesFromSupabase();
 
-    // Inscrição Realtime para novos funcionários, edições e exclusões
-    const channel = supabase
-      .channel('realtime:employees')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'employees' },
-        (payload) => {
-          if (!payload.new || !isMounted) return;
-          const newEmp = mapRowToEmployee(payload.new);
-          setEmployees((prev) => {
-            if (prev.some((e) => e.id === newEmp.id)) return prev;
-            return [...prev, newEmp].sort((a, b) => a.name.localeCompare(b.name));
-          });
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'employees' },
-        (payload) => {
-          if (!payload.new || !isMounted) return;
-          const updatedEmp = mapRowToEmployee(payload.new);
-          setEmployees((prev) =>
-            prev.map((e) => (e.id === updatedEmp.id ? { ...e, ...updatedEmp } : e))
-          );
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'employees' },
-        (payload) => {
-          if (!payload.old || !isMounted) return;
-          const deletedId = (payload.old as any).id;
-          setEmployees((prev) => prev.filter((e) => e.id !== deletedId));
-        }
-      )
-      .subscribe();
+    // Inscrição Realtime compartilhada para novos funcionários, edições e exclusões
+    const unsubscribe = realtimeHub.subscribe('employees', (payload) => {
+      if (!isMounted) return;
+      if (payload.eventType === 'INSERT' && payload.new) {
+        const newEmp = mapRowToEmployee(payload.new);
+        setEmployees((prev) => {
+          if (prev.some((e) => e.id === newEmp.id)) return prev;
+          return [...prev, newEmp].sort((a, b) => a.name.localeCompare(b.name));
+        });
+      } else if (payload.eventType === 'UPDATE' && payload.new) {
+        const updatedEmp = mapRowToEmployee(payload.new);
+        setEmployees((prev) =>
+          prev.map((e) => (e.id === updatedEmp.id ? { ...e, ...updatedEmp } : e))
+        );
+      } else if (payload.eventType === 'DELETE' && payload.old) {
+        const deletedId = (payload.old as any).id;
+        setEmployees((prev) => prev.filter((e) => e.id !== deletedId));
+      }
+    });
 
     // Também ouve evento customizado de login para recarregar imediatamente
     const handleLoginEvent = () => {
@@ -154,7 +138,7 @@ export const EmployeesProvider: React.FC<{
     return () => {
       isMounted = false;
       window.removeEventListener('spine_user_logged_in', handleLoginEvent);
-      supabase.removeChannel(channel);
+      unsubscribe();
     };
   }, []);
 

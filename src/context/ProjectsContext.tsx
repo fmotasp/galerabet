@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { realtimeHub } from '../lib/realtimeHub';
 import { Project, BrandColor } from '../types';
 import { INITIAL_PROJECTS } from '../data/mockData';
 
@@ -185,48 +186,31 @@ export const ProjectsProvider: React.FC<{
 
     fetchProjectsFromSupabase();
 
-    // Inscrição Realtime para novos projetos, atualizações e exclusões
-    const channel = supabase
-      .channel('realtime:projects')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'projects' },
-        (payload) => {
-          if (!payload.new || !isMounted) return;
-          if (isSystemProject(payload.new)) return;
-          const newProj = mapRowToProject(payload.new);
-          setProjects((prev) => {
-            if (prev.some((p) => p.id === newProj.id)) return prev;
-            return [...prev, newProj].sort((a, b) => a.name.localeCompare(b.name));
-          });
+    // Inscrição Realtime compartilhada para novos projetos, atualizações e exclusões
+    const unsubscribe = realtimeHub.subscribe('projects', (payload) => {
+      if (!isMounted) return;
+      if (payload.eventType === 'INSERT' && payload.new) {
+        if (isSystemProject(payload.new)) return;
+        const newProj = mapRowToProject(payload.new);
+        setProjects((prev) => {
+          if (prev.some((p) => p.id === newProj.id)) return prev;
+          return [...prev, newProj].sort((a, b) => a.name.localeCompare(b.name));
+        });
+      } else if (payload.eventType === 'UPDATE' && payload.new) {
+        if (isSystemProject(payload.new)) {
+          // Se virou system, remove da lista de clientes
+          setProjects((prev) => prev.filter((p) => p.id !== payload.new.id));
+          return;
         }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'projects' },
-        (payload) => {
-          if (!payload.new || !isMounted) return;
-          if (isSystemProject(payload.new)) {
-            // Se virou system, remove da lista de clientes
-            setProjects((prev) => prev.filter((p) => p.id !== payload.new.id));
-            return;
-          }
-          const updatedProj = mapRowToProject(payload.new);
-          setProjects((prev) =>
-            prev.map((p) => (p.id === updatedProj.id ? { ...p, ...updatedProj } : p))
-          );
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'projects' },
-        (payload) => {
-          if (!payload.old || !isMounted) return;
-          const deletedId = (payload.old as any).id;
-          setProjects((prev) => prev.filter((p) => p.id !== deletedId));
-        }
-      )
-      .subscribe();
+        const updatedProj = mapRowToProject(payload.new);
+        setProjects((prev) =>
+          prev.map((p) => (p.id === updatedProj.id ? { ...p, ...updatedProj } : p))
+        );
+      } else if (payload.eventType === 'DELETE' && payload.old) {
+        const deletedId = (payload.old as any).id;
+        setProjects((prev) => prev.filter((p) => p.id !== deletedId));
+      }
+    });
 
     // Também ouve evento customizado de login para recarregar imediatamente
     const handleLoginEvent = () => {
@@ -237,7 +221,7 @@ export const ProjectsProvider: React.FC<{
     return () => {
       isMounted = false;
       window.removeEventListener('spine_user_logged_in', handleLoginEvent);
-      supabase.removeChannel(channel);
+      unsubscribe();
     };
   }, []);
 

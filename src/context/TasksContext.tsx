@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { realtimeHub } from '../lib/realtimeHub';
 import { isTaskOverdue, isTaskCompleted, getTaskOverdueDays } from '../lib/taskDateUtils';
 import { encodeTaskDescriptionWithChecklist, decodeTaskDescriptionWithChecklist } from '../lib/taskUtils';
 import { Task, TaskStatus, SpineStatusConfig, Employee } from '../types';
@@ -189,44 +190,26 @@ export const TasksProvider: React.FC<{
     fetchTasksFromSupabase();
   }, [fetchTasksFromSupabase]);
 
-  // Inscrição em tempo real (Supabase Realtime WebSockets) para todos os usuários
+  // Inscrição em tempo real compartilhada (Supabase Realtime WebSockets) para todos os usuários
   useEffect(() => {
-    const channel = supabase
-      .channel('realtime:tasks')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'tasks' },
-        (payload) => {
-          if (!payload.new || !payload.new.id) return;
-          const incomingTask = mapRowToTask(payload.new);
-          setTasks((prev) => {
-            if (prev.some((t) => t.id === incomingTask.id)) {
-              return prev.map((t) => (t.id === incomingTask.id ? { ...t, ...incomingTask } : t));
-            }
-            return [incomingTask, ...prev];
-          });
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'tasks' },
-        (payload) => {
-          if (!payload.new || !payload.new.id) return;
-          const updatedTask = mapRowToTask(payload.new);
-          setTasks((prev) =>
-            prev.map((t) => (t.id === updatedTask.id ? { ...t, ...updatedTask } : t))
-          );
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'tasks' },
-        (payload) => {
-          if (!payload.old || !payload.old.id) return;
-          setTasks((prev) => prev.filter((t) => t.id !== payload.old.id));
-        }
-      )
-      .subscribe();
+    const unsubscribe = realtimeHub.subscribe('tasks', (payload) => {
+      if (payload.eventType === 'INSERT' && payload.new?.id) {
+        const incomingTask = mapRowToTask(payload.new);
+        setTasks((prev) => {
+          if (prev.some((t) => t.id === incomingTask.id)) {
+            return prev.map((t) => (t.id === incomingTask.id ? { ...t, ...incomingTask } : t));
+          }
+          return [incomingTask, ...prev];
+        });
+      } else if (payload.eventType === 'UPDATE' && payload.new?.id) {
+        const updatedTask = mapRowToTask(payload.new);
+        setTasks((prev) =>
+          prev.map((t) => (t.id === updatedTask.id ? { ...t, ...updatedTask } : t))
+        );
+      } else if (payload.eventType === 'DELETE' && payload.old?.id) {
+        setTasks((prev) => prev.filter((t) => t.id !== payload.old.id));
+      }
+    });
 
     // Quando o usuário volta para a aba ou desbloqueia o computador, sincroniza com o banco
     const handleVisibilityChange = () => {
@@ -245,7 +228,7 @@ export const TasksProvider: React.FC<{
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('spine_user_logged_in', handleLoginEvent);
-      supabase.removeChannel(channel);
+      unsubscribe();
     };
   }, [fetchTasksFromSupabase]);
 
