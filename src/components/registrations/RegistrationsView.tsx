@@ -300,36 +300,55 @@ export const RegistrationsView: React.FC = () => {
       {activeSubTab === 'employees' && (
         <div className="space-y-6">
           {/* Department and Tag Filters */}
-          <div className="flex flex-wrap items-center gap-2 bg-[#181818] p-3 rounded-2xl border border-[#2A2A2A]">
-            <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5 px-2">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 bg-[#181818] p-3 rounded-2xl border border-[#2A2A2A]">
+            <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5 px-2 mb-1 sm:mb-0">
               <Tag className="w-3.5 h-3.5 text-[#E4007E]" />
               Filtrar por Tag:
             </span>
 
-            <button
-              onClick={() => setSelectedTagFilter('All')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                selectedTagFilter === 'All'
-                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white'
-                  : 'bg-[#222222] text-slate-400 hover:text-white border border-[#2E2E2E]'
-              }`}
-            >
-              Todas as tags
-            </button>
+            {/* Mobile Dropdown */}
+            <div className="relative w-full sm:hidden">
+              <select
+                value={selectedTagFilter}
+                onChange={(e) => setSelectedTagFilter(e.target.value)}
+                className="appearance-none w-full bg-[#222222] border border-[#2E2E2E] text-white text-xs font-bold py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E] transition-colors uppercase tracking-wider"
+              >
+                <option value="All">TODAS AS TAGS</option>
+                {allUniqueTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            {allUniqueTags.map((tag) => (
+            {/* Desktop Buttons */}
+            <div className="hidden sm:flex flex-wrap items-center gap-2">
               <button
-                key={tag}
-                onClick={() => setSelectedTagFilter(tag === selectedTagFilter ? 'All' : tag)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all uppercase tracking-wider cursor-pointer ${
-                  selectedTagFilter === tag
-                    ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-sm'
-                    : 'bg-[#222222] text-slate-300 hover:text-white border border-[#2E2E2E]'
+                onClick={() => setSelectedTagFilter('All')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  selectedTagFilter === 'All'
+                    ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white'
+                    : 'bg-[#222222] text-slate-400 hover:text-white border border-[#2E2E2E]'
                 }`}
               >
-                {tag}
+                Todas as tags
               </button>
-            ))}
+
+              {allUniqueTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTagFilter(tag === selectedTagFilter ? 'All' : tag)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all uppercase tracking-wider cursor-pointer ${
+                    selectedTagFilter === tag
+                      ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-sm'
+                      : 'bg-[#222222] text-slate-300 hover:text-white border border-[#2E2E2E]'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Employees List */}

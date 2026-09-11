@@ -118,20 +118,38 @@ export const ProjectsView: React.FC = () => {
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-          {['all', 'active', 'planning', 'at_risk', 'completed'].map((status) => (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold capitalize whitespace-nowrap transition-all ${
-                statusFilter === status
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
-              }`}
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto pb-1 sm:pb-0">
+          {/* Mobile Dropdown */}
+          <div className="relative w-full sm:hidden">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="appearance-none w-full bg-[#222222] border border-slate-700/80 text-white text-xs font-bold py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
             >
-              {status === 'at_risk' ? 'At Risk' : status}
-            </button>
-          ))}
+              {['all', 'active', 'planning', 'at_risk', 'completed'].map((status) => (
+                <option key={status} value={status}>
+                  {status === 'at_risk' ? 'At Risk' : status.charAt(0).toUpperCase() + status.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Desktop Buttons */}
+          <div className="hidden sm:flex items-center gap-2">
+            {['all', 'active', 'planning', 'at_risk', 'completed'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setStatusFilter(status)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold capitalize whitespace-nowrap transition-all ${
+                  statusFilter === status
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
+                }`}
+              >
+                {status === 'at_risk' ? 'At Risk' : status}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="relative w-full sm:w-64">
