@@ -167,7 +167,7 @@ export const getValidAccessToken = async (
   return null;
 };
 
-// Helper fetch wrapper to handle Google Drive token expiry
+// Helper fetch wrapper to handle Google Drive token expiry and fallback to API Key
 const driveFetch = async (
   url: string,
   options: RequestInit = {},
@@ -178,8 +178,12 @@ const driveFetch = async (
   if (!token) {
     token = await getValidAccessToken(undefined, interactive);
   }
+
+  // Se não tem token OAuth, tenta usar a API Key diretamente como query param
   if (!token) {
-    throw new Error('No Google Drive access token available');
+    const separator = url.includes('?') ? '&' : '?';
+    const keyUrl = `${url}${separator}key=${GOOGLE_DRIVE_CONFIG.API_KEY}`;
+    return await fetch(keyUrl, options);
   }
 
   const headers = {
@@ -189,7 +193,7 @@ const driveFetch = async (
 
   let response = await fetch(url, { ...options, headers });
 
-  // If unauthorized (401), token has probably expired
+  // If unauthorized (401), token has probably expired -> tenta refresh ou fallback com API Key
   if (response.status === 401) {
     console.warn('Google Drive token expired or invalid (401).');
     localStorage.removeItem('spine_google_access_token');
@@ -200,9 +204,16 @@ const driveFetch = async (
           ...(options.headers || {}),
           Authorization: `Bearer ${newToken}`,
         } as any;
-        response = await fetch(url, { ...options, headers: retryHeaders });
+        return await fetch(url, { ...options, headers: retryHeaders });
       }
     }
+
+    // Fallback com API Key para pastas/arquivos públicos ou compartilhados
+    const separator = url.includes('?') ? '&' : '?';
+    const keyUrl = `${url}${separator}key=${GOOGLE_DRIVE_CONFIG.API_KEY}`;
+    const keyHeaders = { ...(options.headers || {}) } as any;
+    delete keyHeaders.Authorization;
+    response = await fetch(keyUrl, { ...options, headers: keyHeaders });
   }
 
   return response;
@@ -506,30 +517,58 @@ export const uploadFileToDrive = async (
   }
 };
 
-// List files inside a Google Drive task folder
+// List files inside a Google Drive task folder (including subfolders if it's a folder of folders)
 export const listDriveFolderFiles = async (
   folderId: string,
-  accessToken?: string
+  accessToken?: string,
+  recursive: boolean = true
 ): Promise<DriveFileItem[]> => {
   try {
     const query = `'${folderId}' in parents and trashed = false`;
     const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(
       query
-    )}&fields=files(id,name,mimeType,thumbnailLink,webContentLink,webViewLink,iconLink,size,createdTime,description)&orderBy=createdTime desc`;
+    )}&supportsAllDrives=true&includeItemsFromAllDrives=true&fields=files(id,name,mimeType,thumbnailLink,webContentLink,webViewLink,iconLink,size,createdTime,description)&orderBy=createdTime desc`;
 
     const response = await driveFetch(url, {}, accessToken);
 
-    if (!response.ok) return [];
+    if (!response.ok) {
+      const errText = await response.text();
+      console.warn(`[Google Drive] Falha ao listar pasta (${folderId}): ${response.status}`, errText);
+      return [];
+    }
 
     const data = await response.json();
-    return (data.files || []).map((f: any) => ({
-      ...f,
-      type: f.description?.includes('reference')
-        ? 'reference'
-        : f.description?.includes('final')
-        ? 'final'
-        : 'general',
-    }));
+    const items = data.files || [];
+
+    const directFiles: DriveFileItem[] = [];
+    const subfolders: any[] = [];
+
+    for (const item of items) {
+      if (item.mimeType === 'application/vnd.google-apps.folder') {
+        subfolders.push(item);
+      } else {
+        directFiles.push({
+          ...item,
+          type: item.description?.includes('reference')
+            ? 'reference'
+            : item.description?.includes('final')
+            ? 'final'
+            : 'general',
+        });
+      }
+    }
+
+    // Se houver subpastas (ex: a pasta no Drive contém pastas por formato ou tema), busca os arquivos de dentro delas também
+    if (recursive && subfolders.length > 0) {
+      const subFilesArrays = await Promise.all(
+        subfolders.map((sf) => listDriveFolderFiles(sf.id, accessToken, false))
+      );
+      for (const sfFiles of subFilesArrays) {
+        directFiles.push(...sfFiles);
+      }
+    }
+
+    return directFiles;
   } catch (error) {
     console.error('Error listing drive files:', error);
     return [];
@@ -731,3 +770,145 @@ export const uploadEmployeeAvatarToDrive = async (
     return null;
   }
 };
+
+/**
+ * Extrai o ID do Google Drive a partir de qualquer formato de URL (arquivo individual ou pasta) ou do próprio ID.
+ */
+export const extractDriveFileOrFolderId = (urlOrId: string): { id: string; isFolder: boolean } | null => {
+  if (!urlOrId) return null;
+  const str = urlOrId.trim();
+
+  // Se for link de pasta (/folders/...)
+  const folderMatch = str.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+  if (folderMatch && folderMatch[1]) {
+    return { id: folderMatch[1], isFolder: true };
+  }
+
+  // Se for link de arquivo (/file/d/... ou /d/...)
+  const fileMatch = str.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || str.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (fileMatch && fileMatch[1]) {
+    return { id: fileMatch[1], isFolder: false };
+  }
+
+  // Parâmetro ?id=...
+  const idMatch = str.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (idMatch && idMatch[1]) {
+    return { id: idMatch[1], isFolder: false };
+  }
+
+  // Se já for apenas um ID sem barras
+  if (!str.includes('/') && str.length >= 15) {
+    return { id: str, isFolder: false };
+  }
+
+  return null;
+};
+
+/**
+ * Busca detalhes de um arquivo único do Google Drive
+ */
+export const getDriveFileDetails = async (
+  fileId: string,
+  accessToken?: string
+): Promise<DriveFileItem | null> => {
+  try {
+    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,thumbnailLink,webContentLink,webViewLink,iconLink,size,createdTime,description`;
+    const response = await driveFetch(url, {}, accessToken);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (err) {
+    console.warn('Erro ao obter detalhes do arquivo do Drive:', err);
+    return null;
+  }
+};
+
+/**
+ * Extrai o ID da pasta do Google Drive a partir de qualquer formato de URL ou do próprio ID.
+ */
+export const extractDriveFolderId = (urlOrId: string): string | null => {
+  const result = extractDriveFileOrFolderId(urlOrId);
+  return result ? result.id : null;
+};
+
+/**
+ * Lista todos os arquivos contidos em um link do Drive:
+ * - Se o link for de uma PASTA: lista todos os arquivos da pasta
+ * - Se o link for de um ARQUIVO direto: retorna as informações daquele arquivo
+ */
+export const fetchDriveItemsFromLink = async (
+  urlOrId: string,
+  accessToken?: string
+): Promise<{ files: DriveFileItem[]; isFolder: boolean }> => {
+  try {
+    const extracted = extractDriveFileOrFolderId(urlOrId);
+    if (!extracted) return { files: [], isFolder: false };
+
+    // Se identificou como pasta pelo link
+    if (extracted.isFolder) {
+      const files = await listDriveFolderFiles(extracted.id, accessToken);
+      return { files, isFolder: true };
+    }
+
+    // Tenta primeiro ver os detalhes do arquivo
+    const file = await getDriveFileDetails(extracted.id, accessToken);
+    if (file) {
+      if (file.mimeType === 'application/vnd.google-apps.folder') {
+        const files = await listDriveFolderFiles(file.id, accessToken);
+        return { files, isFolder: true };
+      }
+      return { files: [file], isFolder: false };
+    }
+
+    // Fallback: se for arquivo e não conseguiu via API autenticada (ex: link compartilhado com permissão pública)
+    if (!extracted.isFolder) {
+      return {
+        files: [
+          {
+            id: extracted.id,
+            name: 'Key Visual (Arquivo Google Drive)',
+            mimeType: 'image/jpeg',
+            thumbnailLink: `https://lh3.googleusercontent.com/d/${extracted.id}`,
+            webViewLink: urlOrId,
+            webContentLink: `https://drive.google.com/uc?export=download&id=${extracted.id}`,
+          },
+        ],
+        isFolder: false,
+      };
+    }
+
+    // Se for pasta mas a API não listou itens (ex: sem autenticação), retorna item para preview da pasta
+    return { files: [], isFolder: true };
+  } catch (err) {
+    console.warn('Erro ao buscar itens do link do Drive:', err);
+    const extracted = extractDriveFileOrFolderId(urlOrId);
+    if (extracted && !extracted.isFolder) {
+      return {
+        files: [
+          {
+            id: extracted.id,
+            name: 'Key Visual (Arquivo Google Drive)',
+            mimeType: 'image/jpeg',
+            thumbnailLink: `https://lh3.googleusercontent.com/d/${extracted.id}`,
+            webViewLink: urlOrId,
+            webContentLink: `https://drive.google.com/uc?export=download&id=${extracted.id}`,
+          },
+        ],
+        isFolder: false,
+      };
+    }
+    return { files: [], isFolder: false };
+  }
+};
+
+/**
+ * Lista todos os arquivos (imagens, vídeos, PSDs, arquivos) contidos em uma pasta de KVs no Google Drive
+ */
+export const listKvDriveFiles = async (
+  folderUrlOrId: string,
+  accessToken?: string
+): Promise<DriveFileItem[]> => {
+  const res = await fetchDriveItemsFromLink(folderUrlOrId, accessToken);
+  return res.files;
+};
+
+

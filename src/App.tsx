@@ -32,6 +32,9 @@ const RegistrationsView = lazy(() =>
 const MaterialsView = lazy(() =>
   import('./components/materials/MaterialsView').then((m) => ({ default: m.MaterialsView }))
 );
+const KvsView = lazy(() =>
+  import('./components/kvs/KvsView').then((m) => ({ default: m.KvsView }))
+);
 const SettingsView = lazy(() =>
   import('./components/settings/SettingsView').then((m) => ({ default: m.SettingsView }))
 );
@@ -136,6 +139,7 @@ const MainLayout: React.FC = () => {
             {activeTab === 'dashboard' && <DashboardView />}
             {activeTab === 'tasks' && <TasksView />}
             {activeTab === 'materials' && <MaterialsView />}
+            {activeTab === 'kvs' && <KvsView />}
             {activeTab === 'registrations' && (canManage ? <RegistrationsView /> : <DashboardView />)}
             {activeTab === 'projects' && (canManage ? <ProjectsView /> : <DashboardView />)}
             {activeTab === 'employees' && (canManage ? <EmployeesView /> : <DashboardView />)}

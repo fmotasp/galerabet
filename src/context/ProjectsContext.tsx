@@ -9,6 +9,14 @@ export interface BrandMeta {
   logosPackUrl?: string;
   typographyUrl?: string;
   additionalMaterialsUrl?: string;
+  kvDriveUrl?: string;
+  kvDriveItems?: Array<{
+    id: string;
+    title?: string;
+    url: string;
+    driveFolderId?: string;
+    createdAt?: string;
+  }>;
 }
 
 export const encodeProjectDescription = (description: string = '', brand: BrandMeta): string => {
@@ -18,7 +26,9 @@ export const encodeProjectDescription = (description: string = '', brand: BrandM
     Boolean(brand.brandManualUrl) ||
     Boolean(brand.logosPackUrl) ||
     Boolean(brand.typographyUrl) ||
-    Boolean(brand.additionalMaterialsUrl);
+    Boolean(brand.additionalMaterialsUrl) ||
+    Boolean(brand.kvDriveUrl) ||
+    (brand.kvDriveItems && brand.kvDriveItems.length > 0);
 
   if (!hasMeta) return cleanDesc;
   const metaJson = JSON.stringify({
@@ -27,6 +37,8 @@ export const encodeProjectDescription = (description: string = '', brand: BrandM
     logosPackUrl: brand.logosPackUrl || '',
     typographyUrl: brand.typographyUrl || '',
     additionalMaterialsUrl: brand.additionalMaterialsUrl || '',
+    kvDriveUrl: brand.kvDriveUrl || '',
+    kvDriveItems: brand.kvDriveItems || [],
   });
   return `${cleanDesc}\n<!-- __BRAND_META__ ${metaJson} -->`.trim();
 };
@@ -89,6 +101,8 @@ export const ProjectsProvider: React.FC<{
       logosPackUrl: row.logos_pack_url || brandMeta.logosPackUrl,
       typographyUrl: row.typography_url || brandMeta.typographyUrl,
       additionalMaterialsUrl: row.additional_materials_url || brandMeta.additionalMaterialsUrl,
+      kvDriveUrl: row.kv_drive_url || brandMeta.kvDriveUrl,
+      kvDriveItems: Array.isArray(row.kv_drive_items) ? row.kv_drive_items : (brandMeta.kvDriveItems || []),
     };
   };
 
@@ -246,6 +260,7 @@ export const ProjectsProvider: React.FC<{
       logosPackUrl: newProj.logosPackUrl,
       typographyUrl: newProj.typographyUrl,
       additionalMaterialsUrl: newProj.additionalMaterialsUrl,
+      kvDriveUrl: newProj.kvDriveUrl,
     });
 
     // Persiste no Supabase
@@ -323,6 +338,8 @@ export const ProjectsProvider: React.FC<{
       logosPackUrl: targetProj.logosPackUrl,
       typographyUrl: targetProj.typographyUrl,
       additionalMaterialsUrl: targetProj.additionalMaterialsUrl,
+      kvDriveUrl: targetProj.kvDriveUrl,
+      kvDriveItems: targetProj.kvDriveItems,
     });
 
     // Atualiza no Supabase
@@ -349,6 +366,7 @@ export const ProjectsProvider: React.FC<{
       if (updates.logosPackUrl !== undefined) payload.logos_pack_url = updates.logosPackUrl;
       if (updates.typographyUrl !== undefined) payload.typography_url = updates.typographyUrl;
       if (updates.additionalMaterialsUrl !== undefined) payload.additional_materials_url = updates.additionalMaterialsUrl;
+      if (updates.kvDriveUrl !== undefined) payload.kv_drive_url = updates.kvDriveUrl;
 
       const { error } = await supabase.from('projects').upsert(payload);
       if (error) {
@@ -358,6 +376,7 @@ export const ProjectsProvider: React.FC<{
         delete payload.logos_pack_url;
         delete payload.typography_url;
         delete payload.additional_materials_url;
+        delete payload.kv_drive_url;
         await supabase.from('projects').upsert(payload);
       }
     } catch (sbErr) {

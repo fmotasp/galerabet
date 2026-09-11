@@ -68,6 +68,7 @@ export const ProjectModal: React.FC = () => {
         logosPackUrl: editingProject.logosPackUrl || '',
         typographyUrl: editingProject.typographyUrl || '',
         additionalMaterialsUrl: editingProject.additionalMaterialsUrl || '',
+        kvDriveUrl: editingProject.kvDriveUrl || '',
         colorPalette:
           editingProject.colorPalette && editingProject.colorPalette.length > 0
             ? editingProject.colorPalette
@@ -87,6 +88,7 @@ export const ProjectModal: React.FC = () => {
         logosPackUrl: '',
         typographyUrl: '',
         additionalMaterialsUrl: '',
+        kvDriveUrl: '',
         colorPalette: [
           { name: 'Primária', hex: '#E4007E' },
           { name: 'Secundária', hex: '#E94E18' },
@@ -163,6 +165,7 @@ export const ProjectModal: React.FC = () => {
       logosPackUrl: formData.logosPackUrl.trim(),
       typographyUrl: formData.typographyUrl.trim(),
       additionalMaterialsUrl: formData.additionalMaterialsUrl.trim(),
+      kvDriveUrl: formData.kvDriveUrl.trim(),
     };
 
     if (editingProject) {
@@ -417,6 +420,20 @@ export const ProjectModal: React.FC = () => {
                 placeholder="Ex: Poppins / Montserrat ou link de download"
                 value={formData.typographyUrl}
                 onChange={(e) => setFormData((prev) => ({ ...prev, typographyUrl: e.target.value }))}
+              />
+            </div>
+
+            {/* Link Pasta de Key Visuals (KV) */}
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                <ImageIcon className="w-3.5 h-3.5 text-[#E4007E]" />
+                <span>Pasta ou Link de Key Visuals (KV) - Google Drive</span>
+              </label>
+              <Input
+                type="url"
+                placeholder="https://drive.google.com/drive/folders/... (link da pasta de KVs)"
+                value={formData.kvDriveUrl}
+                onChange={(e) => setFormData((prev) => ({ ...prev, kvDriveUrl: e.target.value }))}
               />
             </div>
           </div>
