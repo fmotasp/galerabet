@@ -281,14 +281,35 @@ export const EmployeesProvider: React.FC<{
     const empToDelete = employees.find((e) => e.id === id);
     setEmployees((prev) => prev.filter((e) => e.id !== id));
 
-    // Remove do Supabase
     try {
+      // 1. Obtém token de sessão se existir
+      let sessionToken = '';
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        sessionToken = session?.access_token || '';
+      } catch {}
+
+      const headers: Record<string, string> = {};
+      if (sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;
+
+      // 2. Chama a Edge Function para deletar tanto do Auth (Authentication > Users) quanto da tabela employees
+      await supabase.functions.invoke('manage-employee', {
+        headers,
+        body: {
+          operation: 'delete',
+          employee_id: id,
+          email: empToDelete?.email,
+          auth_user_id: empToDelete?.auth_user_id,
+        },
+      });
+
+      // 3. Garante a remoção direta na tabela employees como redundância
       await supabase.from('employees').delete().eq('id', id);
     } catch (sbErr) {
       console.warn('Supabase employee delete warning:', sbErr);
     }
 
-    addToast('Funcionário Removido', `Removido ${empToDelete?.name || 'colaborador'}.`, 'info');
+    addToast('Funcionário Removido', `Removido ${empToDelete?.name || 'colaborador'} do sistema e do acesso.`, 'info');
   };
 
   return (

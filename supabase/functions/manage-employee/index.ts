@@ -17,12 +17,13 @@ const corsHeaders = {
 };
 
 interface ManageEmployeePayload {
-  operation: "create" | "update_password";
+  operation: "create" | "update_password" | "delete";
   employee_id: string;
   email?: string;
   password?: string;
   name?: string;
   role?: string;
+  auth_user_id?: string;
 }
 
 serve(async (req) => {
@@ -391,8 +392,71 @@ serve(async (req) => {
       );
     }
 
+    // OPERAÇÃO: DELETE (Remove tanto do Supabase Auth quanto da tabela employees)
+    if (operation === "delete") {
+      let targetAuthId = body.auth_user_id;
+      let cleanEmail = (email || "").trim().toLowerCase();
+
+      // 1. Busca dados do funcionário se auth_user_id ou email não foram passados
+      const { data: emp } = await adminClient
+        .from("employees")
+        .select("id, email, auth_user_id")
+        .eq("id", employee_id)
+        .maybeSingle();
+
+      if (emp) {
+        if (!targetAuthId && emp.auth_user_id) targetAuthId = emp.auth_user_id;
+        if (!cleanEmail && emp.email) cleanEmail = emp.email.trim().toLowerCase();
+      }
+
+      // 2. Se não tem targetAuthId mas tem email, busca no Supabase Auth por email
+      if (!targetAuthId && cleanEmail) {
+        try {
+          const { data: userList } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+          const foundAuth = userList?.users?.find(
+            (u) => (u.email || "").trim().toLowerCase() === cleanEmail
+          );
+          if (foundAuth) targetAuthId = foundAuth.id;
+        } catch (e) {
+          console.warn("[manage-employee] Erro ao listar auth users para delete:", e);
+        }
+      }
+
+      // 3. Deleta o usuário de auth.users (Authentication > Users)
+      if (targetAuthId) {
+        const { error: deleteAuthErr } = await adminClient.auth.admin.deleteUser(targetAuthId);
+        if (deleteAuthErr) {
+          console.warn(`[manage-employee] Aviso ao deletar de auth.users (${targetAuthId}):`, deleteAuthErr.message);
+        } else {
+          console.log(`[manage-employee] Usuário ${targetAuthId} removido do Supabase Auth com sucesso.`);
+        }
+      }
+
+      // 4. Deleta da tabela public.employees
+      const { error: deleteEmpErr } = await adminClient
+        .from("employees")
+        .delete()
+        .eq("id", employee_id);
+
+      if (deleteEmpErr) {
+        console.error("[manage-employee] Erro ao deletar de employees:", deleteEmpErr.message);
+        return new Response(
+          JSON.stringify({ error: `Erro ao remover da tabela employees: ${deleteEmpErr.message}` }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Colaborador removido com sucesso de employees e Authentication.",
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
-      JSON.stringify({ error: "Operação inválida. Use 'create' ou 'update_password'." }),
+      JSON.stringify({ error: "Operação inválida. Use 'create', 'update_password' ou 'delete'." }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err: any) {
