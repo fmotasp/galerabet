@@ -184,11 +184,11 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
         </div>
 
           {/* Desktop Filter (Icon Buttons) */}
-          <div className="hidden md:flex flex-wrap items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030] overflow-x-auto max-w-[500px]">
+          <div className="hidden md:flex flex-nowrap items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030] overflow-x-auto max-w-[600px] scrollbar-thin">
             <button
               onClick={() => onClientChange('all')}
               aria-label="Filtrar por todos os clientes"
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 selectedClient === 'all'
                   ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
                   : 'text-slate-300 hover:text-white hover:bg-[#303030]'
@@ -205,7 +205,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                   key={client.id}
                   onClick={() => onClientChange(isSelected ? 'all' : client.id)}
                   aria-label={`Filtrar por cliente ${client.name}`}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex items-center shrink-0 gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
                       : 'text-slate-300 hover:text-white hover:bg-[#303030]'
