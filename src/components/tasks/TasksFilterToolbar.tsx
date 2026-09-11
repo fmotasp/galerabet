@@ -58,8 +58,9 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 bg-[#181818] p-3 rounded-2xl border border-[#2A2A2A]">
       <div className="flex flex-wrap items-center gap-3">
-        {/* Client Filter Dropdown */}
-        <div className="relative">
+        {/* Client Filter (Responsive) */}
+        <div className="flex items-center gap-2">
+        <div className="relative md:hidden">
           <button
             type="button"
             onClick={() => setIsClientDropdownOpen(!isClientDropdownOpen)}
@@ -180,6 +181,69 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
               </div>
             </>
           )}
+        </div>
+
+          {/* Desktop Filter (Icon Buttons) */}
+          <div className="hidden md:flex flex-wrap items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030] overflow-x-auto max-w-[500px]">
+            <button
+              onClick={() => onClientChange('all')}
+              aria-label="Filtrar por todos os clientes"
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                selectedClient === 'all'
+                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-[#303030]'
+              }`}
+              title="Todos os Clientes"
+            >
+              Todos
+            </button>
+
+            {registeredClients.map((client) => {
+              const isSelected = selectedClient === client.id;
+              return (
+                <button
+                  key={client.id}
+                  onClick={() => onClientChange(isSelected ? 'all' : client.id)}
+                  aria-label={`Filtrar por cliente ${client.name}`}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
+                      : 'text-slate-300 hover:text-white hover:bg-[#303030]'
+                  }`}
+                  title={`Filtrar por ${client.name}`}
+                >
+                  {client.icon ? (
+                    <img
+                      src={client.icon}
+                      alt={client.name}
+                      className="w-4 h-4 rounded-md object-contain shrink-0 drop-shadow-xs"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent && !parent.querySelector('.client-fallback-badge')) {
+                          const span = document.createElement('span');
+                          span.className = 'client-fallback-badge w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0';
+                          span.style.backgroundColor = client.color || '#10B981';
+                          span.textContent = client.name.substring(0, 1).toUpperCase();
+                          parent.insertBefore(span, target);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <span
+                      className="w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0"
+                      style={{ backgroundColor: client.color }}
+                    >
+                      {client.name.substring(0, 1).toUpperCase()}
+                    </span>
+                  )}
+                  <span className="truncate max-w-[100px] hidden lg:block">{client.name}</span>
+                </button>
+              );
+            })}
+          </div>
+
         </div>
 
         {/* Custom Modern Member Filter Dropdown */}
