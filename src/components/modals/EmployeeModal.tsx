@@ -601,13 +601,13 @@ export const EmployeeModal: React.FC = () => {
           />
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <KeyRound className="w-3.5 h-3.5 text-[#E4007E]" />
-              <span>{editingEmployee ? 'Senha Atual do Colaborador' : 'Senha de Acesso (Login)'}</span>
-            </label>
-            {editingEmployee && (
+        {editingEmployee ? (
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5 text-[#E4007E]" />
+                <span>Senha Atual do Colaborador</span>
+              </label>
               <span className="text-[10px] font-medium">
                 {formData.password === '123456' ? (
                   <span className="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
@@ -623,64 +623,69 @@ export const EmployeeModal: React.FC = () => {
                   </span>
                 )}
               </span>
-            )}
-          </div>
-          <div className="relative flex items-center">
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              name="new_employee_password"
-              autoComplete="new-password"
-              disabled={isSubmitting}
-              placeholder={
-                editingEmployee
-                  ? formData.password
+            </div>
+            <div className="relative flex items-center">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                name="new_employee_password"
+                autoComplete="new-password"
+                disabled={isSubmitting}
+                placeholder={
+                  formData.password
                     ? ''
                     : editingEmployee.needsPasswordChange !== false
                     ? 'Padrão: 123456'
                     : 'Senha personalizada (digite nova para redefinir)'
-                  : 'Padrão: 123456'
-              }
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E] pr-20 font-mono tracking-wider text-xs sm:text-sm"
-            />
-            <div className="absolute right-2 flex items-center gap-1 text-slate-400">
-              {formData.password && (
+                }
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E] pr-20 font-mono tracking-wider text-xs sm:text-sm"
+              />
+              <div className="absolute right-2 flex items-center gap-1 text-slate-400">
+                {formData.password && (
+                  <button
+                    type="button"
+                    onClick={handleCopyPassword}
+                    title="Copiar senha"
+                    className="p-1.5 hover:text-white rounded-lg hover:bg-[#2A2A2A] transition-colors cursor-pointer"
+                  >
+                    {copiedPassword ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={handleCopyPassword}
-                  title="Copiar senha"
+                  onClick={() => setShowPassword(!showPassword)}
+                  title={showPassword ? 'Ocultar senha' : 'Exibir senha'}
                   className="p-1.5 hover:text-white rounded-lg hover:bg-[#2A2A2A] transition-colors cursor-pointer"
                 >
-                  {copiedPassword ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  ) : (
-                    <Copy className="w-3.5 h-3.5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                title={showPassword ? 'Ocultar senha' : 'Exibir senha'}
-                className="p-1.5 hover:text-white rounded-lg hover:bg-[#2A2A2A] transition-colors cursor-pointer"
-              >
-                {showPassword ? (
-                  <EyeOff className="w-3.5 h-3.5 text-[#E4007E]" />
-                ) : (
-                  <Eye className="w-3.5 h-3.5" />
-                )}
-              </button>
+              </div>
             </div>
-          </div>
-          {editingEmployee && (
             <p className="mt-1.5 text-[11px] text-slate-400">
               {formData.password
                 ? 'Esta é a senha atual de login deste membro. Você pode visualizá-la, copiá-la ou alterá-la digitando uma nova senha.'
                 : 'O colaborador já alterou a senha inicial no Supabase Auth. Digite uma nova senha caso queira redefini-la agora.'}
             </p>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div>
+            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5 mb-1.5">
+              <KeyRound className="w-3.5 h-3.5 text-[#E4007E]" />
+              <span>Senha de Acesso (Login)</span>
+            </label>
+            <div className="p-3 rounded-lg border border-slate-700/50 bg-[#1A1A1A] flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-slate-200">Senha padrão: <span className="font-mono text-[#E4007E]">123456</span></span>
+                <span className="text-xs text-slate-400">O usuário precisará alterar a senha no primeiro acesso.</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="block text-xs font-bold text-slate-300 mb-1.5">

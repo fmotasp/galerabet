@@ -349,11 +349,12 @@ export const LoginView: React.FC = () => {
       }
 
       if (firstAccessUser.email) {
-        await supabase
-          .from('employees')
-          .update(empUpdatePayload)
-          .ilike('email', firstAccessUser.email.trim())
-          .catch(() => {});
+        try {
+          await supabase
+            .from('employees')
+            .update(empUpdatePayload)
+            .ilike('email', firstAccessUser.email.trim());
+        } catch (e) {}
       }
 
       if (updateEmployee && targetEmpId) {

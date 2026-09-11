@@ -142,14 +142,15 @@ export const TasksProvider: React.FC<{
       let { data, error } = await supabase
         .from('tasks')
         .select('*')
-        .order('last_moved_at', { ascending: false });
+        .order('last_moved_at', { ascending: false })
+        .limit(1000);
 
       console.log('[Supabase Tasks] Resposta com order:', { count: data?.length, error });
 
       // Fallback: se last_moved_at falhar (ex: campo com tipo diferente ou nulls), busca sem order
       if (error || !data || data.length === 0) {
         console.log('[Supabase Tasks] Tentando fallback select(*) sem order...');
-        const fallbackRes = await supabase.from('tasks').select('*');
+        const fallbackRes = await supabase.from('tasks').select('*').limit(1000);
         console.log('[Supabase Tasks] Resposta fallback sem order:', { count: fallbackRes.data?.length, error: fallbackRes.error });
         if (fallbackRes.data && fallbackRes.data.length > 0) {
           data = fallbackRes.data;
