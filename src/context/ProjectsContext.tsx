@@ -345,40 +345,43 @@ export const ProjectsProvider: React.FC<{
 
     // Atualiza no Supabase
     try {
-      const payload: any = { id };
-      if (updates.name !== undefined) payload.name = updates.name;
-      if (updates.category !== undefined) payload.category = updates.category;
-      payload.description = packedDescription;
-      if (updates.status !== undefined) payload.status = updates.status;
-      if (updates.progress !== undefined) payload.progress = updates.progress;
-      if (updates.currentSprint !== undefined) payload.current_sprint = updates.currentSprint;
-      if (updates.iconType !== undefined) payload.icon_type = updates.iconType;
-      if (updates.iconColor !== undefined) payload.icon_color = updates.iconColor;
-      if (updates.teamMemberIds !== undefined) payload.team_member_ids = updates.teamMemberIds;
-      if (updates.labelId !== undefined) payload.label_id = updates.labelId;
-      if (updates.labelColor !== undefined) payload.label_color = updates.labelColor;
-      if (updates.logoUrl !== undefined) payload.logo_url = updates.logoUrl;
-      if (updates.clientIds !== undefined) payload.client_ids = updates.clientIds;
-      if (updates.clientNames !== undefined) payload.client_names = updates.clientNames;
-      if (updates.clientId !== undefined) payload.client_id = updates.clientId;
-      if (updates.clientName !== undefined) payload.client_name = updates.clientName;
-      if (updates.colorPalette !== undefined) payload.color_palette = updates.colorPalette;
-      if (updates.brandManualUrl !== undefined) payload.brand_manual_url = updates.brandManualUrl;
-      if (updates.logosPackUrl !== undefined) payload.logos_pack_url = updates.logosPackUrl;
-      if (updates.typographyUrl !== undefined) payload.typography_url = updates.typographyUrl;
-      if (updates.additionalMaterialsUrl !== undefined) payload.additional_materials_url = updates.additionalMaterialsUrl;
-      if (updates.kvDriveUrl !== undefined) payload.kv_drive_url = updates.kvDriveUrl;
+      const payload: any = {
+        id,
+        description: packedDescription,
+      };
+      if (mergedProj.name !== undefined) payload.name = mergedProj.name;
+      if (mergedProj.category !== undefined) payload.category = mergedProj.category;
+      if (mergedProj.status !== undefined) payload.status = mergedProj.status;
+      if (mergedProj.progress !== undefined) payload.progress = mergedProj.progress;
+      if (mergedProj.currentSprint !== undefined) payload.current_sprint = mergedProj.currentSprint;
+      if (mergedProj.iconType !== undefined) payload.icon_type = mergedProj.iconType;
+      if (mergedProj.iconColor !== undefined) payload.icon_color = mergedProj.iconColor;
+      if (mergedProj.teamMemberIds !== undefined) payload.team_member_ids = mergedProj.teamMemberIds;
+      if (mergedProj.labelId !== undefined) payload.label_id = mergedProj.labelId;
+      if (mergedProj.labelColor !== undefined) payload.label_color = mergedProj.labelColor;
+      if (mergedProj.logoUrl !== undefined) payload.logo_url = mergedProj.logoUrl;
+      if (mergedProj.clientIds !== undefined) payload.client_ids = mergedProj.clientIds;
+      if (mergedProj.clientNames !== undefined) payload.client_names = mergedProj.clientNames;
+      if (mergedProj.clientId !== undefined) payload.client_id = mergedProj.clientId;
+      if (mergedProj.clientName !== undefined) payload.client_name = mergedProj.clientName;
 
-      const { error } = await supabase.from('projects').upsert(payload);
-      if (error) {
-        // Fallback without dynamic columns
-        delete payload.color_palette;
-        delete payload.brand_manual_url;
-        delete payload.logos_pack_url;
-        delete payload.typography_url;
-        delete payload.additional_materials_url;
-        delete payload.kv_drive_url;
-        await supabase.from('projects').upsert(payload);
+      // Tenta atualizar primeiro com colunas dinâmicas se existirem
+      const extendedPayload = {
+        ...payload,
+        color_palette: mergedProj.colorPalette,
+        brand_manual_url: mergedProj.brandManualUrl,
+        logos_pack_url: mergedProj.logosPackUrl,
+        typography_url: mergedProj.typographyUrl,
+        additional_materials_url: mergedProj.additionalMaterialsUrl,
+      };
+
+      const { error: upsertErr } = await supabase.from('projects').upsert(extendedPayload);
+      if (upsertErr) {
+        // Fallback apenas com colunas padrão do schema para não dar 400 Bad Request
+        const { error: fallbackErr } = await supabase.from('projects').upsert(payload);
+        if (fallbackErr) {
+          console.warn('[Supabase] Falha no fallback de update do projeto:', fallbackErr.message);
+        }
       }
     } catch (sbErr) {
       console.warn('Supabase project update warning:', sbErr);

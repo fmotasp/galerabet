@@ -171,8 +171,11 @@ serve(async (req) => {
         );
       }
 
-      // R2 CORRIGIDO: A senha inicial é 100% determinada pelo backend (mínimo 6 caracteres exigidos pelo Supabase Auth).
-      const initialPassword = "123456";
+      // Senha fornecida ou inicial padrão
+      const cleanPass = (password || "").trim();
+      const initialPassword = cleanPass && cleanPass.length >= 6 ? cleanPass : "123456";
+      const isCustomPass = initialPassword !== "123456";
+      const needsPasswordChange = !isCustomPass;
 
       // 3. Verifica se já existe um usuário com esse email em auth.users
       const { data: userList, error: listErr } = await adminClient.auth.admin.listUsers();
@@ -190,6 +193,15 @@ serve(async (req) => {
       // 4. Se auth_user_id já está preenchido no employee e confere com o Auth encontrado: IDEMPOTÊNCIA TOTAL
       if (targetEmployee.auth_user_id) {
         if (existingAuthUser && existingAuthUser.id === targetEmployee.auth_user_id) {
+          // Atualiza a senha se uma senha customizada foi informada
+          if (isCustomPass) {
+            await adminClient.auth.admin.updateUserById(targetEmployee.auth_user_id, {
+              password: initialPassword,
+              user_metadata: {
+                needs_password_change: false,
+              },
+            });
+          }
           return new Response(
             JSON.stringify({
               success: true,
@@ -226,14 +238,14 @@ serve(async (req) => {
 
         targetAuthUserId = existingAuthUser.id;
 
-        // Se a conta já pertencia a este mesmo funcionário ou estava sem vínculo, redefine para 1234
+        // Se a conta já pertencia a este mesmo funcionário ou estava sem vínculo, atualiza credencial
         const { error: updateExistingErr } = await adminClient.auth.admin.updateUserById(targetAuthUserId, {
           password: initialPassword,
           user_metadata: {
             name: name || targetEmployee.name || "Colaborador",
             role: role || targetEmployee.role || "Colaborador",
             employee_id: employee_id,
-            needs_password_change: true,
+            needs_password_change: needsPasswordChange,
           },
         });
 
@@ -244,7 +256,7 @@ serve(async (req) => {
           );
         }
       } else {
-        // Cria nova conta no Supabase Auth com senha inicial '1234' e flag de primeiro acesso
+        // Cria nova conta no Supabase Auth
         const { data: newUser, error: createErr } = await adminClient.auth.admin.createUser({
           email: cleanEmail,
           password: initialPassword,
@@ -253,7 +265,7 @@ serve(async (req) => {
             name: name || targetEmployee.name || "Colaborador",
             role: role || targetEmployee.role || "Colaborador",
             employee_id: employee_id,
-            needs_password_change: true,
+            needs_password_change: needsPasswordChange,
           },
         });
 
@@ -270,12 +282,12 @@ serve(async (req) => {
         newlyCreatedAuthUserId = newUser.user.id;
       }
 
-      // 6. Vincula auth_user_id ao funcionário em public.employees e marca needs_password_change = true
+      // 6. Vincula auth_user_id ao funcionário em public.employees e marca needs_password_change
       const { error: linkErr } = await adminClient
         .from("employees")
         .update({
           auth_user_id: targetAuthUserId,
-          needs_password_change: true,
+          needs_password_change: needsPasswordChange,
         })
         .eq("id", employee_id);
 

@@ -55,9 +55,23 @@ export const EmployeeModal: React.FC = () => {
     { id: 'black', name: 'Escuro', bg: 'bg-slate-800', hex: '#344563' },
   ];
 
+  // Rastreia o ID do colaborador atualmente carregado no modal para não re-inicializar a cada render/update
+  const loadedEmployeeIdRef = useRef<string | null | undefined>(undefined);
+
   useEffect(() => {
+    if (!isOpen) {
+      loadedEmployeeIdRef.current = undefined;
+      return;
+    }
+
+    const currentEmpId = editingEmployee ? editingEmployee.id : '__new__';
+    if (loadedEmployeeIdRef.current === currentEmpId) {
+      return;
+    }
+    loadedEmployeeIdRef.current = currentEmpId;
+
     if (editingEmployee) {
-      const currentPassword = editingEmployee.password || (editingEmployee.needsPasswordChange !== false ? '123456' : '');
+      const currentPassword = editingEmployee.password || (editingEmployee.needsPasswordChange === true ? '123456' : '');
       setFormData({
         name: editingEmployee.name,
         email: editingEmployee.email || '',
@@ -70,7 +84,7 @@ export const EmployeeModal: React.FC = () => {
       setAvatarPreview(editingEmployee.avatarUrl || '');
       setAvatarFile(null);
 
-      // Busca a senha mais recente direto no Supabase caso não esteja salva em memória
+      // Busca a senha mais recente direto no Supabase somente se não tivermos ainda em memória
       const loadEmployeePassword = async () => {
         try {
           let query = supabase.from('employees').select('password, needs_password_change');
@@ -80,11 +94,12 @@ export const EmployeeModal: React.FC = () => {
             query = query.ilike('email', editingEmployee.email.trim());
           }
           const { data } = await query.maybeSingle();
-          if (data) {
+          // Só atualiza se o modal ainda estiver com o mesmo colaborador aberto
+          if (data && loadedEmployeeIdRef.current === currentEmpId) {
             if (data.password) {
               setFormData((prev) => ({ ...prev, password: data.password }));
-            } else if (data.needs_password_change) {
-              setFormData((prev) => ({ ...prev, password: prev.password || '123456' }));
+            } else if (data.needs_password_change && !currentPassword) {
+              setFormData((prev) => ({ ...prev, password: '123456' }));
             }
           }
         } catch (err) {
@@ -109,7 +124,7 @@ export const EmployeeModal: React.FC = () => {
     setCopiedPassword(false);
     setValidationError('');
     setIsSubmitting(false);
-  }, [editingEmployee, isOpen]);
+  }, [editingEmployee?.id, isOpen]);
 
   if (!isOpen) return null;
 
@@ -218,6 +233,11 @@ export const EmployeeModal: React.FC = () => {
       .toUpperCase()
       .slice(0, 2);
 
+    const isDefaultPassword = cleanPassword === '123456';
+    const computedNeedsPasswordChange = editingEmployee
+      ? (isDefaultPassword ? true : false)
+      : isDefaultPassword;
+
     const empPayload = {
       name: cleanName,
       email: cleanEmail,
@@ -232,7 +252,7 @@ export const EmployeeModal: React.FC = () => {
       collaboratorIds: [],
       location: editingEmployee ? editingEmployee.location : 'Brasil',
       labelColor: formData.labelColor,
-      needsPasswordChange: editingEmployee ? (editingEmployee.needsPasswordChange ?? false) : true,
+      needsPasswordChange: computedNeedsPasswordChange,
       avatarUrl: finalAvatarUrl || undefined,
     };
 
@@ -253,16 +273,25 @@ export const EmployeeModal: React.FC = () => {
         // Se o funcionário possui conta no Auth e a senha foi alterada, sincroniza no Supabase Auth
         if (editingEmployee.auth_user_id && cleanPassword && cleanPassword.length >= 6) {
           try {
-            const { data: { session } } = await supabase.auth.getSession();
-            const authHeaders = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
-            await supabase.functions.invoke('manage-employee', {
-              headers: authHeaders,
-              body: {
-                operation: 'update_password',
-                employee_id: editingEmployee.id,
-                password: cleanPassword,
-              },
-            });
+            let sessionToken = '';
+            try {
+              const { data: refreshData } = await supabase.auth.refreshSession();
+              sessionToken = refreshData?.session?.access_token || '';
+            } catch {}
+            if (!sessionToken) {
+              const { data: { session } } = await supabase.auth.getSession();
+              sessionToken = session?.access_token || '';
+            }
+            if (sessionToken) {
+              await supabase.functions.invoke('manage-employee', {
+                headers: { Authorization: `Bearer ${sessionToken}` },
+                body: {
+                  operation: 'update_password',
+                  employee_id: editingEmployee.id,
+                  password: cleanPassword,
+                },
+              });
+            }
           } catch (authErr) {
             console.warn('[manage-employee] Falha ao sincronizar senha no Auth:', authErr);
           }
@@ -270,14 +299,107 @@ export const EmployeeModal: React.FC = () => {
 
         // Se for um funcionário legado ou sem vínculo ao Supabase Auth, provisiona o acesso
         if (!editingEmployee.auth_user_id) {
-          const { data: { session } } = await supabase.auth.getSession();
-          const authHeaders = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+          let sessionToken = '';
+          try {
+            const { data: refreshData } = await supabase.auth.refreshSession();
+            sessionToken = refreshData?.session?.access_token || '';
+          } catch {}
+          if (!sessionToken) {
+            const { data: { session } } = await supabase.auth.getSession();
+            sessionToken = session?.access_token || '';
+          }
 
+          if (sessionToken) {
+            const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
+              headers: { Authorization: `Bearer ${sessionToken}` },
+              body: {
+                operation: 'create',
+                employee_id: editingEmployee.id,
+                email: cleanEmail,
+                password: cleanPassword || '123456',
+                name: cleanName,
+                role: empPayload.role,
+              },
+            });
+
+          let funcErrorMsg = '';
+          if (funcErr) {
+            try {
+              if ((funcErr as any).context && typeof (funcErr as any).context.json === 'function') {
+                const errBody = await (funcErr as any).context.json();
+                funcErrorMsg = errBody?.error || funcErr.message;
+              } else if ((funcErr as any).context && typeof (funcErr as any).context.text === 'function') {
+                const errText = await (funcErr as any).context.text();
+                try {
+                  const parsed = JSON.parse(errText);
+                  funcErrorMsg = parsed?.error || errText;
+                } catch {
+                  funcErrorMsg = errText || funcErr.message;
+                }
+              } else {
+                funcErrorMsg = funcErr.message;
+              }
+            } catch {
+              funcErrorMsg = funcErr.message;
+            }
+          } else if (funcData?.error) {
+            funcErrorMsg = funcData.error;
+          }
+
+            if (funcErrorMsg) {
+              console.warn('[manage-employee] Aviso ao configurar acesso do colaborador existente:', funcErrorMsg);
+              addToast(
+                'Atenção ⚠️',
+                `Dados cadastrais salvos, mas o acesso não foi configurado: ${funcErrorMsg}`,
+                'warning'
+              );
+            } else {
+              if (funcData?.auth_user_id) {
+                updateEmployee(editingEmployee.id, {
+                  auth_user_id: funcData.auth_user_id,
+                  needsPasswordChange: computedNeedsPasswordChange,
+                });
+              }
+              addToast('Sucesso', 'Funcionário atualizado e acesso inicial configurado.', 'success');
+            }
+          } else {
+            addToast('Sucesso', 'Funcionário atualizado no painel.', 'success');
+          }
+        } else {
+          addToast('Sucesso', 'Funcionário atualizado com sucesso.', 'success');
+        }
+      } else {
+        // Modo Criação: Cadastra o funcionário no banco
+        const createdEmp = await addEmployee(empPayload);
+        const employeeId = (createdEmp as any)?.id || `emp-${Date.now()}`;
+
+        // Obtém e tenta atualizar a sessão do Supabase Auth para enviar o token de autorização
+        let sessionToken = '';
+        try {
+          const { data: refreshData } = await supabase.auth.refreshSession();
+          sessionToken = refreshData?.session?.access_token || '';
+        } catch {
+          // Fallback para sessão atual em cache
+        }
+        if (!sessionToken) {
+          const { data: { session } } = await supabase.auth.getSession();
+          sessionToken = session?.access_token || '';
+        }
+
+        if (!sessionToken) {
+          console.warn('[manage-employee] Nenhuma sessão ativa do Supabase Auth encontrada.');
+          addToast(
+            'Colaborador Cadastrado ✅',
+            'Dados salvos no painel. Faça login novamente com sua conta para sincronizar o acesso no Supabase Auth.',
+            'info'
+          );
+        } else {
+          // Chama a Edge Function para criar/vincular a identidade no Supabase Auth
           const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
-            headers: authHeaders,
+            headers: { Authorization: `Bearer ${sessionToken}` },
             body: {
               operation: 'create',
-              employee_id: editingEmployee.id,
+              employee_id: employeeId,
               email: cleanEmail,
               password: cleanPassword || '123456',
               name: cleanName,
@@ -310,85 +432,21 @@ export const EmployeeModal: React.FC = () => {
           }
 
           if (funcErrorMsg) {
-            console.warn('[manage-employee] Aviso ao configurar acesso do colaborador existente:', funcErrorMsg);
+            console.warn('[manage-employee] Aviso ao provisionar credencial inicial:', funcErrorMsg);
             addToast(
               'Atenção ⚠️',
-              `Dados cadastrais salvos, mas o acesso não foi configurado: ${funcErrorMsg}`,
+              `Funcionário cadastrado, mas a criação de credencial automática retornou: ${funcErrorMsg}.`,
               'warning'
             );
           } else {
             if (funcData?.auth_user_id) {
-              updateEmployee(editingEmployee.id, {
+              updateEmployee(employeeId, {
                 auth_user_id: funcData.auth_user_id,
-                needsPasswordChange: true,
+                needsPasswordChange: computedNeedsPasswordChange,
               });
             }
-            addToast('Sucesso', 'Funcionário atualizado e acesso inicial configurado.', 'success');
+            addToast('Sucesso', 'Funcionário cadastrado e credenciais configuradas.', 'success');
           }
-        } else {
-          addToast('Sucesso', 'Funcionário atualizado com sucesso.', 'success');
-        }
-      } else {
-        // Modo Criação: Cadastra o funcionário no banco
-        const createdEmp = await addEmployee(empPayload);
-        const employeeId = (createdEmp as any)?.id || `emp-${Date.now()}`;
-
-        // Obtém a sessão atual para enviar o token de autorização explicitamente
-        const { data: { session } } = await supabase.auth.getSession();
-        const authHeaders = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
-
-        // Chama a Edge Function para criar/vincular a identidade no Supabase Auth com senha definida
-        const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
-          headers: authHeaders,
-          body: {
-            operation: 'create',
-            employee_id: employeeId,
-            email: cleanEmail,
-            password: cleanPassword || '123456',
-            name: cleanName,
-            role: empPayload.role,
-          },
-        });
-
-        let funcErrorMsg = '';
-        if (funcErr) {
-          try {
-            if ((funcErr as any).context && typeof (funcErr as any).context.json === 'function') {
-              const errBody = await (funcErr as any).context.json();
-              funcErrorMsg = errBody?.error || funcErr.message;
-            } else if ((funcErr as any).context && typeof (funcErr as any).context.text === 'function') {
-              const errText = await (funcErr as any).context.text();
-              try {
-                const parsed = JSON.parse(errText);
-                funcErrorMsg = parsed?.error || errText;
-              } catch {
-                funcErrorMsg = errText || funcErr.message;
-              }
-            } else {
-              funcErrorMsg = funcErr.message;
-            }
-          } catch {
-            funcErrorMsg = funcErr.message;
-          }
-        } else if (funcData?.error) {
-          funcErrorMsg = funcData.error;
-        }
-
-        if (funcErrorMsg) {
-          console.warn('[manage-employee] Aviso ao provisionar credencial inicial:', funcErrorMsg);
-          addToast(
-            'Atenção ⚠️',
-            `Funcionário cadastrado, mas a criação do acesso falhou: ${funcErrorMsg}. Abra o cadastro dele para tentar novamente.`,
-            'warning'
-          );
-        } else {
-          if (funcData?.auth_user_id) {
-            updateEmployee(employeeId, {
-              auth_user_id: funcData.auth_user_id,
-              needsPasswordChange: true,
-            });
-          }
-          addToast('Sucesso', 'Funcionário cadastrado e credenciais configuradas.', 'success');
         }
       }
 
@@ -570,6 +628,8 @@ export const EmployeeModal: React.FC = () => {
           <div className="relative flex items-center">
             <Input
               type={showPassword ? 'text' : 'password'}
+              name="new_employee_password"
+              autoComplete="new-password"
               disabled={isSubmitting}
               placeholder={
                 editingEmployee
