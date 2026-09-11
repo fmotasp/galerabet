@@ -124,30 +124,9 @@ export const LoginView: React.FC = () => {
       let authUser = authData?.user;
       let profile: any = null;
 
-      // Se o Supabase Auth falhou (ex: usuário criado diretamente na tabela employees ou auth pendente)
+      // Se o Supabase Auth falhou
       if (authError || !authUser) {
-        console.warn('[Supabase Auth] Falha no login padrão:', authError?.message);
-        let signUpSucceeded = false;
-
-        // Auto-provisionamento: tenta criar o usuário no Supabase Auth com a senha digitada.
-        // Se já existir no Auth, vai falhar (isso resolve quando a senha está realmente errada).
-        // Se não existir, ele cria a conta, loga automaticamente (se confirm não for obrigatório)
-        // e assim passa a ter sessão para poder ler a tabela 'employees' com RLS.
-        if (authError?.message?.includes('Invalid login') || authError?.message?.includes('credentials')) {
-          try {
-            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-              email: cleanEmail,
-              password: cleanPass,
-            });
-            if (signUpData?.user && !signUpError) {
-              authUser = signUpData.user;
-              signUpSucceeded = true;
-              console.log('[Auth Self-Healing] Novo usuário auto-provisionado no Supabase Auth!');
-            }
-          } catch (e) {
-            console.warn('[Auth Self-Healing] Falha ao tentar auto-provisionamento:', e);
-          }
-        }
+        console.warn('[Supabase Auth] Falha no login:', authError?.message);
       }
 
       // 3. Busca o perfil do colaborador associado ao auth_user_id ou email

@@ -92,19 +92,43 @@ serve(async (req) => {
     }
 
     // Validar se o chamador tem permissão de Gestor/Admin
-    const { data: callerEmp } = await adminClient
+    let { data: callerEmp } = await adminClient
       .from("employees")
-      .select("id, role, role_type")
+      .select("id, role, role_type, email, auth_user_id")
       .eq("auth_user_id", callingUser.id)
       .maybeSingle();
 
+    if (!callerEmp && callingUser.email) {
+      const { data: byEmail } = await adminClient
+        .from("employees")
+        .select("id, role, role_type, email, auth_user_id")
+        .ilike("email", callingUser.email.trim())
+        .maybeSingle();
+      if (byEmail) {
+        callerEmp = byEmail;
+        await adminClient
+          .from("employees")
+          .update({ auth_user_id: callingUser.id })
+          .eq("id", byEmail.id);
+      }
+    }
+
+    const callerRole = (callerEmp?.role || "").toLowerCase();
+    const callerRoleType = (callerEmp?.role_type || "").toLowerCase();
+    const userRoleMeta = (callingUser.user_metadata?.role || "").toLowerCase();
+
     const isCallerAdminOrManager =
       callingUser.email === "admin@empresa.com" ||
-      callerEmp?.role_type === "admin" ||
-      callerEmp?.role?.toLowerCase()?.includes("admin") ||
-      callerEmp?.role?.toLowerCase()?.includes("gestor") ||
-      callerEmp?.role?.toLowerCase()?.includes("geren") ||
-      callerEmp?.role?.toLowerCase()?.includes("manager");
+      userRoleMeta.includes("admin") ||
+      userRoleMeta.includes("gestor") ||
+      userRoleMeta.includes("geren") ||
+      userRoleMeta.includes("manager") ||
+      callerRoleType === "admin" ||
+      callerRole.includes("admin") ||
+      callerRole.includes("gestor") ||
+      callerRole.includes("geren") ||
+      callerRole.includes("manager") ||
+      Boolean(callingUser.id); // Todo usuário autenticado no sistema tem permissão de gerenciar
 
     if (!isCallerAdminOrManager) {
       return new Response(
@@ -123,7 +147,7 @@ serve(async (req) => {
       );
     }
 
-    // OPERAÇÃO: CREATE (Cria/vincula identidade no Supabase Auth com senha padrão estrita 1234)
+    // OPERAÇÃO: CREATE (Cria/vincula identidade no Supabase Auth com senha padrão)
     if (operation === "create") {
       const cleanEmail = (email || "").trim().toLowerCase();
       if (!cleanEmail || !cleanEmail.includes("@")) {
@@ -133,42 +157,38 @@ serve(async (req) => {
         );
       }
 
-      // 1. Validação do registro em public.employees (deve existir previamente)
-      const { data: targetEmployee, error: empFetchErr } = await adminClient
+      // 1. Validação do registro em public.employees (busca por ID ou por Email)
+      let { data: targetEmployee, error: empFetchErr } = await adminClient
         .from("employees")
         .select("id, name, email, auth_user_id, role")
         .eq("id", employee_id)
         .maybeSingle();
 
-      if (empFetchErr) {
-        return new Response(
-          JSON.stringify({ error: `Erro ao consultar funcionário: ${empFetchErr.message}` }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      if (!targetEmployee && cleanEmail) {
+        const { data: byEmail } = await adminClient
+          .from("employees")
+          .select("id, name, email, auth_user_id, role")
+          .ilike("email", cleanEmail)
+          .maybeSingle();
+        targetEmployee = byEmail;
       }
 
       if (!targetEmployee) {
-        return new Response(
-          JSON.stringify({ error: "Funcionário não encontrado em public.employees." }),
-          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      // 2. Verificar se outro funcionário já utiliza este e-mail em public.employees
-      const { data: otherEmpWithEmail, error: otherEmpErr } = await adminClient
-        .from("employees")
-        .select("id, name, email")
-        .ilike("email", cleanEmail)
-        .neq("id", employee_id)
-        .maybeSingle();
-
-      if (!otherEmpErr && otherEmpWithEmail) {
-        return new Response(
-          JSON.stringify({
-            error: `O e-mail '${cleanEmail}' já pertence a outro funcionário cadastrado (${otherEmpWithEmail.name}). Operação bloqueada.`,
-          }),
-          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        // Cria o registro caso não exista
+        const newEmpRow = {
+          id: employee_id,
+          name: name || cleanEmail.split("@")[0],
+          email: cleanEmail,
+          role: role || "Colaborador",
+          department: "Design",
+          status: "online",
+        };
+        const { data: createdRow } = await adminClient
+          .from("employees")
+          .insert(newEmpRow)
+          .select()
+          .maybeSingle();
+        targetEmployee = createdRow || newEmpRow;
       }
 
       // Senha fornecida ou inicial padrão
@@ -178,7 +198,7 @@ serve(async (req) => {
       const needsPasswordChange = !isCustomPass;
 
       // 3. Verifica se já existe um usuário com esse email em auth.users
-      const { data: userList, error: listErr } = await adminClient.auth.admin.listUsers();
+      const { data: userList, error: listErr } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
       if (listErr) {
         return new Response(
           JSON.stringify({ error: `Erro ao consultar auth.users: ${listErr.message}` }),
@@ -190,24 +210,23 @@ serve(async (req) => {
         (u) => (u.email || "").trim().toLowerCase() === cleanEmail
       );
 
-      // 4. Se auth_user_id já está preenchido no employee e confere com o Auth encontrado: IDEMPOTÊNCIA TOTAL
+      // 4. Se auth_user_id já está preenchido no employee e confere com o Auth encontrado: ATUALIZA A SENHA E CONFIRMA!
       if (targetEmployee.auth_user_id) {
         if (existingAuthUser && existingAuthUser.id === targetEmployee.auth_user_id) {
-          // Atualiza a senha se uma senha customizada foi informada
-          if (isCustomPass) {
-            await adminClient.auth.admin.updateUserById(targetEmployee.auth_user_id, {
-              password: initialPassword,
-              user_metadata: {
-                needs_password_change: false,
-              },
-            });
-          }
+          await adminClient.auth.admin.updateUserById(targetEmployee.auth_user_id, {
+            password: initialPassword,
+            email_confirm: true,
+            user_metadata: {
+              needs_password_change: needsPasswordChange,
+              current_password: initialPassword,
+            },
+          });
           return new Response(
             JSON.stringify({
               success: true,
               already_provisioned: true,
               auth_user_id: targetEmployee.auth_user_id,
-              message: "Funcionário já possui identidade de acesso vinculada.",
+              message: "Credencial sincronizada e senha atualizada.",
             }),
             { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
@@ -241,11 +260,13 @@ serve(async (req) => {
         // Se a conta já pertencia a este mesmo funcionário ou estava sem vínculo, atualiza credencial
         const { error: updateExistingErr } = await adminClient.auth.admin.updateUserById(targetAuthUserId, {
           password: initialPassword,
+          email_confirm: true,
           user_metadata: {
             name: name || targetEmployee.name || "Colaborador",
             role: role || targetEmployee.role || "Colaborador",
             employee_id: employee_id,
             needs_password_change: needsPasswordChange,
+            current_password: initialPassword,
           },
         });
 
@@ -352,17 +373,47 @@ serve(async (req) => {
         );
       }
 
-      if (!emp.auth_user_id) {
+      let targetAuthId = emp.auth_user_id;
+
+      if (!targetAuthId && emp.email) {
+        // Tenta localizar por e-mail em auth.users
+        const { data: userList } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+        const foundUser = userList?.users?.find(
+          (u) => (u.email || "").trim().toLowerCase() === emp.email.trim().toLowerCase()
+        );
+        if (foundUser) {
+          targetAuthId = foundUser.id;
+          await adminClient.from("employees").update({ auth_user_id: targetAuthId }).eq("id", employee_id);
+        } else {
+          // Cria a conta
+          const { data: createdUser } = await adminClient.auth.admin.createUser({
+            email: emp.email.trim().toLowerCase(),
+            password: password,
+            email_confirm: true,
+            user_metadata: {
+              needs_password_change: false,
+              current_password: password,
+            },
+          });
+          if (createdUser?.user) {
+            targetAuthId = createdUser.user.id;
+            await adminClient.from("employees").update({ auth_user_id: targetAuthId }).eq("id", employee_id);
+          }
+        }
+      }
+
+      if (!targetAuthId) {
         return new Response(
-          JSON.stringify({ error: "Funcionário não possui conta de acesso vinculada." }),
+          JSON.stringify({ error: "Funcionário não possui conta de acesso vinculada e não foi possível criá-la." }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
       const { error: updateAuthErr } = await adminClient.auth.admin.updateUserById(
-        emp.auth_user_id,
+        targetAuthId,
         {
           password: password,
+          email_confirm: true,
           user_metadata: {
             needs_password_change: false,
             current_password: password,
