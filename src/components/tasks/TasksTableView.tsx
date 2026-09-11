@@ -191,19 +191,19 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-[#2A2A2A] text-[#E4007E] font-black text-[11px] uppercase tracking-wider bg-[#141414]">
-                <th className="w-12 px-6 py-4">
+                <th className="w-12 px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
                     aria-label="Selecionar todas as tarefas"
                     className="rounded border-[#303030] text-[#E4007E] focus:ring-[#E4007E]/20 bg-[#222222] cursor-pointer"
                   />
                 </th>
-                <th className="px-6 py-4">Demanda & Projeto</th>
-                <th className="px-6 py-4">Responsável</th>
-                <th className="px-4 py-4">Categoria</th>
-                <th className="px-4 py-4">Prazo</th>
-                <th className="px-4 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Ações</th>
+                <th className="px-6 py-4 whitespace-nowrap min-w-[200px]">Demanda & Projeto</th>
+                <th className="px-6 py-4 whitespace-nowrap min-w-[180px]">Responsável</th>
+                <th className="px-4 py-4 whitespace-nowrap min-w-[120px]">Categoria</th>
+                <th className="px-4 py-4 whitespace-nowrap min-w-[120px]">Prazo</th>
+                <th className="px-4 py-4 whitespace-nowrap min-w-[140px]">Status</th>
+                <th className="px-6 py-4 text-right whitespace-nowrap min-w-[100px]">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#262626] font-medium text-white">
