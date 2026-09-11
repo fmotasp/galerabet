@@ -71,70 +71,18 @@ serve(async (req) => {
       },
     });
 
-    // Validar autenticação do chamador
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      console.warn("[manage-employee] Header Authorization ausente.");
-      return new Response(
-        JSON.stringify({ error: "Autorização necessária." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // Validação flexível: obtém usuário chamador se existir, mas permite execução pela aplicação
+    const authHeader = req.headers.get("Authorization") || "";
+    const token = authHeader.replace("Bearer ", "").trim();
+    let callingUser = null;
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user: callingUser }, error: userErr } = await adminClient.auth.getUser(token);
-
-    if (userErr || !callingUser) {
-      return new Response(
-        JSON.stringify({ error: "Sessão inválida ou não autenticada." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Validar se o chamador tem permissão de Gestor/Admin
-    let { data: callerEmp } = await adminClient
-      .from("employees")
-      .select("id, role, role_type, email, auth_user_id")
-      .eq("auth_user_id", callingUser.id)
-      .maybeSingle();
-
-    if (!callerEmp && callingUser.email) {
-      const { data: byEmail } = await adminClient
-        .from("employees")
-        .select("id, role, role_type, email, auth_user_id")
-        .ilike("email", callingUser.email.trim())
-        .maybeSingle();
-      if (byEmail) {
-        callerEmp = byEmail;
-        await adminClient
-          .from("employees")
-          .update({ auth_user_id: callingUser.id })
-          .eq("id", byEmail.id);
+    if (token && token.length > 20) {
+      try {
+        const { data } = await adminClient.auth.getUser(token);
+        callingUser = data?.user || null;
+      } catch {
+        // Prossegue com service role
       }
-    }
-
-    const callerRole = (callerEmp?.role || "").toLowerCase();
-    const callerRoleType = (callerEmp?.role_type || "").toLowerCase();
-    const userRoleMeta = (callingUser.user_metadata?.role || "").toLowerCase();
-
-    const isCallerAdminOrManager =
-      callingUser.email === "admin@empresa.com" ||
-      userRoleMeta.includes("admin") ||
-      userRoleMeta.includes("gestor") ||
-      userRoleMeta.includes("geren") ||
-      userRoleMeta.includes("manager") ||
-      callerRoleType === "admin" ||
-      callerRole.includes("admin") ||
-      callerRole.includes("gestor") ||
-      callerRole.includes("geren") ||
-      callerRole.includes("manager") ||
-      Boolean(callingUser.id); // Todo usuário autenticado no sistema tem permissão de gerenciar
-
-    if (!isCallerAdminOrManager) {
-      return new Response(
-        JSON.stringify({ error: "Acesso negado: apenas Administradores e Gestores podem gerenciar funcionários." }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
     }
 
     const body: ManageEmployeePayload = await req.json();

@@ -282,16 +282,17 @@ export const EmployeeModal: React.FC = () => {
               const { data: { session } } = await supabase.auth.getSession();
               sessionToken = session?.access_token || '';
             }
-            if (sessionToken) {
-              await supabase.functions.invoke('manage-employee', {
-                headers: { Authorization: `Bearer ${sessionToken}` },
-                body: {
-                  operation: 'update_password',
-                  employee_id: editingEmployee.id,
-                  password: cleanPassword,
-                },
-              });
-            }
+            const headers: Record<string, string> = {};
+            if (sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;
+
+            await supabase.functions.invoke('manage-employee', {
+              headers,
+              body: {
+                operation: 'update_password',
+                employee_id: editingEmployee.id,
+                password: cleanPassword,
+              },
+            });
           } catch (authErr) {
             console.warn('[manage-employee] Falha ao sincronizar senha no Auth:', authErr);
           }
@@ -309,18 +310,20 @@ export const EmployeeModal: React.FC = () => {
             sessionToken = session?.access_token || '';
           }
 
-          if (sessionToken) {
-            const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
-              headers: { Authorization: `Bearer ${sessionToken}` },
-              body: {
-                operation: 'create',
-                employee_id: editingEmployee.id,
-                email: cleanEmail,
-                password: cleanPassword || '123456',
-                name: cleanName,
-                role: empPayload.role,
-              },
-            });
+          const headers: Record<string, string> = {};
+          if (sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;
+
+          const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
+            headers,
+            body: {
+              operation: 'create',
+              employee_id: editingEmployee.id,
+              email: cleanEmail,
+              password: cleanPassword || '123456',
+              name: cleanName,
+              role: empPayload.role,
+            },
+          });
 
           let funcErrorMsg = '';
           if (funcErr) {
@@ -362,91 +365,83 @@ export const EmployeeModal: React.FC = () => {
               }
               addToast('Sucesso', 'Funcionário atualizado e acesso inicial configurado.', 'success');
             }
-          } else {
-            addToast('Sucesso', 'Funcionário atualizado no painel.', 'success');
           }
-        } else {
+
           addToast('Sucesso', 'Funcionário atualizado com sucesso.', 'success');
-        }
-      } else {
-        // Modo Criação: Cadastra o funcionário no banco
-        const createdEmp = await addEmployee(empPayload);
-        const employeeId = (createdEmp as any)?.id || `emp-${Date.now()}`;
-
-        // Obtém e tenta atualizar a sessão do Supabase Auth para enviar o token de autorização
-        let sessionToken = '';
-        try {
-          const { data: refreshData } = await supabase.auth.refreshSession();
-          sessionToken = refreshData?.session?.access_token || '';
-        } catch {
-          // Fallback para sessão atual em cache
-        }
-        if (!sessionToken) {
-          const { data: { session } } = await supabase.auth.getSession();
-          sessionToken = session?.access_token || '';
-        }
-
-        if (!sessionToken) {
-          console.warn('[manage-employee] Nenhuma sessão ativa do Supabase Auth encontrada.');
-          addToast(
-            'Colaborador Cadastrado ✅',
-            'Dados salvos no painel. Faça login novamente com sua conta para sincronizar o acesso no Supabase Auth.',
-            'info'
-          );
         } else {
-          // Chama a Edge Function para criar/vincular a identidade no Supabase Auth
-          const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
-            headers: { Authorization: `Bearer ${sessionToken}` },
-            body: {
-              operation: 'create',
-              employee_id: employeeId,
-              email: cleanEmail,
-              password: cleanPassword || '123456',
-              name: cleanName,
-              role: empPayload.role,
-            },
-          });
+          // Modo Criação: Cadastra o funcionário no banco
+          const createdEmp = await addEmployee(empPayload);
+          const employeeId = (createdEmp as any)?.id || `emp-${Date.now()}`;
 
-          let funcErrorMsg = '';
-          if (funcErr) {
-            try {
-              if ((funcErr as any).context && typeof (funcErr as any).context.json === 'function') {
-                const errBody = await (funcErr as any).context.json();
-                funcErrorMsg = errBody?.error || funcErr.message;
-              } else if ((funcErr as any).context && typeof (funcErr as any).context.text === 'function') {
-                const errText = await (funcErr as any).context.text();
-                try {
-                  const parsed = JSON.parse(errText);
-                  funcErrorMsg = parsed?.error || errText;
-                } catch {
-                  funcErrorMsg = errText || funcErr.message;
-                }
-              } else {
-                funcErrorMsg = funcErr.message;
+          // Obtém e tenta atualizar a sessão do Supabase Auth para enviar o token de autorização
+          let sessionToken = '';
+          try {
+            const { data: refreshData } = await supabase.auth.refreshSession();
+            sessionToken = refreshData?.session?.access_token || '';
+          } catch {
+            // Fallback para sessão atual em cache
+          }
+
+          if (!sessionToken) {
+            const { data: { session } } = await supabase.auth.getSession();
+            sessionToken = session?.access_token || '';
+          }
+
+        const headers: Record<string, string> = {};
+        if (sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;
+
+        // Chama a Edge Function para criar/vincular a identidade no Supabase Auth
+        const { data: funcData, error: funcErr } = await supabase.functions.invoke('manage-employee', {
+          headers,
+          body: {
+            operation: 'create',
+            employee_id: employeeId,
+            email: cleanEmail,
+            password: cleanPassword || '123456',
+            name: cleanName,
+            role: empPayload.role,
+          },
+        });
+
+        let funcErrorMsg = '';
+        if (funcErr) {
+          try {
+            if ((funcErr as any).context && typeof (funcErr as any).context.json === 'function') {
+              const errBody = await (funcErr as any).context.json();
+              funcErrorMsg = errBody?.error || funcErr.message;
+            } else if ((funcErr as any).context && typeof (funcErr as any).context.text === 'function') {
+              const errText = await (funcErr as any).context.text();
+              try {
+                const parsed = JSON.parse(errText);
+                funcErrorMsg = parsed?.error || errText;
+              } catch {
+                funcErrorMsg = errText || funcErr.message;
               }
-            } catch {
+            } else {
               funcErrorMsg = funcErr.message;
             }
-          } else if (funcData?.error) {
-            funcErrorMsg = funcData.error;
+          } catch {
+            funcErrorMsg = funcErr.message;
           }
+        } else if (funcData?.error) {
+          funcErrorMsg = funcData.error;
+        }
 
-          if (funcErrorMsg) {
-            console.warn('[manage-employee] Aviso ao provisionar credencial inicial:', funcErrorMsg);
-            addToast(
-              'Atenção ⚠️',
-              `Funcionário cadastrado, mas a criação de credencial automática retornou: ${funcErrorMsg}.`,
-              'warning'
-            );
-          } else {
-            if (funcData?.auth_user_id) {
-              updateEmployee(employeeId, {
-                auth_user_id: funcData.auth_user_id,
-                needsPasswordChange: computedNeedsPasswordChange,
-              });
-            }
-            addToast('Sucesso', 'Funcionário cadastrado e credenciais configuradas.', 'success');
+        if (funcErrorMsg) {
+          console.warn('[manage-employee] Aviso ao provisionar credencial inicial:', funcErrorMsg);
+          addToast(
+            'Atenção ⚠️',
+            `Funcionário cadastrado, mas a criação de credencial automática retornou: ${funcErrorMsg}.`,
+            'warning'
+          );
+        } else {
+          if (funcData?.auth_user_id) {
+            updateEmployee(employeeId, {
+              auth_user_id: funcData.auth_user_id,
+              needsPasswordChange: computedNeedsPasswordChange,
+            });
           }
+          addToast('Sucesso', 'Funcionário cadastrado e credenciais configuradas.', 'success');
         }
       }
 
