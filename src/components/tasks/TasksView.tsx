@@ -151,7 +151,7 @@ export const TasksView: React.FC = () => {
   }, [setShowDoneColumn]);
 
   return (
-    <div className="space-y-6 w-full px-4 sm:px-8 pb-12 animate-in fade-in duration-200">
+    <div className={`w-full px-4 sm:px-8 animate-in fade-in duration-200 ${viewMode === 'kanban' ? 'flex-1 min-h-0 flex flex-col overflow-hidden space-y-4' : 'space-y-6 pb-12'}`}>
       {/* Header */}
       <TasksHeader
         viewMode={viewMode}
@@ -209,19 +209,21 @@ export const TasksView: React.FC = () => {
 
       {/* Board (Kanban) View */}
       {viewMode === 'kanban' ? (
-        <TasksKanbanView
-          columns={columns}
-          filteredTasks={filteredTasks}
-          projects={projects}
-          spineStatuses={spineStatuses}
-          getTaskNumericTimestamp={getTaskNumericTimestamp}
-          getLabelColorHex={getLabelColorHex}
-          getTaskCardBgStyle={getTaskCardBgStyle}
-          moveTaskStatus={moveTaskStatus}
-          moveAllBacklogToDoneLocally={moveAllBacklogToDoneLocally}
-          setIsNewTaskModalOpen={setIsNewTaskModalOpen}
-          setEditingTask={setEditingTask}
-        />
+        <div className="flex-1 min-h-0 w-full overflow-hidden">
+          <TasksKanbanView
+            columns={columns}
+            filteredTasks={filteredTasks}
+            projects={projects}
+            spineStatuses={spineStatuses}
+            getTaskNumericTimestamp={getTaskNumericTimestamp}
+            getLabelColorHex={getLabelColorHex}
+            getTaskCardBgStyle={getTaskCardBgStyle}
+            moveTaskStatus={moveTaskStatus}
+            moveAllBacklogToDoneLocally={moveAllBacklogToDoneLocally}
+            setIsNewTaskModalOpen={setIsNewTaskModalOpen}
+            setEditingTask={setEditingTask}
+          />
+        </div>
       ) : (
         <TasksTableView
           searchQuery={searchQuery}

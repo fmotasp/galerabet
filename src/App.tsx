@@ -126,15 +126,15 @@ const MainLayout: React.FC = () => {
   const canManage = isManagerOrAdmin(currentUser);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[#101010] text-[#F1F2F2] flex flex-col lg:flex-row antialiased">
+    <div className="h-screen w-full overflow-hidden bg-[#101010] text-[#F1F2F2] flex flex-col lg:flex-row antialiased">
       {/* Navigation Sidebar */}
       <Sidebar />
 
       {/* Main View Area */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 h-full">
         <Header />
 
-        <main className="flex-1 p-4 pb-20 sm:p-8 sm:pb-24 lg:pb-8 overflow-y-auto">
+        <main className="flex-1 p-4 pb-20 sm:p-8 sm:pb-24 lg:pb-8 overflow-y-auto flex flex-col min-h-0">
           <Suspense fallback={<ViewLoadingFallback />}>
             {activeTab === 'dashboard' && <DashboardView />}
             {activeTab === 'tasks' && <TasksView />}

@@ -89,7 +89,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
       onMouseLeave={handleMouseLeave}
       onMouseUp={handleMouseUp}
       onMouseMove={handleMouseMove}
-      className="flex gap-5 overflow-x-auto pb-8 pt-2 items-start no-scrollbar select-none cursor-grab active:cursor-grabbing w-full"
+      className="flex gap-5 overflow-x-auto pb-4 pt-2 items-start no-scrollbar select-none cursor-grab active:cursor-grabbing w-full h-full min-h-0"
     >
       {columns.map((col) => {
         const columnTasks = filteredTasks
@@ -124,7 +124,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
               }
               setDraggedTaskId(null);
             }}
-            className={`w-80 shrink-0 min-w-[320px] rounded-2xl p-4 max-h-[calc(100vh-210px)] min-h-[520px] flex flex-col justify-between transition-all duration-200 border border-[#262626] ${
+            className={`w-80 shrink-0 min-w-[320px] rounded-2xl p-4 h-full flex flex-col transition-all duration-200 border border-[#262626] ${
               dragOverColumnId === col.id
                 ? 'bg-[#222222] ring-2 ring-[#E4007E] scale-[1.01]'
                 : 'bg-[#181818]'
