@@ -256,17 +256,39 @@ export const Header: React.FC = () => {
               className="absolute right-0 mt-2 w-64 bg-[#1C1C1C] rounded-2xl shadow-2xl border border-[#303030] p-3 z-50 animate-in fade-in zoom-in-95 duration-150 text-white"
             >
               <div className="flex items-center gap-3 p-2 border-b border-[#303030] pb-3 mb-2">
-                {currentUser?.avatarUrl ? (
-                  <img
-                    src={currentUser.avatarUrl}
-                    alt={currentUser.name}
-                    className="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-[#E4007E]/50"
+                <div 
+                  className="relative group cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Alterar foto de perfil"
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    ref={fileInputRef}
+                    onChange={handleAvatarChange}
                   />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white font-extrabold text-sm flex items-center justify-center shrink-0">
-                    {currentUser?.initials || 'AD'}
+                  {isUploadingAvatar && (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 rounded-full">
+                      <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera className="w-4 h-4 text-white" />
                   </div>
-                )}
+                  
+                  {currentUser?.avatarUrl ? (
+                    <img
+                      src={currentUser.avatarUrl}
+                      alt={currentUser.name}
+                      className="w-12 h-12 rounded-full object-cover shrink-0 ring-2 ring-[#E4007E]/50"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white font-extrabold text-sm flex items-center justify-center shrink-0">
+                      {currentUser?.initials || 'AD'}
+                    </div>
+                  )}
+                </div>
                 <div className="min-w-0 flex-1">
                   <h4 className="font-extrabold text-sm text-white truncate">
                     {currentUser?.name || 'Administrador'}
