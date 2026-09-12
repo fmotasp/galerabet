@@ -22,6 +22,7 @@ export const CommandPaletteModal: React.FC = () => {
     setIsNewTaskModalOpen,
     setActiveFilter,
     setActiveTab,
+    spineStatuses,
   } = useApp();
 
   const [query, setQuery] = useState('');
@@ -262,16 +263,18 @@ export const CommandPaletteModal: React.FC = () => {
                     const globalIdx = allResults.findIndex((r) => r.item === t);
                     const isSelected = globalIdx === selectedIndex;
 
-                    const statusLabel =
-                      t.status === 'done'
-                        ? 'Concluído'
-                        : t.status === 'in_progress'
-                        ? 'Em Progresso'
-                        : t.status === 'in_review'
-                        ? 'Em Aprovação'
-                        : t.status === 'overdue'
-                        ? 'Atrasada'
-                        : 'Backlog';
+                    const customStatus = spineStatuses?.find((s) => s.id === t.status);
+                    const statusLabel = customStatus
+                      ? customStatus.label
+                      : t.status === 'done'
+                      ? 'Concluído'
+                      : t.status === 'in_progress'
+                      ? 'Em Progresso'
+                      : t.status === 'in_review'
+                      ? 'Em Aprovação'
+                      : t.status === 'overdue'
+                      ? 'Atrasada'
+                      : 'Backlog';
 
                     return (
                       <div

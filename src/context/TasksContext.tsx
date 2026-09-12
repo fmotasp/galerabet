@@ -139,9 +139,7 @@ export const TasksProvider: React.FC<{
   const fetchTasksFromSupabase = useCallback(async () => {
     console.log('[Supabase Tasks] Iniciando busca direta na tabela tasks...');
     try {
-      const TASK_SELECT_FIELDS = `id, title, description, category, status, due_date, points, is_flagged, project_id, project_name, sprint_id, assignee_id, assignee_name, assignee_initials, members, labels, attachments, reference_images, comments, cover_attachment_id, last_moved_at, activity_log, created_at, updated_at`;
-
-      // 1. Tenta buscar todas as tarefas com campos otimizados (evita timeout por cover_image_url com base64 gigante)
+      const TASK_SELECT_FIELDS = `id, title, description, category, status, due_date, points, is_flagged, project_id, project_name, sprint_id, assignee_id, assignee_name, assignee_initials, members, labels, attachments, reference_images, comments, cover_attachment_id, cover_image_url, last_moved_at, activity_log, created_at, updated_at`;
       let { data, error } = await supabase
         .from('tasks')
         .select(TASK_SELECT_FIELDS)
@@ -260,7 +258,7 @@ export const TasksProvider: React.FC<{
     if ('Notification' in window && Notification.permission === 'granted') {
       const now = new Date();
       tasks.forEach((t) => {
-        if (t.status === 'done' || !t.dueDate || t.dueDate === 'Sem prazo') return;
+        if (isTaskCompleted(t) || !t.dueDate || t.dueDate === 'Sem prazo') return;
         let dueObj: Date | null = null;
         if (t.dueDate.includes('/')) {
           const parts = t.dueDate.split('/');

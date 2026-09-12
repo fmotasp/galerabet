@@ -21,6 +21,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Employee, Project } from '../../types';
 import { Button, Input, Badge, Avatar } from '../ui';
+import { isTaskCompleted } from '../../lib/taskDateUtils';
 
 export const RegistrationsView: React.FC = () => {
   const {
@@ -182,10 +183,7 @@ export const RegistrationsView: React.FC = () => {
   const getEmployeeEfficiency = (emp: Employee) => {
     const empTasks = getEmployeeTasks(emp);
     if (empTasks.length === 0) return 0;
-    const completed = empTasks.filter((t) => {
-      const s = (t.status || '').toLowerCase();
-      return s === 'done' || s.includes('concl') || s.includes('finaliz') || s.includes('postad');
-    }).length;
+    const completed = empTasks.filter((t) => isTaskCompleted(t)).length;
     return Math.round((completed / empTasks.length) * 100);
   };
 

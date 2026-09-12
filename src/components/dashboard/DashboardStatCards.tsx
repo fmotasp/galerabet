@@ -1,5 +1,5 @@
 import React from 'react';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, HelpCircle } from 'lucide-react';
 import { Button } from '../ui';
 import { DashboardMetrics } from './dashboardUtils';
 
@@ -73,15 +73,30 @@ export const DashboardStatCards: React.FC<DashboardStatCardsProps> = React.memo(
             <span className="text-3xl font-black text-rose-400 tracking-tight">
               {metrics.overdueTasks}
             </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-slate-400 hover:text-white p-1"
-              title="Mais opções"
-              aria-label="Mais opções"
-            >
-              <MoreHorizontal className="w-5 h-5" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <div className="group relative">
+                <HelpCircle className="w-4 h-4 text-slate-400 cursor-help hover:text-white transition-colors mt-1" />
+                <div className="absolute right-0 top-8 w-56 p-3 bg-[#262626] border border-[#3A3A3A] rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
+                  <p className="text-xs text-slate-200 font-bold mb-1.5">
+                    Critérios de Alerta:
+                  </p>
+                  <ul className="text-[10px] text-slate-400 space-y-1.5 list-disc pl-3">
+                    <li><strong className="text-rose-400">Atrasadas:</strong> Mais de 2 dias (D+2) do prazo</li>
+                    <li><strong className="text-amber-400">Vencendo:</strong> Prazo é hoje, amanhã ou depois</li>
+                    <li><strong className="text-cyan-400">Urgentes:</strong> Marcadas com flag manualmente</li>
+                  </ul>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-slate-400 hover:text-white p-1"
+                title="Mais opções"
+                aria-label="Mais opções"
+              >
+                <MoreHorizontal className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
           <span className="text-xs text-slate-300 font-bold uppercase tracking-wider mt-1">
             atrasadas

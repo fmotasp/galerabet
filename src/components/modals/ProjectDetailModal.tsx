@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Edit2, Plus, CheckCircle2, Rocket, Flower2, BarChart3, ShieldCheck, Zap } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Button, Badge, Avatar } from '../ui';
+import { isTaskCompleted } from '../../lib/taskDateUtils';
 
 export const ProjectDetailModal: React.FC = () => {
   const {
@@ -13,6 +14,7 @@ export const ProjectDetailModal: React.FC = () => {
     moveTaskStatus,
     setEditingTask,
     setIsNewTaskModalOpen,
+    spineStatuses,
   } = useApp();
 
   if (!selectedProjectForDetail) return null;
@@ -20,7 +22,7 @@ export const ProjectDetailModal: React.FC = () => {
   const project = selectedProjectForDetail;
   const projectTasks = tasks.filter((t) => t.projectId === project.id);
   const teamMembers = employees.filter((e) => project.teamMemberIds.includes(e.id));
-  const completedCount = projectTasks.filter((t) => t.status === 'done').length;
+  const completedCount = projectTasks.filter((t) => isTaskCompleted(t)).length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -178,19 +180,19 @@ export const ProjectDetailModal: React.FC = () => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        moveTaskStatus(t.id, t.status === 'done' ? 'in_progress' : 'done');
+                        moveTaskStatus(t.id, isTaskCompleted(t) ? 'in_progress' : 'done');
                       }}
                       className="text-slate-400 hover:text-emerald-600 cursor-pointer"
                     >
                       <CheckCircle2
                         className={`w-4 h-4 ${
-                          t.status === 'done' ? 'text-emerald-500 fill-emerald-100' : ''
+                          isTaskCompleted(t) ? 'text-emerald-500 fill-emerald-100' : ''
                         }`}
                       />
                     </button>
                     <span
                       className={`font-semibold ${
-                        t.status === 'done'
+                        isTaskCompleted(t)
                           ? 'line-through text-slate-400'
                           : 'text-slate-800 group-hover:text-indigo-600'
                       }`}
@@ -207,7 +209,7 @@ export const ProjectDetailModal: React.FC = () => {
                       size="sm"
                       className="bg-slate-100 text-slate-700 border-transparent capitalize font-bold text-[11px] px-2 py-0.5 rounded"
                     >
-                      {t.status.replace('_', ' ')}
+                      {spineStatuses?.find(s => s.id === t.status)?.label || t.status.replace('_', ' ')}
                     </Badge>
                   </div>
                 </div>

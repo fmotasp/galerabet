@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useApp, useProjects, useEmployees, useTasks } from '../../context/AppContext';
 import { Project } from '../../types';
+import { isTaskCompleted } from '../../lib/taskDateUtils';
 
 export const ProjectsView: React.FC = () => {
   const { projects, deleteProject } = useProjects();
@@ -186,7 +187,7 @@ export const ProjectsView: React.FC = () => {
               project.teamMemberIds.includes(e.id)
             );
             const projectTasks = tasks.filter((t) => t.projectId === project.id);
-            const completedCount = projectTasks.filter((t) => t.status === 'done').length;
+            const completedCount = projectTasks.filter((t) => isTaskCompleted(t)).length;
 
             return (
               <div
