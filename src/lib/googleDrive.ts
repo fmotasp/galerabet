@@ -730,6 +730,24 @@ export const uploadEmployeeAvatarToDrive = async (
       empFolder = { id: d.id, webViewLink: d.webViewLink || '' };
     }
 
+    // 2.5 Delete old avatars if any exist in the employee folder
+    try {
+      const q = `'${empFolder.id}' in parents and trashed = false`;
+      const listRes = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`, {
+        method: 'GET'
+      }, token);
+      if (listRes.ok) {
+        const listData = await listRes.json();
+        for (const oldFile of listData.files || []) {
+          await driveFetch(`https://www.googleapis.com/drive/v3/files/${oldFile.id}`, {
+            method: 'DELETE'
+          }, token);
+        }
+      }
+    } catch (e) {
+      console.warn("Could not delete old avatars", e);
+    }
+
     // 3. Upload photo file into employee folder
     const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     const fileName = `avatar.${ext}`;

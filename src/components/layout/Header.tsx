@@ -17,7 +17,7 @@ import {
   Camera,
   Loader2,
 } from 'lucide-react';
-import { uploadFileToDrive } from '../../lib/googleDrive';
+import { uploadEmployeeAvatarToDrive } from '../../lib/googleDrive';
 import { useApp } from '../../context/AppContext';
 
 export const Header: React.FC = () => {
@@ -44,20 +44,12 @@ export const Header: React.FC = () => {
 
     setIsUploadingAvatar(true);
     try {
-      const uploaded = await uploadFileToDrive(file, 'root', 'general');
-      if (uploaded) {
-        let newAvatarUrl = uploaded.thumbnailLink;
-        if (newAvatarUrl) {
-          newAvatarUrl = newAvatarUrl.replace('=s220', '=s800');
-        } else {
-          newAvatarUrl = uploaded.webContentLink || uploaded.webViewLink;
-        }
-
-        if (newAvatarUrl) {
-          updateEmployee(currentUser.id, { avatarUrl: newAvatarUrl });
-          setCurrentUser({ ...currentUser, avatarUrl: newAvatarUrl });
-          addToast('Foto Atualizada! 📸', 'Sua foto de perfil foi alterada com sucesso.', 'success');
-        }
+      const result = await uploadEmployeeAvatarToDrive(file, currentUser.name);
+      if (result && result.url) {
+        const newAvatarUrl = result.url;
+        updateEmployee(currentUser.id, { avatarUrl: newAvatarUrl });
+        setCurrentUser({ ...currentUser, avatarUrl: newAvatarUrl });
+        addToast('Foto Atualizada! 📸', 'Sua foto de perfil foi alterada com sucesso.', 'success');
       }
     } catch (err) {
       console.error(err);
