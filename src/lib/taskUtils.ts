@@ -131,7 +131,7 @@ export const decodeTaskDescriptionWithChecklist = (
     try {
       checklists = JSON.parse(match[1]);
       cleanDescription = rawDescription.replace(match[0], '').trim();
-    } catch {}
+    } catch (err) {}
   }
 
   return { cleanDescription, checklists };

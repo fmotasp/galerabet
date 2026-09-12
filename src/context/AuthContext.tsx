@@ -213,7 +213,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               try {
                 localStorage.setItem('spine_logged_user', JSON.stringify(appUser));
                 localStorage.setItem(STORAGE_KEYS.LOGIN_DATE, getTodayDateStr());
-              } catch {}
+              } catch (err) {}
             }
           }
         } else if (!localStorage.getItem('spine_logged_user')) {
@@ -242,7 +242,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   localStorage.setItem('spine_logged_user', JSON.stringify(appUser));
                   localStorage.setItem(STORAGE_KEYS.LOGIN_DATE, getTodayDateStr());
                   window.dispatchEvent(new Event('spine_user_logged_in'));
-                } catch {}
+                } catch (err) {}
               }
             }
           }
@@ -270,12 +270,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         localStorage.setItem(STORAGE_KEYS.LOGIN_DATE, getTodayDateStr());
         localStorage.setItem('spine_logged_user', JSON.stringify(user));
-      } catch {}
+      } catch (err) {}
       setCurrentUserState(user);
       setPendingPasswordChangeUser(null);
       try {
         window.dispatchEvent(new Event('spine_user_logged_in'));
-      } catch {}
+      } catch (err) {}
     } else if (user && user.needsPasswordChange) {
       localStorage.removeItem('spine_logged_user');
       localStorage.removeItem(STORAGE_KEYS.LOGIN_DATE);

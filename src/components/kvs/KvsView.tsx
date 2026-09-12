@@ -126,7 +126,7 @@ export const KvsView: React.FC = () => {
       setKvEntries(entriesList);
       try {
         localStorage.setItem('spine_kvs_cache_entries', JSON.stringify(entriesList));
-      } catch {}
+      } catch (err) {}
     } catch (err) {
       console.error('Erro ao listar KVs:', err);
     } finally {
@@ -144,7 +144,7 @@ export const KvsView: React.FC = () => {
           setKvEntries(parsed);
         }
       }
-    } catch {}
+    } catch (err) {}
   }, []);
 
   // Monitora alterações nos links de KVs dos clientes
@@ -282,7 +282,7 @@ export const KvsView: React.FC = () => {
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
       addToast('Link copiado!', 'Link do Google Drive copiado para a área de transferência.', 'success');
-    } catch {}
+    } catch (err) {}
   };
 
   // Filtragem dos entries

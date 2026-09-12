@@ -62,7 +62,7 @@ export const EmployeesProvider: React.FC<{
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    } catch {}
+    } catch (err) {}
     return INITIAL_EMPLOYEES;
   });
 
@@ -72,7 +72,7 @@ export const EmployeesProvider: React.FC<{
       if (employees && employees.length > 0) {
         localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(employees));
       }
-    } catch {}
+    } catch (err) {}
   }, [employees]);
 
   // Carrega lista de funcionários diretamente do Supabase e sincroniza em tempo real
@@ -97,7 +97,7 @@ export const EmployeesProvider: React.FC<{
             setEmployees(mapped);
             try {
               localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(mapped));
-            } catch {}
+            } catch (err) {}
           } else {
             console.warn('[Supabase] Array vazio retornado para employees (possível bloqueio por RLS). Mantendo cache local.');
           }
@@ -271,7 +271,7 @@ export const EmployeesProvider: React.FC<{
       try {
         const { data: { session } } = await supabase.auth.getSession();
         sessionToken = session?.access_token || '';
-      } catch {}
+      } catch (err) {}
 
       const headers: Record<string, string> = {};
       if (sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;

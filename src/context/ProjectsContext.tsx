@@ -54,7 +54,7 @@ export const decodeProjectDescription = (rawDescription?: string): { cleanDescri
     try {
       brandMeta = JSON.parse(match[1]);
       cleanDescription = rawDescription.replace(match[0], '').trim();
-    } catch {}
+    } catch (err) {}
   }
 
   return { cleanDescription, brandMeta };
@@ -137,7 +137,7 @@ export const ProjectsProvider: React.FC<{
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    } catch {}
+    } catch (err) {}
     return INITIAL_PROJECTS;
   });
 
@@ -147,7 +147,7 @@ export const ProjectsProvider: React.FC<{
       if (projects && projects.length > 0) {
         localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(projects));
       }
-    } catch {}
+    } catch (err) {}
   }, [projects]);
 
   // Carrega lista de clientes/projetos diretamente do Supabase e sincroniza em tempo real
@@ -174,7 +174,7 @@ export const ProjectsProvider: React.FC<{
             setProjects(mapped);
             try {
               localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(mapped));
-            } catch {}
+            } catch (err) {}
           } else {
             console.warn('[Supabase] Array vazio retornado para projetos (possível bloqueio por RLS). Mantendo cache local.');
           }
@@ -314,7 +314,7 @@ export const ProjectsProvider: React.FC<{
     try {
       const updatedList = projects.map((proj) => (proj.id === id ? mergedProj : proj));
       localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(updatedList));
-    } catch {}
+    } catch (err) {}
 
     const { cleanDescription } = decodeProjectDescription(mergedProj.description || '');
     const packedDescription = encodeProjectDescription(cleanDescription, {

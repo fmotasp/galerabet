@@ -49,7 +49,7 @@ export const useTaskModalForm = ({
         if (saved) {
           actor = JSON.parse(saved);
         }
-      } catch {}
+      } catch (err) {}
     }
 
     const matchedEmp = employees.find(
@@ -168,7 +168,7 @@ export const useTaskModalForm = ({
         const cleanUrl = url.pathname + (url.search ? url.search : '') + (url.hash ? url.hash : '');
         window.history.replaceState({}, document.title, cleanUrl);
       }
-    } catch {}
+    } catch (err) {}
   };
 
   const handleAddMember = (empId: string) => {

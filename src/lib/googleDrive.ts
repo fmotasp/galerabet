@@ -103,7 +103,7 @@ export const requestDriveToken = (clientId?: string): Promise<string | null> => 
                 logo_url: expiry,
                 status: 'active',
               }).then();
-            } catch {}
+            } catch (err) {}
 
             resolve(token);
           },
@@ -778,7 +778,7 @@ export const uploadEmployeeAvatarToDrive = async (
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: 'reader', type: 'anyone' }),
       }, token);
-    } catch {}
+    } catch (err) {}
 
     // 5. Return public URL
     const url = `https://lh3.googleusercontent.com/d/${fileId}`;

@@ -178,7 +178,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       const saved = sessionStorage.getItem('spine_active_tab') as NavigationTab;
       if (saved && VALID_TABS.includes(saved)) return saved;
-    } catch {}
+    } catch (err) {}
     return 'dashboard';
   };
 
@@ -191,7 +191,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (window.location.hash !== `#${tab}`) {
         window.history.replaceState(null, '', `#${tab}`);
       }
-    } catch {}
+    } catch (err) {}
   }, []);
 
   // Sincroniza se o usuário usar os botões de voltar/avançar do navegador
@@ -218,7 +218,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    } catch {}
+    } catch (err) {}
     return INITIAL_SPRINT_LIST;
   });
   const [currentSprintId, setCurrentSprintId] = useState<string>(INITIAL_SPRINT.id);
@@ -345,7 +345,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.ACTIVITIES);
       if (saved) return JSON.parse(saved);
-    } catch {}
+    } catch (err) {}
     return [];
   });
 
@@ -400,7 +400,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         const parsed = JSON.parse(savedTasks);
         if (Array.isArray(parsed) && parsed.length > 0) return false;
       }
-    } catch {}
+    } catch (err) {}
     return true;
   });
 
@@ -477,7 +477,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
         const fromStorage = sessionStorage.getItem('pending_shared_task_id');
         if (fromStorage) return fromStorage;
-      } catch {}
+      } catch (err) {}
       return null;
     };
 

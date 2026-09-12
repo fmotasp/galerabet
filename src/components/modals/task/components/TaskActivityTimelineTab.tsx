@@ -140,7 +140,7 @@ export const TaskActivityTimelineTab: React.FC<{
                 if (!isNaN(d.getTime())) {
                   formattedDate = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
                 }
-              } catch {}
+              } catch (err) {}
 
               return (
                 <div key={act.id} className="relative group">

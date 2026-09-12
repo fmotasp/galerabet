@@ -127,11 +127,11 @@ export const LogsView: React.FC = () => {
                     <p className="text-white font-medium truncate">
                       {log.task_title || 'Tarefa sem título (ou ID: ' + log.task_id + ')'}
                     </p>
-                    {log.details && Object.keys(log.details).length > 0 && log.action === 'UPDATE' && (
+                    {log.details && Object.keys(log.details).length > 0 && (
                       <div className="mt-2 text-xs text-slate-400 bg-[#181818] p-2 rounded-lg border border-[#262626]">
                         {Object.entries(log.details).map(([key, val]) => (
                           <div key={key}>
-                            <span className="font-bold">{key}:</span> {JSON.stringify(val)}
+                            <span className="font-bold">{key}:</span> {typeof val === 'string' ? val : JSON.stringify(val)}
                           </div>
                         ))}
                       </div>

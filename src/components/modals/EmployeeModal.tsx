@@ -277,7 +277,7 @@ export const EmployeeModal: React.FC = () => {
             try {
               const { data: refreshData } = await supabase.auth.refreshSession();
               sessionToken = refreshData?.session?.access_token || '';
-            } catch {}
+            } catch (err) {}
             if (!sessionToken) {
               const { data: { session } } = await supabase.auth.getSession();
               sessionToken = session?.access_token || '';
@@ -304,7 +304,7 @@ export const EmployeeModal: React.FC = () => {
           try {
             const { data: refreshData } = await supabase.auth.refreshSession();
             sessionToken = refreshData?.session?.access_token || '';
-          } catch {}
+          } catch (err) {}
           if (!sessionToken) {
             const { data: { session } } = await supabase.auth.getSession();
             sessionToken = session?.access_token || '';

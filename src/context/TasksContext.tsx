@@ -74,7 +74,7 @@ export const TasksProvider: React.FC<{
           }));
         }
       }
-    } catch {}
+    } catch (err) {}
     return INITIAL_TASKS;
   });
 
@@ -87,7 +87,7 @@ export const TasksProvider: React.FC<{
         if (saved) {
           actor = JSON.parse(saved);
         }
-      } catch {}
+      } catch (err) {}
     }
     return {
       name: actor?.name || 'Membro',
@@ -177,7 +177,7 @@ export const TasksProvider: React.FC<{
             attachments: (attachments || []).slice(0, 3).map((a) => ({ id: a.id, name: a.name })),
           }));
           localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(topRecentTasks));
-        } catch {}
+        } catch (err) {}
       } else {
         console.warn('[Supabase Tasks] Supabase retornou array vazio ou nulo.');
       }
@@ -460,7 +460,7 @@ export const TasksProvider: React.FC<{
           localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(updatedCache));
         }
       }
-    } catch {}
+    } catch (err) {}
 
     try {
       const payload: any = {};
@@ -646,7 +646,7 @@ export const TasksProvider: React.FC<{
           localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(updatedCache));
         }
       }
-    } catch {}
+    } catch (e) {}
 
     try {
       const updatePayload: Record<string, any> = {
@@ -677,6 +677,12 @@ export const TasksProvider: React.FC<{
           return;
         }
       }
+      
+      logSystemAction('UPDATE', id, targetTask.title, actorName, {
+        actionDetail: 'Mudança de status da coluna',
+        fromStatus: oldStatus,
+        toStatus: newStatus
+      });
     } catch (sbErr) {
       console.warn('Supabase move status warning:', sbErr);
     }
