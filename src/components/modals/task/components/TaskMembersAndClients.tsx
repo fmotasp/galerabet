@@ -79,7 +79,7 @@ export const TaskMembersAndClients: React.FC<{
                 <div key={groupId} className="flex flex-col gap-1.5 items-center">
                   <div className="flex items-center gap-1.5">
                     {g.members.map(m => {
-                      const resolvedAvatar = m.avatarUrl || m.matchedEmp?.avatarUrl || '';
+                      const resolvedAvatar = m.matchedEmp?.avatarUrl || m.avatarUrl || '';
                       return (
                         <div
                           key={m.id}

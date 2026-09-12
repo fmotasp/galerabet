@@ -41,7 +41,7 @@ export const TaskMembersStack: React.FC<TaskMembersStackProps> = ({ task }) => {
           (m.name && emp.name && emp.name.toLowerCase().trim() === m.name.toLowerCase().trim())
       );
 
-      const resolvedAvatar = m.avatarUrl || matchedEmp?.avatarUrl || '';
+      const resolvedAvatar = matchedEmp?.avatarUrl || m.avatarUrl || '';
 
       return {
         ...m,

@@ -63,7 +63,7 @@ export const useTaskModalForm = ({
       id: matchedEmp?.id || actor?.id || 'unassigned',
       name: matchedEmp?.name || actor?.name || 'Membro',
       initials: matchedEmp?.initials || actor?.initials || 'MB',
-      avatarUrl: matchedEmp?.avatarUrl || actor?.avatarUrl,
+      avatarUrl: matchedEmp?.avatarUrl || actor?.avatarUrl || '',
     };
   };
 
@@ -441,7 +441,7 @@ export const useTaskModalForm = ({
             );
             return {
               ...m,
-              avatarUrl: m.avatarUrl || matchedEmp?.avatarUrl || '',
+              avatarUrl: matchedEmp?.avatarUrl || m.avatarUrl || '',
               name: m.name || matchedEmp?.name || 'Membro',
               initials: m.initials || matchedEmp?.initials || 'MB',
             };
