@@ -352,8 +352,27 @@ export const TasksProvider: React.FC<{
       },
     ] : [];
 
+    // Adiciona os gestores padrão na lista de membros da nova tarefa
+    const defaultManagerNames = ['giovanni', 'fernanda', 'guilherme gonçalves', 'fabio mozart'];
+    const existingMemberIds = new Set((newTaskData.members || []).map(m => m.id));
+    let updatedMembers = [...(newTaskData.members || [])];
+
+    employees.forEach(emp => {
+      const isManager = defaultManagerNames.some(name => emp.name.toLowerCase().includes(name));
+      if (isManager && !existingMemberIds.has(emp.id)) {
+        updatedMembers.push({
+          id: emp.id,
+          name: emp.name,
+          initials: emp.initials,
+          avatarUrl: emp.avatarUrl,
+        });
+        existingMemberIds.add(emp.id);
+      }
+    });
+
     const newTask: Task = {
       ...newTaskData,
+      members: updatedMembers,
       id: newId,
       createdAt: new Date().toISOString().split('T')[0],
       commentsCount: 0,

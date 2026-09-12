@@ -37,77 +37,89 @@ export const TaskMembersAndClients: React.FC<{
         <label className="block text-xs font-bold text-slate-200 mb-2">
           Membros
         </label>
-        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-2 -mb-2">
-          {[...taskMembers]
-            .sort((a, b) => {
-              const empA = employees.find(
-                (emp) =>
-                  (a.id && emp.id && emp.id === a.id) ||
-                  (a.name && emp.name && emp.name.toLowerCase().trim() === a.name.toLowerCase().trim())
-              );
-              const empB = employees.find(
-                (emp) =>
-                  (b.id && emp.id && emp.id === b.id) ||
-                  (b.name && emp.name && emp.name.toLowerCase().trim() === b.name.toLowerCase().trim())
-              );
+        <div className="flex items-start gap-4 flex-wrap pb-2">
+          {(() => {
+            const getGroup = (emp?: Employee) => {
+              if (!emp) return 3;
+              const role = (emp.role || '').toLowerCase();
+              const roleType = (emp.roleType || '').toLowerCase();
+              
+              if (role.includes('gestor') || role.includes('gerente') || role.includes('manager') || roleType === 'manager' || roleType === 'admin') return 1;
+              if (role.includes('design') || role.includes('video') || role.includes('vídeo') || role.includes('maker')) return 2;
+              return 3;
+            };
 
-              const getGroup = (emp?: Employee) => {
-                if (!emp) return 3;
-                const role = (emp.role || '').toLowerCase();
-                const roleType = (emp.roleType || '').toLowerCase();
-                
-                if (role.includes('gestor') || role.includes('gerente') || role.includes('manager') || roleType === 'manager' || roleType === 'admin') return 1;
-                if (role.includes('design') || role.includes('video') || role.includes('vídeo') || role.includes('maker')) return 2;
-                return 3;
-              };
+            const groups: Record<number, { label: string; members: any[] }> = {
+              1: { label: 'Gestores', members: [] },
+              2: { label: 'Design & Vídeo', members: [] },
+              3: { label: 'Outros', members: [] },
+            };
 
-              return getGroup(empA) - getGroup(empB);
-            })
-            .map((m) => {
-            // Cruza com funcionários cadastrados para obter avatar atualizado
-            const matchedEmp = employees.find(
-              (emp) =>
-                (m.id && emp.id && emp.id === m.id) ||
-                (m.name && emp.name && emp.name.toLowerCase().trim() === m.name.toLowerCase().trim())
-            );
-            const resolvedAvatar = m.avatarUrl || matchedEmp?.avatarUrl || '';
-            return (
-              <div
-                key={m.id}
-                className="relative group cursor-pointer shrink-0"
-                onClick={() => handleRemoveMember(m.id)}
-                title={`${m.name} (Clique para remover)`}
-              >
-                <Avatar
-                  src={resolvedAvatar}
-                  name={m.name}
-                  alt={m.name}
-                  size="sm"
-                  ring
-                  className="!w-9 !h-9 ring-2 ring-[#E4007E]/60 group-hover:ring-rose-500 transition-all shadow-xs text-xs font-black"
-                />
-                <div className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                  <X className="w-2.5 h-2.5" />
+            taskMembers.forEach((m) => {
+              const matchedEmp = employees.find(
+                (emp) =>
+                  (m.id && emp.id && emp.id === m.id) ||
+                  (m.name && emp.name && emp.name.toLowerCase().trim() === m.name.toLowerCase().trim())
+              );
+              const group = getGroup(matchedEmp);
+              groups[group].members.push({ ...m, matchedEmp });
+            });
+
+            return [1, 2, 3].map(groupId => {
+              const g = groups[groupId as keyof typeof groups];
+              if (g.members.length === 0) return null;
+              
+              return (
+                <div key={groupId} className="flex flex-col gap-1.5 items-center">
+                  <div className="flex items-center gap-1.5">
+                    {g.members.map(m => {
+                      const resolvedAvatar = m.avatarUrl || m.matchedEmp?.avatarUrl || '';
+                      return (
+                        <div
+                          key={m.id}
+                          className="relative group cursor-pointer shrink-0"
+                          onClick={() => handleRemoveMember(m.id)}
+                          title={`${m.name} (Clique para remover)`}
+                        >
+                          <Avatar
+                            src={resolvedAvatar}
+                            name={m.name}
+                            alt={m.name}
+                            size="sm"
+                            ring
+                            className="!w-9 !h-9 ring-2 ring-[#E4007E]/60 group-hover:ring-rose-500 transition-all shadow-xs text-xs font-black"
+                          />
+                          <div className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <X className="w-2.5 h-2.5" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-[#1A1A1A] px-2 py-0.5 rounded-md border border-[#2E2E2E]">
+                    {g.label}
+                  </span>
                 </div>
-              </div>
-            );
-          })}
+              );
+            });
+          })()}
 
           {/* Add Member Button with Popover */}
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              onClick={() => {
-                setIsMembersPopoverOpen(!isMembersPopoverOpen);
-                setIsLabelsPopoverOpen(false);
-              }}
-              className="w-9 h-9 rounded-full bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E] flex items-center justify-center text-slate-200 hover:text-white transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
-              title="Adicionar Membro"
-            >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-            </button>
+          <div className="flex flex-col gap-1.5 items-center">
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMembersPopoverOpen(!isMembersPopoverOpen);
+                  setIsLabelsPopoverOpen(false);
+                }}
+                className="w-9 h-9 rounded-full bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E] flex items-center justify-center text-slate-200 hover:text-white transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+                title="Adicionar Membro"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+              </button>
 
-            {/* Members Popover Dropdown */}
+              {/* Members Popover Dropdown */}
             {isMembersPopoverOpen && (
               <>
                 <div
@@ -193,6 +205,7 @@ export const TaskMembersAndClients: React.FC<{
                 </div>
               </>
             )}
+            </div>
           </div>
         </div>
       </div>
