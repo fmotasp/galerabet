@@ -550,6 +550,23 @@ export const useTaskModalForm = ({
         } : null);
 
         const initialMembers = initialMember ? [initialMember] : [];
+        
+        // Adiciona os gestores padrão na lista de membros da nova tarefa
+        const defaultManagerNames = ['giovanni', 'fernanda', 'guilherme gonçalves', 'fabio mozart'];
+        const existingMemberIds = new Set(initialMembers.map(m => m.id));
+        
+        employees.forEach(emp => {
+          const isManager = defaultManagerNames.some(name => emp.name.toLowerCase().includes(name));
+          if (isManager && !existingMemberIds.has(emp.id)) {
+            initialMembers.push({
+              id: emp.id,
+              name: emp.name,
+              initials: emp.initials,
+              avatarUrl: emp.avatarUrl,
+            });
+            existingMemberIds.add(emp.id);
+          }
+        });
 
         setFormData({
           title: '',
