@@ -41,6 +41,12 @@ export const TaskMembersAndClients: React.FC<{
           {(() => {
             const getGroup = (emp?: Employee) => {
               if (!emp) return 3;
+              
+              // Felipe Mota deve aparecer como Designer nas tarefas, independentemente dos privilégios de admin
+              if (emp.name && emp.name.toLowerCase().includes('felipe mota')) {
+                return 2;
+              }
+              
               const role = (emp.role || '').toLowerCase();
               const roleType = (emp.roleType || '').toLowerCase();
               
