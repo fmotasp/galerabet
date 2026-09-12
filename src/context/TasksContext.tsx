@@ -30,9 +30,7 @@ export interface TasksContextType {
   fetchTasksFromSupabase: () => Promise<void>;
 }
 
-const STORAGE_KEYS = {
-  TASKS: 'spine_tasks_v1',
-};
+
 
 const TasksContext = createContext<TasksContextType | null>(null);
 
@@ -57,26 +55,8 @@ export const TasksProvider: React.FC<{
   addActivity,
   resetAllStores,
 }) => {
-  // Tasks (Demandas) - Hidratação imediata síncrona de cache para evitar tela zerada
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.TASKS);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((t: Task) => ({
-            ...t,
-            activityLog: (t.activityLog || []).filter((act: any) => {
-              const userName = (act.user || '').trim().toLowerCase();
-              const userIn = (act.userInitials || '').trim().toUpperCase();
-              return userName !== 'sistema' && userIn !== 'SYS' && userName !== 'equipe' && userIn !== 'EQ';
-            }),
-          }));
-        }
-      }
-    } catch (err) {}
-    return INITIAL_TASKS;
-  });
+  // Tasks (Demandas) - Inicializa vazio para garantir dados reais do servidor
+  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
 
   // Helper para obter os dados do usuário autenticado no momento da ação
   const getCurrentActor = () => {
@@ -169,15 +149,6 @@ export const TasksProvider: React.FC<{
         console.log(`[Supabase Tasks] ✅ Sucesso: ${data.length} tarefas recebidas do Supabase!`);
         const mapped = data.map(mapRowToTask);
         setTasks(mapped);
-        // Atualiza cache local apenas com a resposta oficial do Supabase
-        try {
-          const topRecentTasks = mapped.slice(0, 1000).map(({ referenceImages, attachments, comments, ...rest }) => ({
-            ...rest,
-            checklists: rest.checklists || [],
-            attachments: (attachments || []).slice(0, 3).map((a) => ({ id: a.id, name: a.name })),
-          }));
-          localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(topRecentTasks));
-        } catch (err) {}
       } else {
         console.warn('[Supabase Tasks] Supabase retornou array vazio ou nulo.');
       }
@@ -239,20 +210,6 @@ export const TasksProvider: React.FC<{
       fetchTasksFromSupabase();
     }
   }, [currentUser?.id, fetchTasksFromSupabase]);
-
-  // Cache inteligente e seguro no LocalStorage (armazena apenas as 50 mais recentes para evitar QuotaExceededError em 10.000+ tarefas)
-  useEffect(() => {
-    try {
-      const topRecentTasks = tasks.slice(0, 1000).map(({ referenceImages, attachments, comments, ...rest }) => ({
-        ...rest,
-        checklists: rest.checklists || [],
-        attachments: (attachments || []).slice(0, 3).map((a) => ({ id: a.id, name: a.name })),
-      }));
-      localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(topRecentTasks));
-    } catch {
-      // Ignora silenciosamente se o navegador desabilitar ou limitar o LocalStorage
-    }
-  }, [tasks]);
 
   // Notifications for tasks due in <= 2 days
   useEffect(() => {
@@ -448,20 +405,6 @@ export const TasksProvider: React.FC<{
       })
     );
 
-    // Sincroniza cache local imediatamente para persistir no F5
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.TASKS);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          const updatedCache = parsed.map((t: any) =>
-            t.id === id ? { ...t, ...updates, activityLog: nextActivityLog } : t
-          );
-          localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(updatedCache));
-        }
-      }
-    } catch (err) {}
-
     try {
       const payload: any = {};
       if (updates.status !== undefined) {
@@ -634,20 +577,6 @@ export const TasksProvider: React.FC<{
       })
     );
 
-    // Sincroniza cache local imediatamente para persistir no F5
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.TASKS);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          const updatedCache = parsed.map((t: any) =>
-            t.id === id ? { ...t, status: newStatus, lastMovedAt: now } : t
-          );
-          localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(updatedCache));
-        }
-      }
-    } catch (e) {}
-
     try {
       const updatePayload: Record<string, any> = {
         status: newStatus,
@@ -758,7 +687,6 @@ export const TasksProvider: React.FC<{
 
   const clearAllTasks = () => {
     setTasks([]);
-    localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify([]));
     supabase.from('tasks').delete().neq('id', '0').then();
 
     addActivity('Admin', 'AD', 'limpou todas as tarefas do sistema', 'orange');
@@ -767,7 +695,6 @@ export const TasksProvider: React.FC<{
 
   const resetSystemKeepCredentials = () => {
     setTasks([]);
-    localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify([]));
     supabase.from('tasks').delete().neq('id', '0').then();
 
     if (resetAllStores) {
