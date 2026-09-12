@@ -177,6 +177,8 @@ export const useTaskModalForm = ({
     if (!emp) return;
     if (taskMembers.some((m) => m.id === emp.id)) return;
 
+    isMembersDirtyRef.current = true;
+
     const newMember: TaskMember = {
       id: emp.id,
       name: emp.name,
@@ -215,6 +217,8 @@ export const useTaskModalForm = ({
   };
 
   const handleRemoveMember = (memberId: string) => {
+    isMembersDirtyRef.current = true;
+
     const nextMembers = taskMembers.filter((m) => m.id !== memberId);
     setTaskMembers(nextMembers);
 
@@ -406,6 +410,7 @@ export const useTaskModalForm = ({
   const prevIsOpenRef = useRef(false);
   const prevEditingTaskIdRef = useRef<string | null>(null);
   const isStatusDirtyRef = useRef(false);
+  const isMembersDirtyRef = useRef(false);
 
   useEffect(() => {
     const justOpened = isOpen && !prevIsOpenRef.current;
@@ -413,6 +418,7 @@ export const useTaskModalForm = ({
 
     if (justOpened || taskChanged) {
       isStatusDirtyRef.current = false;
+      isMembersDirtyRef.current = false;
       if (editingTask) {
         setFormData({
           title: editingTask.title || '',
@@ -497,13 +503,17 @@ export const useTaskModalForm = ({
                   driveFileId: f.id,
                 }));
 
+                let merged: any[] = [];
                 setReferenceImages((prev) => {
                   const map = new Map<string, any>();
                   prev.forEach((r) => map.set(r.driveFileId || r.name || r.id, r));
                   mappedRefs.forEach((mr) => map.set(mr.driveFileId || mr.name || mr.id, mr));
-                  const merged = Array.from(map.values());
-                  updateTask(editingTask.id, { referenceImages: merged });
+                  merged = Array.from(map.values());
                   return merged;
+                });
+                // Chamar side-effect fora do setState updater
+                Promise.resolve().then(() => {
+                  updateTask(editingTask.id, { referenceImages: merged });
                 });
               }
             })
@@ -523,13 +533,16 @@ export const useTaskModalForm = ({
                   driveFileId: f.id,
                 }));
 
+                let merged: any[] = [];
                 setAttachments((prev) => {
                   const map = new Map<string, TaskAttachment>();
                   prev.forEach((a) => map.set(a.driveFileId || a.id || a.name, a));
                   mappedAtts.forEach((ma) => map.set(ma.driveFileId || ma.id || ma.name, ma));
-                  const merged = Array.from(map.values());
-                  updateTask(editingTask.id, { attachments: merged });
+                  merged = Array.from(map.values());
                   return merged;
+                });
+                Promise.resolve().then(() => {
+                  updateTask(editingTask.id, { attachments: merged });
                 });
               }
             })
@@ -813,16 +826,10 @@ export const useTaskModalForm = ({
     const firstRefUrl = (referenceImages && referenceImages.length > 0) ? referenceImages[0].url : undefined;
     const resolvedCover = editingTask?.coverImageUrl || firstRefUrl;
 
-    const isStatusChanged = isStatusDirtyRef.current && editingTask && formData.status !== editingTask.status;
-
     const taskPayload: any = {
       title: formData.title,
       description: formData.description,
       category: selectedLabels.join(', ') || formData.category || 'Geral',
-      assigneeId: primaryAssignee?.id || 'unassigned',
-      assigneeName: primaryAssignee?.name || 'Sem membro',
-      assigneeInitials: primaryAssignee?.initials || 'SM',
-      members: taskMembers,
       projectId: formData.projectId || (selectedLabels.length > 0 ? selectedLabels[0] : ''),
       projectName: projects.find((p) => p.id === formData.projectId)?.name || (selectedLabels.length > 0 ? selectedLabels[0] : 'Geral'),
       sprintId: formData.sprintId,
@@ -840,14 +847,19 @@ export const useTaskModalForm = ({
       driveFolderId: currentDriveFolderId,
       driveFolderUrl: currentDriveFolderUrl,
     };
+
     if (isStatusDirtyRef.current || !editingTask) {
       taskPayload.status = formData.status;
     }
 
+    if (isMembersDirtyRef.current || !editingTask) {
+      taskPayload.members = taskMembers;
+      taskPayload.assigneeId = primaryAssignee?.id || 'unassigned';
+      taskPayload.assigneeName = primaryAssignee?.name || 'Sem membro';
+      taskPayload.assigneeInitials = primaryAssignee?.initials || 'SM';
+    }
+
     if (editingTask) {
-      if (isStatusChanged && moveTaskStatus) {
-        await moveTaskStatus(editingTask.id, formData.status);
-      }
       await updateTask(editingTask.id, taskPayload);
       addToast('Alterações Salvas! ✅', `Tarefa "${taskPayload.title}" atualizada no Sistema e Supabase.`, 'success');
     } else {

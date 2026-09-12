@@ -7,7 +7,7 @@ import {
   CheckCheck,
 } from 'lucide-react';
 import { Task, TaskStatus, Project, SpineStatusConfig } from '../../types';
-import { getTaskOverdueDays } from '../../lib/taskDateUtils';
+import { getTaskOverdueDays, isTaskOverdue } from '../../lib/taskDateUtils';
 import { TaskMembersStack } from './TaskMembersStack';
 import { compareTaskDueDatesAscending } from './useTasksFilter';
 
@@ -164,7 +164,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
                 {visibleTasks.map((task) => {
                   // Determine Priority Header Style (matches reference design & custom statuses)
                   const getPriorityInfo = () => {
-                    if (task.isFlagged || task.status === 'overdue') {
+                    if (task.isFlagged || isTaskOverdue(task) || task.status === 'overdue') {
                       return {
                         label: 'URGENTE',
                         bg: 'bg-rose-600 text-white font-black',

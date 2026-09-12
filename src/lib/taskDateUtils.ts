@@ -218,6 +218,11 @@ export function getTaskOverdueDays(
 ): number {
   if (isTaskCompleted(task)) return 0;
 
+  const s = (task.status || '').toLowerCase().trim();
+  if (s === 'in_review' || s.includes('revis') || s.includes('review') || s.includes('aprov')) {
+    return 0;
+  }
+
   const due = parseTaskDueDate(task.dueDate);
   if (!due) {
     // Flagged/urgent or explicitly overdue with no date
@@ -256,6 +261,12 @@ export function isTaskOverdue(
   referenceDate = new Date()
 ): boolean {
   if (isTaskCompleted(task)) return false;
+
+  const s = (task.status || '').toLowerCase().trim();
+  if (s === 'in_review' || s.includes('revis') || s.includes('review') || s.includes('aprov')) {
+    return false;
+  }
+
   if (task.isFlagged) return true;
 
   const due = parseTaskDueDate(task.dueDate);

@@ -116,17 +116,17 @@ export const TasksProvider: React.FC<{
       assigneeId: row.assignee_id,
       assigneeName: row.assignee_name,
       assigneeInitials: row.assignee_initials,
-      members: row.members || [],
-      labels: row.labels || [],
-      attachments: row.attachments || [],
+      members: typeof row.members === 'string' ? JSON.parse(row.members) : (row.members || []),
+      labels: typeof row.labels === 'string' ? JSON.parse(row.labels) : (row.labels || []),
+      attachments: typeof row.attachments === 'string' ? JSON.parse(row.attachments) : (row.attachments || []),
       checklists: resolvedChecklists,
       checklistsCount: Array.isArray(resolvedChecklists) ? resolvedChecklists.length : (row.checklists_count || 0),
-      referenceImages: row.reference_images || [],
-      comments: row.comments || [],
+      referenceImages: typeof row.reference_images === 'string' ? JSON.parse(row.reference_images) : (row.reference_images || []),
+      comments: typeof row.comments === 'string' ? JSON.parse(row.comments) : (row.comments || []),
       coverImageUrl: row.cover_image_url,
       coverAttachmentId: row.cover_attachment_id,
       lastMovedAt: Number(row.last_moved_at) || Date.now(),
-      activityLog: (row.activity_log || row.activityLog || []).filter((act: any) => {
+      activityLog: (typeof (row.activity_log || row.activityLog) === 'string' ? JSON.parse(row.activity_log || row.activityLog) : (row.activity_log || row.activityLog || [])).filter((act: any) => {
         const userName = (act.user || '').trim().toLowerCase();
         const userIn = (act.userInitials || '').trim().toUpperCase();
         return userName !== 'sistema' && userIn !== 'SYS' && userName !== 'equipe' && userIn !== 'EQ';
@@ -284,51 +284,6 @@ export const TasksProvider: React.FC<{
     }
   }, [tasks]);
 
-  // Auto-move overdue tasks (2+ days delayed) to 'overdue'
-  useEffect(() => {
-    if (!tasks || tasks.length === 0) return;
-
-    const overdueCandidateTasks = tasks.filter((t) => {
-      if (isTaskCompleted(t)) return false;
-      if (t.status === 'overdue') return false;
-      const overdueDays = getTaskOverdueDays(t);
-      return overdueDays >= 2;
-    });
-
-    if (overdueCandidateTasks.length === 0) return;
-
-    const now = Date.now();
-    const overdueIds = overdueCandidateTasks.map((t) => t.id);
-
-    setTasks((prev) =>
-      prev.map((t) =>
-        overdueIds.includes(t.id)
-          ? {
-              ...t,
-              status: 'overdue',
-              lastMovedAt: now,
-            }
-          : t
-      )
-    );
-
-    (async () => {
-      try {
-        for (const t of overdueCandidateTasks) {
-          await supabase
-            .from('tasks')
-            .update({
-              status: 'overdue',
-              last_moved_at: now,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', t.id);
-        }
-      } catch (err) {
-        console.warn('Auto-move overdue tasks to Supabase error:', err);
-      }
-    })();
-  }, [tasks]);
 
   // Task Actions
   const addTask = async (newTaskData: Omit<Task, 'id' | 'createdAt'>) => {
@@ -685,7 +640,7 @@ export const TasksProvider: React.FC<{
         activity_log: nextActivityLog,
       };
 
-      if (isReview && nextAssigneeId !== targetTask.assigneeId) {
+      if ((newStatus === 'in_review' || newStatus.toLowerCase().includes('revis')) && nextAssigneeId !== targetTask.assigneeId) {
         updatePayload.assignee_id = nextAssigneeId;
         updatePayload.assignee_name = nextAssigneeName;
         updatePayload.assignee_initials = nextAssigneeInitials;
