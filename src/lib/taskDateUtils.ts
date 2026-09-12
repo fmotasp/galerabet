@@ -239,14 +239,16 @@ export function getTaskOverdueDays(
   const diffMs = now.getTime() - dueMidnight.getTime();
   if (diffMs > 0) {
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    // Only counts as overdue if delay is 2 or more days
-    if (diffDays >= 2) {
-      return diffDays;
+    // D+2 logic: 2 days of grace period.
+    // If due is 09/09, 10/09 is 1, 11/09 is 2, 12/09 is 3.
+    // Delay starts counting on 12/09 as "1 day overdue".
+    if (diffDays > 2) {
+      return diffDays - 2;
     }
   }
 
-  // If explicitly flagged as urgent without date, count as overdue
-  if (task.isFlagged) return 2;
+  // If explicitly flagged as urgent without date, count as overdue (default 1 day for urgent)
+  if (task.isFlagged) return 1;
 
   // Delay less than 2 days or due date is today/future -> NOT overdue
   return 0;
@@ -271,7 +273,7 @@ export function isTaskOverdue(
 
   const due = parseTaskDueDate(task.dueDate);
   if (due) {
-    return getTaskOverdueDays(task, referenceDate) >= 2;
+    return getTaskOverdueDays(task, referenceDate) > 0;
   }
 
   return task.status === 'overdue';
