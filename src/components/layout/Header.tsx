@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useRef, useEffect } from 'react';
 import {
   Menu,
   Search,
@@ -14,7 +14,10 @@ import {
   Radio,
   Sun,
   Moon,
+  Camera,
+  Loader2,
 } from 'lucide-react';
+import { uploadFileToDrive } from '../../lib/googleDrive';
 import { useApp } from '../../context/AppContext';
 
 export const Header: React.FC = () => {
@@ -28,7 +31,41 @@ export const Header: React.FC = () => {
     logout,
     isManagerOrAdmin,
     addToast,
+    updateEmployee,
+    setCurrentUser,
   } = useApp();
+
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser?.id) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      const uploaded = await uploadFileToDrive(file, 'root', 'general');
+      if (uploaded) {
+        let newAvatarUrl = uploaded.thumbnailLink;
+        if (newAvatarUrl) {
+          newAvatarUrl = newAvatarUrl.replace('=s220', '=s800');
+        } else {
+          newAvatarUrl = uploaded.webContentLink || uploaded.webViewLink;
+        }
+
+        if (newAvatarUrl) {
+          updateEmployee(currentUser.id, { avatarUrl: newAvatarUrl });
+          setCurrentUser({ ...currentUser, avatarUrl: newAvatarUrl });
+          addToast('Foto Atualizada! 📸', 'Sua foto de perfil foi alterada com sucesso.', 'success');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      addToast('Erro ao atualizar foto', 'Não foi possível fazer o upload da imagem no Drive.', 'error');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
