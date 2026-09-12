@@ -268,7 +268,7 @@ export const CommandPaletteModal: React.FC = () => {
                         : t.status === 'in_progress'
                         ? 'Em Progresso'
                         : t.status === 'in_review'
-                        ? 'Em Revisão'
+                        ? 'Em Aprovação'
                         : t.status === 'overdue'
                         ? 'Atrasada'
                         : 'Backlog';

@@ -138,7 +138,7 @@ export const EmployeeDetailModal: React.FC = () => {
     if (s === 'in_review' || s.includes('revis') || s.includes('aprov')) {
       return (
         <Badge variant="warning" size="sm">
-          Em Revisão
+          Em Aprovação
         </Badge>
       );
     }
@@ -326,7 +326,7 @@ export const EmployeeDetailModal: React.FC = () => {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Em Revisão ({reviewCount})
+              Em Aprovação ({reviewCount})
             </button>
             <button
               type="button"

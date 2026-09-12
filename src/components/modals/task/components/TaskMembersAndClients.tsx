@@ -37,8 +37,33 @@ export const TaskMembersAndClients: React.FC<{
         <label className="block text-xs font-bold text-slate-200 mb-2">
           Membros
         </label>
-        <div className="flex items-center gap-2 flex-wrap">
-          {taskMembers.map((m) => {
+        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-2 -mb-2">
+          {[...taskMembers]
+            .sort((a, b) => {
+              const empA = employees.find(
+                (emp) =>
+                  (a.id && emp.id && emp.id === a.id) ||
+                  (a.name && emp.name && emp.name.toLowerCase().trim() === a.name.toLowerCase().trim())
+              );
+              const empB = employees.find(
+                (emp) =>
+                  (b.id && emp.id && emp.id === b.id) ||
+                  (b.name && emp.name && emp.name.toLowerCase().trim() === b.name.toLowerCase().trim())
+              );
+
+              const getGroup = (emp?: Employee) => {
+                if (!emp) return 3;
+                const role = (emp.role || '').toLowerCase();
+                const roleType = (emp.roleType || '').toLowerCase();
+                
+                if (role.includes('gestor') || role.includes('gerente') || role.includes('manager') || roleType === 'manager' || roleType === 'admin') return 1;
+                if (role.includes('design') || role.includes('video') || role.includes('vídeo') || role.includes('maker')) return 2;
+                return 3;
+              };
+
+              return getGroup(empA) - getGroup(empB);
+            })
+            .map((m) => {
             // Cruza com funcionários cadastrados para obter avatar atualizado
             const matchedEmp = employees.find(
               (emp) =>
@@ -49,7 +74,7 @@ export const TaskMembersAndClients: React.FC<{
             return (
               <div
                 key={m.id}
-                className="relative group cursor-pointer"
+                className="relative group cursor-pointer shrink-0"
                 onClick={() => handleRemoveMember(m.id)}
                 title={`${m.name} (Clique para remover)`}
               >
@@ -61,7 +86,7 @@ export const TaskMembersAndClients: React.FC<{
                   ring
                   className="!w-9 !h-9 ring-2 ring-[#E4007E]/60 group-hover:ring-rose-500 transition-all shadow-xs text-xs font-black"
                 />
-                <div className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <X className="w-2.5 h-2.5" />
                 </div>
               </div>
@@ -69,7 +94,7 @@ export const TaskMembersAndClients: React.FC<{
           })}
 
           {/* Add Member Button with Popover */}
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               type="button"
               onClick={() => {

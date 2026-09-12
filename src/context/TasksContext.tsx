@@ -608,36 +608,6 @@ export const TasksProvider: React.FC<{
     let nextAssigneeInitials = targetTask.assigneeInitials;
     let nextMembers = targetTask.members ? [...targetTask.members] : [];
 
-    const isReview = newStatus === 'in_review' || statusLabel.toLowerCase().includes('revis') || statusLabel.toLowerCase().includes('aprov');
-    if (isReview) {
-      const fabio = employees.find((e) => e.name.toLowerCase().includes('fabio mozart'));
-      if (fabio) {
-        // Mantém o autor original no array de membros da tarefa
-        if (targetTask.assigneeId && targetTask.assigneeId !== fabio.id) {
-          if (!nextMembers.some((m) => m.id === targetTask.assigneeId)) {
-            nextMembers.push({
-              id: targetTask.assigneeId,
-              name: targetTask.assigneeName || 'Membro',
-              initials: targetTask.assigneeInitials || 'MB',
-              avatarUrl: targetTask.members?.find((m) => m.id === targetTask.assigneeId)?.avatarUrl,
-            });
-          }
-        }
-
-        nextAssigneeId = fabio.id;
-        nextAssigneeName = fabio.name;
-        nextAssigneeInitials = fabio.initials;
-        if (!nextMembers.some((m) => m.id === fabio.id)) {
-          nextMembers.push({
-            id: fabio.id,
-            name: fabio.name,
-            initials: fabio.initials,
-            avatarUrl: fabio.avatarUrl,
-          });
-        }
-      }
-    }
-
     const actor = getCurrentActor();
     const actorName = actor.name || targetTask.assigneeName || 'Membro';
     const actorInitials = actor.initials || targetTask.assigneeInitials || 'MB';

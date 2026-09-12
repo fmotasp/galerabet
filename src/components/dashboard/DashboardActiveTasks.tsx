@@ -42,7 +42,7 @@ const getStatusBadge = (task: Task) => {
     case 'in_review':
       return (
         <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-950/80 text-sky-300 border border-sky-800 whitespace-nowrap">
-          Em revisão
+          Em Aprovação
         </span>
       );
     case 'overdue':

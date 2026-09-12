@@ -199,7 +199,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
                     }
                     if (task.status === 'in_review') {
                       return {
-                        label: 'EM REVISÃO',
+                        label: 'EM APROVAÇÃO',
                         bg: 'bg-purple-600 text-white font-black',
                       };
                     }
