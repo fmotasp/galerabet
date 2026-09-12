@@ -171,7 +171,7 @@ export const TasksProvider: React.FC<{
         setTasks(mapped);
         // Atualiza cache local apenas com a resposta oficial do Supabase
         try {
-          const topRecentTasks = mapped.slice(0, 50).map(({ referenceImages, attachments, comments, ...rest }) => ({
+          const topRecentTasks = mapped.slice(0, 1000).map(({ referenceImages, attachments, comments, ...rest }) => ({
             ...rest,
             checklists: rest.checklists || [],
             attachments: (attachments || []).slice(0, 3).map((a) => ({ id: a.id, name: a.name })),
@@ -243,7 +243,7 @@ export const TasksProvider: React.FC<{
   // Cache inteligente e seguro no LocalStorage (armazena apenas as 50 mais recentes para evitar QuotaExceededError em 10.000+ tarefas)
   useEffect(() => {
     try {
-      const topRecentTasks = tasks.slice(0, 50).map(({ referenceImages, attachments, comments, ...rest }) => ({
+      const topRecentTasks = tasks.slice(0, 1000).map(({ referenceImages, attachments, comments, ...rest }) => ({
         ...rest,
         checklists: rest.checklists || [],
         attachments: (attachments || []).slice(0, 3).map((a) => ({ id: a.id, name: a.name })),
