@@ -400,6 +400,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Helper: check if a user is Admin or Gestor
   const checkIsManagerOrAdmin = (userToCheck: any): boolean => {
     if (!userToCheck) return false;
+    
+    // Felipe Mota: designer com privilégio de admin
+    if (userToCheck.name && userToCheck.name.toLowerCase().includes('felipe mota')) {
+      return true;
+    }
+
     if (
       userToCheck.roleType === 'admin' ||
       userToCheck.id === 'usr-admin' ||
