@@ -58,6 +58,9 @@ const ProjectDetailModal = lazy(() =>
 const CommandPaletteModal = lazy(() =>
   import('./components/common/CommandPaletteModal').then((m) => ({ default: m.CommandPaletteModal }))
 );
+const LogsView = lazy(() =>
+  import('./components/logs/LogsView').then((m) => ({ default: m.LogsView }))
+);
 
 // Fast Skeleton / Shimmer Fallback
 const ViewLoadingFallback: React.FC = () => (
@@ -145,6 +148,7 @@ const MainLayout: React.FC = () => {
             {activeTab === 'employees' && (canManage ? <EmployeesView /> : <DashboardView />)}
             {activeTab === 'reports' && (canManage ? <ReportsView /> : <DashboardView />)}
             {activeTab === 'settings' && (canManage ? <SettingsView /> : <DashboardView />)}
+            {activeTab === 'logs' && <LogsView />}
           </Suspense>
         </main>
       </div>

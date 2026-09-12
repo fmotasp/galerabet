@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { realtimeHub } from '../lib/realtimeHub';
+import { logSystemAction } from '../lib/systemLog';
 import { isTaskOverdue, isTaskCompleted, getTaskOverdueDays } from '../lib/taskDateUtils';
 import { encodeTaskDescriptionWithChecklist, decodeTaskDescriptionWithChecklist } from '../lib/taskUtils';
 import { Task, TaskStatus, SpineStatusConfig, Employee } from '../types';
@@ -395,6 +396,9 @@ export const TasksProvider: React.FC<{
 
     addActivity(currentUser?.name || 'Theo R.', currentUser?.initials || 'TR', `criou a tarefa "${newTask.title}"`, 'blue');
     addToast('Task Created! 🚀', `"${newTask.title}" added to board.`);
+    logSystemAction('CREATE', newTask.id, newTask.title, authorName || 'Desconhecido', {
+      initialStatus: newTask.status
+    });
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
@@ -512,6 +516,12 @@ export const TasksProvider: React.FC<{
           }
         }
       }
+      
+      if (targetTask) {
+        logSystemAction('UPDATE', id, targetTask.title, actor.name || 'Membro desconhecido', {
+          updatedFields: Object.keys(updates)
+        });
+      }
     } catch (sbErr) {
       console.warn('Supabase task update warning:', sbErr);
     }
@@ -530,6 +540,13 @@ export const TasksProvider: React.FC<{
 
     try {
       await supabase.from('tasks').delete().eq('id', id);
+      const actor = getCurrentActor();
+      if (taskToDelete) {
+        logSystemAction('DELETE', id, taskToDelete.title, actor.name || 'Membro desconhecido', {
+          deletedStatus: taskToDelete.status,
+          deletedMembers: taskToDelete.members?.map(m => m.name),
+        });
+      }
     } catch (sbErr) {
       console.warn('Supabase task delete warning:', sbErr);
     }

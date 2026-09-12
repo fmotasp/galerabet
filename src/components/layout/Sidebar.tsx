@@ -9,6 +9,7 @@ import {
   Layers,
   Palette,
   Image,
+  ShieldAlert,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { NavigationTab } from '../../types';
@@ -111,6 +112,19 @@ export const Sidebar: React.FC = () => {
             title="Configurações"
           >
             <Settings className={`w-5 h-5 shrink-0 ${activeTab === 'settings' ? 'text-white' : 'text-[#A0A0A0] group-hover:text-white'}`} />
+          </button>
+          
+          <button
+            id="nav-item-logs"
+            onClick={() => handleNavClick('logs')}
+            className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-200 group relative mt-4 ${
+              activeTab === 'logs'
+                ? 'bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white scale-105 shadow-lg shadow-[#E4007E]/30'
+                : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
+            }`}
+            title="Logs do Sistema (Admin)"
+          >
+            <ShieldAlert className={`w-5 h-5 shrink-0 ${activeTab === 'logs' ? 'text-white' : 'text-[#A0A0A0] group-hover:text-white'}`} />
           </button>
         </div>
       ) : (

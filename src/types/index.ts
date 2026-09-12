@@ -1,4 +1,4 @@
-export type NavigationTab = 'dashboard' | 'tasks' | 'projects' | 'employees' | 'registrations' | 'reports' | 'materials' | 'kvs' | 'settings';
+export type NavigationTab = 'dashboard' | 'tasks' | 'projects' | 'employees' | 'registrations' | 'reports' | 'materials' | 'kvs' | 'settings' | 'logs';
 
 export interface BrandColor {
   id?: string;
