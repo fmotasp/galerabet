@@ -32,6 +32,7 @@ export const Header: React.FC = () => {
     isManagerOrAdmin,
     addToast,
     updateEmployee,
+    employees,
     setCurrentUser,
   } = useApp();
 
@@ -47,7 +48,19 @@ export const Header: React.FC = () => {
       const result = await uploadEmployeeAvatarToDrive(file, currentUser.name);
       if (result && result.url) {
         const newAvatarUrl = result.url;
-        updateEmployee(currentUser.id, { avatarUrl: newAvatarUrl });
+        const matchingEmp = employees.find(e => 
+          e.auth_user_id === currentUser.id || 
+          e.id === currentUser.id || 
+          (currentUser.employeeId && e.id === currentUser.employeeId) ||
+          e.name.toLowerCase().trim() === currentUser.name.toLowerCase().trim()
+        );
+        
+        if (matchingEmp) {
+          updateEmployee(matchingEmp.id, { avatarUrl: newAvatarUrl });
+        } else {
+          updateEmployee(currentUser.id, { avatarUrl: newAvatarUrl });
+        }
+        
         setCurrentUser({ ...currentUser, avatarUrl: newAvatarUrl });
         addToast('Foto Atualizada! 📸', 'Sua foto de perfil foi alterada com sucesso.', 'success');
       }
