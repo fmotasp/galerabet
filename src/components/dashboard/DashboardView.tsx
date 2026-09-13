@@ -19,7 +19,7 @@ import {
 
 export const DashboardView: React.FC = () => {
   // Contextos especializados
-  const { tasks } = useTasks();
+  const { tasks, isLoadingTasks } = useTasks();
   const { employees } = useEmployees();
   const { projects } = useProjects();
   const { currentUser, isManagerOrAdmin } = useAuth();
@@ -71,6 +71,15 @@ export const DashboardView: React.FC = () => {
     },
     [setSelectedEmployeeForDetail]
   );
+
+  if (isLoadingTasks) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <div className="w-12 h-12 border-4 border-[#E4007E] border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-slate-400 font-medium animate-pulse">Sincronizando tarefas da nuvem...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 w-full px-4 sm:px-8 pb-12">

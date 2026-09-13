@@ -86,6 +86,7 @@ export const TasksView: React.FC = () => {
     moveTaskStatus,
     deleteTask,
     moveAllBacklogToDoneLocally,
+    isLoadingTasks
   } = useTasks();
   const { projects } = useProjects();
   const { employees } = useEmployees();
@@ -149,6 +150,15 @@ export const TasksView: React.FC = () => {
   const handleShowDoneColumnToggle = useCallback(() => {
     setShowDoneColumn((prev) => !prev);
   }, [setShowDoneColumn]);
+
+  if (isLoadingTasks) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <div className="w-12 h-12 border-4 border-[#E4007E] border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-slate-400 font-medium animate-pulse">Sincronizando tarefas da nuvem...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={`w-full px-4 sm:px-8 animate-in fade-in duration-200 ${viewMode === 'kanban' ? 'flex-1 min-h-0 flex flex-col overflow-hidden space-y-4' : 'space-y-6 pb-12'}`}>
