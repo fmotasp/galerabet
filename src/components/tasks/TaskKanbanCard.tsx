@@ -79,9 +79,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
                       );
 
                       if (imgAtts.length > 0) {
-                        const firstImg = imgAtts[0];
-                        const newCover = `https://drive.google.com/thumbnail?id=${firstImg.id}&sz=w1000`;
-                        updateTask(task.id, { referenceImages: merged, coverImageUrl: newCover });
+                        updateTask(task.id, { referenceImages: merged });
                       } else {
                         updateTask(task.id, { referenceImages: merged });
                       }
