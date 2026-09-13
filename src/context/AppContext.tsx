@@ -393,30 +393,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(() => {
-    try {
-      const savedTasks = localStorage.getItem('spine_tasks_v1');
-      if (savedTasks) {
-        const parsed = JSON.parse(savedTasks);
-        if (Array.isArray(parsed) && parsed.length > 0) return false;
-      }
-    } catch (err) {}
-    return true;
-  });
-
-  useEffect(() => {
-    let isMounted = true;
-
-    // Garante que o TasksContext carregue direto do Supabase quando o usuário estiver pronto
-    if (auth.currentUser?.id) {
-      // Sincronização garantida
-      setIsInitialLoading(false);
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [auth.currentUser?.id]);
+  const isInitialLoading = tasksContext.isLoadingTasks;
 
   const mapDbRowToTask = (row: any): Task => {
     const rawDesc = row.description || '';

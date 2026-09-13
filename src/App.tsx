@@ -111,9 +111,9 @@ const MainLayout: React.FC = () => {
       <div className="min-h-screen bg-[#101010] flex flex-col items-center justify-center p-6 select-none">
         <div className="flex flex-col items-center gap-6 max-w-sm text-center animate-in fade-in zoom-in-95 duration-300">
           <img
-            src="/login-logo.png"
+            src="/sidebar-icon.png"
             alt="RioSãoPaulo"
-            className="w-48 h-auto object-contain drop-shadow-2xl animate-pulse"
+            className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(228,0,126,0.5)] animate-bounce"
           />
           <div className="w-52 h-1.5 bg-[#222222] rounded-full overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-r from-[#E4007E] to-[#E94E18] animate-pulse rounded-full" />
