@@ -393,8 +393,8 @@ export const useTaskModalForm = ({
           list.push({
             id: attId,
             type: 'file',
-            user: editingTask.assigneeName || 'Membro',
-            userInitials: editingTask.assigneeInitials || 'MB',
+            user: a.authorName || editingTask.assigneeName || 'Membro',
+            userInitials: a.authorInitials || editingTask.assigneeInitials || 'MB',
             title: `Arquivo anexado: "${a.name}"`,
             details: a.bytes ? `${(a.bytes / (1024 * 1024)).toFixed(2)} MB` : undefined,
             date: safeFormatISO(aTs),

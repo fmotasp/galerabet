@@ -100,6 +100,17 @@ export const useTaskDriveFiles = ({
           });
         }
 
+        let authorName = 'Usuário';
+        let authorInitials = 'U';
+        try {
+          const saved = localStorage.getItem('spine_logged_user');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.name) authorName = parsed.name;
+            if (parsed.initials) authorInitials = parsed.initials;
+          }
+        } catch (e) {}
+
         const newAtt: TaskAttachment = {
           id: `att-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           name: file.name,
@@ -111,6 +122,8 @@ export const useTaskDriveFiles = ({
           bytes: file.size,
           mimeType: file.type,
           isUpload: true,
+          authorName,
+          authorInitials,
         };
         createdAttachments.push(newAtt);
       } catch (uploadErr) {

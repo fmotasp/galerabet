@@ -50,6 +50,8 @@ export interface TaskAttachment {
   driveFileId?: string;
   thumbnailUrl?: string;
   previews?: { url: string; width: number; height: number }[];
+  authorName?: string;
+  authorInitials?: string;
 }
 
 export interface TaskMember {
