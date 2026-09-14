@@ -68,7 +68,7 @@ export const DashboardStatCards: React.FC<DashboardStatCardsProps> = React.memo(
         </div>
 
         {/* Card 3: Overdue / Alerted */}
-        <div className="bg-[#181818] rounded-2xl p-5 border border-[#2A2A2A] shadow-lg relative flex flex-col justify-between hover:border-[#383838] transition-all overflow-hidden">
+        <div className="bg-[#181818] rounded-2xl p-5 border border-[#2A2A2A] shadow-lg relative flex flex-col justify-between hover:border-[#383838] transition-all">
           <div className="flex items-start justify-between">
             <span className="text-3xl font-black text-rose-400 tracking-tight">
               {metrics.overdueTasks}
@@ -76,15 +76,18 @@ export const DashboardStatCards: React.FC<DashboardStatCardsProps> = React.memo(
             <div className="flex items-center gap-1">
               <div className="group relative">
                 <HelpCircle className="w-4 h-4 text-slate-400 cursor-help hover:text-white transition-colors mt-1" />
-                <div className="absolute right-0 top-8 w-56 p-3 bg-[#262626] border border-[#3A3A3A] rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
+                <div className="absolute right-0 top-8 w-64 p-3 bg-[#262626] border border-[#3A3A3A] rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[999] pointer-events-none">
                   <p className="text-xs text-slate-200 font-bold mb-1.5">
                     Critérios de Alerta:
                   </p>
                   <ul className="text-[10px] text-slate-400 space-y-1.5 list-disc pl-3">
-                    <li><strong className="text-rose-400">Atrasadas:</strong> Mais de 2 dias (D+2) do prazo</li>
-                    <li><strong className="text-amber-400">Vencendo:</strong> Prazo é hoje, amanhã ou depois</li>
-                    <li><strong className="text-cyan-400">Urgentes:</strong> Marcadas com flag manualmente</li>
+                    <li><strong className="text-rose-400">Atrasadas:</strong> Prazo previsto vencido</li>
+                    <li><strong className="text-amber-400">Vencendo:</strong> Prazo é hoje, amanhã ou depois (D+2)</li>
+                    <li><strong className="text-cyan-400">Urgentes:</strong> Marcadas com estrela (Flag)</li>
                   </ul>
+                  <p className="text-[9px] text-slate-500 font-medium mt-2 border-t border-[#3A3A3A] pt-1.5 leading-tight">
+                    * Ignora tarefas Concluídas ou já Em Aprovação.
+                  </p>
                 </div>
               </div>
               <Button
