@@ -307,7 +307,7 @@ export const TasksProvider: React.FC<{
         title: newTask.title,
         description: encodeTaskDescriptionWithChecklist(newTask.description || '', newTask.checklists || []),
         category: newTask.category || 'Geral',
-        status: newTask.status || 'backlog',
+        status: (newTask.status === 'overdue' ? 'novos_pedidos' : newTask.status) || 'backlog',
         due_date: newTask.dueDate || null,
         points: newTask.points || 0,
         is_flagged: Boolean(newTask.isFlagged),
@@ -417,8 +417,12 @@ export const TasksProvider: React.FC<{
     try {
       const payload: any = {};
       if (updates.status !== undefined) {
-        payload.status = updates.status;
-        payload.last_moved_at = now;
+        if (updates.status === 'overdue' && targetTask && targetTask.status !== 'overdue') {
+          console.warn('[Safety Lock] Ignoring overdue status update from cache.');
+        } else {
+          payload.status = updates.status;
+          payload.last_moved_at = now;
+        }
       }
       if (updates.title !== undefined) payload.title = updates.title;
       if (updates.description !== undefined || updates.checklists !== undefined) {
