@@ -29,6 +29,7 @@ export interface TasksContextType {
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   fetchTasksFromSupabase: () => Promise<void>;
   isLoadingTasks: boolean;
+  hasFetchedOnce: boolean;
 }
 
 
@@ -57,6 +58,7 @@ export const TasksProvider: React.FC<{
   resetAllStores,
 }) => {
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
   
   // Tasks (Demandas) - Inicializa vazio para garantir dados reais do servidor
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -160,8 +162,9 @@ export const TasksProvider: React.FC<{
       console.error('[Supabase Tasks] Falha de exceção ao carregar tarefas:', err);
     } finally {
       setIsLoadingTasks(false);
+      setHasFetchedOnce(true);
     }
-  }, []);
+  }, [supabase]);
 
   // Busca inicial imediata ao montar o contexto
   useEffect(() => {
@@ -756,6 +759,7 @@ export const TasksProvider: React.FC<{
         setTasks,
         fetchTasksFromSupabase,
         isLoadingTasks,
+        hasFetchedOnce,
       }}
     >
       {children}

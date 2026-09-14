@@ -393,7 +393,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const isInitialLoading = tasksContext.isLoadingTasks;
+  const isInitialLoading = tasksContext.isLoadingTasks && !tasksContext.hasFetchedOnce;
 
   const mapDbRowToTask = (row: any): Task => {
     const rawDesc = row.description || '';
