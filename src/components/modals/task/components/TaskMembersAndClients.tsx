@@ -83,7 +83,7 @@ export const TaskMembersAndClients: React.FC<{
                       return (
                         <div
                           key={m.id}
-                          className="relative group cursor-pointer shrink-0"
+                          className="relative flex group cursor-pointer shrink-0"
                           onClick={() => handleRemoveMember(m.id)}
                           title={`${m.name} (Clique para remover)`}
                         >
@@ -102,7 +102,7 @@ export const TaskMembersAndClients: React.FC<{
                       );
                     })}
                   </div>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-[#1A1A1A] px-2 py-0.5 rounded-md border border-[#2E2E2E]">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-[#1A1A1A] px-2 py-0.5 rounded-md border border-[#2E2E2E] whitespace-nowrap h-[20px] flex items-center justify-center">
                     {g.label}
                   </span>
                 </div>
@@ -112,7 +112,7 @@ export const TaskMembersAndClients: React.FC<{
 
           {/* Add Member Button with Popover */}
           <div className="flex flex-col gap-1.5 items-center">
-            <div className="relative shrink-0">
+            <div className="relative flex shrink-0">
               <button
                 type="button"
                 onClick={() => {
