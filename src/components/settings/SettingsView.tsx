@@ -13,10 +13,12 @@ import {
   Building,
   Bell,
   Sliders,
+  Wrench,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { SpineStatusConfig } from '../../types';
 import { compressImageFile } from '../../lib/imageUtils';
+import { supabase } from '../../lib/supabase';
 
 export const COLOR_PALETTES = [
   { label: 'Cinza / Neutro', color: 'text-slate-600', bg: 'bg-slate-100', dotColor: '#64748B', gradient: 'from-slate-500 to-slate-700' },
@@ -41,16 +43,86 @@ export const SettingsView: React.FC = () => {
     resetSpineStatusesToDefault,
     loginArtUrl,
     updateLoginArtUrl,
+    currentUser,
+    isManagerOrAdmin,
   } = useApp();
 
   const [activeSettingsTab, setActiveSettingsTab] = useState<'statuses' | 'login_art' | 'general' | 'notifications'>('statuses');
   const [tempLoginArtUrl, setTempLoginArtUrl] = useState<string>(loginArtUrl || '');
   const [isUploadingArt, setIsUploadingArt] = useState(false);
+  const [isFixingTasks, setIsFixingTasks] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setTempLoginArtUrl(loginArtUrl || '');
   }, [loginArtUrl]);
+
+  const handleFixOverdueTasks = async () => {
+    if (!window.confirm('Isto irá verificar e tentar corrigir automaticamente tarefas que desapareceram devido ao status "overdue". Deseja continuar?')) return;
+    
+    setIsFixingTasks(true);
+    try {
+      const { data, error } = await supabase.from('tasks').select('id, title, status, activity_log').eq('status', 'overdue');
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        addToast('Tudo Certo!', 'Não há tarefas perdidas no momento.', 'info');
+        setIsFixingTasks(false);
+        return;
+      }
+      
+      const labelToId: Record<string, string> = {
+        'backlog': 'backlog',
+        'novos pedidos': 'novos_pedidos',
+        'em produção': 'in_progress',
+        'em aprovação': 'in_review',
+        'bloqueado/pausado': 'blocked',
+        'bloqueado': 'blocked',
+        'pausado': 'blocked',
+        'postar': 'postar',
+        'concluída': 'done',
+        'concluído': 'done'
+      };
+      
+      let fixedCount = 0;
+      for (const task of data) {
+        let log: any[] = [];
+        try {
+          log = typeof task.activity_log === 'string' ? JSON.parse(task.activity_log) : (task.activity_log || []);
+        } catch(e) {}
+        
+        let lastValidStatusId = null;
+        if (Array.isArray(log)) {
+          for (let i = log.length - 1; i >= 0; i--) {
+            const act = log[i];
+            if (act.type === 'status_changed' || act.type === 'delivered') {
+              let match = act.details && act.details.match(/coluna\s+(.+)$/i);
+              if (!match && act.details) match = act.details.match(/status\s+"([^"]+)"/i);
+              if (!match && act.description) match = act.description.match(/status alterado para "([^"]+)"/i);
+              if (match && match[1]) {
+                const label = match[1].toLowerCase().trim().replace(/"/g, '');
+                if (labelToId[label]) {
+                  lastValidStatusId = labelToId[label];
+                  break;
+                }
+              }
+            }
+          }
+        }
+        
+        const finalStatus = lastValidStatusId || 'novos_pedidos';
+        await supabase.from('tasks').update({ status: finalStatus }).eq('id', task.id);
+        fixedCount++;
+      }
+      
+      addToast('Reparo Concluído', `${fixedCount} tarefas foram resgatadas com sucesso! Atualize a página.`, 'success');
+    } catch (err: any) {
+      console.error(err);
+      addToast('Erro no Reparo', 'Ocorreu um erro: ' + err.message, 'error');
+    } finally {
+      setIsFixingTasks(false);
+    }
+  };
 
   const [newStatusName, setNewStatusName] = useState('');
   const [selectedPaletteIdx, setSelectedPaletteIdx] = useState(0);
@@ -593,6 +665,37 @@ export const SettingsView: React.FC = () => {
               </select>
             </div>
           </div>
+
+          {isManagerOrAdmin(currentUser) && (
+            <div className="mt-8 pt-6 border-t border-slate-800">
+              <h3 className="font-extrabold text-white text-base flex items-center gap-2 mb-2">
+                <Wrench className="w-4 h-4 text-rose-400" />
+                <span>Manutenção e Reparos</span>
+              </h3>
+              <p className="text-xs text-slate-400 mb-4">
+                Ferramentas avançadas para correção de inconsistências no banco de dados. Use com cuidado.
+              </p>
+              
+              <div className="bg-[#222222] border border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-200">Reparar Tarefas Órfãs (Bug Overdue)</h4>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Restaura tarefas que sumiram do Kanban por estarem no status "overdue".
+                  </p>
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={handleFixOverdueTasks}
+                  disabled={isFixingTasks}
+                  className="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white rounded-xl text-xs font-extrabold transition-all shadow-md flex items-center gap-2 shrink-0 cursor-pointer"
+                >
+                  <Wrench className="w-3.5 h-3.5" />
+                  <span>{isFixingTasks ? 'Reparando...' : 'Rodar Correção Automática'}</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
