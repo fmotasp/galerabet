@@ -74,26 +74,37 @@ export function parseTaskDueDate(dateStr?: string | null): Date | null {
     return null;
   }
 
+  // Helper para extrair data e hora
+  const [datePart, timePart] = str.split(' ');
+  let hours = 0;
+  let minutes = 0;
+
+  if (timePart && timePart.includes(':')) {
+    const timeParts = timePart.split(':');
+    hours = parseInt(timeParts[0], 10) || 0;
+    minutes = parseInt(timeParts[1], 10) || 0;
+  }
+
   // 1. DD/MM/YYYY or DD/MM/YY
-  if (str.includes('/')) {
-    const parts = str.split('/').map((p) => parseInt(p.trim(), 10));
+  if (datePart.includes('/')) {
+    const parts = datePart.split('/').map((p) => parseInt(p.trim(), 10));
     if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
       const year = parts[2] < 100 ? 2000 + parts[2] : parts[2];
-      const d = new Date(year, parts[1] - 1, parts[0]);
+      const d = new Date(year, parts[1] - 1, parts[0], hours, minutes);
       if (!isNaN(d.getTime())) return d;
     }
   }
 
   // 2. YYYY-MM-DD or DD-MM-YYYY
-  if (str.includes('-')) {
-    const parts = str.split('-').map((p) => parseInt(p.trim(), 10));
+  if (datePart.includes('-')) {
+    const parts = datePart.split('-').map((p) => parseInt(p.trim(), 10));
     if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
       if (parts[0] > 1000) {
-        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        const d = new Date(parts[0], parts[1] - 1, parts[2], hours, minutes);
         if (!isNaN(d.getTime())) return d;
       } else {
         const year = parts[2] < 100 ? 2000 + parts[2] : parts[2];
-        const d = new Date(year, parts[1] - 1, parts[0]);
+        const d = new Date(year, parts[1] - 1, parts[0], hours, minutes);
         if (!isNaN(d.getTime())) return d;
       }
     }

@@ -58,23 +58,44 @@ export const TaskStatusAndDates: React.FC<{
         </label>
         <div className="relative">
           <input
-            type="date"
-            value={
-              formData.dueDate && formData.dueDate !== 'Sem prazo' && formData.dueDate.includes('/')
-                ? formData.dueDate.split('/').reverse().join('-')
-                : formData.dueDate === 'Sem prazo'
-                  ? ''
-                  : formData.dueDate || ''
-            }
+            type="datetime-local"
+            value={(() => {
+              if (!formData.dueDate || formData.dueDate === 'Sem prazo') return '';
+              let [dateStr, timeStr] = formData.dueDate.split(' ');
+              
+              // Handle if it is already in ISO format (has T)
+              if (!timeStr && dateStr.includes('T')) {
+                const splitT = dateStr.split('T');
+                dateStr = splitT[0];
+                timeStr = splitT[1];
+              }
+              
+              if (dateStr && dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                  const ymd = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                  return timeStr ? `${ymd}T${timeStr}` : `${ymd}T00:00`;
+                }
+              } else if (dateStr && dateStr.includes('-')) {
+                return timeStr ? `${dateStr}T${timeStr}` : `${dateStr}T00:00`;
+              }
+              return formData.dueDate;
+            })()}
             onChange={(e) => {
               const val = e.target.value;
               let newDueDate = 'Sem prazo';
               if (val) {
-                const parts = val.split('-');
-                if (parts.length === 3) {
-                  newDueDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
-                } else {
-                  newDueDate = val;
+                const [datePart, timePart] = val.split('T');
+                if (datePart) {
+                  const parts = datePart.split('-');
+                  if (parts.length === 3) {
+                    newDueDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    if (timePart) {
+                      newDueDate += ` ${timePart}`;
+                    }
+                  } else {
+                    newDueDate = val;
+                  }
                 }
               }
               setFormData((prev) => ({ ...prev, dueDate: newDueDate }));
