@@ -1,4 +1,4 @@
-export type NavigationTab = 'dashboard' | 'tasks' | 'projects' | 'employees' | 'registrations' | 'reports' | 'materials' | 'kvs' | 'settings' | 'logs';
+export type NavigationTab = 'dashboard' | 'tasks' | 'projects' | 'employees' | 'registrations' | 'reports' | 'materials' | 'kvs' | 'suggestions' | 'settings' | 'logs';
 
 export interface BrandColor {
   id?: string;
@@ -223,4 +223,13 @@ export interface ToastNotification {
   title: string;
   message?: string;
   type: 'success' | 'info' | 'warning' | 'error';
+}
+
+export interface SystemSuggestion {
+  id: string;
+  title: string;
+  status: 'pending' | 'completed';
+  created_by: string;
+  created_at: string;
+  completed_at?: string;
 }

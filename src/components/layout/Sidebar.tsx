@@ -10,6 +10,7 @@ import {
   Palette,
   Image,
   ShieldAlert,
+  Lightbulb,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { NavigationTab } from '../../types';
@@ -35,6 +36,7 @@ export const Sidebar: React.FC = () => {
       ? [
           { id: 'registrations' as NavigationTab, label: 'Cadastros', icon: Layers },
           { id: 'reports' as NavigationTab, label: 'Relatórios', icon: BarChart3 },
+          { id: 'suggestions' as NavigationTab, label: 'Sugestões', icon: Lightbulb },
         ]
       : []),
   ];

@@ -38,6 +38,9 @@ const KvsView = lazy(() =>
 const SettingsView = lazy(() =>
   import('./components/settings/SettingsView').then((m) => ({ default: m.SettingsView }))
 );
+const SuggestionsView = lazy(() =>
+  import('./components/suggestions/SuggestionsView').then((m) => ({ default: m.SuggestionsView }))
+);
 
 // Lazy Loaded Modals & Overlays
 const TaskModal = lazy(() =>
@@ -148,6 +151,7 @@ const MainLayout: React.FC = () => {
             {activeTab === 'employees' && (canManage ? <EmployeesView /> : <DashboardView />)}
             {activeTab === 'reports' && (canManage ? <ReportsView /> : <DashboardView />)}
             {activeTab === 'settings' && (canManage ? <SettingsView /> : <DashboardView />)}
+            {activeTab === 'suggestions' && (canManage ? <SuggestionsView /> : <DashboardView />)}
             {activeTab === 'logs' && <LogsView />}
           </Suspense>
         </main>
