@@ -297,6 +297,11 @@ export const TaskRichTextEditor: React.FC<{
         ref={editorRef}
         contentEditable
         onInput={handleInput}
+        onPaste={(e) => {
+          e.preventDefault();
+          const text = e.clipboardData.getData('text/plain');
+          document.execCommand('insertText', false, text);
+        }}
         className="w-full min-h-[140px] max-h-[300px] overflow-y-auto p-3 text-xs text-white focus:outline-none leading-relaxed bg-[#1C1C1C]"
         data-placeholder={placeholder || 'Escreva a descrição da tarefa...'}
       />
