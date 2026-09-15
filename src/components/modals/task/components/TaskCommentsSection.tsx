@@ -115,8 +115,27 @@ export const TaskCommentsSection: React.FC<{
                         )}
                       </div>
                     </div>
-                    <p className="text-xs text-slate-100 pl-7 leading-relaxed font-normal">
-                      {comment.text}
+                    <p className="text-xs text-slate-100 pl-7 leading-relaxed font-normal whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere]">
+                      {(() => {
+                        const urlRegex = /(https?:\/\/[^\s]+)/g;
+                        const parts = comment.text.split(urlRegex);
+                        return parts.map((part, i) => {
+                          if (part.match(urlRegex)) {
+                            return (
+                              <a
+                                key={i}
+                                href={part}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sky-400 hover:text-sky-300 underline font-bold"
+                              >
+                                {part}
+                              </a>
+                            );
+                          }
+                          return <span key={i}>{part}</span>;
+                        });
+                      })()}
                     </p>
                   </div>
                 );
