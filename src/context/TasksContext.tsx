@@ -366,6 +366,8 @@ export const TasksProvider: React.FC<{
     logSystemAction('CREATE', newTask.id, newTask.title, authorName || 'Desconhecido', {
       initialStatus: newTask.status
     });
+    
+    return newTask;
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {

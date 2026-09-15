@@ -1,14 +1,9 @@
 UPDATE public.tasks
 SET attachments = (
   regexp_replace(
-    regexp_replace(
-      attachments::text,
-      '"thumbnailUrl":"data:image/[^"]+"',
-      '"thumbnailUrl":""',
-      'g'
-    ),
-    '"url":"data:image/[^"]+"',
-    '"url":""',
+    attachments::text,
+    'data:image/[^"]+',
+    'REMOVIDO',
     'g'
   )
 )::jsonb

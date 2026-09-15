@@ -21,6 +21,7 @@ interface TaskKanbanCardProps {
   onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragEnd: () => void;
   onClick: () => void;
+  onClone?: (task: Task) => void;
 }
 
 export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
@@ -33,6 +34,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
   onDragStart,
   onDragEnd,
   onClick,
+  onClone,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const { updateTask, addTask } = useTasks();
@@ -67,7 +69,10 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
     };
 
     try {
-      await addTask(clonedTaskData);
+      const addedTask = await addTask(clonedTaskData);
+      if (addedTask && onClone) {
+        onClone(addedTask);
+      }
     } catch (err) {
       console.error('Failed to clone task:', err);
     }

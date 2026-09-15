@@ -182,6 +182,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
                       setDragOverColumnId(null);
                     }}
                     onClick={() => setEditingTask(task)}
+                    onClone={(clonedTask) => setEditingTask(clonedTask)}
                   />
                 ))}
 
