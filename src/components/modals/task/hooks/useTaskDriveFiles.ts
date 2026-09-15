@@ -91,14 +91,6 @@ export const useTaskDriveFiles = ({
 
         const isImg = !isPsd && (file.type.startsWith('image/') || Boolean(file.name.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)));
         let localDataUrl = '';
-        if (isImg) {
-          localDataUrl = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (ev) => resolve(ev.target?.result as string || '');
-            reader.onerror = () => resolve('');
-            reader.readAsDataURL(file);
-          });
-        }
 
         let authorName = 'Usuário';
         let authorInitials = 'U';
@@ -116,9 +108,9 @@ export const useTaskDriveFiles = ({
           name: file.name,
           url: driveFileId
             ? `https://drive.google.com/file/d/${driveFileId}/view`
-            : localDataUrl || '',
+            : '',
           driveFileId: driveFileId || undefined,
-          thumbnailUrl: localDataUrl || (driveFileId ? `https://lh3.googleusercontent.com/d/${driveFileId}` : ''),
+          thumbnailUrl: driveFileId ? `https://lh3.googleusercontent.com/d/${driveFileId}` : '',
           bytes: file.size,
           mimeType: file.type,
           isUpload: true,
