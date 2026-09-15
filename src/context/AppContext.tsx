@@ -26,7 +26,7 @@ import {
 import { AuthProvider, useAuth, CurrentUserType } from './AuthContext';
 import { EmployeesProvider, useEmployees } from './EmployeesContext';
 import { ProjectsProvider, useProjects, BrandMeta, encodeProjectDescription, decodeProjectDescription } from './ProjectsContext';
-import { decodeTaskDescriptionWithChecklist } from '../lib/taskUtils';
+import { decodeTaskDescriptionWithChecklist, isDesignerOrVideomaker } from '../lib/taskUtils';
 import { TasksProvider, useTasks } from './TasksContext';
 
 export type { BrandMeta, CurrentUserType };
@@ -211,7 +211,21 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  const [activeFilter, setActiveFilter] = useState<'all' | 'mine' | 'flagged'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'mine' | 'flagged'>(() => {
+    if (auth.currentUser && isDesignerOrVideomaker(auth.currentUser)) {
+      return 'mine';
+    }
+    return 'all';
+  });
+
+  useEffect(() => {
+    if (auth.currentUser && isDesignerOrVideomaker(auth.currentUser)) {
+      setActiveFilter('mine');
+    } else {
+      setActiveFilter('all');
+    }
+  }, [auth.currentUser?.id]); // Depend only on user ID to avoid resetting when user updates profile
+
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
 
   const [sprints, setSprints] = useState<Sprint[]>(() => {

@@ -1,7 +1,7 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Task, TaskStatus, Project, Employee, SpineStatusConfig } from '../../types';
 import { CurrentUserType } from '../../context/AuthContext';
-import { isTaskAssignedToMe } from '../../lib/taskUtils';
+import { isTaskAssignedToMe, isDesignerOrVideomaker } from '../../lib/taskUtils';
 import { isTaskOverdue, isTaskCompleted, parseTaskDueDate } from '../../lib/taskDateUtils';
 import { useDebounce } from '../../hooks/useDebounce';
 export const getClientLogoFallback = (projectName?: string, logoUrl?: string) => {
@@ -83,7 +83,22 @@ export const useTasksFilter = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const debouncedSearchQuery = useDebounce(searchQuery, 250);
   const [selectedClient, setSelectedClient] = useState<string>('all');
-  const [selectedMember, setSelectedMember] = useState<string>('all');
+  const [selectedMember, setSelectedMember] = useState<string>(() => {
+    if (currentUser && isDesignerOrVideomaker(currentUser)) {
+      return 'mine';
+    }
+    return 'all';
+  });
+
+  // Sync when current user logs in
+  useEffect(() => {
+    if (currentUser && isDesignerOrVideomaker(currentUser)) {
+      setSelectedMember('mine');
+    } else {
+      setSelectedMember('all');
+    }
+  }, [currentUser?.id]);
+
   const [isMemberDropdownOpen, setIsMemberDropdownOpen] = useState<boolean>(false);
   const [memberFilterSearch, setMemberFilterSearch] = useState<string>('');
   const [showDoneColumn, setShowDoneColumn] = useState<boolean>(true);
