@@ -3,6 +3,7 @@ import {
   CheckSquare,
   MessageSquare,
   Paperclip,
+  Copy,
 } from 'lucide-react';
 import { Task, Project, SpineStatusConfig } from '../../types';
 import { getTaskOverdueDays, isTaskOverdue } from '../../lib/taskDateUtils';
@@ -34,8 +35,43 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
   onClick,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const { updateTask } = useTasks();
+  const { updateTask, addTask } = useTasks();
   const [hasScanned, setHasScanned] = useState(false);
+
+  const handleCloneTask = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const clonedTaskData: Omit<Task, 'id' | 'createdAt'> = {
+      title: `(1) ${task.title}`,
+      description: task.description || '',
+      status: 'backlog',
+      priority: task.priority || 'medium',
+      dueDate: 'Sem prazo',
+      projectId: task.projectId,
+      projectName: task.projectName,
+      labels: task.labels ? [...task.labels] : [],
+      members: task.members ? [...task.members] : [],
+      checklists: task.checklists ? JSON.parse(JSON.stringify(task.checklists)) : [],
+      checklistsCount: task.checklistsCount,
+      category: task.category,
+      tags: task.tags ? [...task.tags] : [],
+      comments: [],
+      attachments: [],
+      referenceImages: [],
+      finalImages: [],
+      driveFiles: [],
+      commentsCount: 0,
+      attachmentsCount: 0,
+      isFlagged: false,
+    };
+
+    try {
+      await addTask(clonedTaskData);
+    } catch (err) {
+      console.error('Failed to clone task:', err);
+    }
+  };
 
   // Lazy loading logic
   useEffect(() => {
@@ -363,6 +399,15 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
                   <CheckSquare className="w-3.5 h-3.5 text-[#00A723]" />
                   <span className="text-white font-black text-[11px]">{chCount}</span>
                 </span>
+
+                <button
+                  type="button"
+                  onClick={handleCloneTask}
+                  className="flex items-center gap-1.5 hover:text-[#E4007E] transition-colors ml-1 cursor-pointer"
+                  title="Clonar Tarefa"
+                >
+                  <Copy className="w-3.5 h-3.5 text-slate-400 hover:text-[#E4007E]" />
+                </button>
               </div>
 
               {(() => {
