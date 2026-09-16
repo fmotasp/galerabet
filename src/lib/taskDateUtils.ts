@@ -236,8 +236,7 @@ export function getTaskOverdueDays(
 
   const due = parseTaskDueDate(task.dueDate);
   if (!due) {
-    // Flagged/urgent or explicitly overdue with no date
-    if (task.status === 'overdue' || task.isFlagged) return 2;
+    if (task.status === 'overdue') return 2;
     return 0;
   }
 
@@ -258,9 +257,6 @@ export function getTaskOverdueDays(
     }
   }
 
-  // If explicitly flagged as urgent without date, count as overdue (default 1 day for urgent)
-  if (task.isFlagged) return 1;
-
   // Delay less than 2 days or due date is today/future -> NOT overdue
   return 0;
 }
@@ -279,8 +275,6 @@ export function isTaskOverdue(
   if (s === 'in_review' || s.includes('revis') || s.includes('review') || s.includes('aprov')) {
     return false;
   }
-
-  if (task.isFlagged) return true;
 
   const due = parseTaskDueDate(task.dueDate);
   if (due) {
