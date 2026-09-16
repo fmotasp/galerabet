@@ -9,7 +9,7 @@ export const TaskStatusAndDates: React.FC<{
   onStatusChange?: () => void;
 }> = ({ formData, setFormData, spineStatuses, onStatusChange }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
       {/* Status da tarefa */}
       <div>
         <label className="block text-xs font-bold text-slate-200 mb-1.5">
@@ -103,6 +103,29 @@ export const TaskStatusAndDates: React.FC<{
             className="w-full p-3 bg-[#1C1C1C] border border-[#2E2E2E] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-[#E4007E] cursor-pointer"
           />
         </div>
+      </div>
+
+      {/* URGENTE */}
+      <div>
+        <label className="block text-xs font-bold text-slate-200 mb-1.5">
+          Urgência
+        </label>
+        <button
+          type="button"
+          onClick={() => setFormData(prev => ({ ...prev, isFlagged: !prev.isFlagged }))}
+          className={`w-full flex items-center justify-between p-3 border rounded-xl text-xs font-black transition-all ${
+            formData.isFlagged
+              ? 'bg-rose-600/20 border-rose-600 text-rose-500'
+              : 'bg-[#1C1C1C] border-[#2E2E2E] text-slate-400 hover:border-rose-500/50'
+          }`}
+        >
+          <span>MARCAR COMO URGENTE</span>
+          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+            formData.isFlagged ? 'border-rose-500 bg-rose-500' : 'border-slate-500'
+          }`}>
+            {formData.isFlagged && <div className="w-2 h-2 bg-white rounded-full" />}
+          </div>
+        </button>
       </div>
     </div>
   );

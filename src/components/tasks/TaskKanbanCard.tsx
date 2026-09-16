@@ -147,55 +147,40 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
   }, [task.id, task.coverImageUrl, task.driveFolderId, task.title, hasScanned, updateTask]);
 
   const getPriorityInfo = () => {
-    if (task.isFlagged || isTaskOverdue(task) || task.status === 'overdue') {
-      return {
-        label: 'URGENTE',
-        bg: 'bg-rose-600 text-white font-black',
-      };
-    }
+    let label = 'BACKLOG';
+    let bg = 'bg-slate-700 text-white font-black';
+
     const customSt = spineStatuses.find((s) => s.id === task.status);
     if (customSt) {
+      label = customSt.label.toUpperCase();
       const rawLabel = customSt.label.toLowerCase();
-      let bg = customSt.gradient ? `bg-gradient-to-r ${customSt.gradient} text-white font-black` : 'bg-[#02376F] text-white font-black';
+      bg = customSt.gradient ? `bg-gradient-to-r ${customSt.gradient} text-white font-black` : 'bg-[#02376F] text-white font-black';
       if (rawLabel.includes('novo') || rawLabel.includes('pedid')) bg = 'bg-[#0088FF] text-white font-black';
       else if (rawLabel.includes('andamento') || rawLabel.includes('produ')) bg = 'bg-amber-500 text-[#000A17] font-black';
       else if (rawLabel.includes('aprov') || rawLabel.includes('revis')) bg = 'bg-purple-600 text-white font-black';
       else if (rawLabel.includes('concl') || rawLabel.includes('done') || rawLabel.includes('final')) bg = 'bg-emerald-600 text-white font-black';
       else if (rawLabel.includes('backlog')) bg = 'bg-slate-700 text-white font-black';
+    } else {
+      if (task.status === 'blocked') {
+        label = 'PRIORIDADE MODERADA';
+        bg = 'bg-orange-600 text-white font-black';
+      } else if (task.status === 'in_progress') {
+        label = 'EM ANDAMENTO';
+        bg = 'bg-amber-500 text-[#000A17] font-black';
+      } else if (task.status === 'in_review') {
+        label = 'EM APROVAÇÃO';
+        bg = 'bg-purple-600 text-white font-black';
+      } else if (task.status === 'done') {
+        label = 'CONCLUÍDO';
+        bg = 'bg-emerald-600 text-white font-black';
+      }
+    }
 
-      return {
-        label: customSt.label.toUpperCase(),
-        bg,
-      };
+    if (task.isFlagged || isTaskOverdue(task) || task.status === 'overdue') {
+      bg = 'bg-rose-600 text-white font-black';
     }
-    if (task.status === 'blocked') {
-      return {
-        label: 'PRIORIDADE MODERADA',
-        bg: 'bg-orange-600 text-white font-black',
-      };
-    }
-    if (task.status === 'in_progress') {
-      return {
-        label: 'EM ANDAMENTO',
-        bg: 'bg-amber-500 text-[#000A17] font-black',
-      };
-    }
-    if (task.status === 'in_review') {
-      return {
-        label: 'EM APROVAÇÃO',
-        bg: 'bg-purple-600 text-white font-black',
-      };
-    }
-    if (task.status === 'done') {
-      return {
-        label: 'CONCLUÍDO',
-        bg: 'bg-emerald-600 text-white font-black',
-      };
-    }
-    return {
-      label: 'BACKLOG',
-      bg: 'bg-slate-700 text-white font-black',
-    };
+
+    return { label, bg };
   };
 
   const pInfo = getPriorityInfo();
