@@ -6,7 +6,7 @@ import {
   Copy,
 } from 'lucide-react';
 import { Task, Project, SpineStatusConfig } from '../../types';
-import { getTaskOverdueDays, isTaskOverdue } from '../../lib/taskDateUtils';
+import { getTaskOverdueDays, isTaskOverdue, wasDeliveredLate } from '../../lib/taskDateUtils';
 import { TaskMembersStack } from './TaskMembersStack';
 import { listTaskBriefingFiles } from '../../lib/googleDrive';
 import { useTasks } from '../../context/TasksContext';
@@ -176,8 +176,16 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
       }
     }
 
-    if (task.isFlagged || isTaskOverdue(task) || task.status === 'overdue') {
+    if (wasDeliveredLate(task)) {
       bg = 'bg-rose-600 text-white font-black';
+      label = `${label} - COM ATRASO`;
+    } else if (task.isFlagged || isTaskOverdue(task) || task.status === 'overdue') {
+      bg = 'bg-rose-600 text-white font-black';
+      if (task.isFlagged) {
+        label = `URGENTE - ${label}`;
+      } else if (isTaskOverdue(task) || task.status === 'overdue') {
+        label = `ATRASADO - ${label}`;
+      }
     }
 
     return { label, bg };

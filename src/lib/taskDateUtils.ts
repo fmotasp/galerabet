@@ -284,3 +284,32 @@ export function isTaskOverdue(
   return task.status === 'overdue';
 }
 
+/**
+ * Checks if a completed/delivered task was delivered after its due date (including D+2 grace period).
+ */
+export function wasDeliveredLate(task: { dueDate?: string; status?: string; deliveredAt?: string }): boolean {
+  if (!task.deliveredAt || !isTaskCompleted(task)) return false;
+  
+  const due = parseTaskDueDate(task.dueDate);
+  if (!due) return false;
+
+  const deliveryDate = parseTaskDueDate(task.deliveredAt);
+  if (!deliveryDate) return false;
+
+  const deliveryDateMidnight = new Date(deliveryDate);
+  deliveryDateMidnight.setHours(0, 0, 0, 0);
+
+  const dueMidnight = new Date(due);
+  dueMidnight.setHours(0, 0, 0, 0);
+
+  const diffMs = deliveryDateMidnight.getTime() - dueMidnight.getTime();
+  if (diffMs > 0) {
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays > 2) {
+      return true;
+    }
+  }
+
+  return false;
+}
+

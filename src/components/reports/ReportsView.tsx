@@ -378,7 +378,9 @@ export const ReportsView: React.FC = () => {
       }
     });
 
-    const computedColumns = spineStatuses.map(st => {
+    const computedColumns = spineStatuses
+      .filter(st => !st.label.toLowerCase().includes('conclu') && st.id !== 'done')
+      .map(st => {
       const label = st.label.toUpperCase();
       const data = statusDurations[label];
       const avgMs = data && data.count > 0 ? data.totalMs / data.count : 0;
@@ -604,15 +606,16 @@ export const ReportsView: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Gargalos do Funil de Produção & Tempo Médio por Etapa */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="p-5 bg-[#181818] border border-[#2E2E2E] rounded-2xl space-y-4">
+      {/* 2. Gargalos do Funil de Produção & Tempo Médio por Etapa (Lado a Lado) */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        
+        {/* Funil de Produção */}
+        <div className="p-5 bg-[#181818] border border-[#2E2E2E] rounded-2xl space-y-4 flex flex-col">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-[#E4007E]" />
-              <h2 className="text-sm font-black text-white uppercase tracking-wider">Funil de Produção (Volume)</h2>
+              <h2 className="text-sm font-black text-white uppercase tracking-wider">Funil de Produção</h2>
             </div>
-            <span className="text-xs text-slate-400 font-medium">Onde as demandas estão concentradas</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -637,14 +640,13 @@ export const ReportsView: React.FC = () => {
           </div>
         </div>
 
-        {/* 2.5 Tempo Médio de Ciclo por Coluna */}
-        <div className="p-5 bg-[#181818] border border-[#2E2E2E] rounded-2xl space-y-4">
+        {/* Tempo Médio de Ciclo */}
+        <div className="p-5 bg-[#181818] border border-[#2E2E2E] rounded-2xl space-y-4 flex flex-col">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-500" />
-              <h2 className="text-sm font-black text-white uppercase tracking-wider">Tempo Médio por Etapa</h2>
+              <h2 className="text-sm font-black text-white uppercase tracking-wider">Tempo Médio (Cycle Time)</h2>
             </div>
-            <span className="text-xs text-slate-400 font-medium">Cycle Time das fases</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -659,7 +661,7 @@ export const ReportsView: React.FC = () => {
               >
                 {tc.isMax && (
                   <div className="absolute top-0 right-0 px-2 py-0.5 bg-rose-500 text-[9px] font-black uppercase text-white rounded-bl-lg">
-                    Maior Gargalo
+                    Gargalo
                   </div>
                 )}
                 <div className="flex items-center justify-between gap-1">
@@ -675,6 +677,7 @@ export const ReportsView: React.FC = () => {
             ))}
           </div>
         </div>
+
       </div>
 
       {/* 3. Grid Principal: Produtividade por Membro & Volume por Cliente */}
