@@ -325,6 +325,90 @@ export const ReportsView: React.FC = () => {
     });
   }, [spineStatuses, filteredTasks]);
 
+  // 5.5 Tempo Médio por Coluna
+  const timeInColumns = useMemo(() => {
+    const statusDurations: Record<string, { totalMs: number, count: number }> = {};
+    
+    // Inicializa todos os status do spine para aparecerem no relatório mesmo se 0
+    spineStatuses.forEach(st => {
+      statusDurations[st.label.toUpperCase()] = { totalMs: 0, count: 0 };
+    });
+
+    const getLabel = (log: any) => {
+      const text = (log.details || log.description || '');
+      const m = text.match(/coluna (.*)|status \"(.*?)\"|para \"(.*?)\"/i);
+      if (m) return (m[1] || m[2] || m[3]).toUpperCase();
+      return null;
+    };
+
+    filteredTasks.forEach((task) => {
+      if (!task.activityLog || task.activityLog.length === 0) return;
+
+      const logs = [...task.activityLog].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      
+      let currentStatus = (spineStatuses[0]?.label || 'NOVOS PEDIDOS').toUpperCase();
+      let lastTimestamp = new Date(task.createdAt || logs[0].timestamp).getTime();
+
+      logs.forEach((log) => {
+        if (log.type === 'status_changed' || log.type === 'delivered') {
+          const ts = new Date(log.timestamp).getTime();
+          const duration = ts - lastTimestamp;
+          
+          if (duration > 0) {
+            if (!statusDurations[currentStatus]) statusDurations[currentStatus] = { totalMs: 0, count: 0 };
+            statusDurations[currentStatus].totalMs += duration;
+            statusDurations[currentStatus].count += 1;
+          }
+
+          const nextStatus = getLabel(log);
+          if (nextStatus) {
+            currentStatus = nextStatus;
+          }
+          lastTimestamp = ts;
+        }
+      });
+
+      if (!isTaskCompleted(task)) {
+        const duration = Date.now() - lastTimestamp;
+        if (duration > 0) {
+          if (!statusDurations[currentStatus]) statusDurations[currentStatus] = { totalMs: 0, count: 0 };
+          statusDurations[currentStatus].totalMs += duration;
+          statusDurations[currentStatus].count += 1;
+        }
+      }
+    });
+
+    const computedColumns = spineStatuses.map(st => {
+      const label = st.label.toUpperCase();
+      const data = statusDurations[label];
+      const avgMs = data && data.count > 0 ? data.totalMs / data.count : 0;
+      const avgHours = avgMs / (1000 * 60 * 60);
+      const avgDays = avgHours / 24;
+      
+      let displayStr = '0h';
+      if (avgDays >= 1) {
+        displayStr = `${avgDays.toFixed(1)} dias`;
+      } else if (avgHours > 0) {
+        displayStr = `${avgHours.toFixed(1)} horas`;
+      }
+
+      return {
+        id: st.id,
+        label: st.label,
+        bg: st.bg,
+        dotColor: st.dotColor || '#E4007E',
+        avgHours,
+        displayStr,
+      };
+    });
+
+    const maxHours = Math.max(...computedColumns.map(c => c.avgHours));
+    return computedColumns.map(c => ({
+      ...c,
+      isMax: maxHours > 0 && c.avgHours === maxHours,
+    }));
+  }, [filteredTasks, spineStatuses]);
+
   // 6. Exportação para CSV
   const handleExportCSV = useCallback(() => {
     const rows: string[] = [];
@@ -520,35 +604,76 @@ export const ReportsView: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Gargalos do Funil de Produção (Pipeline Kanban em Tempo Real) */}
-      <div className="p-5 bg-[#181818] border border-[#2E2E2E] rounded-2xl space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-[#E4007E]" />
-            <h2 className="text-sm font-black text-white uppercase tracking-wider">Funil de Produção & Represamento</h2>
+      {/* 2. Gargalos do Funil de Produção & Tempo Médio por Etapa */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="p-5 bg-[#181818] border border-[#2E2E2E] rounded-2xl space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-[#E4007E]" />
+              <h2 className="text-sm font-black text-white uppercase tracking-wider">Funil de Produção (Volume)</h2>
+            </div>
+            <span className="text-xs text-slate-400 font-medium">Onde as demandas estão concentradas</span>
           </div>
-          <span className="text-xs text-slate-400 font-medium">Onde as demandas estão concentradas</span>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {statusFunnel.map((st) => (
+              <div key={st.id} className="p-3 bg-[#101010] border border-[#2E2E2E] rounded-xl space-y-2">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-[11px] font-bold text-slate-300 truncate" title={st.label}>{st.label}</span>
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: st.dotColor }} />
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-lg font-black text-white">{st.count}</span>
+                  <span className="text-[10px] text-slate-500 font-bold">{st.percentage}%</span>
+                </div>
+                <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{ width: `${Math.max(st.percentage, 4)}%`, backgroundColor: st.dotColor }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
-          {statusFunnel.map((st) => (
-            <div key={st.id} className="p-3 bg-[#101010] border border-[#2E2E2E] rounded-xl space-y-2">
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-[11px] font-bold text-slate-300 truncate" title={st.label}>{st.label}</span>
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: st.dotColor }} />
-              </div>
-              <div className="flex items-baseline justify-between">
-                <span className="text-lg font-black text-white">{st.count}</span>
-                <span className="text-[10px] text-slate-500 font-bold">{st.percentage}%</span>
-              </div>
-              <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{ width: `${Math.max(st.percentage, 4)}%`, backgroundColor: st.dotColor }}
-                />
-              </div>
+        {/* 2.5 Tempo Médio de Ciclo por Coluna */}
+        <div className="p-5 bg-[#181818] border border-[#2E2E2E] rounded-2xl space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-500" />
+              <h2 className="text-sm font-black text-white uppercase tracking-wider">Tempo Médio por Etapa</h2>
             </div>
-          ))}
+            <span className="text-xs text-slate-400 font-medium">Cycle Time das fases</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {timeInColumns.map((tc) => (
+              <div
+                key={tc.id}
+                className={`p-3 border rounded-xl space-y-2 relative overflow-hidden transition-all ${
+                  tc.isMax
+                    ? 'bg-rose-500/10 border-rose-500/30'
+                    : 'bg-[#101010] border-[#2E2E2E]'
+                }`}
+              >
+                {tc.isMax && (
+                  <div className="absolute top-0 right-0 px-2 py-0.5 bg-rose-500 text-[9px] font-black uppercase text-white rounded-bl-lg">
+                    Maior Gargalo
+                  </div>
+                )}
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-[11px] font-bold text-slate-300 truncate" title={tc.label}>{tc.label}</span>
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: tc.dotColor }} />
+                </div>
+                <div className="flex flex-col">
+                  <span className={`text-lg font-black ${tc.isMax ? 'text-rose-400' : 'text-white'}`}>
+                    {tc.displayStr}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
