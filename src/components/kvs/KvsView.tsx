@@ -457,7 +457,7 @@ export const KvsView: React.FC = () => {
           </Button>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
           {filteredEntries.map((entry) => {
             const hasMultipleFiles = entry.files && entry.files.length > 1;
 
@@ -579,7 +579,7 @@ export const KvsView: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {entry.files.map((file) => {
                       const isImage =
                         file.mimeType.startsWith('image/') ||
