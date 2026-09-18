@@ -17,6 +17,9 @@ import {
   Building2,
   Copy,
   Check,
+  ChevronDown,
+  ChevronRight,
+  Folder,
 } from 'lucide-react';
 import { useApp, useProjects } from '../../context/AppContext';
 import { Project } from '../../types';
@@ -63,6 +66,21 @@ export const KvsView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingEntries, setLoadingEntries] = useState(false);
   const [kvEntries, setKvEntries] = useState<KvDriveEntry[]>([]);
+
+  // Estado de pastas expandidas
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+
+  const toggleFolder = (id: string) => {
+    setExpandedFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   // Lightbox modal para imagem expandida
   const [activeLightboxItem, setActiveLightboxItem] = useState<{
@@ -449,10 +467,22 @@ export const KvsView: React.FC = () => {
                 className="bg-[#141414] border border-[#262626] rounded-3xl p-5 sm:p-6 shadow-xl space-y-5"
               >
                 {/* Cabeçalho do Entry */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#242424] pb-4">
-                  <div className="flex items-center gap-3">
+                <div 
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${(!entry.isFolder || expandedFolders.has(entry.id)) ? 'border-b border-[#242424] pb-4' : ''}`}
+                >
+                  <div 
+                    className={`flex items-center gap-3 ${entry.isFolder ? 'cursor-pointer group/header' : ''}`}
+                    onClick={() => entry.isFolder && toggleFolder(entry.id)}
+                  >
+                    {entry.isFolder && (
+                      <div className="flex items-center justify-center w-6 h-6 -ml-1 text-slate-500 group-hover/header:text-[#E4007E] transition-colors">
+                        {expandedFolders.has(entry.id) ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                      </div>
+                    )}
                     <div className="w-10 h-10 rounded-xl bg-[#1C1C1C] border border-[#2E2E2E] flex items-center justify-center overflow-hidden shrink-0 p-1.5 shadow">
-                      {entry.clientLogo ? (
+                      {entry.isFolder ? (
+                        <Folder className="w-5 h-5 text-blue-400" />
+                      ) : entry.clientLogo ? (
                         <img src={entry.clientLogo} alt="" className="w-full h-full object-contain" />
                       ) : (
                         <Building2 className="w-5 h-5 text-slate-400" />
@@ -464,12 +494,14 @@ export const KvsView: React.FC = () => {
                           {entry.clientName}
                         </span>
                         {entry.isFolder && (
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium">
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium group-hover/header:bg-blue-500/20 transition-colors">
                             Pasta do Drive ({entry.files.length} {entry.files.length === 1 ? 'item' : 'itens'})
                           </span>
                         )}
                       </div>
-                      <h2 className="text-base font-bold text-white tracking-tight">{entry.title}</h2>
+                      <h2 className={`text-base font-bold text-white tracking-tight ${entry.isFolder ? 'group-hover/header:text-[#E4007E] transition-colors' : ''}`}>
+                        {entry.title}
+                      </h2>
                     </div>
                   </div>
 
@@ -516,7 +548,8 @@ export const KvsView: React.FC = () => {
                 </div>
 
                 {/* Arquivos / Prévias Visuais */}
-                {entry.files.length === 0 ? (
+                {(!entry.isFolder || expandedFolders.has(entry.id)) && (
+                  entry.files.length === 0 ? (
                   <div className="p-8 text-center bg-[#181818] border border-dashed border-[#2A2A2A] rounded-2xl space-y-3">
                     <p className="text-xs text-slate-400 max-w-lg mx-auto">
                       Esta pasta está protegida no Google Drive ou requer autenticação da conta para listar os arquivos internos.
@@ -689,7 +722,7 @@ export const KvsView: React.FC = () => {
                       );
                     })}
                   </div>
-                )}
+                ))}
               </div>
             );
           })}
