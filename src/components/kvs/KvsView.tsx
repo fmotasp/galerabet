@@ -464,11 +464,11 @@ export const KvsView: React.FC = () => {
             return (
               <div
                 key={entry.id}
-                className="bg-[#141414] border border-[#262626] rounded-3xl p-5 sm:p-6 shadow-xl space-y-5"
+                className="bg-[#141414] border border-[#262626] rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 shadow-xl flex flex-col"
               >
                 {/* Cabeçalho do Entry */}
                 <div 
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${(!entry.isFolder || expandedFolders.has(entry.id)) ? 'border-b border-[#242424] pb-4' : ''}`}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[#181818] ${(!entry.isFolder || expandedFolders.has(entry.id)) ? 'border-b border-[#242424]' : ''}`}
                 >
                   <div 
                     className={`flex items-center gap-3 ${entry.isFolder ? 'cursor-pointer group/header' : ''}`}
@@ -549,37 +549,38 @@ export const KvsView: React.FC = () => {
 
                 {/* Arquivos / Prévias Visuais */}
                 {(!entry.isFolder || expandedFolders.has(entry.id)) && (
-                  entry.files.length === 0 ? (
-                  <div className="p-8 text-center bg-[#181818] border border-dashed border-[#2A2A2A] rounded-2xl space-y-3">
-                    <p className="text-xs text-slate-400 max-w-lg mx-auto">
-                      Esta pasta está protegida no Google Drive ou requer autenticação da conta para listar os arquivos internos.
-                    </p>
-                    <div className="flex items-center justify-center gap-3 flex-wrap">
-                      <button
-                        onClick={async () => {
-                          const token = await getValidAccessToken(undefined, true);
-                          if (token) {
-                            loadKvsData(false);
-                          }
-                        }}
-                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white text-xs font-bold shadow hover:opacity-95 transition-opacity"
-                      >
-                        Conectar Google Drive
-                      </button>
+                  <div className="p-4 bg-[#141414] space-y-4">
+                    {entry.files.length === 0 ? (
+                      <div className="p-8 text-center bg-[#181818] border border-dashed border-[#2A2A2A] rounded-2xl space-y-3">
+                        <p className="text-xs text-slate-400 max-w-lg mx-auto">
+                          Esta pasta está protegida no Google Drive ou requer autenticação da conta para listar os arquivos internos.
+                        </p>
+                        <div className="flex items-center justify-center gap-3 flex-wrap">
+                          <button
+                            onClick={async () => {
+                              const token = await getValidAccessToken(undefined, true);
+                              if (token) {
+                                loadKvsData(false);
+                              }
+                            }}
+                            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white text-xs font-bold shadow hover:opacity-95 transition-opacity"
+                          >
+                            Conectar Google Drive
+                          </button>
 
-                      <a
-                        href={entry.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3.5 py-1.5 rounded-xl bg-[#242424] hover:bg-[#303030] text-slate-300 hover:text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors"
-                      >
-                        <span>Abrir Pasta no Drive</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <a
+                            href={entry.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-3.5 py-1.5 rounded-xl bg-[#242424] hover:bg-[#303030] text-slate-300 hover:text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors"
+                          >
+                            <span>Abrir Pasta no Drive</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {entry.files.map((file) => {
                       const isImage =
                         file.mimeType.startsWith('image/') ||
@@ -722,7 +723,9 @@ export const KvsView: React.FC = () => {
                       );
                     })}
                   </div>
-                ))}
+                  )}
+                  </div>
+                )}
               </div>
             );
           })}
