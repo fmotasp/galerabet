@@ -31,7 +31,7 @@ export const Sidebar: React.FC = () => {
     { id: 'dashboard', label: 'Painel', icon: LayoutGrid },
     { id: 'tasks', label: 'Tarefas', icon: ClipboardList },
     { id: 'materials', label: 'Material Auxiliar', icon: Palette },
-    { id: 'kvs', label: 'Key Visuals (KV)', icon: Image },
+
     ...(canManage
       ? [
           { id: 'registrations' as NavigationTab, label: 'Cadastros', icon: Layers },

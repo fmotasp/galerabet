@@ -1,4 +1,4 @@
-export type NavigationTab = 'dashboard' | 'tasks' | 'projects' | 'employees' | 'registrations' | 'reports' | 'materials' | 'kvs' | 'suggestions' | 'settings' | 'logs';
+export type NavigationTab = 'dashboard' | 'tasks' | 'projects' | 'employees' | 'registrations' | 'reports' | 'materials' | 'suggestions' | 'settings' | 'logs';
 
 export interface BrandColor {
   id?: string;
@@ -162,6 +162,8 @@ export interface Project {
   typographyUrl?: string;
   additionalMaterialsUrl?: string;
   kvDriveUrl?: string;
+  tarjasUrl?: string;
+  psdBaseUrl?: string;
   kvDriveItems?: Array<{
     id: string;
     title?: string;

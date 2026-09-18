@@ -9,6 +9,7 @@ import {
   Plus,
   Edit2,
   Type,
+  ImageIcon,
 } from 'lucide-react';
 import { useApp, useProjects } from '../../context/AppContext';
 
@@ -123,6 +124,8 @@ export const MaterialsView: React.FC = () => {
             const hasManual = Boolean(client.brandManualUrl);
             const hasLogos = Boolean(client.logosPackUrl || client.logoUrl);
             const hasTypography = Boolean(client.typographyUrl);
+            const hasTarjas = Boolean(client.tarjasUrl);
+            const hasPsdBase = Boolean(client.psdBaseUrl);
 
             return (
               <div
@@ -250,7 +253,7 @@ export const MaterialsView: React.FC = () => {
 
                 {/* Card Footer Actions: Manual da Marca, Pack de Logos & Tipografia */}
                 <div className="space-y-2 pt-4 border-t border-[#222222]">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {/* Botão 1: Manual da Marca */}
                     {hasManual ? (
                       <a
@@ -356,6 +359,64 @@ export const MaterialsView: React.FC = () => {
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Tipografia</span>
+                      </button>
+                    )}
+
+                    {/* Botão 4: Tarjas */}
+                    {hasTarjas ? (
+                      <a
+                        href={client.tarjasUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-2.5 bg-[#1C1C1C] hover:bg-[#262626] text-white border border-[#2E2E2E] hover:border-amber-400/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link"
+                        title="Abrir Tarjas"
+                      >
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <ImageIcon className="w-4 h-4 text-amber-400 shrink-0 group-hover/link:scale-110 transition-transform" />
+                          <span className="truncate text-white">Tarjas</span>
+                        </div>
+                        <ExternalLink className="w-3 h-3 text-slate-400 group-hover/link:text-white shrink-0 ml-1" />
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingProject(client);
+                          setIsNewProjectModalOpen(true);
+                        }}
+                        className="px-3 py-2.5 bg-[#1C1C1C]/40 hover:bg-[#1C1C1C] text-slate-400 hover:text-white border border-dashed border-[#2E2E2E] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Tarjas</span>
+                      </button>
+                    )}
+
+                    {/* Botão 5: PSD Base */}
+                    {hasPsdBase ? (
+                      <a
+                        href={client.psdBaseUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-2.5 bg-[#1C1C1C] hover:bg-[#262626] text-white border border-[#2E2E2E] hover:border-[#E4007E]/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link col-span-2"
+                        title="Abrir PSD Base"
+                      >
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <ImageIcon className="w-4 h-4 text-[#E4007E] shrink-0 group-hover/link:scale-110 transition-transform" />
+                          <span className="truncate text-white">PSD Base</span>
+                        </div>
+                        <ExternalLink className="w-3 h-3 text-slate-400 group-hover/link:text-white shrink-0 ml-1" />
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingProject(client);
+                          setIsNewProjectModalOpen(true);
+                        }}
+                        className="px-3 py-2.5 bg-[#1C1C1C]/40 hover:bg-[#1C1C1C] text-slate-400 hover:text-white border border-dashed border-[#2E2E2E] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer col-span-2"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>PSD Base</span>
                       </button>
                     )}
                   </div>
