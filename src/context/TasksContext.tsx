@@ -192,13 +192,15 @@ export const TasksProvider: React.FC<{
       }
     });
 
-    // Quando o usuário volta para a aba ou desbloqueia o computador, sincroniza com o banco
+    // Comentado para economizar limite de Tráfego do Supabase (estava baixando 150 tarefas pesadas a cada troca de aba)
+    /* 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         fetchTasksFromSupabase();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    */
 
     // Quando qualquer usuário faz login ou troca de conta, busca imediatamente todas as tarefas do Supabase
     const handleLoginEvent = () => {
@@ -207,7 +209,7 @@ export const TasksProvider: React.FC<{
     window.addEventListener('spine_user_logged_in', handleLoginEvent);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('spine_user_logged_in', handleLoginEvent);
       unsubscribe();
     };
