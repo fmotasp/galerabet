@@ -8,6 +8,7 @@ import {
   deleteDriveFolder,
 } from '../../../../lib/googleDrive';
 import { TaskModalFormData, TaskReferenceImage, TimelineActionItem } from '../types';
+import { supabase } from '../../../../lib/supabase';
 
 export const useTaskModalForm = ({
   isOpen,
@@ -487,6 +488,42 @@ export const useTaskModalForm = ({
         setComments(editingTask.comments || []);
         setChecklists(editingTask.checklists || []);
         setAttachments(editingTask.attachments || []);
+
+        // Lazy load dos campos pesados que foram omitidos no Kanban para economizar tráfego
+        if (editingTask.id) {
+          supabase.from('tasks')
+            .select('description, attachments, reference_images, comments, activity_log, checklists')
+            .eq('id', editingTask.id)
+            .single()
+            .then(({ data, error }) => {
+              if (data && !error) {
+                const desc = data.description || '';
+                const atts = typeof data.attachments === 'string' ? JSON.parse(data.attachments) : (data.attachments || []);
+                const refs = typeof data.reference_images === 'string' ? JSON.parse(data.reference_images) : (data.reference_images || []);
+                const comms = typeof data.comments === 'string' ? JSON.parse(data.comments) : (data.comments || []);
+                const checks = typeof data.checklists === 'string' ? JSON.parse(data.checklists) : (data.checklists || []);
+                const logs = typeof data.activity_log === 'string' ? JSON.parse(data.activity_log) : (data.activity_log || []);
+
+                setFormData(prev => ({ ...prev, description: desc }));
+                setIsEditingDescription(!desc);
+                setAttachments(atts);
+                setReferenceImages(refs);
+                setComments(comms);
+                setChecklists(checks);
+
+                setEditingTask(prev => prev ? {
+                  ...prev,
+                  description: desc,
+                  attachments: atts,
+                  referenceImages: refs,
+                  comments: comms,
+                  checklists: checks,
+                  activityLog: logs
+                } : null);
+              }
+            })
+            .catch(() => {});
+        }
 
         const folderId = editingTask.driveFolderId;
         const taskTitle = editingTask.title;

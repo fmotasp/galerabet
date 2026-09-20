@@ -131,37 +131,11 @@ export const TaskRichTextEditor: React.FC<{
     if (url) exec('createLink', url);
   };
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        if (result) {
-          exec('insertImage', result);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-    e.target.value = '';
-  };
 
-  const addImage = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
 
   return (
     <div className="rounded-2xl overflow-hidden border border-[#2E2E2E] focus-within:border-[#E4007E] transition-all bg-[#1C1C1C]">
-      {/* Hidden File Input for Local Images */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        accept="image/*"
-        onChange={handleImageFileChange}
-        className="hidden"
-      />
+
       <div className="flex items-center flex-wrap gap-1 p-2 bg-[#181818] border-b border-[#2E2E2E] text-slate-200 select-none">
         <button
           type="button"
@@ -266,18 +240,7 @@ export const TaskRichTextEditor: React.FC<{
           <LinkIcon className="w-3.5 h-3.5" />
         </button>
 
-        <button
-          type="button"
-          onMouseDown={(e) => {
-            e.preventDefault();
-            addImage();
-          }}
-          className="p-1.5 hover:bg-[#282828] rounded-lg font-bold text-xs transition-colors flex items-center gap-1 text-[#E4007E]"
-          title="Anexar Imagem do Seu Computador"
-        >
-          <ImageIcon className="w-3.5 h-3.5" />
-          <span className="text-[10px] font-bold">Imagem</span>
-        </button>
+
 
         <button
           type="button"

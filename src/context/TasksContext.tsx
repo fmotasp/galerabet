@@ -126,7 +126,8 @@ export const TasksProvider: React.FC<{
     setIsLoadingTasks(true);
     console.log('[Supabase Tasks] Iniciando busca direta na tabela tasks...');
     try {
-      const TASK_SELECT_FIELDS = `id, title, description, category, status, due_date, points, is_flagged, project_id, project_name, sprint_id, assignee_id, assignee_name, assignee_initials, members, labels, attachments, reference_images, comments, cover_attachment_id, cover_image_url, last_moved_at, activity_log, created_at, updated_at`;
+      // Retirado description, attachments, reference_images, comments, activity_log para economizar tráfego
+      const TASK_SELECT_FIELDS = `id, title, category, status, due_date, points, is_flagged, project_id, project_name, sprint_id, assignee_id, assignee_name, assignee_initials, members, labels, cover_attachment_id, cover_image_url, last_moved_at, created_at, updated_at`;
       let { data, error } = await supabase
         .from('tasks')
         .select(TASK_SELECT_FIELDS)
