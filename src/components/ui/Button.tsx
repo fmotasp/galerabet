@@ -14,21 +14,21 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white font-black shadow-md shadow-[#E4007E]/25 active:scale-98 border border-transparent',
+    'bg-[#E4007E] hover:bg-[#C2006B] text-white font-semibold shadow-md shadow-[#E4007E]/25 active:scale-98 border border-transparent',
   secondary:
-    'bg-[#1C1C1C] hover:bg-[#2E2E2E] text-slate-200 hover:text-white border border-[#2E2E2E] hover:border-[#E4007E]/50 font-bold active:scale-98',
+    'bg-[#1C1C1C] hover:bg-[#262626] text-slate-200 hover:text-white border border-[#2E2E2E] hover:border-[#E4007E]/50 font-medium active:scale-98',
   danger:
-    'bg-rose-600 hover:bg-rose-700 text-white font-black shadow-md shadow-rose-600/20 active:scale-98 border border-transparent',
+    'bg-[#1C1C1C] hover:bg-rose-950/40 text-rose-500 font-medium border border-[#2E2E2E] hover:border-rose-900/50 active:scale-98',
   outline:
-    'bg-transparent hover:bg-[#222222] text-slate-300 hover:text-white border border-[#2E2E2E] hover:border-slate-500 font-bold active:scale-98',
+    'bg-transparent hover:bg-[#1A1A1A] text-slate-300 hover:text-white border border-[#2E2E2E] hover:border-slate-500 font-medium active:scale-98',
   ghost:
-    'bg-transparent hover:bg-[#222222] text-slate-400 hover:text-white font-bold border border-transparent',
+    'bg-transparent hover:bg-[#1A1A1A] text-slate-400 hover:text-white font-medium border border-transparent',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 text-xs rounded-xl gap-1.5',
-  md: 'px-4 py-2.5 text-xs sm:text-sm rounded-xl gap-2',
-  lg: 'px-5 py-3 text-sm rounded-xl font-black gap-2.5',
+  sm: 'px-3 py-1.5 text-[13px] rounded-xl gap-1.5',
+  md: 'px-4 py-2.5 text-sm rounded-xl gap-2',
+  lg: 'px-6 py-3 text-[15px] rounded-xl font-semibold gap-2.5',
   icon: 'p-2 rounded-xl aspect-square flex items-center justify-center',
 };
 

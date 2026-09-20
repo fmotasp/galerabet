@@ -14,11 +14,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Header Title */}
         <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] flex items-center justify-center text-white shadow-lg shadow-[#E4007E]/25">
+          <div className="w-10 h-10 rounded-2xl bg-[#E4007E] flex items-center justify-center text-white shadow-lg shadow-[#E4007E]/25">
             <Layers className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-semibold text-white tracking-tight">
               Painel Geral
             </h1>
             <p className="text-xs text-slate-400 font-medium">
@@ -30,13 +30,13 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
         {/* Right Header Controls: Filter Pill + New Task */}
         <div className="flex items-center gap-3">
           {/* Segmented Filter Pill */}
-          <div className="flex items-center bg-[#181818] p-1 rounded-2xl border border-[#2A2A2A] shadow-md">
+          <div className="flex items-center bg-[#161616] p-1 rounded-2xl border border-[#262626] shadow-sm">
             <button
               id="filter-all"
               onClick={() => onFilterChange('all')}
-              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-4 py-1.5 rounded-xl text-[13px] font-medium transition-all cursor-pointer ${
                 activeFilter === 'all'
-                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-sm'
+                  ? 'bg-[#222222] text-white shadow-sm ring-1 ring-white/5'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -45,23 +45,23 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
             <button
               id="filter-flagged"
               onClick={() => onFilterChange('flagged')}
-              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-4 py-1.5 rounded-xl text-[13px] font-medium transition-all cursor-pointer ${
                 activeFilter === 'flagged'
-                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-sm'
+                  ? 'bg-[#222222] text-white shadow-sm ring-1 ring-white/5'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Com Alerta
+              Com alerta
             </button>
           </div>
 
           <Button
             id="btn-dashboard-new-task"
             onClick={onNewTaskClick}
-            leftIcon={<Plus className="w-4 h-4 stroke-[3]" />}
-            className="text-xs sm:text-sm shadow-md shadow-[#E4007E]/25"
+            leftIcon={<Plus className="w-4 h-4 stroke-[2.5]" />}
+            className="text-[13px] sm:text-[14px]"
           >
-            <span>Nova Tarefa</span>
+            <span>Nova tarefa</span>
           </Button>
         </div>
       </div>

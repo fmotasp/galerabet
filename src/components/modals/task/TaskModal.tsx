@@ -253,10 +253,10 @@ export const TaskModal: React.FC = () => {
                       handleClose();
                     }
                   }}
-                  className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black shadow-md shadow-rose-600/20 transition-all active:scale-98 cursor-pointer flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-[#1C1C1C] hover:bg-rose-950/40 text-rose-500 rounded-xl text-sm font-medium transition-all active:scale-98 cursor-pointer flex items-center gap-1.5 border border-[#2E2E2E] hover:border-rose-900/50"
                 >
                   <Trash2 className="w-4 h-4" />
-                  <span>Excluir Tarefa</span>
+                  <span>Excluir tarefa</span>
                 </button>
               ) : (
                 <div />
@@ -266,10 +266,10 @@ export const TaskModal: React.FC = () => {
                 <button
                   type="submit"
                   id="btn-submit-task"
-                  className="px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-xs font-black shadow-md shadow-[#E4007E]/25 transition-all active:scale-98 cursor-pointer flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-sm font-semibold shadow-md shadow-[#E4007E]/20 transition-all active:scale-98 cursor-pointer flex items-center gap-1.5"
                 >
-                  <Check className="w-4 h-4 stroke-[3]" />
-                  <span>{editingTask ? 'Salvar Alterações' : 'Criar Tarefa'}</span>
+                  <Check className="w-4 h-4 stroke-[2.5]" />
+                  <span>{editingTask ? 'Salvar alterações' : 'Criar tarefa'}</span>
                 </button>
               </div>
             </div>
