@@ -76,7 +76,7 @@ export const getLabelColorHex = (labelName: string, labelColor?: string): { bg: 
 
 export const getTaskCardBgStyle = (task: Task, projects: Project[]): { className: string; style?: React.CSSProperties } => {
   return {
-    className: 'bg-[#181818] hover:bg-[#202020] border border-[#2A2A2A] hover:border-[#383838] shadow-xl',
+    className: 'bg-[#161616] hover:bg-[#1C1C1C] border border-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] drop-shadow-md',
   };
 };
 
@@ -86,7 +86,9 @@ export const TasksView: React.FC = () => {
     moveTaskStatus,
     deleteTask,
     moveAllBacklogToDoneLocally,
-    isLoadingTasks
+    isLoadingTasks,
+    updateTask,
+    addTask,
   } = useTasks();
   const { projects } = useProjects();
   const { employees } = useEmployees();
@@ -225,6 +227,8 @@ export const TasksView: React.FC = () => {
             moveAllBacklogToDoneLocally={moveAllBacklogToDoneLocally}
             setIsNewTaskModalOpen={setIsNewTaskModalOpen}
             setEditingTask={setEditingTask}
+            updateTask={updateTask}
+            addTask={addTask}
           />
         </div>
       ) : (

@@ -32,6 +32,8 @@ export interface TasksKanbanViewProps {
   moveAllBacklogToDoneLocally: () => void;
   setIsNewTaskModalOpen: (open: boolean) => void;
   setEditingTask: (task: Task) => void;
+  updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
+  addTask: (newTaskData: Omit<Task, 'id' | 'createdAt'>) => Promise<Task>;
 }
 
 export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
@@ -46,6 +48,8 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
   moveAllBacklogToDoneLocally,
   setIsNewTaskModalOpen,
   setEditingTask,
+  updateTask,
+  addTask,
 }) => {
   const kanbanRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -124,10 +128,10 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
               }
               setDraggedTaskId(null);
             }}
-            className={`w-80 shrink-0 min-w-[320px] rounded-2xl p-4 h-full flex flex-col transition-all duration-200 border border-[#262626] ${
+            className={`w-80 shrink-0 min-w-[320px] rounded-2xl p-4 h-full flex flex-col transition-all duration-200 ${
               dragOverColumnId === col.id
-                ? 'bg-[#222222] ring-2 ring-[#E4007E] scale-[1.01]'
-                : 'bg-[#181818]'
+                ? 'bg-[#161616] ring-1 ring-[#E4007E] scale-[1.01]'
+                : 'bg-transparent'
             }`}
           >
             <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
@@ -183,6 +187,8 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
                     }}
                     onClick={() => setEditingTask(task)}
                     onClone={(clonedTask) => setEditingTask(clonedTask)}
+                    updateTask={updateTask}
+                    addTask={addTask}
                   />
                 ))}
 

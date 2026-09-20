@@ -6,6 +6,7 @@ import { isTaskOverdue, isTaskCompleted, getTaskOverdueDays } from '../lib/taskD
 import { encodeTaskDescriptionWithChecklist, decodeTaskDescriptionWithChecklist } from '../lib/taskUtils';
 import { Task, TaskStatus, SpineStatusConfig, Employee } from '../types';
 import { INITIAL_TASKS } from '../data/mockData';
+import { useTasksStore } from '../store/useTasksStore';
 
 export interface TasksContextType {
   tasks: Task[];
@@ -57,11 +58,12 @@ export const TasksProvider: React.FC<{
   addActivity,
   resetAllStores,
 }) => {
-  const [isLoadingTasks, setIsLoadingTasks] = useState(true);
-  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
-  
-  // Tasks (Demandas) - Inicializa vazio para garantir dados reais do servidor
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const tasks = useTasksStore(state => state.tasks);
+  const setTasks = useTasksStore(state => state.setTasks);
+  const isLoadingTasks = useTasksStore(state => state.isLoadingTasks);
+  const setIsLoadingTasks = useTasksStore(state => state.setIsLoadingTasks);
+  const hasFetchedOnce = useTasksStore(state => state.hasFetchedOnce);
+  const setHasFetchedOnce = useTasksStore(state => state.setHasFetchedOnce);
 
   // Helper para obter os dados do usuário autenticado no momento da ação
   const getCurrentActor = () => {
@@ -255,7 +257,7 @@ export const TasksProvider: React.FC<{
 
 
   // Task Actions
-  const addTask = async (newTaskData: Omit<Task, 'id' | 'createdAt'>) => {
+  const addTask = useCallback(async (newTaskData: Omit<Task, 'id' | 'createdAt'>) => {
     const newId = `task-${Date.now()}`;
     const actor = getCurrentActor();
     const hasRealActor = actor.name && actor.name !== 'Membro' && actor.name !== 'Equipe';
@@ -371,12 +373,13 @@ export const TasksProvider: React.FC<{
     });
     
     return newTask;
-  };
+  }, [employees, currentUser, addActivity, addToast, setEmployees, setTasks]);
 
-  const updateTask = async (id: string, updates: Partial<Task>) => {
+  const updateTask = useCallback(async (id: string, updates: Partial<Task>) => {
     const now = Date.now();
     const actor = getCurrentActor();
-    const targetTask = tasks.find((t) => t.id === id);
+    const currentTasks = useTasksStore.getState().tasks;
+    const targetTask = currentTasks.find((t) => t.id === id);
 
     let nextActivityLog = updates.activityLog ?? (targetTask?.activityLog ? [...targetTask.activityLog] : []);
 
@@ -434,7 +437,7 @@ export const TasksProvider: React.FC<{
       }
       if (updates.title !== undefined) payload.title = updates.title;
       if (updates.description !== undefined || updates.checklists !== undefined) {
-        const currentTask = tasks.find(t => t.id === id);
+        const currentTask = targetTask;
         const baseDescription = updates.description !== undefined ? updates.description : (currentTask?.description || '');
         const baseChecklists = updates.checklists !== undefined ? updates.checklists : (currentTask?.checklists || []);
         payload.description = encodeTaskDescriptionWithChecklist(baseDescription, baseChecklists);
@@ -489,7 +492,7 @@ export const TasksProvider: React.FC<{
     } catch (sbErr) {
       console.warn('Supabase task update warning:', sbErr);
     }
-  };
+  }, [spineStatuses, addToast, setTasks, currentUser]);
 
   const deleteTask = async (id: string) => {
     const taskToDelete = tasks.find((t) => t.id === id);
@@ -532,8 +535,9 @@ export const TasksProvider: React.FC<{
     addToast('Task Deleted', `Removed "${taskToDelete?.title || 'task'}"`, 'info');
   };
 
-  const moveTaskStatus = async (id: string, newStatus: TaskStatus) => {
-    const targetTask = tasks.find((t) => t.id === id);
+  const moveTaskStatus = useCallback(async (id: string, newStatus: TaskStatus) => {
+    const currentTasks = useTasksStore.getState().tasks;
+    const targetTask = currentTasks.find((t) => t.id === id);
     if (!targetTask) return;
 
     const oldStatus = targetTask.status;
@@ -651,7 +655,7 @@ export const TasksProvider: React.FC<{
       );
       addToast('Status Updated', `Moved to ${statusLabel}`);
     }
-  };
+  }, [spineStatuses, currentUser, addActivity, addToast, setTasks]);
 
   const moveAllBacklogToDoneLocally = () => {
     const count = tasks.filter(

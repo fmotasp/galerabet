@@ -22,9 +22,11 @@ interface TaskKanbanCardProps {
   onDragEnd: () => void;
   onClick: () => void;
   onClone?: (task: Task) => void;
+  updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
+  addTask: (newTaskData: Omit<Task, 'id' | 'createdAt'>) => Promise<Task>;
 }
 
-export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
+export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
   task,
   projects,
   spineStatuses,
@@ -35,9 +37,11 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
   onDragEnd,
   onClick,
   onClone,
+  updateTask,
+  addTask,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const { updateTask, addTask } = useTasks();
+
   const [hasScanned, setHasScanned] = useState(false);
 
   const handleCloneTask = async (e: React.MouseEvent) => {
@@ -207,7 +211,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
       }`}
     >
       {/* Top Priority Header Bar */}
-      <div className={`w-full py-1.5 px-3 text-[11px] font-black tracking-widest uppercase text-center relative ${pInfo.bg}`}>
+      <div className={`w-full py-1.5 px-3 text-[10px] font-bold tracking-widest uppercase text-left relative ${pInfo.bg}`}>
         <span className="relative z-10">{pInfo.label}</span>
       </div>
 
@@ -292,7 +296,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
       })()}
 
       {/* Main Card Content Body */}
-      <div className="p-3.5 space-y-3 bg-[#181818]">
+      <div className="p-3.5 space-y-3 bg-transparent">
         {/* Client / Labels Badges Row */}
         {(() => {
           const labelItems: Array<{ name: string; color?: string }> = [];
@@ -358,7 +362,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
         })()}
 
         {/* Title */}
-        <h4 className="font-black text-sm text-white leading-snug tracking-tight">
+        <h4 className="font-semibold text-[14px] text-white leading-snug tracking-tight">
           {task.title}
         </h4>
 
@@ -381,21 +385,21 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
           }
 
           return (
-            <div className="flex items-center justify-between pt-2.5 border-t border-[#262626] text-xs font-bold">
+            <div className="flex items-center justify-between pt-2.5 border-t border-white/5 text-[12px] font-medium">
               <div className="flex items-center gap-3.5 text-slate-300">
                 <span className="flex items-center gap-1.5 hover:text-[#E4007E] transition-colors" title="Comentários">
-                  <MessageSquare className="w-3.5 h-3.5 text-[#E4007E]" />
-                  <span className="text-white font-black text-[11px]">{cCount}</span>
+                  <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="text-white font-medium text-[11px]">{cCount}</span>
                 </span>
 
                 <span className="flex items-center gap-1.5 hover:text-[#E4007E] transition-colors" title="Arquivos / Anexos">
-                  <Paperclip className="w-3.5 h-3.5 text-[#E4007E]" />
-                  <span className="text-white font-black text-[11px]">{aCount}</span>
+                  <Paperclip className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="text-white font-medium text-[11px]">{aCount}</span>
                 </span>
 
                 <span className="flex items-center gap-1.5 hover:text-[#E4007E] transition-colors" title="Checklists">
-                  <CheckSquare className="w-3.5 h-3.5 text-[#00A723]" />
-                  <span className="text-white font-black text-[11px]">{chCount}</span>
+                  <CheckSquare className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="text-white font-medium text-[11px]">{chCount}</span>
                 </span>
 
                 <button
@@ -412,13 +416,13 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
                 const overdueDays = getTaskOverdueDays(task);
                 if (overdueDays > 0) {
                   return (
-                    <div className="text-rose-400 font-extrabold text-[11px] bg-rose-950/70 px-2 py-0.5 rounded border border-rose-800/70 shadow-xs whitespace-nowrap" title={`Prazo previsto: ${task.dueDate}`}>
+                    <div className="text-rose-400 font-semibold text-[11px] bg-rose-950/40 px-2 py-0.5 rounded border border-rose-800/40 shadow-xs whitespace-nowrap" title={`Prazo previsto: ${task.dueDate}`}>
                       Atrasada ({overdueDays}d)
                     </div>
                   );
                 }
                 return (
-                  <div className="text-slate-200 font-extrabold text-[11px]">
+                  <div className="text-slate-400 font-medium text-[11px]">
                     {task.dueDate && task.dueDate !== 'Sem prazo' ? task.dueDate : 'Sem prazo'}
                   </div>
                 );
@@ -429,4 +433,4 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = ({
       </div>
     </div>
   );
-};
+});

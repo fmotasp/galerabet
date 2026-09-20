@@ -26,18 +26,18 @@
     --font-semibold: 600;
     --font-bold: 700;
 
-    /* ── Colors: Backgrounds (RioSãoPaulo Brandbook: Black 3C #101010 & Cinza 447C #303030) ── */
-    --bg-darkest: #181818;
-    --bg-canvas: #101010;
-    --bg-elevated: #222222;
-    --bg-input: #262626;
-    --bg-form: #141414;
-    --bg-popup: #1C1C1C;
-    --bg-overlay: #101010;
-    --bg-table: #1C1C1C;
-    --bg-surface: #1E1E1E;
-    --bg-cookie: #222222;
-    --bg-interactive: #303030;
+    /* ── Colors: Backgrounds (Nova Paleta Criativa) ── */
+    --bg-darkest: #0A0A0A;
+    --bg-canvas: #0C0C0C;
+    --bg-elevated: #161616;
+    --bg-input: #1A1A1A;
+    --bg-form: #0C0C0C;
+    --bg-popup: #161616;
+    --bg-overlay: #080808;
+    --bg-table: #161616;
+    --bg-surface: #161616;
+    --bg-cookie: #1A1A1A;
+    --bg-interactive: #222222;
     --bg-brand: #E4007E;
 
     /* ── Colors: Actions (Rosa 213C #E4007E & Laranja 1655C #E94E18) ── */
