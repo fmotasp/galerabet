@@ -12,9 +12,9 @@ export const DashboardStatCards: React.FC<DashboardStatCardsProps> = React.memo(
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Card 1: Total Tasks */}
-        <div className="bg-[#181818] rounded-2xl p-5 border border-[#2A2A2A] shadow-lg relative flex flex-col justify-between hover:border-[#383838] transition-all">
+        <div className="bg-[#161616] rounded-2xl p-5 shadow-xs relative flex flex-col justify-between ring-1 ring-white/5">
           <div className="flex items-start justify-between">
-            <span className="text-3xl font-black text-white tracking-tight">
+            <span className="text-3xl font-semibold text-white tracking-tight">
               {metrics.totalTasks}
             </span>
             <Button
@@ -27,21 +27,21 @@ export const DashboardStatCards: React.FC<DashboardStatCardsProps> = React.memo(
               <MoreHorizontal className="w-5 h-5" />
             </Button>
           </div>
-          <span className="text-xs text-slate-300 font-bold uppercase tracking-wider mt-1">
-            total de tarefas
+          <span className="text-[10px] text-slate-400 font-medium uppercase tracking-widest mt-1">
+            Total de tarefas
           </span>
-          <div className="mt-4 pt-3 border-t border-[#2A2A2A] flex items-center justify-between text-xs">
-            <span className="text-[#E4007E] font-bold">
+          <div className="mt-4 pt-3 flex items-center justify-between text-xs">
+            <span className="text-[#E4007E] font-medium">
               {metrics.activeProjectsCount} projetos ativos
             </span>
-            <span className="text-slate-400 font-medium">sprint atual</span>
+            <span className="text-slate-500 font-medium">Sprint atual</span>
           </div>
         </div>
 
         {/* Card 2: Completed */}
-        <div className="bg-[#181818] rounded-2xl p-5 border border-[#2A2A2A] shadow-lg relative flex flex-col justify-between hover:border-[#383838] transition-all overflow-hidden">
+        <div className="bg-[#161616] rounded-2xl p-5 shadow-xs relative flex flex-col justify-between ring-1 ring-emerald-500/10 overflow-hidden">
           <div className="flex items-start justify-between">
-            <span className="text-3xl font-black text-[#10B981] tracking-tight">
+            <span className="text-3xl font-semibold text-emerald-400 tracking-tight">
               {metrics.completedTasks}
             </span>
             <Button
@@ -54,23 +54,21 @@ export const DashboardStatCards: React.FC<DashboardStatCardsProps> = React.memo(
               <MoreHorizontal className="w-5 h-5" />
             </Button>
           </div>
-          <span className="text-xs text-slate-300 font-bold uppercase tracking-wider mt-1">
-            concluídas
+          <span className="text-[10px] text-slate-400 font-medium uppercase tracking-widest mt-1">
+            Concluídas
           </span>
-          <div className="mt-4 pt-3 border-t border-[#2A2A2A] flex items-center justify-between text-xs">
-            <span className="text-[#10B981] font-bold">
+          <div className="mt-4 pt-3 flex items-center justify-between text-xs">
+            <span className="text-emerald-400/80 font-medium">
               {metrics.completionPercentage}% concluído
             </span>
-            <span className="text-slate-400 font-medium">em tempo real</span>
+            <span className="text-slate-500 font-medium">Sprint atual</span>
           </div>
-          {/* Bottom indicator */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#10B981]" />
         </div>
 
-        {/* Card 3: Overdue / Alerted */}
-        <div className="bg-[#181818] rounded-2xl p-5 border border-[#2A2A2A] shadow-lg relative flex flex-col justify-between hover:border-[#383838] transition-all">
+        {/* Card 3: Overdue */}
+        <div className="bg-[#161616] rounded-2xl p-5 shadow-xs relative flex flex-col justify-between ring-1 ring-rose-500/10 overflow-hidden">
           <div className="flex items-start justify-between">
-            <span className="text-3xl font-black text-rose-400 tracking-tight">
+            <span className="text-3xl font-semibold text-rose-400 tracking-tight">
               {metrics.overdueTasks}
             </span>
             <div className="flex items-center gap-1">
@@ -101,17 +99,15 @@ export const DashboardStatCards: React.FC<DashboardStatCardsProps> = React.memo(
               </Button>
             </div>
           </div>
-          <span className="text-xs text-slate-300 font-bold uppercase tracking-wider mt-1">
-            atrasadas
+          <span className="text-[10px] text-slate-400 font-medium uppercase tracking-widest mt-1">
+            Atrasadas
           </span>
-          <div className="mt-4 pt-3 border-t border-[#2A2A2A] flex items-center justify-between text-xs">
-            <span className="text-rose-400 font-bold">
+          <div className="mt-4 pt-3 flex items-center justify-between text-xs">
+            <span className="text-rose-400 font-medium">
               {metrics.escalatedCount} com alerta / pendência
             </span>
-            <span className="text-slate-400 font-medium">atenção</span>
+            <span className="text-slate-500 font-medium">Atenção</span>
           </div>
-          {/* Accent bar */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-rose-500" />
         </div>
       </div>
     );

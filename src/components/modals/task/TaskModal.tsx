@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, Check } from 'lucide-react';
+import { Trash2, Check, MessageSquare } from 'lucide-react';
 import { useApp } from '../../../context/AppContext';
 import { TaskModalHeader } from './components/TaskModalHeader';
 import { TaskStatusAndDates } from './components/TaskStatusAndDates';
@@ -236,8 +236,14 @@ export const TaskModal: React.FC = () => {
                   currentUser={currentUser}
                 />
               ) : (
-                <div className="p-4 bg-[#1C1C1C]/40 border border-dashed border-[#2E2E2E] rounded-xl text-center text-xs text-slate-400 font-medium flex items-center justify-center min-h-[120px]">
-                  Comentários estarão disponíveis após salvar a tarefa.
+                <div className="p-5 bg-white/[0.02] rounded-xl flex flex-col items-center justify-center min-h-[120px] text-center">
+                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                    <MessageSquare className="w-4 h-4 text-slate-500" />
+                  </div>
+                  <h4 className="text-[13px] font-medium text-slate-300 mb-1">Inicie a discussão</h4>
+                  <p className="text-[11px] text-slate-500 max-w-[200px]">
+                    Salve a tarefa para desbloquear os comentários e marcar sua equipe.
+                  </p>
                 </div>
               )}
             </div>

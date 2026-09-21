@@ -169,12 +169,12 @@ export const EmployeesView: React.FC = () => {
           {/* Top Header: Title, Tabs & Search */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-black text-white tracking-tight">Funcionários</h1>
+              <h1 className="text-3xl font-semibold text-white tracking-tight">Funcionários</h1>
               {/* Tabs: All / Organization */}
               <div className="flex items-center gap-6 mt-3 border-b border-slate-800 pb-2">
                 <button
                   onClick={() => setActiveTab('all')}
-                  className={`relative text-sm font-bold pb-2 transition-all cursor-pointer ${
+                  className={`relative text-sm font-medium pb-2 transition-all cursor-pointer ${
                     activeTab === 'all' ? 'text-white' : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -186,7 +186,7 @@ export const EmployeesView: React.FC = () => {
 
                 <button
                   onClick={() => setActiveTab('organization')}
-                  className={`relative text-sm font-bold pb-2 transition-all cursor-pointer ${
+                  className={`relative text-sm font-medium pb-2 transition-all cursor-pointer ${
                     activeTab === 'organization' ? 'text-white' : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -207,25 +207,23 @@ export const EmployeesView: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   leftIcon={<Search className="w-4 h-4" />}
-                  className="py-2.5 bg-[#181818] !border-slate-800 focus:!border-[#E4007E] rounded-2xl text-xs font-semibold"
+                  className="py-2 bg-[#161616] !border-slate-800 focus:!border-[#E4007E] rounded-xl text-[13px] font-medium"
                 />
               </div>
 
               <Button
                 id="btn-add-employee"
                 variant="primary"
-                size="md"
                 onClick={() => setIsNewEmployeeModalOpen(true)}
-                leftIcon={<Plus className="w-4 h-4 stroke-[3]" />}
-                className="px-4 py-2.5 rounded-2xl text-xs font-black shadow-md shadow-[#E4007E]/25 shrink-0"
+                leftIcon={<Plus className="w-4 h-4 stroke-[2.5]" />}
               >
-                Novo Membro
+                Novo membro
               </Button>
             </div>
           </div>
 
           {/* Filter & Control Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-[#181818] p-3 rounded-2xl border border-slate-800">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Left Filter Dropdowns */}
             <div className="flex flex-wrap items-center gap-2">
               {/* Department Dropdown */}

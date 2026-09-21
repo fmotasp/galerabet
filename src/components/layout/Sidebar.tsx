@@ -88,7 +88,7 @@ export const Sidebar: React.FC = () => {
                 onClick={() => handleNavClick(item.id)}
                 className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-200 group relative ${
                   isActive
-                    ? 'bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white scale-105 shadow-lg shadow-[#E4007E]/30'
+                    ? 'bg-[#E4007E] text-white shadow-md shadow-[#E4007E]/20'
                     : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
                 }`}
                 title={item.label}
@@ -108,7 +108,7 @@ export const Sidebar: React.FC = () => {
             onClick={() => handleNavClick('settings')}
             className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-200 group relative ${
               activeTab === 'settings'
-                ? 'bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white scale-105 shadow-lg shadow-[#E4007E]/30'
+                ? 'bg-[#E4007E] text-white shadow-md shadow-[#E4007E]/20'
                 : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
             }`}
             title="Configurações"
@@ -121,7 +121,7 @@ export const Sidebar: React.FC = () => {
             onClick={() => handleNavClick('logs')}
             className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-200 group relative mt-4 ${
               activeTab === 'logs'
-                ? 'bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white scale-105 shadow-lg shadow-[#E4007E]/30'
+                ? 'bg-[#E4007E] text-white shadow-md shadow-[#E4007E]/20'
                 : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
             }`}
             title="Logs do Sistema (Admin)"
@@ -150,21 +150,23 @@ export const Sidebar: React.FC = () => {
           return (
             <button
               key={item.id}
+              id={`nav-item-mobile-${item.id}`}
               onClick={() => handleNavClick(item.id)}
-              className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 ${
+              className={`flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200 ${
                 isActive
-                  ? 'text-[#E4007E]'
+                  ? 'bg-[#E4007E] text-white shadow-md shadow-[#E4007E]/20'
                   : 'text-[#A0A0A0] hover:text-white'
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? 'text-[#E4007E]' : 'text-[#A0A0A0]'}`} />
-              <span className="text-[9px] mt-1 font-semibold">{item.label.split(' ')[0]}</span>
+              <Icon className="w-5 h-5 mb-1" />
+              <span className="text-[10px] font-medium tracking-tight">
+                {item.label}
+              </span>
             </button>
           );
         })}
         {canManage && (
           <button
-            onClick={() => handleNavClick('settings')}
             className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 ${
               activeTab === 'settings'
                 ? 'text-[#E4007E]'
