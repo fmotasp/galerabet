@@ -193,11 +193,11 @@ export const RegistrationsView: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#181818] p-6 rounded-3xl border border-[#2A2A2A] shadow-xl">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] flex items-center justify-center text-white font-black shadow-lg shadow-[#E4007E]/25">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] flex items-center justify-center text-white font-semibold shadow-lg shadow-[#E4007E]/25">
               <Layers className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
                 Central de Cadastros
               </h1>
               <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
@@ -228,7 +228,7 @@ export const RegistrationsView: React.FC = () => {
               size="md"
               onClick={() => setIsNewEmployeeModalOpen(true)}
               leftIcon={<Plus className="w-4 h-4 stroke-[3]" />}
-              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-sm font-black"
+              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-sm font-semibold"
             >
               Novo Funcionário
             </Button>
@@ -239,7 +239,7 @@ export const RegistrationsView: React.FC = () => {
               size="md"
               onClick={() => setIsNewProjectModalOpen(true)}
               leftIcon={<Plus className="w-4 h-4 stroke-[3]" />}
-              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-sm font-black"
+              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-sm font-semibold"
             >
               Novo Cliente
             </Button>
@@ -309,7 +309,7 @@ export const RegistrationsView: React.FC = () => {
               <select
                 value={selectedTagFilter}
                 onChange={(e) => setSelectedTagFilter(e.target.value)}
-                className="appearance-none w-full bg-[#222222] border border-[#2E2E2E] text-white text-xs font-bold py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E] transition-colors uppercase tracking-wider"
+                className="appearance-none w-full bg-[#222222] border border-[#2E2E2E] text-white text-sm font-medium py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E] transition-colors"
               >
                 <option value="All">TODAS AS TAGS</option>
                 {allUniqueTags.map((tag) => (
@@ -337,7 +337,7 @@ export const RegistrationsView: React.FC = () => {
                 <button
                   key={tag}
                   onClick={() => setSelectedTagFilter(tag === selectedTagFilter ? 'All' : tag)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all uppercase tracking-wider cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                     selectedTagFilter === tag
                       ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-sm'
                       : 'bg-[#222222] text-slate-300 hover:text-white border border-[#2E2E2E]'
@@ -426,7 +426,7 @@ export const RegistrationsView: React.FC = () => {
                             alt={emp.name}
                             size="xl"
                             status={getStatusDot(emp.status)}
-                            className="!w-16 !h-16 shadow-md [&>div]:bg-[#222222] [&>div]:text-[#E4007E] [&>div]:border [&>div]:border-[#303030] [&>div]:text-lg [&>div]:font-black"
+                            className="!w-16 !h-16 shadow-md [&>div]:bg-[#222222] [&>div]:text-[#E4007E] [&>div]:border [&>div]:border-[#303030] [&>div]:text-lg [&>div]:font-semibold"
                           />
                         </div>
                       </div>
@@ -465,7 +465,7 @@ export const RegistrationsView: React.FC = () => {
 
                     {/* Card Footer: Role in Uppercase */}
                     <div className="bg-[#141414] px-4 py-3 border-t border-[#262626] text-center">
-                      <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 group-hover:text-white transition-colors truncate block">
+                      <span className="text-xs font-medium text-slate-300 group-hover:text-white transition-colors truncate block">
                         {emp.role || emp.department || 'COLABORADOR'}
                       </span>
                     </div>
@@ -649,7 +649,7 @@ export const RegistrationsView: React.FC = () => {
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-2">
                 <Tag className="w-5 h-5 text-[#FFBA00]" />
-                <h3 className="text-base font-black text-white">
+                <h3 className="text-base font-semibold text-white">
                   Etiquetas de {tagModalEmployee.name}
                 </h3>
               </div>
@@ -675,7 +675,7 @@ export const RegistrationsView: React.FC = () => {
                     <Badge
                       key={tag}
                       size="sm"
-                      className="bg-indigo-950 text-indigo-300 border-indigo-800 font-bold uppercase tracking-wider inline-flex items-center gap-1.5 px-3 py-1 rounded-lg"
+                      className="bg-indigo-950 text-indigo-300 border-indigo-800 font-medium text-xs inline-flex items-center gap-1.5 px-3 py-1 rounded-lg"
                     >
                       {tag}
                       <button
@@ -712,13 +712,13 @@ export const RegistrationsView: React.FC = () => {
                       handleAddTagToEmployee(tagModalEmployee);
                     }
                   }}
-                  className="flex-1 py-2 text-xs text-white uppercase placeholder-slate-500 font-bold !bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
+                  className="flex-1 py-2 text-sm text-white placeholder-slate-500 font-medium !bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
                 />
                 <Button
                   variant="primary"
                   size="sm"
                   onClick={() => handleAddTagToEmployee(tagModalEmployee)}
-                  className="px-4 py-2.5 text-xs font-black shrink-0"
+                  className="px-4 py-2.5 text-xs font-semibold shrink-0"
                 >
                   Adicionar
                 </Button>

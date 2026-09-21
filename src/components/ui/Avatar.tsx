@@ -88,7 +88,7 @@ export const Avatar: React.FC<AvatarProps> = ({
         />
       ) : (
         <div
-          className={`w-full h-full rounded-full flex items-center justify-center font-black uppercase text-white shadow-xs ${text} ${
+          className={`w-full h-full rounded-full flex items-center justify-center font-semibold uppercase text-white shadow-xs ${text} ${
             !colorHex ? 'bg-gradient-to-tr from-[#222222] to-[#2E2E2E] border border-[#3A3A3A]' : ''
           }`}
           style={colorHex ? { backgroundColor: colorHex } : undefined}

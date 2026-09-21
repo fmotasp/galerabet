@@ -51,7 +51,7 @@ export const TaskCommentsSection: React.FC<{
             type="button"
             disabled={isPostingComment || !newCommentText.trim()}
             onClick={onAddComment}
-            className="px-4 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 disabled:opacity-50 text-white rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 self-end py-3 shadow-md shadow-[#E4007E]/25 cursor-pointer"
+            className="px-4 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 self-end py-3 shadow-md shadow-[#E4007E]/25 cursor-pointer"
           >
             <Send className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>{isPostingComment ? 'Enviando...' : 'Enviar'}</span>

@@ -272,12 +272,12 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-[#181818] text-slate-200 font-black text-xs flex items-center justify-center">
+                    <div className="w-full h-full rounded-full bg-[#181818] text-slate-200 font-semibold text-xs flex items-center justify-center">
                       {top2.employee.initials || top2.employee.name.slice(0, 2)}
                     </div>
                   )}
                 </div>
-                <div className="absolute -bottom-2 px-1.5 py-0.2 rounded-full bg-slate-300 text-slate-900 font-black text-[9px] shadow uppercase">
+                <div className="absolute -bottom-2 px-1.5 py-0.2 rounded-full bg-slate-300 text-slate-900 font-semibold text-[9px] shadow uppercase">
                   TOP 2
                 </div>
               </div>
@@ -290,7 +290,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
               </span>
 
               <div className="mt-2 pt-1.5 border-t border-white/5 w-full">
-                <div className="text-[10px] font-black text-white">
+                <div className="text-[10px] font-semibold text-white">
                   {top2.completed} <span className="font-medium text-slate-400 text-[9px]">feitas</span>
                 </div>
                 <div className="text-[9px] text-emerald-400 font-bold">
@@ -326,18 +326,18 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-[#181818] text-[#FFB903] font-black text-sm flex items-center justify-center">
+                    <div className="w-full h-full rounded-full bg-[#181818] text-[#FFB903] font-semibold text-sm flex items-center justify-center">
                       {top1.employee.initials || top1.employee.name.slice(0, 2)}
                     </div>
                   )}
                 </div>
-                <div className="absolute -bottom-2.5 px-2 py-0.5 rounded-full bg-[#FFB903] text-slate-950 font-black text-[10px] shadow uppercase flex items-center gap-0.5">
+                <div className="absolute -bottom-2.5 px-2 py-0.5 rounded-full bg-[#FFB903] text-slate-950 font-semibold text-[10px] shadow uppercase flex items-center gap-0.5">
                   <Flame className="w-2.5 h-2.5 fill-slate-950" />
                   <span>TOP 1</span>
                 </div>
               </div>
 
-              <h4 className="font-black text-white text-xs mt-2 truncate max-w-[100px]">
+              <h4 className="font-semibold text-white text-xs mt-2 truncate max-w-[100px]">
                 {top1.employee.name.split(' ')[0]}
               </h4>
               <span className="text-[10px] text-[#FFE082] font-semibold truncate max-w-[95px] block">
@@ -345,7 +345,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
               </span>
 
               <div className="mt-2 pt-1.5 border-t border-[#FFB903]/20 w-full">
-                <div className="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FFB903] to-[#E94E18]">
+                <div className="text-xs font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#FFB903] to-[#E94E18]">
                   {top1.completed} <span className="font-bold text-slate-300 text-[10px]">feitas</span>
                 </div>
                 <div className="text-[10px] text-emerald-400 font-extrabold">
@@ -376,12 +376,12 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-[#181818] text-[#CD7F32] font-black text-xs flex items-center justify-center">
+                    <div className="w-full h-full rounded-full bg-[#181818] text-[#CD7F32] font-semibold text-xs flex items-center justify-center">
                       {top3.employee.initials || top3.employee.name.slice(0, 2)}
                     </div>
                   )}
                 </div>
-                <div className="absolute -bottom-2 px-1.5 py-0.2 rounded-full bg-[#CD7F32] text-white font-black text-[9px] shadow uppercase">
+                <div className="absolute -bottom-2 px-1.5 py-0.2 rounded-full bg-[#CD7F32] text-white font-semibold text-[9px] shadow uppercase">
                   TOP 3
                 </div>
               </div>
@@ -394,7 +394,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
               </span>
 
               <div className="mt-2 pt-1.5 border-t border-white/5 w-full">
-                <div className="text-[10px] font-black text-white">
+                <div className="text-[10px] font-semibold text-white">
                   {top3.completed} <span className="font-medium text-slate-400 text-[9px]">feitas</span>
                 </div>
                 <div className="text-[9px] text-emerald-400 font-bold">
@@ -416,7 +416,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
       {others.length > 0 && (
         <div className="pt-3 border-t border-[#262626] relative z-10 space-y-2">
           <div className="flex items-center justify-between px-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
               Classificação ({rankingList.length})
             </span>
           </div>
@@ -457,7 +457,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="px-2 py-0.5 rounded-full bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] font-black text-[10px]">
+                    <span className="px-2 py-0.5 rounded-full bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] font-semibold text-[10px]">
                       {item.completed} entregas
                     </span>
                     <span className="text-[10px] font-bold text-emerald-400">

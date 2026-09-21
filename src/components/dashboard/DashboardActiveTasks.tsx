@@ -139,7 +139,7 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
                     const style = getLabelColorHex(firstLabel.name, firstLabel.color);
                     return (
                       <span
-                        className="hidden sm:inline-flex items-center gap-1 text-[11px] px-2.5 py-0.8 rounded-lg font-black tracking-wide uppercase shadow-2xs border"
+                        className="hidden sm:inline-flex items-center gap-1 text-[11px] px-2.5 py-0.8 rounded-lg font-semibold tracking-wide uppercase shadow-2xs border"
                         style={{
                           backgroundColor: style.bg,
                           color: style.text,

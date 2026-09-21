@@ -41,7 +41,7 @@ export const TaskStatusAndDates: React.FC<{
               deliveredAt: isReview ? '' : (isDone && !prev.deliveredAt ? new Date().toLocaleDateString('pt-BR') : prev.deliveredAt),
             }));
           }}
-          className="w-full p-3 bg-[#1C1C1C] border border-[#2E2E2E] rounded-xl text-xs font-black text-white transition-all shadow-xs focus:outline-none focus:border-[#E4007E] cursor-pointer"
+          className="w-full p-3 bg-[#1C1C1C] border border-[#2E2E2E] rounded-xl text-xs font-semibold text-white transition-all shadow-xs focus:outline-none focus:border-[#E4007E] cursor-pointer"
         >
           {spineStatuses.map((st) => (
             <option key={st.id} value={st.id} className="bg-[#181818] text-white font-bold py-2">
@@ -113,7 +113,7 @@ export const TaskStatusAndDates: React.FC<{
         <button
           type="button"
           onClick={() => setFormData(prev => ({ ...prev, isFlagged: !prev.isFlagged }))}
-          className={`w-full flex items-center justify-between p-3 border rounded-xl text-xs font-black transition-all ${
+          className={`w-full flex items-center justify-between p-3 border rounded-xl text-xs font-semibold transition-all ${
             formData.isFlagged
               ? 'bg-rose-600/20 border-rose-600 text-rose-500'
               : 'bg-[#1C1C1C] border-[#2E2E2E] text-slate-400 hover:border-rose-500/50'

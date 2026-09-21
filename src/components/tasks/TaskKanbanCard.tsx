@@ -152,39 +152,39 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
 
   const getPriorityInfo = () => {
     let label = 'BACKLOG';
-    let bg = 'bg-slate-700 text-white font-black';
+    let bg = 'bg-slate-700 text-white font-semibold';
 
     const customSt = spineStatuses.find((s) => s.id === task.status);
     if (customSt) {
       label = customSt.label.toUpperCase();
       const rawLabel = customSt.label.toLowerCase();
-      bg = customSt.gradient ? `bg-gradient-to-r ${customSt.gradient} text-white font-black` : 'bg-[#02376F] text-white font-black';
-      if (rawLabel.includes('novo') || rawLabel.includes('pedid')) bg = 'bg-[#0088FF] text-white font-black';
-      else if (rawLabel.includes('andamento') || rawLabel.includes('produ')) bg = 'bg-amber-500 text-[#000A17] font-black';
-      else if (rawLabel.includes('aprov') || rawLabel.includes('revis')) bg = 'bg-purple-600 text-white font-black';
-      else if (rawLabel.includes('concl') || rawLabel.includes('done') || rawLabel.includes('final')) bg = 'bg-emerald-600 text-white font-black';
-      else if (rawLabel.includes('backlog')) bg = 'bg-slate-700 text-white font-black';
+      bg = customSt.gradient ? `bg-gradient-to-r ${customSt.gradient} text-white font-semibold` : 'bg-[#02376F] text-white font-semibold';
+      if (rawLabel.includes('novo') || rawLabel.includes('pedid')) bg = 'bg-[#0088FF] text-white font-semibold';
+      else if (rawLabel.includes('andamento') || rawLabel.includes('produ')) bg = 'bg-amber-500 text-[#000A17] font-semibold';
+      else if (rawLabel.includes('aprov') || rawLabel.includes('revis')) bg = 'bg-purple-600 text-white font-semibold';
+      else if (rawLabel.includes('concl') || rawLabel.includes('done') || rawLabel.includes('final')) bg = 'bg-emerald-600 text-white font-semibold';
+      else if (rawLabel.includes('backlog')) bg = 'bg-slate-700 text-white font-semibold';
     } else {
       if (task.status === 'blocked') {
         label = 'PRIORIDADE MODERADA';
-        bg = 'bg-orange-600 text-white font-black';
+        bg = 'bg-orange-600 text-white font-semibold';
       } else if (task.status === 'in_progress') {
         label = 'EM ANDAMENTO';
-        bg = 'bg-amber-500 text-[#000A17] font-black';
+        bg = 'bg-amber-500 text-[#000A17] font-semibold';
       } else if (task.status === 'in_review') {
         label = 'EM APROVAÇÃO';
-        bg = 'bg-purple-600 text-white font-black';
+        bg = 'bg-purple-600 text-white font-semibold';
       } else if (task.status === 'done') {
         label = 'CONCLUÍDO';
-        bg = 'bg-emerald-600 text-white font-black';
+        bg = 'bg-emerald-600 text-white font-semibold';
       }
     }
 
     if (wasDeliveredLate(task)) {
-      bg = 'bg-rose-600 text-white font-black';
+      bg = 'bg-rose-600 text-white font-semibold';
       label = `${label} - COM ATRASO`;
     } else if (task.isFlagged || isTaskOverdue(task) || task.status === 'overdue') {
-      bg = 'bg-rose-600 text-white font-black';
+      bg = 'bg-rose-600 text-white font-semibold';
       if (task.isFlagged) {
         label = `URGENTE - ${label}`;
       } else if (isTaskOverdue(task) || task.status === 'overdue') {
@@ -336,7 +336,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
                 return (
                   <span
                     key={lIdx}
-                    className="h-6 px-2.5 rounded-full text-[10px] font-black tracking-wider uppercase inline-flex items-center gap-1.5 shadow-xs border border-white/10"
+                    className="h-6 px-2.5 rounded-full text-[10px] font-semibold tracking-wider uppercase inline-flex items-center gap-1.5 shadow-xs border border-white/10"
                     style={{
                       backgroundColor: style.bg,
                       color: style.text,
@@ -349,7 +349,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
                         className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
                       />
                     ) : (
-                      <div className="w-3.5 h-3.5 rounded-full bg-white/20 text-white flex items-center justify-center text-[8px] font-black shrink-0">
+                      <div className="w-3.5 h-3.5 rounded-full bg-white/20 text-white flex items-center justify-center text-[8px] font-semibold shrink-0">
                         {lbl.name.slice(0, 1).toUpperCase()}
                       </div>
                     )}

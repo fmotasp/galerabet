@@ -135,8 +135,8 @@ export const SettingsView: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            <span className="w-10 h-10 rounded-2xl bg-[#181818] border border-slate-800 text-[#FFB903] flex items-center justify-center font-black text-sm shadow-md">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight flex items-center gap-3">
+            <span className="w-10 h-10 rounded-2xl bg-[#181818] border border-slate-800 text-[#FFB903] flex items-center justify-center font-semibold text-sm shadow-md">
               <Sliders className="w-5 h-5" />
             </span>
             <span>Configurações do Sistema</span>
@@ -171,7 +171,7 @@ export const SettingsView: React.FC = () => {
         >
           <ImageIcon className="w-4 h-4 text-[#FFB903]" />
           <span>Arte da Tela de Login</span>
-          <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-amber-500/20 text-[#FFB903] border border-amber-500/30 font-black">
+          <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-amber-500/20 text-[#FFB903] border border-amber-500/30 font-semibold">
             NOVO
           </span>
         </button>
@@ -331,7 +331,7 @@ export const SettingsView: React.FC = () => {
           {/* List of active statuses */}
           <div className="bg-[#181818] rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-5 text-white">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-slate-800/60">
-              <h4 className="text-xs font-black text-slate-300 uppercase tracking-wider">
+              <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
                 Status Ativos no Sistema ({spineStatuses.length})
               </h4>
               <span className="text-[11px] text-slate-400 font-medium">
@@ -566,7 +566,7 @@ export const SettingsView: React.FC = () => {
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black text-white">Dimensões Recomendadas</h4>
+                  <h4 className="text-xs font-semibold text-white">Dimensões Recomendadas</h4>
                   <p className="text-[11px] text-pink-200/80 font-medium">
                     Proporção vertical 8:9 ou resolução 1920 × 2160 px. Formatos: PNG, JPG, WebP ou SVG.
                   </p>

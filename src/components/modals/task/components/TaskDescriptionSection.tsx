@@ -22,7 +22,7 @@ export const TaskDescriptionSection: React.FC<{
 
     return (
       <div
-        className="leading-relaxed text-xs text-slate-100 font-medium space-y-1.5 prose-sm max-w-none break-words break-all whitespace-pre-wrap [overflow-wrap:anywhere] [&_b]:font-black [&_strong]:font-black [&_strong]:text-white [&_b]:text-white [&_h1]:text-base [&_h1]:font-black [&_h1]:text-white [&_h2]:text-sm [&_h2]:font-extrabold [&_h2]:text-white [&_h3]:text-xs [&_h3]:font-bold [&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5 [&_a]:text-sky-400 [&_a]:hover:text-sky-300 [&_a]:underline [&_a]:cursor-pointer [&_a]:font-semibold"
+        className="leading-relaxed text-xs text-slate-100 font-medium space-y-1.5 prose-sm max-w-none break-words break-all whitespace-pre-wrap [overflow-wrap:anywhere] [&_b]:font-semibold [&_strong]:font-semibold [&_strong]:text-white [&_b]:text-white [&_h1]:text-base [&_h1]:font-semibold [&_h1]:text-white [&_h2]:text-sm [&_h2]:font-extrabold [&_h2]:text-white [&_h3]:text-xs [&_h3]:font-bold [&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5 [&_a]:text-sky-400 [&_a]:hover:text-sky-300 [&_a]:underline [&_a]:cursor-pointer [&_a]:font-semibold"
         dangerouslySetInnerHTML={{ __html: htmlContent }}
       />
     );
@@ -47,7 +47,7 @@ export const TaskDescriptionSection: React.FC<{
             <button
               type="button"
               onClick={() => setIsEditingDescription(false)}
-              className="px-4 py-1.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-xs font-black transition-all shadow-sm cursor-pointer"
+              className="px-4 py-1.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-xs font-semibold transition-all shadow-sm cursor-pointer"
             >
               Concluir
             </button>

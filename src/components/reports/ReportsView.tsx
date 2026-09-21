@@ -471,9 +471,9 @@ export const ReportsView: React.FC = () => {
               <BarChart3 className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-semibold text-white tracking-tight flex items-center gap-2">
                 Relatórios para Gestores
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 uppercase font-black tracking-wider">
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-medium">
                   Dados Reais
                 </span>
               </h1>
@@ -525,7 +525,7 @@ export const ReportsView: React.FC = () => {
           <button
             onClick={handleExportCSV}
             type="button"
-            className="px-3.5 py-2 bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white rounded-xl text-xs font-black flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-[#E4007E]/20 cursor-pointer"
+            className="px-3.5 py-2 bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white rounded-xl text-xs font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-[#E4007E]/20 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Exportar CSV</span>
@@ -538,13 +538,13 @@ export const ReportsView: React.FC = () => {
         {/* SLA / Taxa de Pontualidade */}
         <div className="p-4 bg-[#181818] border border-[#2E2E2E] rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Índice de SLA (Prazos)</span>
+            <span className="text-xs font-medium text-slate-400">Índice de SLA (Prazos)</span>
             <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <Percent className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-white">{metrics.slaRate}%</span>
+            <span className="text-2xl font-semibold text-white">{metrics.slaRate}%</span>
             <span className="text-[10px] text-emerald-400 font-semibold">no prazo previsto</span>
           </div>
           <p className="text-[11px] text-slate-400">
@@ -555,13 +555,13 @@ export const ReportsView: React.FC = () => {
         {/* Demandas Concluídas */}
         <div className="p-4 bg-[#181818] border border-[#2E2E2E] rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Demandas Concluídas</span>
+            <span className="text-xs font-medium text-slate-400">Demandas Concluídas</span>
             <div className="p-1.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-white">{metrics.completedCount}</span>
+            <span className="text-2xl font-semibold text-white">{metrics.completedCount}</span>
             <span className="text-[10px] text-slate-400 font-semibold">de {metrics.total} tarefas</span>
           </div>
           <p className="text-[11px] text-slate-400">
@@ -572,13 +572,13 @@ export const ReportsView: React.FC = () => {
         {/* Demandas Atrasadas Ativas */}
         <div className="p-4 bg-[#181818] border border-[#2E2E2E] rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Atrasadas em Aberto</span>
+            <span className="text-xs font-medium text-slate-400">Atrasadas em Aberto</span>
             <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={`text-2xl font-black ${metrics.overdueActiveCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+            <span className={`text-2xl font-semibold ${metrics.overdueActiveCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
               {metrics.overdueActiveCount}
             </span>
             <span className="text-[10px] text-slate-400 font-semibold">demandas críticas</span>
@@ -591,13 +591,13 @@ export const ReportsView: React.FC = () => {
         {/* Lead Time / Tempo Médio de Ciclo */}
         <div className="p-4 bg-[#181818] border border-[#2E2E2E] rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tempo Médio de Ciclo</span>
+            <span className="text-xs font-medium text-slate-400">Tempo Médio de Ciclo</span>
             <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
               <Clock className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-white">{metrics.avgLeadTime}</span>
+            <span className="text-2xl font-semibold text-white">{metrics.avgLeadTime}</span>
             <span className="text-xs text-slate-300 font-bold">dias</span>
           </div>
           <p className="text-[11px] text-slate-400">
@@ -614,7 +614,7 @@ export const ReportsView: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-[#E4007E]" />
-              <h2 className="text-sm font-black text-white uppercase tracking-wider">Funil de Produção</h2>
+              <h2 className="text-base font-medium text-white tracking-tight">Funil de Produção</h2>
             </div>
           </div>
 
@@ -626,7 +626,7 @@ export const ReportsView: React.FC = () => {
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: st.dotColor }} />
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-lg font-black text-white">{st.count}</span>
+                  <span className="text-lg font-semibold text-white">{st.count}</span>
                   <span className="text-[10px] text-slate-500 font-bold">{st.percentage}%</span>
                 </div>
                 <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden">
@@ -645,7 +645,7 @@ export const ReportsView: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-500" />
-              <h2 className="text-sm font-black text-white uppercase tracking-wider">Tempo Médio (Cycle Time)</h2>
+              <h2 className="text-base font-medium text-white tracking-tight">Tempo Médio (Cycle Time)</h2>
             </div>
           </div>
 
@@ -660,7 +660,7 @@ export const ReportsView: React.FC = () => {
                 }`}
               >
                 {tc.isMax && (
-                  <div className="absolute top-0 right-0 px-2 py-0.5 bg-rose-500 text-[9px] font-black uppercase text-white rounded-bl-lg">
+                  <div className="absolute top-0 right-0 px-2 py-0.5 bg-rose-500 text-[10px] font-medium text-white rounded-bl-lg">
                     Gargalo
                   </div>
                 )}
@@ -669,7 +669,7 @@ export const ReportsView: React.FC = () => {
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: tc.dotColor }} />
                 </div>
                 <div className="flex flex-col">
-                  <span className={`text-lg font-black ${tc.isMax ? 'text-rose-400' : 'text-white'}`}>
+                  <span className={`text-lg font-semibold ${tc.isMax ? 'text-rose-400' : 'text-white'}`}>
                     {tc.displayStr}
                   </span>
                 </div>
@@ -687,7 +687,7 @@ export const ReportsView: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-sky-400" />
-              <h2 className="text-sm font-black text-white uppercase tracking-wider">Produtividade (Design & Audiovisual)</h2>
+              <h2 className="text-base font-medium text-white tracking-tight">Produtividade (Design & Audiovisual)</h2>
             </div>
             <span className="text-xs text-slate-400 font-medium">{memberProductivity.length} profissionais</span>
           </div>
@@ -695,7 +695,7 @@ export const ReportsView: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[#2E2E2E] text-slate-400 font-black uppercase text-[10px] tracking-wider">
+                <tr className="border-b border-white/5 text-slate-400 font-medium text-xs">
                   <th className="pb-2.5">Colaborador</th>
                   <th className="pb-2.5 text-center">Atribuídas</th>
                   <th className="pb-2.5 text-center">Concluídas</th>
@@ -719,7 +719,7 @@ export const ReportsView: React.FC = () => {
                           {m.avatarUrl ? (
                             <img src={m.avatarUrl} alt={m.name} className="w-6 h-6 rounded-full object-cover ring-1 ring-white/10" />
                           ) : (
-                            <div className="w-6 h-6 rounded-full bg-[#2A2A2A] text-white font-black text-[10px] flex items-center justify-center">
+                            <div className="w-6 h-6 rounded-full bg-[#2A2A2A] text-white font-semibold text-[10px] flex items-center justify-center">
                               {m.initials}
                             </div>
                           )}
@@ -730,14 +730,14 @@ export const ReportsView: React.FC = () => {
                         </div>
                       </td>
                       <td className="py-2.5 text-center font-bold text-slate-300">{m.total}</td>
-                      <td className="py-2.5 text-center font-black text-emerald-400">{m.completed}</td>
+                      <td className="py-2.5 text-center font-semibold text-emerald-400">{m.completed}</td>
                       <td className="py-2.5 text-center font-bold text-sky-400">{m.inProgress}</td>
                       <td className="py-2.5 text-center">
                         <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${m.adjustments > 0 ? 'bg-rose-950 text-rose-300' : 'text-slate-500'}`}>
                           {m.adjustments} ({m.adjustmentRate}%)
                         </span>
                       </td>
-                      <td className="py-2.5 text-center font-black text-amber-400">{m.points}</td>
+                      <td className="py-2.5 text-center font-semibold text-amber-400">{m.points}</td>
                     </tr>
                   ))
                 )}
@@ -751,7 +751,7 @@ export const ReportsView: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-emerald-400" />
-              <h2 className="text-sm font-black text-white uppercase tracking-wider">Demandas por Cliente</h2>
+              <h2 className="text-base font-medium text-white tracking-tight">Demandas por Cliente</h2>
             </div>
             <span className="text-xs text-slate-400 font-medium">{clientDistribution.length} marcas</span>
           </div>
@@ -771,11 +771,11 @@ export const ReportsView: React.FC = () => {
                       ) : (
                         <span className="w-3 h-3 rounded-full" style={{ backgroundColor: client.color }} />
                       )}
-                      <span className="text-xs font-black text-white">{client.name}</span>
+                      <span className="text-xs font-semibold text-white">{client.name}</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
                       <span className="font-bold text-slate-400">{client.completed} / {client.total}</span>
-                      <span className="font-black text-emerald-400 text-[11px]">({client.completionRate}%)</span>
+                      <span className="font-semibold text-emerald-400 text-[11px]">({client.completionRate}%)</span>
                     </div>
                   </div>
 
@@ -804,7 +804,7 @@ export const ReportsView: React.FC = () => {
 
                   {/* Distribuição detalhada por todas as colunas / status */}
                   <div className="pt-2 border-t border-[#222222]">
-                    <div className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1.5 flex items-center justify-between">
+                    <div className="text-xs font-medium text-slate-400 mb-1.5 flex items-center justify-between">
                       <span>Status das Colunas:</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
@@ -825,7 +825,7 @@ export const ReportsView: React.FC = () => {
                               style={{ backgroundColor: count > 0 ? (st.dotColor || st.color || '#E4007E') : '#444444' }}
                             />
                             <span>{st.label}:</span>
-                            <span className={count > 0 ? 'text-[#E4007E] font-black' : 'text-slate-500 font-medium'}>
+                            <span className={count > 0 ? 'text-[#E4007E] font-semibold' : 'text-slate-500 font-medium'}>
                               {count}
                             </span>
                           </div>
@@ -846,7 +846,7 @@ export const ReportsView: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-rose-400" />
-              <h2 className="text-sm font-black text-rose-300 uppercase tracking-wider">
+              <h2 className="text-base font-medium text-rose-300 tracking-tight">
                 Atenção da Gestão: Demandas Atrasadas ({metrics.overdueTasks.length})
               </h2>
             </div>
@@ -856,7 +856,7 @@ export const ReportsView: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-rose-500/20 text-rose-300 font-black uppercase text-[10px] tracking-wider">
+                <tr className="border-b border-rose-500/20 text-rose-300 font-medium text-xs">
                   <th className="pb-2">Demanda</th>
                   <th className="pb-2">Cliente</th>
                   <th className="pb-2">Responsável</th>
@@ -873,7 +873,7 @@ export const ReportsView: React.FC = () => {
                       <td className="py-2.5 text-slate-300 font-semibold">{task.projectName || 'Geral'}</td>
                       <td className="py-2.5 text-slate-300">{task.assigneeName || 'Sem membro'}</td>
                       <td className="py-2.5 text-rose-300 font-mono">{task.dueDate}</td>
-                      <td className="py-2.5 text-right font-black text-rose-400">
+                      <td className="py-2.5 text-right font-semibold text-rose-400">
                         +{overdueDays} {overdueDays === 1 ? 'dia' : 'dias'}
                       </td>
                     </tr>

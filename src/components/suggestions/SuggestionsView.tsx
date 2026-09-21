@@ -117,7 +117,7 @@ export const SuggestionsView: React.FC = () => {
             <Lightbulb className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-white tracking-tight">Sugestões de Melhorias</h1>
+            <h1 className="text-2xl font-semibold text-white tracking-tight">Sugestões de Melhorias</h1>
             <p className="text-sm font-medium text-slate-400">
               Checklist de ideias e melhorias sugeridas pelos gestores.
             </p>
@@ -158,7 +158,7 @@ export const SuggestionsView: React.FC = () => {
           <div className="space-y-3">
             <div className="flex items-center gap-2 mb-4">
               <Clock className="w-4 h-4 text-amber-500" />
-              <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
+              <h2 className="text-base font-semibold text-white tracking-tight">
                 Pendentes ({pending.length})
               </h2>
             </div>
@@ -199,7 +199,7 @@ export const SuggestionsView: React.FC = () => {
             <div className="space-y-3 pt-6 border-t border-[#222]">
               <div className="flex items-center gap-2 mb-4">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
+                <h2 className="text-base font-semibold text-white tracking-tight">
                   Concluídas ({completed.length})
                 </h2>
               </div>

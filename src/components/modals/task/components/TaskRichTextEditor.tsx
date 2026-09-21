@@ -21,11 +21,11 @@ export const markdownToHtml = (md: string = ''): string => {
   // Headers
   html = html.replace(/^### (.*$)/gim, '<h3 class="text-sm font-extrabold text-slate-900 dark:text-white mt-3 mb-1">$1</h3>');
   html = html.replace(/^## (.*$)/gim, '<h2 class="text-base font-extrabold text-slate-900 dark:text-white mt-4 mb-1.5">$1</h2>');
-  html = html.replace(/^# (.*$)/gim, '<h1 class="text-lg font-black text-slate-900 dark:text-white mt-4 mb-2">$1</h1>');
+  html = html.replace(/^# (.*$)/gim, '<h1 class="text-lg font-semibold text-slate-900 dark:text-white mt-4 mb-2">$1</h1>');
 
   // Bold & Italic
   html = html.replace(/\*\*\*([^*]+?)\*\*\*/g, '<b><i>$1</i></b>');
-  html = html.replace(/\*\*([^*]+?)\*\*/g, '<strong class="font-black text-slate-900 dark:text-white">$1</strong>');
+  html = html.replace(/\*\*([^*]+?)\*\*/g, '<strong class="font-semibold text-slate-900 dark:text-white">$1</strong>');
   html = html.replace(/\*([^*]+?)\*/g, '<em class="italic">$1</em>');
   html = html.replace(/~~(.*?)~~/g, '<strike class="line-through text-slate-400">$1</strike>');
 
@@ -159,7 +159,7 @@ export const TaskRichTextEditor: React.FC<{
           title="Alternar MAIÚSCULO / Normal"
         >
           <Type className="w-3.5 h-3.5" />
-          <span className="text-[10px] font-black">Tt</span>
+          <span className="text-[10px] font-semibold">Tt</span>
         </button>
 
         <div className="h-4 w-px bg-[#2E2E2E] mx-0.5" />

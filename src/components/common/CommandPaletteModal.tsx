@@ -183,7 +183,7 @@ export const CommandPaletteModal: React.FC = () => {
               <X className="w-4 h-4" />
             </Button>
           )}
-          <span className="hidden sm:flex items-center gap-1 text-[11px] font-black text-slate-300 bg-[#222222] px-2.5 py-1 rounded-xl border border-[#303030] shadow-sm ml-2">
+          <span className="hidden sm:flex items-center gap-1 text-[11px] font-semibold text-slate-300 bg-[#222222] px-2.5 py-1 rounded-xl border border-[#303030] shadow-sm ml-2">
             <Command className="w-3.5 h-3.5 text-[#E4007E]" /> K
           </span>
         </div>
@@ -201,7 +201,7 @@ export const CommandPaletteModal: React.FC = () => {
               {/* Quick Actions */}
               {quickActions.length > 0 && (
                 <div className="space-y-1.5">
-                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-1">
+                  <div className="text-xs font-medium text-slate-400 tracking-wide px-3 py-1">
                     Ações Rápidas
                   </div>
                   {quickActions.map((action) => {
@@ -215,7 +215,7 @@ export const CommandPaletteModal: React.FC = () => {
                         onMouseEnter={() => setSelectedIndex(globalIdx)}
                         className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all ${
                           isSelected
-                            ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-lg shadow-[#E4007E]/25 font-black'
+                            ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-lg shadow-[#E4007E]/25 font-semibold'
                             : 'bg-[#222222]/70 hover:bg-[#222222] border border-[#2E2E2E] text-white'
                         }`}
                       >
@@ -232,7 +232,7 @@ export const CommandPaletteModal: React.FC = () => {
                           <div>
                             <div
                               className={`text-xs ${
-                                isSelected ? 'font-black text-white' : 'font-bold text-white'
+                                isSelected ? 'font-semibold text-white' : 'font-bold text-white'
                               }`}
                             >
                               {action.title}
@@ -256,7 +256,7 @@ export const CommandPaletteModal: React.FC = () => {
               {/* Tasks */}
               {matchedTasks.length > 0 && (
                 <div className="space-y-1.5">
-                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-1">
+                  <div className="text-xs font-medium text-slate-400 tracking-wide px-3 py-1">
                     Tarefas ({matchedTasks.length})
                   </div>
                   {matchedTasks.map((t) => {
@@ -283,7 +283,7 @@ export const CommandPaletteModal: React.FC = () => {
                         onMouseEnter={() => setSelectedIndex(globalIdx)}
                         className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all ${
                           isSelected
-                            ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-lg shadow-[#E4007E]/25 font-black'
+                            ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-lg shadow-[#E4007E]/25 font-semibold'
                             : 'bg-[#222222]/70 hover:bg-[#222222] border border-[#2E2E2E] text-white'
                         }`}
                       >
@@ -300,7 +300,7 @@ export const CommandPaletteModal: React.FC = () => {
                           <div className="min-w-0 flex-1">
                             <div
                               className={`text-xs truncate ${
-                                isSelected ? 'font-black text-white' : 'font-bold text-white'
+                                isSelected ? 'font-semibold text-white' : 'font-bold text-white'
                               }`}
                             >
                               {t.title}

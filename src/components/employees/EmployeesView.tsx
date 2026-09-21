@@ -401,7 +401,7 @@ export const EmployeesView: React.FC = () => {
                             alt={emp.name}
                             size="xl"
                             status={getStatusDot(emp.status)}
-                            className="!w-16 !h-16 shadow-md [&>div]:bg-[#01264E] [&>div]:text-white [&>div]:text-lg [&>div]:font-black"
+                            className="!w-16 !h-16 shadow-md [&>div]:bg-[#01264E] [&>div]:text-white [&>div]:text-lg [&>div]:font-semibold"
                           />
                         </div>
                       </div>
@@ -440,7 +440,7 @@ export const EmployeesView: React.FC = () => {
 
                     {/* Card Footer: Role in Uppercase */}
                     <div className="bg-[#001124] px-4 py-3 border-t border-slate-800/80 text-center">
-                      <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 group-hover:text-white transition-colors truncate block">
+                      <span className="text-xs font-medium text-slate-300 group-hover:text-white transition-colors truncate block">
                         {emp.role || emp.department || 'COLABORADOR'}
                       </span>
                     </div>
@@ -453,7 +453,7 @@ export const EmployeesView: React.FC = () => {
             <div className="bg-[#181818] rounded-3xl border border-slate-800 overflow-hidden shadow-lg">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800 text-[#E4007E] font-black uppercase text-[11px] tracking-wider bg-[#001124]">
+                  <tr className="border-b border-slate-800 text-slate-400 font-medium text-xs bg-[#161616]">
                     <th className="px-6 py-4">Membro</th>
                     <th className="px-6 py-4">Cargo</th>
                     <th className="px-6 py-4">Departamento</th>
@@ -488,7 +488,7 @@ export const EmployeesView: React.FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-slate-300 font-bold uppercase text-[11px]">{emp.role || '—'}</td>
+                        <td className="px-6 py-4 text-slate-300 font-medium text-sm">{emp.role || '—'}</td>
                         <td className="px-6 py-4 text-slate-300">{emp.department || 'Geral'}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
@@ -540,10 +540,10 @@ export const EmployeesView: React.FC = () => {
             {/* Header: Selected Team / Member */}
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-[10px] font-extrabold tracking-wider uppercase text-slate-400 block">
+                <span className="text-xs font-medium text-slate-400 block">
                   SELECIONADO
                 </span>
-                <h2 className="text-xl font-black text-white tracking-tight mt-0.5 truncate max-w-[200px]">
+                <h2 className="text-xl font-semibold text-white tracking-tight mt-0.5 truncate max-w-[200px]">
                   {sidebarEmployee ? sidebarEmployee.name : 'Equipe Geral'}
                 </h2>
                 <p className="text-xs text-slate-400 font-medium">
@@ -614,10 +614,10 @@ export const EmployeesView: React.FC = () => {
 
                 {/* Inner Text */}
                 <div className="absolute flex flex-col items-center justify-center text-center">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-medium text-slate-400">
                     TIME LOG
                   </span>
-                  <span className="text-2xl font-black text-white tracking-tight">
+                  <span className="text-2xl font-semibold text-white tracking-tight">
                     {stats.rate}%
                   </span>
                 </div>
@@ -649,10 +649,10 @@ export const EmployeesView: React.FC = () => {
                 {/* Total */}
                 <div className="bg-[#001124] p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
                   <div className="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r" />
-                  <span className="text-[10px] font-black tracking-wider uppercase text-slate-400 block pl-1">
+                  <span className="text-xs font-medium text-slate-400 block pl-1">
                     TOTAL
                   </span>
-                  <span className="text-xl font-black text-white block mt-1 pl-1">
+                  <span className="text-xl font-semibold text-white block mt-1 pl-1">
                     {stats.total}
                   </span>
                 </div>
@@ -660,10 +660,10 @@ export const EmployeesView: React.FC = () => {
                 {/* Concluídas */}
                 <div className="bg-[#001124] p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
                   <div className="absolute left-0 top-3 bottom-3 w-1 bg-emerald-500 rounded-r" />
-                  <span className="text-[10px] font-black tracking-wider uppercase text-slate-400 block pl-1">
+                  <span className="text-xs font-medium text-slate-400 block pl-1">
                     CONCLUÍDAS
                   </span>
-                  <span className="text-xl font-black text-white block mt-1 pl-1">
+                  <span className="text-xl font-semibold text-white block mt-1 pl-1">
                     {stats.completed}
                   </span>
                 </div>
@@ -671,10 +671,10 @@ export const EmployeesView: React.FC = () => {
                 {/* Em Andamento */}
                 <div className="bg-[#001124] p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
                   <div className="absolute left-0 top-3 bottom-3 w-1 bg-cyan-400 rounded-r" />
-                  <span className="text-[10px] font-black tracking-wider uppercase text-slate-400 block pl-1">
+                  <span className="text-xs font-medium text-slate-400 block pl-1">
                     EM ANDAMENTO
                   </span>
-                  <span className="text-xl font-black text-white block mt-1 pl-1">
+                  <span className="text-xl font-semibold text-white block mt-1 pl-1">
                     {stats.inProgress}
                   </span>
                 </div>
@@ -682,10 +682,10 @@ export const EmployeesView: React.FC = () => {
                 {/* Aguardando / Pendentes */}
                 <div className="bg-[#001124] p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
                   <div className="absolute left-0 top-3 bottom-3 w-1 bg-amber-500 rounded-r" />
-                  <span className="text-[10px] font-black tracking-wider uppercase text-slate-400 block pl-1">
+                  <span className="text-xs font-medium text-slate-400 block pl-1">
                     AGUARDANDO
                   </span>
-                  <span className="text-xl font-black text-white block mt-1 pl-1">
+                  <span className="text-xl font-semibold text-white block mt-1 pl-1">
                     {stats.waiting}
                   </span>
                 </div>
@@ -701,7 +701,7 @@ export const EmployeesView: React.FC = () => {
                     <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#001124]" />
                   </div>
                   <div>
-                    <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block">
+                    <span className="text-xs font-medium text-slate-400 block">
                       CENTRAL DE AVISOS
                     </span>
                     <span className="text-xs font-bold text-white group-hover:text-[#FFB903] transition-colors">

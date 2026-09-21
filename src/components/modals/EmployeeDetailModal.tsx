@@ -185,7 +185,7 @@ export const EmployeeDetailModal: React.FC = () => {
 
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                <h2 className="text-xl sm:text-2xl font-semibold text-white tracking-tight">
                   {emp.name}
                 </h2>
                 <Badge variant="primary" size="sm">
@@ -241,31 +241,31 @@ export const EmployeeDetailModal: React.FC = () => {
         {/* 2. Métricas & Desempenho */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10">
           <div className="bg-[#121212] border border-[#282828] rounded-2xl p-3.5 text-center">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">
               Total Atribuídas
             </span>
-            <span className="text-2xl font-black text-white">{totalCount}</span>
+            <span className="text-2xl font-semibold text-white">{totalCount}</span>
           </div>
 
           <div className="bg-[#121212] border border-[#282828] rounded-2xl p-3.5 text-center">
-            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 block mb-1">
               Concluídas / Postar
             </span>
-            <span className="text-2xl font-black text-emerald-400">{doneCount}</span>
+            <span className="text-2xl font-semibold text-emerald-400">{doneCount}</span>
           </div>
 
           <div className="bg-[#121212] border border-[#282828] rounded-2xl p-3.5 text-center">
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#E4007E] block mb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#E4007E] block mb-1">
               Em Produção
             </span>
-            <span className="text-2xl font-black text-[#E4007E]">{doingCount}</span>
+            <span className="text-2xl font-semibold text-[#E4007E]">{doingCount}</span>
           </div>
 
           <div className="bg-[#121212] border border-[#282828] rounded-2xl p-3.5 text-center">
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#FFB903] block mb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#FFB903] block mb-1">
               Taxa de Eficiência
             </span>
-            <span className="text-2xl font-black text-[#FFB903]">{rate}%</span>
+            <span className="text-2xl font-semibold text-[#FFB903]">{rate}%</span>
           </div>
         </div>
 
@@ -274,7 +274,7 @@ export const EmployeeDetailModal: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-[#E4007E]" />
-              <h3 className="text-sm font-black text-white uppercase tracking-wider">
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
                 Demandas do Colaborador ({displayedTasks.length})
               </h3>
             </div>
@@ -287,7 +287,7 @@ export const EmployeeDetailModal: React.FC = () => {
                 setIsNewTaskModalOpen(true);
               }}
               leftIcon={<Plus className="w-3.5 h-3.5" />}
-              className="self-start sm:self-auto font-black shadow-xs"
+              className="self-start sm:self-auto font-semibold shadow-xs"
             >
               Nova Tarefa
             </Button>
@@ -300,7 +300,7 @@ export const EmployeeDetailModal: React.FC = () => {
               onClick={() => setActiveTab('all')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'all'
-                  ? 'bg-[#282828] text-white shadow-xs font-black'
+                  ? 'bg-[#282828] text-white shadow-xs font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -311,7 +311,7 @@ export const EmployeeDetailModal: React.FC = () => {
               onClick={() => setActiveTab('doing')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'doing'
-                  ? 'bg-[#E4007E]/20 text-[#E4007E] border border-[#E4007E]/40 font-black'
+                  ? 'bg-[#E4007E]/20 text-[#E4007E] border border-[#E4007E]/40 font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -322,7 +322,7 @@ export const EmployeeDetailModal: React.FC = () => {
               onClick={() => setActiveTab('review')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'review'
-                  ? 'bg-amber-950/60 text-amber-300 border border-amber-800/60 font-black'
+                  ? 'bg-amber-950/60 text-amber-300 border border-amber-800/60 font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -333,7 +333,7 @@ export const EmployeeDetailModal: React.FC = () => {
               onClick={() => setActiveTab('backlog')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'backlog'
-                  ? 'bg-slate-800 text-slate-200 border border-slate-700 font-black'
+                  ? 'bg-slate-800 text-slate-200 border border-slate-700 font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -344,7 +344,7 @@ export const EmployeeDetailModal: React.FC = () => {
               onClick={() => setActiveTab('done')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'done'
-                  ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/60 font-black'
+                  ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/60 font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -388,7 +388,7 @@ export const EmployeeDetailModal: React.FC = () => {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4
-                            className={`font-black text-sm text-white group-hover:text-[#E4007E] transition-colors truncate max-w-[280px] sm:max-w-[340px] ${
+                            className={`font-semibold text-sm text-white group-hover:text-[#E4007E] transition-colors truncate max-w-[280px] sm:max-w-[340px] ${
                               isDone ? 'line-through text-slate-400' : ''
                             }`}
                           >
@@ -402,7 +402,7 @@ export const EmployeeDetailModal: React.FC = () => {
                             const style = getLabelColorHex(firstLabel.name, firstLabel.color);
                             return (
                               <span
-                                className="text-[10px] px-2 py-0.2 rounded-md font-black uppercase shadow-2xs border"
+                                className="text-[10px] px-2 py-0.2 rounded-md font-semibold uppercase shadow-2xs border"
                                 style={{
                                   backgroundColor: style.bg,
                                   color: style.text,

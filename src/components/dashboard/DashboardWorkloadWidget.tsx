@@ -24,7 +24,7 @@ export const DashboardWorkloadWidget: React.FC<DashboardWorkloadWidgetProps> = R
             </p>
           </div>
           {totalBacklogCount > 0 && (
-            <span className="text-[10px] font-black bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] px-2.5 py-1 rounded-full animate-pulse shrink-0">
+            <span className="text-[10px] font-semibold bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] px-2.5 py-1 rounded-full animate-pulse shrink-0">
               {totalBacklogCount} no Backlog
             </span>
           )}

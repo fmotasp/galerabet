@@ -97,13 +97,13 @@ export const TaskModalHeader: React.FC<{
                   const newTitle = e.target.value;
                   setFormData((prev) => ({ ...prev, title: newTitle }));
                 }}
-                className="w-full !bg-transparent !border-0 !border-none !outline-none !ring-0 !shadow-none focus:!ring-0 focus:!outline-none focus:!bg-transparent hover:!bg-transparent p-0 text-xl sm:text-2xl font-black text-white tracking-tight drop-shadow-xs cursor-pointer focus:cursor-text placeholder:text-white/60"
+                className="w-full !bg-transparent !border-0 !border-none !outline-none !ring-0 !shadow-none focus:!ring-0 focus:!outline-none focus:!bg-transparent hover:!bg-transparent p-0 text-xl sm:text-2xl font-semibold text-white tracking-tight drop-shadow-xs cursor-pointer focus:cursor-text placeholder:text-white/60"
                 style={{ backgroundColor: 'transparent', background: 'transparent', border: 'none', outline: 'none', boxShadow: 'none' }}
                 placeholder="Título da Demanda"
                 title="Clique para editar o título"
               />
             ) : (
-              <h2 className="text-xl font-black text-white tracking-tight drop-shadow-xs">
+              <h2 className="text-xl font-semibold text-white tracking-tight drop-shadow-xs">
                 Criar Nova Tarefa
               </h2>
             )}
@@ -135,7 +135,7 @@ export const TaskModalHeader: React.FC<{
               const displayDate = formData.deliveredAt || new Date().toLocaleDateString('pt-BR');
 
               return (
-                <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-black tracking-wide shadow-xs animate-in fade-in duration-200 select-none">
+                <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-semibold tracking-wide shadow-xs animate-in fade-in duration-200 select-none">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>Data de Entrega: {displayDate}</span>
                 </div>
@@ -151,7 +151,7 @@ export const TaskModalHeader: React.FC<{
               });
               if (overdueDays > 0) {
                 return (
-                  <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-rose-950/80 text-rose-300 border border-rose-500/80 rounded-xl text-xs font-black tracking-wide shadow-lg shadow-rose-950/60 animate-pulse select-none">
+                  <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-rose-950/80 text-rose-300 border border-rose-500/80 rounded-xl text-xs font-semibold tracking-wide shadow-lg shadow-rose-950/60 animate-pulse select-none">
                     <span className="text-sm">⚠️</span>
                     <span>Atrasado ({overdueDays} {overdueDays === 1 ? 'dia' : 'dias'})</span>
                   </div>
@@ -164,7 +164,7 @@ export const TaskModalHeader: React.FC<{
               <button
                 type="button"
                 onClick={handleShareTask}
-                className={`px-3 py-2 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 text-xs font-black shadow-xs active:scale-95 ${
+                className={`px-3 py-2 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 text-xs font-semibold shadow-xs active:scale-95 ${
                   copiedLink
                     ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
                     : 'text-slate-300 hover:text-white bg-[#222222]/80 hover:bg-[#2A2A2A] border-[#2E2E2E]'
@@ -204,7 +204,7 @@ export const TaskModalHeader: React.FC<{
               onClick={() => setActiveDrawerTab('details')}
               className={`py-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeDrawerTab === 'details'
-                  ? 'border-[#E4007E] text-transparent bg-clip-text bg-gradient-to-r from-[#E4007E] to-[#E94E18] font-black'
+                  ? 'border-[#E4007E] text-transparent bg-clip-text bg-gradient-to-r from-[#E4007E] to-[#E94E18] font-semibold'
                   : 'border-transparent text-slate-300 hover:text-white'
               }`}
             >
@@ -217,13 +217,13 @@ export const TaskModalHeader: React.FC<{
               onClick={() => setActiveDrawerTab('attachments')}
               className={`py-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeDrawerTab === 'attachments'
-                  ? 'border-[#E4007E] text-transparent bg-clip-text bg-gradient-to-r from-[#E4007E] to-[#E94E18] font-black'
+                  ? 'border-[#E4007E] text-transparent bg-clip-text bg-gradient-to-r from-[#E4007E] to-[#E94E18] font-semibold'
                   : 'border-transparent text-slate-300 hover:text-white'
               }`}
             >
               <Paperclip className={`w-4 h-4 ${activeDrawerTab === 'attachments' ? 'text-[#E4007E]' : ''}`} />
               <span>Arquivos Entregues</span>
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${activeDrawerTab === 'attachments' ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white font-black' : 'bg-[#1C1C1C] border border-[#303030] text-white'}`}>
+              <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${activeDrawerTab === 'attachments' ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white font-semibold' : 'bg-[#1C1C1C] border border-[#303030] text-white'}`}>
                 {attachments.length}
               </span>
             </button>
@@ -233,13 +233,13 @@ export const TaskModalHeader: React.FC<{
               onClick={() => setActiveDrawerTab('history')}
               className={`py-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeDrawerTab === 'history'
-                  ? 'border-[#E4007E] text-transparent bg-clip-text bg-gradient-to-r from-[#E4007E] to-[#E94E18] font-black'
+                  ? 'border-[#E4007E] text-transparent bg-clip-text bg-gradient-to-r from-[#E4007E] to-[#E94E18] font-semibold'
                   : 'border-transparent text-slate-300 hover:text-white'
               }`}
             >
               <History className={`w-4 h-4 ${activeDrawerTab === 'history' ? 'text-[#E4007E]' : ''}`} />
               <span>Ações & Histórico</span>
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${activeDrawerTab === 'history' ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white font-black' : 'bg-[#1C1C1C] border border-[#303030] text-white'}`}>
+              <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${activeDrawerTab === 'history' ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white font-semibold' : 'bg-[#1C1C1C] border border-[#303030] text-white'}`}>
                 {timelineActions.length}
               </span>
             </button>

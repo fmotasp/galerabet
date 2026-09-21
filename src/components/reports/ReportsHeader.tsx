@@ -17,7 +17,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = React.memo(
               <BarChart2 className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight flex items-center gap-2">
                 <span>Relatório de Produtividade por Colaborador</span>
               </h1>
               <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
@@ -43,7 +43,7 @@ export const ReportsHeader: React.FC<ReportsHeaderProps> = React.memo(
           <Button
             onClick={onPrint}
             leftIcon={<Printer className="w-4 h-4" />}
-            className="text-xs font-black"
+            className="text-xs font-semibold"
             title="Imprimir ou Salvar em PDF"
             aria-label="Imprimir ou Salvar em PDF"
           >

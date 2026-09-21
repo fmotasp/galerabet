@@ -93,7 +93,7 @@ export const TaskMembersAndClients: React.FC<{
                             alt={m.name}
                             size="sm"
                             ring
-                            className="!w-9 !h-9 ring-2 ring-[#E4007E]/60 group-hover:ring-rose-500 transition-all shadow-xs text-xs font-black"
+                            className="!w-9 !h-9 ring-2 ring-[#E4007E]/60 group-hover:ring-rose-500 transition-all shadow-xs text-xs font-semibold"
                           />
                           <div className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                             <X className="w-2.5 h-2.5" />
@@ -135,7 +135,7 @@ export const TaskMembersAndClients: React.FC<{
                 <div className="absolute left-0 top-11 w-72 bg-[#141414] border border-[#2E2E2E] rounded-2xl shadow-2xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-100">
                   <div className="flex items-center justify-between pb-3 border-b border-[#2E2E2E] mb-3">
                     <div className="w-5" />
-                    <h4 className="text-sm font-black text-center text-white">
+                    <h4 className="text-sm font-semibold text-center text-white">
                       Membros
                     </h4>
                     <button
@@ -244,7 +244,7 @@ export const TaskMembersAndClients: React.FC<{
                         className="w-full h-full object-contain"
                       />
                     ) : (
-                      <div className="w-full h-full rounded-xs bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-black text-[9px]">
+                      <div className="w-full h-full rounded-xs bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-semibold text-[9px]">
                         {lbl.slice(0, 2).toUpperCase()}
                       </div>
                     )}
@@ -293,7 +293,7 @@ export const TaskMembersAndClients: React.FC<{
               <div className="absolute left-0 top-11 w-80 bg-[#141414] border border-[#2A2A2A] rounded-2xl shadow-2xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-100">
                 <div className="flex items-center justify-between pb-3 border-b border-[#262626] mb-3">
                   <div className="w-5" />
-                  <h4 className="text-sm font-black text-center text-white">
+                  <h4 className="text-sm font-semibold text-center text-white">
                     Clientes
                   </h4>
                   <button
@@ -355,7 +355,7 @@ export const TaskMembersAndClients: React.FC<{
                                   className="w-full h-full object-contain"
                                 />
                               ) : (
-                                <div className="w-full h-full rounded-md bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-black text-[10px]">
+                                <div className="w-full h-full rounded-md bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-semibold text-[10px]">
                                   {c.name.slice(0, 2).toUpperCase()}
                                 </div>
                               )}

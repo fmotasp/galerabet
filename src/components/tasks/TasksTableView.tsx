@@ -136,7 +136,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
           <button
             onClick={() => setIsNewTaskModalOpen(true)}
             aria-label="Adicionar Nova Demanda"
-            className="px-5 py-2.5 bg-[#E4007E] hover:bg-[#c2006b] text-white rounded-2xl text-xs font-black shadow-md shadow-pink-600/10 transition-all active:scale-98 flex items-center gap-1.5 cursor-pointer"
+            className="px-5 py-2.5 bg-[#E4007E] hover:bg-[#c2006b] text-white rounded-2xl text-xs font-semibold shadow-md shadow-pink-600/10 transition-all active:scale-98 flex items-center gap-1.5 cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>Nova Demanda</span>
@@ -190,7 +190,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-[#2A2A2A] text-[#E4007E] font-black text-[11px] uppercase tracking-wider bg-[#141414]">
+              <tr className="border-b border-[#2A2A2A] text-[#E4007E] font-semibold text-[11px] uppercase tracking-wider bg-[#141414]">
                 <th className="w-12 px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
@@ -304,7 +304,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
                           <select
                             value={task.status}
                             onChange={(e) => moveTaskStatus(task.id, e.target.value as TaskStatus)}
-                            className={`w-full py-1.5 pl-3 pr-8 rounded-full text-xs font-black border uppercase tracking-wider text-center appearance-none cursor-pointer transition-colors focus:outline-none ${pillColor}`}
+                            className={`w-full py-1.5 pl-3 pr-8 rounded-full text-xs font-semibold border uppercase tracking-wider text-center appearance-none cursor-pointer transition-colors focus:outline-none ${pillColor}`}
                           >
                             {spineStatuses.map((status) => (
                               <option key={status.id} value={status.id} className="text-slate-800 bg-white">

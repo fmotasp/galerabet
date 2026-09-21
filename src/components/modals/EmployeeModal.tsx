@@ -496,7 +496,7 @@ export const EmployeeModal: React.FC = () => {
               />
             ) : (
               <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg border-2 border-[#333333]"
+                className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-semibold text-xl shadow-lg border-2 border-[#333333]"
                 style={{
                   backgroundColor:
                     LABEL_COLORS.find((c) => c.id === formData.labelColor)?.hex || '#89609e',
@@ -791,7 +791,7 @@ export const EmployeeModal: React.FC = () => {
               size="md"
               isLoading={isSubmitting}
               disabled={isSubmitting}
-              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-xs font-black"
+              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-xs font-semibold"
             >
               {editingEmployee ? 'Salvar Alterações' : 'Cadastrar Membro'}
             </Button>

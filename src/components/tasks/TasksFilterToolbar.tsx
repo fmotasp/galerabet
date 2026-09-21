@@ -86,7 +86,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                         />
                       ) : (
                         <span
-                          className="w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0"
+                          className="w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-semibold text-white shrink-0"
                           style={{ backgroundColor: client.color }}
                         >
                           {client.name.substring(0, 1).toUpperCase()}
@@ -165,7 +165,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                               />
                             ) : (
                               <span
-                                className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black text-white shrink-0"
+                                className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-semibold text-white shrink-0"
                                 style={{ backgroundColor: client.color }}
                               >
                                 {client.name.substring(0, 1).toUpperCase()}
@@ -223,7 +223,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                         const parent = target.parentElement;
                         if (parent && !parent.querySelector('.client-fallback-badge')) {
                           const span = document.createElement('span');
-                          span.className = 'client-fallback-badge w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0';
+                          span.className = 'client-fallback-badge w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-semibold text-white shrink-0';
                           span.style.backgroundColor = client.color || '#10B981';
                           span.textContent = client.name.substring(0, 1).toUpperCase();
                           parent.insertBefore(span, target);
@@ -232,7 +232,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                     />
                   ) : (
                     <span
-                      className="w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-black text-white shrink-0"
+                      className="w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-semibold text-white shrink-0"
                       style={{ backgroundColor: client.color }}
                     >
                       {client.name.substring(0, 1).toUpperCase()}
@@ -273,7 +273,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                   {emp.avatarUrl ? (
                     <img src={emp.avatarUrl} alt={emp.name} className="w-4 h-4 rounded-full object-cover" />
                   ) : (
-                    <div className="w-4 h-4 rounded-full bg-[#262626] border border-[#303030] text-[9px] font-black flex items-center justify-center text-[#E4007E]">
+                    <div className="w-4 h-4 rounded-full bg-[#262626] border border-[#303030] text-[9px] font-semibold flex items-center justify-center text-[#E4007E]">
                       {emp.initials}
                     </div>
                   )}
@@ -382,7 +382,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                                 className="w-6 h-6 rounded-full object-cover shrink-0"
                               />
                             ) : (
-                              <div className="w-6 h-6 rounded-full bg-[#262626] text-[#E4007E] font-black text-[10px] flex items-center justify-center shrink-0">
+                              <div className="w-6 h-6 rounded-full bg-[#262626] text-[#E4007E] font-semibold text-[10px] flex items-center justify-center shrink-0">
                                 {emp.initials}
                               </div>
                             )}

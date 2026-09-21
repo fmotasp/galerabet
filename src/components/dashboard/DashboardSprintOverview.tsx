@@ -59,7 +59,7 @@ export const DashboardSprintOverview: React.FC<DashboardSprintOverviewProps> = R
             </svg>
             {/* Donut Center Percentage */}
             <div className="absolute flex flex-col items-center justify-center">
-              <span className="font-black text-2xl text-white">
+              <span className="font-semibold text-2xl text-white">
                 {metrics.completionPercentage}%
               </span>
             </div>

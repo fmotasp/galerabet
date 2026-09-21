@@ -490,7 +490,7 @@ export const ProjectModal: React.FC = () => {
               type="submit"
               variant="primary"
               size="md"
-              className="px-5 py-2.5 text-xs font-black shadow-lg shadow-[#E4007E]/25"
+              className="px-5 py-2.5 text-xs font-semibold shadow-lg shadow-[#E4007E]/25"
             >
               {editingProject ? 'Salvar Alterações' : 'Adicionar Cliente'}
             </Button>

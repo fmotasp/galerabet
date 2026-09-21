@@ -394,11 +394,11 @@ export const LoginView: React.FC = () => {
             /* ================= TELINHA DE PRIMEIRO ACESSO ================= */
             <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
               <div className="space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] text-[11px] font-black tracking-wider uppercase">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] text-[11px] font-semibold tracking-wider uppercase">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Primeiro Acesso</span>
                 </div>
-                <h2 className="text-2xl font-black text-white tracking-tight">
+                <h2 className="text-2xl font-semibold text-white tracking-tight">
                   Defina sua Nova Senha
                 </h2>
                 <p className="text-xs text-slate-400 leading-relaxed font-medium">
@@ -464,7 +464,7 @@ export const LoginView: React.FC = () => {
                 <button
                   type="submit"
                   disabled={firstAccessLoading}
-                  className="w-full py-3.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-base font-black shadow-lg shadow-[#E4007E]/25 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-center"
+                  className="w-full py-3.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-base font-semibold shadow-lg shadow-[#E4007E]/25 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-center"
                 >
                   {firstAccessLoading ? 'Salvando Senha...' : 'Salvar Nova Senha e Entrar'}
                 </button>
@@ -536,7 +536,7 @@ export const LoginView: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-base font-black shadow-lg shadow-[#E4007E]/25 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-center"
+                  className="w-full py-3.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-base font-semibold shadow-lg shadow-[#E4007E]/25 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-center"
                 >
                   {loading ? 'Entrando...' : 'Entrar'}
                 </button>
@@ -620,7 +620,7 @@ export const LoginView: React.FC = () => {
               <Info className="w-6 h-6" />
             </div>
 
-            <h3 className="text-xl font-black text-white mb-2">
+            <h3 className="text-xl font-semibold text-white mb-2">
               {infoModal === 'signup' ? 'Cadastro de Usuário' : 'Recuperação de Senha'}
             </h3>
 
@@ -633,7 +633,7 @@ export const LoginView: React.FC = () => {
             <button
               type="button"
               onClick={() => setInfoModal(null)}
-              className="w-full py-3 bg-[#E4007E] hover:bg-[#c2006b] text-white rounded-xl text-xs font-black transition-all shadow-md cursor-pointer"
+              className="w-full py-3 bg-[#E4007E] hover:bg-[#c2006b] text-white rounded-xl text-xs font-semibold transition-all shadow-md cursor-pointer"
             >
               Entendido
             </button>
@@ -673,11 +673,11 @@ export const LoginView: React.FC = () => {
 
             {/* Welcome Title & User Name */}
             <div className="space-y-2.5">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] text-[11px] font-black tracking-widest uppercase shadow-xs">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] text-[11px] font-semibold tracking-widest uppercase shadow-xs">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Acesso Autorizado</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
                 Bem-vindo(a), <span className="text-[#E4007E]">{welcomeUser.name}</span>!
               </h2>
               <p className="text-xs sm:text-sm text-slate-400 font-medium">
@@ -692,7 +692,7 @@ export const LoginView: React.FC = () => {
                 <span className="text-xs font-bold text-slate-200">
                   Carregando os dados...
                 </span>
-                <span className="px-2.5 py-0.5 rounded-lg bg-[#E4007E] text-white font-black text-xs shadow-md">
+                <span className="px-2.5 py-0.5 rounded-lg bg-[#E4007E] text-white font-semibold text-xs shadow-md">
                   {countdown}s
                 </span>
               </div>

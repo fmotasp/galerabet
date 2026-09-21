@@ -22,7 +22,7 @@ export const TaskLightboxModal: React.FC<{
             <ImageIcon className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-black truncate">{previewingReference.name}</h3>
+            <h3 className="text-sm font-semibold truncate">{previewingReference.name}</h3>
             <p className="text-[11px] text-slate-400">Imagem de Referência • Visualização em Alta Resolução</p>
           </div>
         </div>

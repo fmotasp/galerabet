@@ -151,7 +151,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
               type="button"
               disabled={isPostingAttachment}
               onClick={handleUploadSelectedFileAttachment}
-              className="relative overflow-hidden w-full py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white disabled:opacity-80 rounded-xl text-xs font-black transition-all shadow-md shadow-[#E4007E]/25 flex items-center justify-center gap-1.5 active:scale-98 cursor-pointer"
+              className="relative overflow-hidden w-full py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white disabled:opacity-80 rounded-xl text-xs font-semibold transition-all shadow-md shadow-[#E4007E]/25 flex items-center justify-center gap-1.5 active:scale-98 cursor-pointer"
             >
               {isPostingAttachment && uploadTotalCount > 0 && (
                 <div
@@ -253,7 +253,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
                 <div className="flex items-center justify-between gap-1.5 min-w-0">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <div
-                      className={`p-1 rounded-lg text-white shrink-0 flex items-center justify-center font-black ${
+                      className={`p-1 rounded-lg text-white shrink-0 flex items-center justify-center font-semibold ${
                         isPsd
                           ? 'bg-[#181818] text-[#38BDF8] text-[11px] border border-[#2E2E2E] w-6 h-6 shadow-xs'
                           : isZip
@@ -282,12 +282,12 @@ export const TaskDriveAttachmentsTab: React.FC<{
                       title="Clique para abrir o arquivo PSD no Google Drive"
                     >
                       <div className="w-14 h-14 rounded-2xl bg-[#141414] border-2 border-[#38BDF8]/60 flex items-center justify-center shadow-xl mb-2 group-hover/psd:scale-110 transition-transform">
-                        <span className="text-[#38BDF8] font-black text-2xl tracking-tighter select-none">Ps</span>
+                        <span className="text-[#38BDF8] font-semibold text-2xl tracking-tighter select-none">Ps</span>
                       </div>
                       <span className="text-[10px] font-bold text-white truncate max-w-full block select-none px-1" title={att.name}>
                         {att.name}
                       </span>
-                      <span className="text-[9px] text-slate-300 font-black mt-1 uppercase tracking-wider bg-[#141414] px-2 py-0.5 rounded-md border border-[#2E2E2E] shadow-xs">
+                      <span className="text-[9px] text-slate-300 font-semibold mt-1 uppercase tracking-wider bg-[#141414] px-2 py-0.5 rounded-md border border-[#2E2E2E] shadow-xs">
                         {att.bytes ? `${(att.bytes / (1024 * 1024)).toFixed(1)} MB` : 'ARQUIVO PSD'}
                       </span>
                     </a>
@@ -305,7 +305,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
                       <span className="text-[10px] font-bold text-amber-200 truncate max-w-full block select-none px-1" title={att.name}>
                         {att.name}
                       </span>
-                      <span className="text-[9px] text-amber-400 font-black mt-1 uppercase tracking-wider bg-[#141414] px-2 py-0.5 rounded-md border border-[#78350F] shadow-xs">
+                      <span className="text-[9px] text-amber-400 font-semibold mt-1 uppercase tracking-wider bg-[#141414] px-2 py-0.5 rounded-md border border-[#78350F] shadow-xs">
                         {att.bytes ? `${(att.bytes / (1024 * 1024)).toFixed(1)} MB` : 'PACOTE ZIP'}
                       </span>
                     </a>

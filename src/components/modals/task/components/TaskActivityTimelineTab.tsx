@@ -29,7 +29,7 @@ export const TaskActivityTimelineTab: React.FC<{
           </div>
           <div className="min-w-0">
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Total de Ações</span>
-            <span className="text-sm font-black text-white leading-tight">{timelineActions.length}</span>
+            <span className="text-sm font-semibold text-white leading-tight">{timelineActions.length}</span>
           </div>
         </div>
 
@@ -39,7 +39,7 @@ export const TaskActivityTimelineTab: React.FC<{
           </div>
           <div className="min-w-0">
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Criada Em</span>
-            <span className="text-xs font-black text-white truncate block">
+            <span className="text-xs font-semibold text-white truncate block">
               {editingTask.createdAt ? editingTask.createdAt : 'Recentemente'}
             </span>
           </div>
@@ -51,7 +51,7 @@ export const TaskActivityTimelineTab: React.FC<{
           </div>
           <div className="min-w-0">
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Prazo / Entrega</span>
-            <span className="text-xs font-black text-white truncate block">
+            <span className="text-xs font-semibold text-white truncate block">
               {editingTask.deliveredAt ? `Entregue: ${editingTask.deliveredAt}` : (editingTask.dueDate || 'Sem prazo')}
             </span>
           </div>
@@ -61,7 +61,7 @@ export const TaskActivityTimelineTab: React.FC<{
       {/* Timeline Container - Ultra Compact */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between pb-1.5 border-b border-[#2E2E2E]">
-          <h3 className="text-[11px] font-black uppercase tracking-wider text-[#E4007E] flex items-center gap-1.5">
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#E4007E] flex items-center gap-1.5">
             <History className="w-3.5 h-3.5 text-[#E4007E]" />
             <span>Linha do Tempo de Ações</span>
           </h3>
@@ -160,17 +160,17 @@ export const TaskActivityTimelineTab: React.FC<{
                             className="w-5 h-5 rounded-full object-cover ring-1 ring-white/20"
                           />
                         ) : (
-                          <div className="w-5 h-5 rounded-full bg-[#1C1C1C] border border-[#2E2E2E] text-white font-black text-[9px] flex items-center justify-center">
+                          <div className="w-5 h-5 rounded-full bg-[#1C1C1C] border border-[#2E2E2E] text-white font-semibold text-[9px] flex items-center justify-center">
                             {act.userInitials}
                           </div>
                         )}
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-black text-white">{act.user}</span>
+                          <span className="text-xs font-semibold text-white">{act.user}</span>
                           <span className="text-[10px] font-medium text-slate-400">• {formattedDate}</span>
                         </div>
                       </div>
 
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-1 border ${style.badgeBg}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider flex items-center gap-1 border ${style.badgeBg}`}>
                         {style.icon}
                         <span>{style.label}</span>
                       </span>

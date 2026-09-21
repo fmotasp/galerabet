@@ -74,13 +74,13 @@ export const Modal: React.FC<ModalProps> = ({
           <div className="flex items-center justify-between pb-4 border-b border-[#262626] shrink-0">
             <div className="flex items-center gap-2.5">
               {icon && (
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-black shadow-md shadow-[#E4007E]/25 shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-semibold shadow-md shadow-[#E4007E]/25 shrink-0">
                   {icon}
                 </div>
               )}
               <div>
                 {title && (
-                  <h2 className="text-lg font-black text-white tracking-tight leading-snug">
+                  <h2 className="text-lg font-semibold text-white tracking-tight leading-snug">
                     {title}
                   </h2>
                 )}

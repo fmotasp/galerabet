@@ -15,7 +15,7 @@ export const TasksHeader: React.FC<TasksHeaderProps> = React.memo(({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 className="text-3xl font-black text-white tracking-tight">Tarefas</h1>
+        <h1 className="text-3xl font-semibold text-white tracking-tight">Tarefas</h1>
         <p className="text-sm text-slate-400 mt-1">Acompanhe suas demandas, tarefas e entregas em tempo real.</p>
       </div>
 
@@ -54,7 +54,7 @@ export const TasksHeader: React.FC<TasksHeaderProps> = React.memo(({
           id="btn-tasks-new-task"
           onClick={onNewTask}
           aria-label="Adicionar Nova Tarefa"
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-2xl text-xs font-black shadow-md shadow-[#E4007E]/25 transition-all active:scale-98 cursor-pointer"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-2xl text-xs font-semibold shadow-md shadow-[#E4007E]/25 transition-all active:scale-98 cursor-pointer"
         >
           <Plus className="w-4 h-4 stroke-[3]" />
           <span>Nova Tarefa</span>

@@ -78,7 +78,7 @@ export const TaskMembersStack: React.FC<TaskMembersStackProps> = ({ task }) => {
               alt={m.name}
               size="sm"
               ring
-              className="!w-7 !h-7 ring-2 ring-[#101010] shadow-sm text-[10px] font-black"
+              className="!w-7 !h-7 ring-2 ring-[#101010] shadow-sm text-[10px] font-semibold"
             />
           </div>
         ))}

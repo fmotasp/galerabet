@@ -87,7 +87,7 @@ export const LogsView: React.FC = () => {
     <div className="flex-1 flex flex-col min-h-0 w-full animate-in fade-in duration-200 p-4 sm:p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-black text-white uppercase tracking-wide">Logs do Sistema</h1>
+          <h1 className="text-2xl font-semibold text-white tracking-tight">Logs do Sistema</h1>
           <p className="text-slate-400 mt-1">Registro de todas as ações importantes realizadas no sistema.</p>
         </div>
         <button

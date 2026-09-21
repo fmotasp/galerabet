@@ -79,7 +79,7 @@ export const MaterialsView: React.FC = () => {
       {/* Top Header & Search Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#141414] border border-[#262626] rounded-3xl p-5 shadow-xl">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-black shadow-lg shadow-[#E4007E]/25 shrink-0">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-semibold shadow-lg shadow-[#E4007E]/25 shrink-0">
             <Palette className="w-5 h-5" />
           </div>
           <div>
@@ -147,7 +147,7 @@ export const MaterialsView: React.FC = () => {
                             className="w-full h-full object-contain"
                           />
                         ) : (
-                          <div className="w-full h-full rounded-xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-black text-sm">
+                          <div className="w-full h-full rounded-xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-semibold text-sm">
                             {client.name.slice(0, 2).toUpperCase()}
                           </div>
                         )}
@@ -217,7 +217,7 @@ export const MaterialsView: React.FC = () => {
                                   style={{ backgroundColor: c.hex }}
                                 />
                                 <div className="min-w-0 flex-1">
-                                  <span className="text-[10px] font-mono font-black text-white block truncate uppercase">
+                                  <span className="text-[10px] font-mono font-semibold text-white block truncate uppercase">
                                     {c.hex}
                                   </span>
                                   <span className="text-[9px] text-slate-300 block truncate font-medium">
@@ -226,7 +226,7 @@ export const MaterialsView: React.FC = () => {
                                 </div>
                               </div>
                               {isCopied && (
-                                <div className="absolute inset-0 bg-emerald-600/90 flex items-center justify-center gap-1 text-[10px] font-black text-white animate-in fade-in">
+                                <div className="absolute inset-0 bg-emerald-600/90 flex items-center justify-center gap-1 text-[10px] font-semibold text-white animate-in fade-in">
                                   <Check className="w-3 h-3 stroke-[3]" />
                                   <span>Copiado!</span>
                                 </div>

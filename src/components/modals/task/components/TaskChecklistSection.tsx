@@ -44,7 +44,7 @@ export const TaskChecklistSection: React.FC<TaskChecklistSectionProps> = ({
         </div>
 
         {totalCount > 0 && (
-          <span className="text-[11px] font-black text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/60">
+          <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/60">
             {progressPercent}%
           </span>
         )}
@@ -140,7 +140,7 @@ export const TaskChecklistSection: React.FC<TaskChecklistSectionProps> = ({
               type="button"
               disabled={!newItemTitle.trim()}
               onClick={handleAddNewItem}
-              className="px-3.5 py-2.5 bg-gradient-to-r from-[#00A723] to-emerald-600 hover:opacity-95 disabled:opacity-50 text-white rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 shadow-sm cursor-pointer"
+              className="px-3.5 py-2.5 bg-gradient-to-r from-[#00A723] to-emerald-600 hover:opacity-95 disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 shadow-sm cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Adicionar</span>
