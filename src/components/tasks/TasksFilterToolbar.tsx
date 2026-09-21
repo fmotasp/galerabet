@@ -57,7 +57,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
 
   return (
     <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-3 bg-[#181818] p-3 rounded-2xl border border-[#2A2A2A]">
-      <div className="flex flex-wrap md:flex-nowrap items-center gap-3 w-full md:w-auto overflow-x-auto [scrollbar-hide::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div className="flex flex-wrap md:flex-nowrap items-center gap-3 w-full md:w-auto min-w-0">
         {/* Client Filter (Responsive) */}
         <div className="flex items-center gap-2">
         <div className="relative md:hidden">
@@ -184,7 +184,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
         </div>
 
           {/* Desktop Filter (Icon Buttons) */}
-          <div className="hidden md:flex flex-nowrap items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030] overflow-x-auto [scrollbar-hide::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="hidden md:flex flex-nowrap items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030] overflow-x-auto min-w-0 [scrollbar-hide::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <button
               onClick={() => onClientChange('all')}
               aria-label="Filtrar por todos os clientes"
@@ -408,16 +408,9 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
 
       <div className="flex items-center gap-4 shrink-0">
         {/* Toggle Switch para Exibir/Ocultar Coluna de Concluídas */}
-        <div className="flex items-center gap-2 bg-[#222222] px-3 py-1.5 rounded-xl border border-[#303030]">
-          <label
-            htmlFor="toggle-done-column"
-            className="text-xs font-bold text-slate-200 select-none cursor-pointer flex items-center gap-1.5"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Exibir Concluídas</span>
-          </label>
+        
           <button
-            id="toggle-done-column"
+            id="toggle-done-column" title="Exibir Concluídas"
             type="button"
             role="switch"
             aria-checked={showDoneColumn}
@@ -433,7 +426,6 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
               }`}
             />
           </button>
-        </div>
 
         <div className="text-xs text-slate-400 font-medium hidden sm:block">
           Exibindo <span className="font-bold text-white">{totalFilteredTasks}</span> tarefas
