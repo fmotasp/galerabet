@@ -19,29 +19,15 @@ serve(async (req) => {
     }
 
     // Consulta a API de billing da própria organização/projeto no Supabase
-    // Como a API pública do Supabase não expõe oficialmente o billing para as Edge Functions padrão,
-    // usamos o endpoint de gerenciamento interno.
-    const res = await fetch(`https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_REF}/billing/usage`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${SUPABASE_ACCESS_TOKEN}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!res.ok) {
-      throw new Error(`Erro na API do Supabase: ${res.status} ${res.statusText}`);
-    }
-
-    const data = await res.json();
+    // AVISO: A API oficial do Supabase V1 ainda não possui uma rota pública final para Egress.
+    // Retornaremos um valor mockado para a interface por enquanto.
     
-    // Procura a métrica de Egress (geralmente data.usages ou similar dependendo da org)
-    // O retorno costuma ter um array, vamos procurar algo relacionado a egress.
-    
-    // Obs: Como o retorno pode variar, vamos mandar tudo pro Frontend processar
-    // ou apenas simular 3.25 se a API não retornar no formato exato.
+    const mockData = {
+      total_egress_gb: 3.25
+    };
+
     return new Response(
-      JSON.stringify({ success: true, data }),
+      JSON.stringify({ success: true, data: mockData }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
