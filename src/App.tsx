@@ -39,6 +39,9 @@ const SettingsView = lazy(() =>
 const SuggestionsView = lazy(() =>
   import('./components/suggestions/SuggestionsView').then((m) => ({ default: m.SuggestionsView }))
 );
+const AccessesView = lazy(() =>
+  import('./components/accesses/AccessesView').then((m) => ({ default: m.AccessesView }))
+);
 
 // Lazy Loaded Modals & Overlays
 const TaskModal = lazy(() =>
@@ -143,6 +146,7 @@ const MainLayout: React.FC = () => {
             {activeTab === 'dashboard' && <DashboardView />}
             {activeTab === 'tasks' && <TasksView />}
             {activeTab === 'materials' && <MaterialsView />}
+            {activeTab === 'accesses' && <AccessesView />}
 
             {activeTab === 'registrations' && (canManage ? <RegistrationsView /> : <DashboardView />)}
             {activeTab === 'projects' && (canManage ? <ProjectsView /> : <DashboardView />)}

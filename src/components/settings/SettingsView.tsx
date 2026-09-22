@@ -19,6 +19,7 @@ import { useApp } from '../../context/AppContext';
 import { SpineStatusConfig } from '../../types';
 import { compressImageFile } from '../../lib/imageUtils';
 import { supabase } from '../../lib/supabase';
+import { useAccesses } from '../../hooks/useAccesses';
 
 export const COLOR_PALETTES = [
   { label: 'Cinza / Neutro', color: 'text-slate-600', bg: 'bg-slate-100', dotColor: '#64748B', gradient: 'from-slate-500 to-slate-700' },
@@ -52,10 +53,14 @@ export const SettingsView: React.FC = () => {
   const [isUploadingArt, setIsUploadingArt] = useState(false);
   const [isFixingTasks, setIsFixingTasks] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const { accessCategories, fetchAccessCategories, saveAccessCategories } = useAccesses();
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   useEffect(() => {
     setTempLoginArtUrl(loginArtUrl || '');
-  }, [loginArtUrl]);
+    fetchAccessCategories();
+  }, [loginArtUrl, fetchAccessCategories]);
 
   const handleFixOverdueTasks = async () => {
     if (!window.confirm('Isto irá verificar e tentar corrigir automaticamente tarefas que desapareceram devido ao status "overdue". Deseja continuar?')) return;
@@ -198,6 +203,18 @@ export const SettingsView: React.FC = () => {
         >
           <Bell className="w-4 h-4 text-sky-400" />
           <span>Alertas & Notificações</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSettingsTab('access_categories')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            activeSettingsTab === 'access_categories'
+              ? 'bg-[#222222] text-emerald-300 border border-emerald-500/50 shadow-xs'
+              : 'text-slate-400 hover:text-white hover:bg-[#181818]'
+          }`}
+        >
+          <Layers className="w-4 h-4 text-emerald-400" />
+          <span>Categorias de Acesso</span>
         </button>
       </div>
 
@@ -716,6 +733,75 @@ export const SettingsView: React.FC = () => {
               placeholder="https://hooks.slack.com/services/..."
               className="w-full p-3 text-xs bg-[#181818] border border-slate-700 rounded-xl font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#FFB903]"
             />
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Access Categories */}
+      {activeSettingsTab === 'access_categories' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="bg-[#181818] rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-6 text-white">
+            <div className="pb-4 border-b border-slate-800/80">
+              <h3 className="font-extrabold text-white text-lg flex items-center gap-2">
+                <Layers className="w-5 h-5 text-emerald-400" />
+                <span>Categorias de Acessos</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-1 font-medium">
+                Gerencie as categorias disponíveis para os acessos do sistema.
+              </p>
+            </div>
+
+            <div className="bg-[#222222] border border-slate-800 rounded-2xl p-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  placeholder="Nova Categoria (ex: Provedor, Plataforma...)"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newCategoryName.trim()) {
+                      saveAccessCategories([...accessCategories, newCategoryName.trim()]);
+                      setNewCategoryName('');
+                    }
+                  }}
+                  className="flex-1 px-4 py-2.5 bg-[#181818] border border-slate-700 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-[#E4007E]"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newCategoryName.trim()) {
+                      saveAccessCategories([...accessCategories, newCategoryName.trim()]);
+                      setNewCategoryName('');
+                    }
+                  }}
+                  className="px-6 py-2.5 bg-[#E4007E] hover:bg-[#E94E18] text-white rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-md"
+                >
+                  <Plus className="w-4 h-4" /> Adicionar
+                </button>
+              </div>
+
+              <div className="space-y-2 mt-4">
+                {accessCategories.map((cat, idx) => (
+                  <div key={idx} className="flex items-center justify-between bg-[#181818] p-3 rounded-xl border border-slate-700">
+                    <span className="font-semibold text-sm">{cat}</span>
+                    <button
+                      onClick={() => {
+                        const newArr = [...accessCategories];
+                        newArr.splice(idx, 1);
+                        saveAccessCategories(newArr);
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                      title="Remover Categoria"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                {accessCategories.length === 0 && (
+                  <p className="text-slate-500 text-sm italic">Nenhuma categoria cadastrada.</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

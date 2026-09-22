@@ -1,4 +1,4 @@
-export type NavigationTab = 'dashboard' | 'tasks' | 'projects' | 'employees' | 'registrations' | 'reports' | 'materials' | 'suggestions' | 'settings' | 'logs';
+export type NavigationTab = 'dashboard' | 'tasks' | 'projects' | 'employees' | 'registrations' | 'reports' | 'materials' | 'suggestions' | 'settings' | 'logs' | 'accesses';
 
 export interface BrandColor {
   id?: string;
@@ -234,4 +234,17 @@ export interface SystemSuggestion {
   created_by: string;
   created_at: string;
   completed_at?: string;
+}
+
+export interface Access {
+  id: string;
+  title: string;
+  siteUrl?: string;
+  category?: string;
+  login: string;
+  password?: string;
+  coverImageUrl?: string;
+  coverFileId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }

@@ -172,6 +172,7 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     'suggestions',
     'settings',
     'logs',
+    'accesses',
   ];
 
   const getInitialTab = (): NavigationTab => {

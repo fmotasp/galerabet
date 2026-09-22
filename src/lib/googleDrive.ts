@@ -930,3 +930,68 @@ export const listKvDriveFiles = async (
 };
 
 
+
+// Upload access cover image directly to the ACESSOS folder
+export const uploadAccessCoverToDrive = async (
+  file: File,
+  accessToken?: string
+): Promise<{ url: string; fileId: string } | null> => {
+  try {
+    const token = accessToken || await getValidAccessToken(undefined, true);
+    if (!token) return null;
+
+    const rootId = GOOGLE_DRIVE_CONFIG.ROOT_FOLDER_ID;
+
+    let acessosFolder = await findDriveFolderByName('ACESSOS', rootId, token, true);
+    if (!acessosFolder) {
+      const res = await driveFetch('https://www.googleapis.com/drive/v3/files?fields=id,webViewLink', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'ACESSOS',
+          mimeType: 'application/vnd.google-apps.folder',
+          parents: rootId ? [rootId] : [],
+        }),
+      }, token, true);
+      if (!res.ok) return null;
+      const d = await res.json();
+      acessosFolder = { id: d.id, webViewLink: d.webViewLink || '' };
+    }
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const fileName = `cover_${Date.now()}.${ext}`;
+    const metadata = {
+      name: fileName,
+      parents: [acessosFolder.id],
+      description: `Capa de acesso`,
+    };
+
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', file);
+
+    const uploadRes = await driveFetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name',
+      { method: 'POST', body: form },
+      token,
+      true
+    );
+    if (!uploadRes.ok) return null;
+    const uploadData = await uploadRes.json();
+    const fileId = uploadData.id;
+
+    try {
+      await driveFetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'reader', type: 'anyone' }),
+      }, token);
+    } catch (err) {}
+
+    const url = `https://lh3.googleusercontent.com/d/${fileId}`;
+    return { url, fileId };
+  } catch (err) {
+    console.error('Error uploading access cover:', err);
+    return null;
+  }
+};
