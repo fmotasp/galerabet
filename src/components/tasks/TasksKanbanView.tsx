@@ -58,7 +58,6 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
 
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverColumnId, setDragOverColumnId] = useState<string | null>(null);
-  const [columnLimits, setColumnLimits] = useState<Record<string, number>>({});
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!kanbanRef.current) return;
@@ -99,9 +98,6 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
         const columnTasks = filteredTasks
           .filter((t) => t.status === col.id)
           .sort(compareTaskDueDatesAscending);
-
-        const limit = columnLimits[col.id] || 10;
-        const visibleTasks = columnTasks.slice(0, limit);
 
         return (
           <div
@@ -166,7 +162,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
 
               {/* Cards in this column */}
               <div className="space-y-3 flex-1 overflow-y-auto no-scrollbar pr-0.5 min-h-[100px] pb-1">
-                {visibleTasks.map((task) => (
+                {columnTasks.map((task) => (
                   <TaskKanbanCard
                     key={task.id}
                     task={task}
@@ -191,22 +187,6 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
                     addTask={addTask}
                   />
                 ))}
-
-                {columnTasks.length > limit && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setColumnLimits((prev) => ({
-                        ...prev,
-                        [col.id]: (prev[col.id] || 10) + 10,
-                      }));
-                    }}
-                    className="w-full py-2.5 my-2 bg-[#1a1a1a] hover:bg-[#E4007E]/10 text-slate-400 hover:text-[#E4007E] rounded-xl text-xs font-bold transition-all border border-[#333333] hover:border-[#E4007E]/40 flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.99]"
-                  >
-                    <span>Ver mais · {columnTasks.length - limit} restantes</span>
-                  </button>
-                )}
               </div>
             </div>
 
