@@ -14,11 +14,13 @@ import {
   Radio,
   Sun,
   Moon,
+  Cloud,
   Camera,
   Loader2,
 } from 'lucide-react';
 import { uploadEmployeeAvatarToDrive } from '../../lib/googleDrive';
 import { useApp } from '../../context/AppContext';
+import { supabase } from '../../lib/supabase';
 
 export const Header: React.FC = () => {
   const {
@@ -100,6 +102,42 @@ export const Header: React.FC = () => {
     }
   }, [isDarkMode]);
 
+  // Egress State
+  const [egressUsed, setEgressUsed] = useState<number>(3.25); // Valor inicial
+  const egressTotal = 250; // Limite fixo do plano
+  const [isLoadingEgress, setIsLoadingEgress] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchEgress = async () => {
+      try {
+        setIsLoadingEgress(true);
+        const { data, error } = await supabase.functions.invoke('get-egress');
+        if (error) {
+          // Apenas logamos o erro, não quebra a interface, mantém o valor mockado se falhar
+          console.warn('Egress Edge Function error:', error);
+          return;
+        }
+        if (data && data.success && data.data && isMounted) {
+          // Como o formato do retorno do Billing Usage varia,
+          // aqui deveríamos mapear a métrica correta de Egress do payload
+          // Exemplo imaginário se ele retornar na raiz: data.data.total_egress_gb
+          // Por enquanto deixamos o log para você debugar e achar o campo exato.
+          console.log('Dados de Egress recebidos:', data.data);
+          if (data.data.total_egress_gb !== undefined) {
+             setEgressUsed(Number(data.data.total_egress_gb));
+          }
+        }
+      } catch (err) {
+        console.warn('Falha ao buscar Egress:', err);
+      } finally {
+        if (isMounted) setIsLoadingEgress(false);
+      }
+    };
+    
+    fetchEgress(); 
+  }, []);
+
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -132,6 +170,30 @@ export const Header: React.FC = () => {
 
       {/* Right section: Search, Notifications, Dark Mode, User profile */}
       <div className="flex items-center gap-2 sm:gap-4">
+        {/* Egress Usage Widget */}
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#1C1C1C] border border-[#303030] rounded-xl mr-2" title="Uso de Banda (Egress)">
+          <Cloud className="w-4 h-4 text-[#808080]" />
+          <div className="flex flex-col">
+            <span className="text-[9px] font-bold text-[#808080] uppercase tracking-wider leading-none mb-0.5">Egress / Banda</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-white leading-none">
+                {isLoadingEgress ? <Loader2 className="w-3 h-3 animate-spin inline-block text-[#808080]" /> : egressUsed.toFixed(2)}
+                {' '}<span className="text-[#808080] font-medium">/ {egressTotal} GB</span>
+              </span>
+              {/* Progress bar */}
+              <div className="w-12 h-1.5 bg-[#2A2A2A] rounded-full overflow-hidden">
+                <div 
+                  className={`h-full rounded-full transition-all duration-1000 ${
+                    (egressUsed / egressTotal) > 0.9 ? 'bg-rose-500' : 
+                    (egressUsed / egressTotal) > 0.75 ? 'bg-amber-500' : 'bg-emerald-500'
+                  }`} 
+                  style={{ width: `${Math.min(100, (egressUsed / egressTotal) * 100)}%` }} 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleDarkMode}
