@@ -10,6 +10,8 @@ export interface BrandMeta {
   logosPackUrl?: string;
   typographyUrl?: string;
   additionalMaterialsUrl?: string;
+  tarjasUrl?: string;
+  psdBaseUrl?: string;
   kvDriveUrl?: string;
   kvDriveItems?: Array<{
     id: string;
@@ -28,6 +30,8 @@ export const encodeProjectDescription = (description: string = '', brand: BrandM
     Boolean(brand.logosPackUrl) ||
     Boolean(brand.typographyUrl) ||
     Boolean(brand.additionalMaterialsUrl) ||
+    Boolean(brand.tarjasUrl) ||
+    Boolean(brand.psdBaseUrl) ||
     Boolean(brand.kvDriveUrl) ||
     (brand.kvDriveItems && brand.kvDriveItems.length > 0);
 
@@ -38,6 +42,8 @@ export const encodeProjectDescription = (description: string = '', brand: BrandM
     logosPackUrl: brand.logosPackUrl || '',
     typographyUrl: brand.typographyUrl || '',
     additionalMaterialsUrl: brand.additionalMaterialsUrl || '',
+    tarjasUrl: brand.tarjasUrl || '',
+    psdBaseUrl: brand.psdBaseUrl || '',
     kvDriveUrl: brand.kvDriveUrl || '',
     kvDriveItems: brand.kvDriveItems || [],
   });
@@ -102,6 +108,8 @@ export const ProjectsProvider: React.FC<{
       logosPackUrl: row.logos_pack_url || brandMeta.logosPackUrl,
       typographyUrl: row.typography_url || brandMeta.typographyUrl,
       additionalMaterialsUrl: row.additional_materials_url || brandMeta.additionalMaterialsUrl,
+      tarjasUrl: row.tarjas_url || brandMeta.tarjasUrl,
+      psdBaseUrl: row.psd_base_url || brandMeta.psdBaseUrl,
       kvDriveUrl: row.kv_drive_url || brandMeta.kvDriveUrl,
       kvDriveItems: Array.isArray(row.kv_drive_items) ? row.kv_drive_items : (brandMeta.kvDriveItems || []),
     };
@@ -244,6 +252,8 @@ export const ProjectsProvider: React.FC<{
       logosPackUrl: newProj.logosPackUrl,
       typographyUrl: newProj.typographyUrl,
       additionalMaterialsUrl: newProj.additionalMaterialsUrl,
+      tarjasUrl: newProj.tarjasUrl,
+      psdBaseUrl: newProj.psdBaseUrl,
       kvDriveUrl: newProj.kvDriveUrl,
     });
 
@@ -272,6 +282,8 @@ export const ProjectsProvider: React.FC<{
         logos_pack_url: newProj.logosPackUrl,
         typography_url: newProj.typographyUrl,
         additional_materials_url: newProj.additionalMaterialsUrl,
+        tarjas_url: newProj.tarjasUrl,
+        psd_base_url: newProj.psdBaseUrl,
       });
 
       if (error) {
@@ -323,6 +335,8 @@ export const ProjectsProvider: React.FC<{
       logosPackUrl: mergedProj.logosPackUrl,
       typographyUrl: mergedProj.typographyUrl,
       additionalMaterialsUrl: mergedProj.additionalMaterialsUrl,
+      tarjasUrl: mergedProj.tarjasUrl,
+      psdBaseUrl: mergedProj.psdBaseUrl,
       kvDriveUrl: mergedProj.kvDriveUrl,
       kvDriveItems: mergedProj.kvDriveItems,
     });
@@ -357,6 +371,8 @@ export const ProjectsProvider: React.FC<{
         logos_pack_url: mergedProj.logosPackUrl,
         typography_url: mergedProj.typographyUrl,
         additional_materials_url: mergedProj.additionalMaterialsUrl,
+        tarjas_url: mergedProj.tarjasUrl,
+        psd_base_url: mergedProj.psdBaseUrl,
       };
 
       const { error: upsertErr } = await supabase.from('projects').upsert(extendedPayload);
