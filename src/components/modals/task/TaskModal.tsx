@@ -133,7 +133,7 @@ export const TaskModal: React.FC = () => {
     <div className="fixed inset-0 z-50 flex justify-end overflow-hidden animate-in fade-in duration-200">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-xs transition-opacity duration-300 cursor-pointer"
+        className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300 cursor-pointer"
         onClick={handleClose}
       />
 
@@ -159,7 +159,7 @@ export const TaskModal: React.FC = () => {
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#101010]">
             {!editingTask && (
               <div className="w-full">
-                <label className="block text-xs font-bold text-slate-200 mb-1.5">
+                <label className="block text-xs font-medium text-slate-200 mb-1.5">
                   Título da Tarefa <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -249,7 +249,7 @@ export const TaskModal: React.FC = () => {
             </div>
 
             {/* Drawer Footer Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-[#2E2E2E] mt-4">
+            <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-4">
               {editingTask ? (
                 <button
                   type="button"
@@ -259,7 +259,7 @@ export const TaskModal: React.FC = () => {
                       handleClose();
                     }
                   }}
-                  className="px-5 py-2.5 bg-[#1C1C1C] hover:bg-rose-950/40 text-rose-500 rounded-xl text-sm font-medium transition-all active:scale-98 cursor-pointer flex items-center gap-1.5 border border-[#2E2E2E] hover:border-rose-900/50"
+                  className="px-5 py-2.5 bg-[#1C1C1C] hover:bg-rose-950/40 text-rose-500 rounded-xl text-sm font-medium transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 border border-white/5 hover:border-rose-900/50"
                 >
                   <Trash2 className="w-4 h-4" />
                   <span>Excluir tarefa</span>
@@ -272,7 +272,7 @@ export const TaskModal: React.FC = () => {
                 <button
                   type="submit"
                   id="btn-submit-task"
-                  className="px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-sm font-semibold shadow-md shadow-[#E4007E]/20 transition-all active:scale-98 cursor-pointer flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-sm font-semibold shadow-md shadow-[#E4007E]/20 transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
                 >
                   <Check className="w-4 h-4 stroke-[2.5]" />
                   <span>{editingTask ? 'Salvar alterações' : 'Criar tarefa'}</span>

@@ -12,7 +12,7 @@ export const TaskStatusAndDates: React.FC<{
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
       {/* Status da tarefa */}
       <div>
-        <label className="block text-xs font-bold text-slate-200 mb-1.5">
+        <label className="block text-xs font-medium text-slate-200 mb-1.5">
           Status da Tarefa
         </label>
         <select
@@ -41,7 +41,7 @@ export const TaskStatusAndDates: React.FC<{
               deliveredAt: isReview ? '' : (isDone && !prev.deliveredAt ? new Date().toLocaleDateString('pt-BR') : prev.deliveredAt),
             }));
           }}
-          className="w-full p-3 bg-[#1C1C1C] border border-[#2E2E2E] rounded-xl text-xs font-semibold text-white transition-all shadow-xs focus:outline-none focus:border-[#E4007E] cursor-pointer"
+          className="w-full h-[46px] px-3 bg-[#1C1C1C] border border-white/5 rounded-xl text-xs font-semibold text-white transition-all shadow-xs focus:outline-none focus:border-[#E4007E] cursor-pointer"
         >
           {spineStatuses.map((st) => (
             <option key={st.id} value={st.id} className="bg-[#181818] text-white font-bold py-2">
@@ -53,7 +53,7 @@ export const TaskStatusAndDates: React.FC<{
 
       {/* Prazo Previsto */}
       <div>
-        <label className="block text-xs font-bold text-slate-200 mb-1.5">
+        <label className="block text-xs font-medium text-slate-200 mb-1.5">
           Prazo Previsto <span className="text-rose-500">*</span>
         </label>
         <div className="relative">
@@ -100,20 +100,20 @@ export const TaskStatusAndDates: React.FC<{
               }
               setFormData((prev) => ({ ...prev, dueDate: newDueDate }));
             }}
-            className="w-full p-3 bg-[#1C1C1C] border border-[#2E2E2E] rounded-xl text-xs font-bold text-white focus:outline-none focus:border-[#E4007E] cursor-pointer"
+            className="w-full h-[46px] px-3 bg-[#1C1C1C] border border-white/5 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-[#E4007E] cursor-pointer"
           />
         </div>
       </div>
 
       {/* URGENTE */}
       <div>
-        <label className="block text-xs font-bold text-slate-200 mb-1.5">
+        <label className="block text-xs font-medium text-slate-200 mb-1.5">
           Urgência
         </label>
         <button
           type="button"
           onClick={() => setFormData(prev => ({ ...prev, isFlagged: !prev.isFlagged }))}
-          className={`w-full flex items-center justify-between p-3 border rounded-xl text-xs font-semibold transition-all ${
+          className={`w-full h-[46px] flex items-center justify-between px-3 border rounded-xl text-xs font-semibold transition-all active:scale-95 ${
             formData.isFlagged
               ? 'bg-rose-600/20 border-rose-600 text-rose-500'
               : 'bg-[#1C1C1C] border-[#2E2E2E] text-slate-400 hover:border-rose-500/50'

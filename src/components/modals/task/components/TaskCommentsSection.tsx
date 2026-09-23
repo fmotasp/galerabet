@@ -24,7 +24,7 @@ export const TaskCommentsSection: React.FC<{
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-[#E4007E]" />
-          <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">
+          <h3 className="text-xs font-medium text-slate-200 uppercase tracking-wider">
             Comentários ({comments.length})
           </h3>
         </div>
@@ -51,7 +51,7 @@ export const TaskCommentsSection: React.FC<{
             type="button"
             disabled={isPostingComment || !newCommentText.trim()}
             onClick={onAddComment}
-            className="px-4 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 self-end py-3 shadow-md shadow-[#E4007E]/25 cursor-pointer"
+            className="px-4 bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E] text-slate-300 hover:text-white disabled:opacity-50 disabled:hover:border-[#2E2E2E] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 self-end py-3 shadow-sm cursor-pointer"
           >
             <Send className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>{isPostingComment ? 'Enviando...' : 'Enviar'}</span>
@@ -60,8 +60,9 @@ export const TaskCommentsSection: React.FC<{
 
         {/* Comments Feed */}
         {comments.length === 0 ? (
-          <div className="p-4 bg-[#1C1C1C]/50 border border-dashed border-[#2E2E2E] rounded-xl text-center text-xs text-slate-400 font-medium">
-            Nenhum comentário nesta demanda ainda.
+          <div className="py-6 text-center flex flex-col items-center justify-center gap-2 text-slate-400">
+            <MessageSquare className="w-5 h-5 opacity-40" />
+            <span className="text-xs font-medium">Nenhum comentário nesta demanda ainda.</span>
           </div>
         ) : (
           <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">

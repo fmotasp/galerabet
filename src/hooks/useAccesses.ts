@@ -13,10 +13,13 @@ export const useAccesses = () => {
     
     setIsLoadingAccesses(true);
     try {
+      console.log('[Supabase Accesses] Iniciando busca...');
       const { data, error } = await supabase
         .from('accesses')
         .select('*')
         .order('created_at', { ascending: false });
+
+      console.log('[Supabase Accesses] Resposta:', { count: data?.length, error, data });
 
       if (error) throw error;
 

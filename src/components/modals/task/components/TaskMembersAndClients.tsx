@@ -34,7 +34,7 @@ export const TaskMembersAndClients: React.FC<{
     >
       {/* Membros */}
       <div className={`relative ${isMembersPopoverOpen ? 'z-50' : 'z-20'}`}>
-        <label className="block text-xs font-bold text-slate-200 mb-2">
+        <label className="block text-xs font-medium text-slate-200 mb-2">
           Membros
         </label>
         <div className="flex items-start gap-4 flex-wrap pb-2">
@@ -76,35 +76,30 @@ export const TaskMembersAndClients: React.FC<{
               if (g.members.length === 0) return null;
               
               return (
-                <div key={groupId} className="flex flex-col gap-1.5 items-center">
-                  <div className="flex items-center gap-1.5">
-                    {g.members.map(m => {
-                      const resolvedAvatar = m.matchedEmp?.avatarUrl || m.avatarUrl || '';
-                      return (
-                        <div
-                          key={m.id}
-                          className="relative flex group cursor-pointer shrink-0"
-                          onClick={() => handleRemoveMember(m.id)}
-                          title={`${m.name} (Clique para remover)`}
-                        >
-                          <Avatar
-                            src={resolvedAvatar}
-                            name={m.name}
-                            alt={m.name}
-                            size="sm"
-                            ring
-                            className="!w-9 !h-9 ring-2 ring-[#E4007E]/60 group-hover:ring-rose-500 transition-all shadow-xs text-xs font-semibold"
-                          />
-                          <div className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                            <X className="w-2.5 h-2.5" />
-                          </div>
+                <div key={groupId} className="flex items-center gap-1.5">
+                  {g.members.map(m => {
+                    const resolvedAvatar = m.matchedEmp?.avatarUrl || m.avatarUrl || '';
+                    return (
+                      <div
+                        key={m.id}
+                        className="relative flex group cursor-pointer shrink-0 active:scale-95 transition-transform"
+                        onClick={() => handleRemoveMember(m.id)}
+                        title={`${m.name} • ${g.label} (Clique para remover)`}
+                      >
+                        <Avatar
+                          src={resolvedAvatar}
+                          name={m.name}
+                          alt={m.name}
+                          size="sm"
+                          ring
+                          className="!w-9 !h-9 ring-2 ring-[#E4007E]/60 group-hover:ring-rose-500 transition-all shadow-xs text-xs font-semibold"
+                        />
+                        <div className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                          <X className="w-2.5 h-2.5" />
                         </div>
-                      );
-                    })}
-                  </div>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-[#1A1A1A] px-2 py-0.5 rounded-md border border-[#2E2E2E] whitespace-nowrap h-[20px] flex items-center justify-center">
-                    {g.label}
-                  </span>
+                      </div>
+                    );
+                  })}
                 </div>
               );
             });
@@ -129,7 +124,7 @@ export const TaskMembersAndClients: React.FC<{
             {isMembersPopoverOpen && (
               <>
                 <div
-                  className="fixed inset-0 z-40"
+                  className="fixed inset-0 z-40 backdrop-blur-[2px]"
                   onClick={() => setIsMembersPopoverOpen(false)}
                 />
                 <div className="absolute left-0 top-11 w-72 bg-[#141414] border border-[#2E2E2E] rounded-2xl shadow-2xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-100">
@@ -174,10 +169,10 @@ export const TaskMembersAndClients: React.FC<{
                                 if (isSelected) handleRemoveMember(emp.id);
                                 else handleAddMember(emp.id);
                               }}
-                              className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-colors ${
+                              className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-colors active:scale-98 ${
                                 isSelected
                                   ? 'bg-[#2E2E2E]/60 border border-[#E4007E]/40'
-                                  : 'hover:bg-[#1C1C1C]'
+                                  : 'hover:bg-[#1C1C1C] border border-transparent'
                               }`}
                             >
                               <div className="flex items-center gap-2.5 min-w-0">
@@ -188,7 +183,7 @@ export const TaskMembersAndClients: React.FC<{
                                   size="xs"
                                   ring
                                   className={`!w-7 !h-7 ring-2 font-bold text-xs ${
-                                    isSelected ? 'ring-[#E4007E]' : 'ring-[#2E2E2E]'
+                                    isSelected ? 'ring-[#E4007E]' : 'ring-white/5'
                                   }`}
                                 />
                                 <div className="truncate">
@@ -218,7 +213,7 @@ export const TaskMembersAndClients: React.FC<{
 
       {/* Clientes */}
       <div className={`relative ${isLabelsPopoverOpen ? 'z-50' : 'z-20'}`}>
-        <label className="block text-xs font-bold text-slate-200 mb-2">
+        <label className="block text-xs font-medium text-slate-200 mb-2">
           Clientes <span className="text-rose-500">*</span>
         </label>
         <div className="flex items-center gap-2 flex-wrap">
@@ -234,7 +229,7 @@ export const TaskMembersAndClients: React.FC<{
                     setIsLabelsPopoverOpen(!isLabelsPopoverOpen);
                     setIsMembersPopoverOpen(false);
                   }}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide shadow-xs inline-flex items-center gap-2 cursor-pointer bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E]/60 text-slate-200 hover:text-white transition-all group/client"
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide shadow-xs inline-flex items-center gap-2 cursor-pointer bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E]/60 text-slate-200 hover:text-white transition-all group/client active:scale-95"
                 >
                   <div className="w-5 h-5 rounded-md bg-[#141414] border border-[#2E2E2E] flex items-center justify-center overflow-hidden shrink-0 p-0.5">
                     {clientObj?.logoUrl ? (
@@ -261,7 +256,7 @@ export const TaskMembersAndClients: React.FC<{
                 setIsLabelsPopoverOpen(!isLabelsPopoverOpen);
                 setIsMembersPopoverOpen(false);
               }}
-              className="px-4 py-2 rounded-xl text-xs font-bold tracking-wide shadow-xs inline-flex items-center gap-2 cursor-pointer bg-[#1C1C1C] border border-[#2E2E2E] text-slate-300 hover:text-white hover:border-[#E4007E] transition-all"
+              className="px-4 py-2 rounded-xl text-xs font-bold tracking-wide shadow-xs inline-flex items-center gap-2 cursor-pointer bg-[#1C1C1C] border border-[#2E2E2E] text-slate-300 hover:text-white hover:border-[#E4007E] transition-all active:scale-95"
             >
               <Building2 className="w-3.5 h-3.5 text-[#E4007E]" />
               <span>Selecionar Cliente</span>

@@ -31,7 +31,7 @@ export const TaskDescriptionSection: React.FC<{
   return (
     <div className="space-y-2 flex-1 flex flex-col min-w-0">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+        <label className="text-xs font-medium text-slate-200 flex items-center gap-1.5">
           <span>Descrição</span>
         </label>
       </div>
@@ -47,7 +47,7 @@ export const TaskDescriptionSection: React.FC<{
             <button
               type="button"
               onClick={() => setIsEditingDescription(false)}
-              className="px-4 py-1.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-xs font-semibold transition-all shadow-sm cursor-pointer"
+              className="px-4 py-1.5 bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E] text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all shadow-sm cursor-pointer"
             >
               Concluir
             </button>

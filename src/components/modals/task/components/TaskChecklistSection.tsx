@@ -38,7 +38,7 @@ export const TaskChecklistSection: React.FC<TaskChecklistSectionProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <CheckSquare className="w-4 h-4 text-[#00A723]" />
-          <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">
+          <h3 className="text-xs font-medium text-slate-200 uppercase tracking-wider">
             Checklist ({completedCount}/{totalCount})
           </h3>
         </div>
@@ -106,8 +106,9 @@ export const TaskChecklistSection: React.FC<TaskChecklistSectionProps> = ({
         ))}
 
         {checklists.length === 0 && !isAdding && (
-          <div className="p-4 bg-[#1C1C1C]/50 border border-dashed border-[#2E2E2E] rounded-xl text-center text-xs text-slate-400 font-medium">
-            Nenhum item no checklist ainda.
+          <div className="py-6 text-center flex flex-col items-center justify-center gap-2 text-slate-400">
+            <CheckSquare className="w-5 h-5 opacity-40" />
+            <span className="text-xs font-medium">Nenhum item no checklist ainda.</span>
           </div>
         )}
       </div>

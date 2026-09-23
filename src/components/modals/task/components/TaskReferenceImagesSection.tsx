@@ -28,7 +28,7 @@ export const TaskReferenceImagesSection: React.FC<{
   return (
     <div className="space-y-2 flex-1 flex flex-col min-w-0">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+        <label className="text-xs font-medium text-slate-200 flex items-center gap-1.5">
           <ImageIcon className="w-4 h-4 text-[#E4007E]" />
           <span>Imagem de Referência (Briefing)</span>
         </label>
@@ -60,10 +60,10 @@ export const TaskReferenceImagesSection: React.FC<{
               referenceFileInputRef.current?.click();
             }
           }}
-          className={`border-2 border-dashed rounded-xl p-4 text-center transition-all group flex-1 flex flex-col items-center justify-center min-h-[140px] ${
+          className={`border border-dashed rounded-xl p-4 text-center transition-all group flex-1 flex flex-col items-center justify-center min-h-[140px] ${
             isUploadingReference
               ? 'border-[#E4007E] bg-[#E4007E]/10 cursor-not-allowed'
-              : 'border-[#2E2E2E] hover:border-[#E4007E] bg-[#101010]/60 hover:bg-[#022B54] cursor-pointer'
+              : 'border-[#444444] hover:border-[#E4007E] bg-[#101010]/60 hover:bg-[#1A1A1A] cursor-pointer'
           }`}
         >
         {isUploadingReference ? (
