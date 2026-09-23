@@ -90,12 +90,19 @@ export const Sidebar: React.FC = () => {
                 onClick={() => handleNavClick(item.id)}
                 className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-200 group relative ${
                   isActive
-                    ? 'bg-[#E4007E] text-white shadow-md shadow-[#E4007E]/20'
+                    ? 'bg-gradient-to-r from-[#E4007E]/15 to-transparent'
                     : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
                 }`}
-                title={item.label}
               >
-                <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-white' : 'text-[#A0A0A0] group-hover:text-white'}`} />
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#E4007E] rounded-r-full shadow-[0_0_8px_#E4007E]" />
+                )}
+                <Icon className={`w-5 h-5 shrink-0 transition-colors ${isActive ? 'text-[#E4007E]' : 'text-[#A0A0A0] group-hover:text-white'}`} />
+                
+                {/* Custom Tooltip */}
+                <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#2E2E2E] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
+                  {item.label}
+                </div>
               </button>
             );
           })}
@@ -104,31 +111,43 @@ export const Sidebar: React.FC = () => {
 
       {/* Bottom Navigation (Settings Icon - Only for Gestores and Admin) */}
       {canManage ? (
-        <div className="pt-4 border-none w-full flex justify-center">
+        <div className="pt-4 border-none w-full flex flex-col items-center gap-3">
           <button
             id="nav-item-settings"
             onClick={() => handleNavClick('settings')}
             className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-200 group relative ${
               activeTab === 'settings'
-                ? 'bg-[#E4007E] text-white shadow-md shadow-[#E4007E]/20'
+                ? 'bg-gradient-to-r from-[#E4007E]/15 to-transparent'
                 : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
             }`}
-            title="Configurações"
           >
-            <Settings className={`w-5 h-5 shrink-0 ${activeTab === 'settings' ? 'text-white' : 'text-[#A0A0A0] group-hover:text-white'}`} />
+            {activeTab === 'settings' && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#E4007E] rounded-r-full shadow-[0_0_8px_#E4007E]" />
+            )}
+            <Settings className={`w-5 h-5 shrink-0 transition-colors ${activeTab === 'settings' ? 'text-[#E4007E]' : 'text-[#A0A0A0] group-hover:text-white'}`} />
+            
+            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#2E2E2E] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
+              Configurações
+            </div>
           </button>
           
           <button
             id="nav-item-logs"
             onClick={() => handleNavClick('logs')}
-            className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-200 group relative mt-4 ${
+            className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-200 group relative ${
               activeTab === 'logs'
-                ? 'bg-[#E4007E] text-white shadow-md shadow-[#E4007E]/20'
+                ? 'bg-gradient-to-r from-[#E4007E]/15 to-transparent'
                 : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
             }`}
-            title="Logs do Sistema (Admin)"
           >
-            <ShieldAlert className={`w-5 h-5 shrink-0 ${activeTab === 'logs' ? 'text-white' : 'text-[#A0A0A0] group-hover:text-white'}`} />
+            {activeTab === 'logs' && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#E4007E] rounded-r-full shadow-[0_0_8px_#E4007E]" />
+            )}
+            <ShieldAlert className={`w-5 h-5 shrink-0 transition-colors ${activeTab === 'logs' ? 'text-[#E4007E]' : 'text-[#A0A0A0] group-hover:text-white'}`} />
+            
+            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#2E2E2E] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
+              Logs do Sistema
+            </div>
           </button>
         </div>
       ) : (

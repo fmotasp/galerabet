@@ -450,29 +450,30 @@ export const EmployeesView: React.FC = () => {
             </div>
           ) : (
             /* Table / List View */
-            <div className="bg-[#181818] rounded-3xl border border-slate-800 overflow-hidden shadow-lg">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-medium text-xs bg-[#161616]">
-                    <th className="px-6 py-4">Membro</th>
-                    <th className="px-6 py-4">Cargo</th>
-                    <th className="px-6 py-4">Departamento</th>
-                    <th className="px-6 py-4">Desempenho</th>
-                    <th className="px-6 py-4 text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60 font-medium text-white">
-                  {filteredEmployees.map((emp) => {
-                    const efficiency = getEmployeeEfficiency(emp);
-                    return (
-                      <tr
-                        key={emp.id}
-                        onClick={() => {
-                          setSelectedSidebarEmployeeId(emp.id);
-                          setEditingEmployee(emp);
-                        }}
-                        className="hover:bg-slate-800/30 transition-colors cursor-pointer"
-                      >
+            <div className="bg-[#101010] rounded-3xl border border-white/5 overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="sticky top-0 z-20 backdrop-blur-md bg-[#101010]/80">
+                    <tr className="border-b border-white/5 text-[#E4007E] font-semibold text-[11px] uppercase tracking-wider">
+                      <th className="px-6 py-4 whitespace-nowrap">Membro</th>
+                      <th className="px-6 py-4 whitespace-nowrap">Cargo</th>
+                      <th className="px-6 py-4 whitespace-nowrap">Departamento</th>
+                      <th className="px-6 py-4 whitespace-nowrap">Desempenho</th>
+                      <th className="px-6 py-4 text-right whitespace-nowrap">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 font-medium text-white">
+                    {filteredEmployees.map((emp) => {
+                      const efficiency = getEmployeeEfficiency(emp);
+                      return (
+                        <tr
+                          key={emp.id}
+                          onClick={() => {
+                            setSelectedSidebarEmployeeId(emp.id);
+                            setEditingEmployee(emp);
+                          }}
+                          className="hover:bg-white/5 transition-colors cursor-pointer group"
+                        >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <Avatar
@@ -527,8 +528,9 @@ export const EmployeesView: React.FC = () => {
                       </tr>
                     );
                   })}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

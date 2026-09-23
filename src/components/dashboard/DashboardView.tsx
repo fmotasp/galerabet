@@ -93,6 +93,7 @@ export const DashboardView: React.FC = () => {
           {/* Active Tasks Widget */}
           <DashboardActiveTasks
             tasks={filteredTasks}
+            isLoading={isLoadingTasks}
             onTaskClick={handleTaskClick}
             onAddTaskClick={handleNewTaskClick}
           />

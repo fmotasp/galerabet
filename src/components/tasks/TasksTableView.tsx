@@ -186,11 +186,11 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
       </div>
 
       {/* Table View Container */}
-      <div className="bg-[#181818] rounded-3xl border border-[#2A2A2A] shadow-xl overflow-hidden">
+      <div className="bg-[#101010] rounded-3xl border border-white/5 shadow-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-[#2A2A2A] text-[#E4007E] font-semibold text-[11px] uppercase tracking-wider bg-[#141414]">
+            <thead className="sticky top-0 z-20 backdrop-blur-md bg-[#101010]/80">
+              <tr className="border-b border-white/5 text-[#E4007E] font-semibold text-[11px] uppercase tracking-wider">
                 <th className="w-12 px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
@@ -206,11 +206,11 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
                 <th className="px-6 py-4 text-right whitespace-nowrap min-w-[100px]">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#262626] font-medium text-white">
+            <tbody className="divide-y divide-white/5 font-medium text-white">
               {paginatedTasks.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-16 text-center">
-                    <CheckSquare className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                    <CheckSquare className="w-12 h-12 text-slate-600 mx-auto mb-3 opacity-20" />
                     <h3 className="text-base font-bold text-white">Nenhuma demanda encontrada</h3>
                     <p className="text-xs text-slate-400 mt-1">Não há tarefas correspondentes aos filtros selecionados.</p>
                   </td>
@@ -226,7 +226,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
                     <tr
                       key={task.id}
                       onClick={() => setEditingTask(task)}
-                      className="hover:bg-[#222222]/50 transition-all cursor-pointer group"
+                      className="hover:bg-white/5 transition-all cursor-pointer group"
                     >
                       {/* Checkbox */}
                       <td className="px-6 py-4.5" onClick={(e) => e.stopPropagation()}>

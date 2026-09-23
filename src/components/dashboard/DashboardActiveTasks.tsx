@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MoreHorizontal, ChevronDown } from 'lucide-react';
+import { MoreHorizontal, ChevronDown, CheckSquare } from 'lucide-react';
 import { Task } from '../../types';
 import { Button } from '../ui';
 import { getLabelColorHex } from '../tasks/TasksView';
@@ -12,6 +12,7 @@ import { getIndicatorColor } from './dashboardUtils';
 
 interface DashboardActiveTasksProps {
   tasks: Task[];
+  isLoading?: boolean;
   onTaskClick: (task: Task) => void;
   onAddTaskClick: () => void;
 }
@@ -75,7 +76,7 @@ const getStatusBadge = (task: Task) => {
 };
 
 export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.memo(
-  ({ tasks, onTaskClick, onAddTaskClick }) => {
+  ({ tasks, isLoading, onTaskClick, onAddTaskClick }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
@@ -101,9 +102,27 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
 
         {/* Task rows */}
         <div className="space-y-3">
-          {tasks.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 text-sm font-medium">
-              Nenhuma tarefa corresponde ao filtro ativo.
+          {isLoading ? (
+            // Skeleton Loaders
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-white/5 bg-white/5 animate-pulse">
+                <div className="flex items-center gap-3 w-1/2">
+                  <div className="w-3.5 h-3.5 rounded-md bg-white/10 shrink-0" />
+                  <div className="h-4 bg-white/10 rounded w-3/4" />
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-white/10" />
+                  <div className="h-5 bg-white/10 rounded-full w-20" />
+                </div>
+              </div>
+            ))
+          ) : tasks.length === 0 ? (
+            <div className="py-12 text-center flex flex-col items-center">
+              <div className="w-10 h-10 mb-2 opacity-20">
+                <CheckSquare className="w-full h-full text-white" />
+              </div>
+              <span className="text-white font-bold text-sm">Nenhuma tarefa ativa</span>
+              <span className="text-slate-400 text-xs mt-1">Todas as tarefas deste filtro estão concluídas ou vazias.</span>
             </div>
           ) : (
             (isExpanded ? tasks : tasks.slice(0, 5)).map((task) => (

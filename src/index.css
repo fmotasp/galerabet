@@ -401,7 +401,8 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none !important;
-  box-shadow: none !important;
+  box-shadow: 0 0 0 2px rgba(228, 0, 126, 0.3) !important;
+  border: 1px solid #E4007E !important;
 }
 
 /* Kanban column dashed borders */

@@ -78,7 +78,7 @@ export const TaskActivityTimelineTab: React.FC<{
             <p className="text-xs font-bold text-slate-300">Nenhuma ação registrada nesta demanda ainda.</p>
           </div>
         ) : (
-          <div className="relative pl-5 space-y-2.5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#2E2E2E]">
+          <div className="relative pl-5 space-y-2.5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-white/5">
             {timelineActions.map((act) => {
               const getIconAndStyle = () => {
                 switch (act.type) {
@@ -145,22 +145,22 @@ export const TaskActivityTimelineTab: React.FC<{
               return (
                 <div key={act.id} className="relative group">
                   {/* Timeline node dot */}
-                  <div className="absolute -left-5 top-2.5 w-3.5 h-3.5 rounded-full bg-[#101010] border-2 border-[#2E2E2E] flex items-center justify-center -translate-x-1/2 z-10 shadow-xs group-hover:border-[#E4007E] transition-colors">
+                  <div className="absolute -left-5 top-2.5 w-3.5 h-3.5 rounded-full bg-[#101010] border-2 border-white/10 flex items-center justify-center -translate-x-1/2 z-10 shadow-xs group-hover:border-[#E4007E] transition-colors">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#E4007E]" />
                   </div>
 
                   {/* Compact Action Card */}
-                  <div className="p-2.5 sm:p-3 bg-[#181818] border border-[#2E2E2E] rounded-xl shadow-xs space-y-1 hover:border-[#E4007E]/40 transition-colors">
+                  <div className="p-2.5 sm:p-3 bg-[#1C1C1C] border border-white/5 rounded-xl shadow-xs space-y-1 hover:border-[#E4007E]/40 transition-colors">
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-2">
                         {act.avatarUrl ? (
                           <img
                             src={act.avatarUrl}
                             alt={act.user}
-                            className="w-5 h-5 rounded-full object-cover ring-1 ring-white/20"
+                            className="w-5 h-5 rounded-full object-cover ring-1 ring-white/10"
                           />
                         ) : (
-                          <div className="w-5 h-5 rounded-full bg-[#1C1C1C] border border-[#2E2E2E] text-white font-semibold text-[9px] flex items-center justify-center">
+                          <div className="w-5 h-5 rounded-full bg-[#101010] border border-white/5 text-white font-semibold text-[9px] flex items-center justify-center">
                             {act.userInitials}
                           </div>
                         )}
@@ -178,7 +178,7 @@ export const TaskActivityTimelineTab: React.FC<{
 
                     <p className="text-xs font-bold text-slate-100 leading-snug">{act.title}</p>
                     {act.details && (
-                      <p className="text-[11px] text-slate-300 bg-[#101010] px-2.5 py-1.5 rounded-lg border border-[#2E2E2E]/60 font-medium whitespace-pre-wrap break-words mt-1">
+                      <p className="text-[11px] text-slate-400 font-medium whitespace-pre-wrap break-words mt-1">
                         {act.details}
                       </p>
                     )}

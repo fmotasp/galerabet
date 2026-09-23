@@ -103,8 +103,8 @@ export const TaskDriveAttachmentsTab: React.FC<{
       </div>
 
       {/* Add Attachment Form: Real File Upload Only */}
-      <div className="p-4 bg-[#1C1C1C] border border-[#2E2E2E] rounded-2xl space-y-3">
-        <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+      <div className="space-y-3">
+        <h4 className="text-xs font-medium text-white flex items-center gap-1.5 px-1">
           <Paperclip className="w-4 h-4 text-[#E4007E]" />
           <span>Anexar Arquivo Final da Demanda</span>
         </h4>
@@ -112,7 +112,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
         {/* File Upload Box */}
         <div
           onClick={() => attachmentFileInputRef.current?.click()}
-          className="border-2 border-dashed border-[#2E2E2E] hover:border-[#E4007E] bg-[#101010]/60 p-4 rounded-xl text-center cursor-pointer transition-colors group"
+          className="border border-dashed border-white/10 hover:border-[#E4007E] bg-white/[0.02] hover:bg-white/[0.04] p-6 rounded-2xl text-center cursor-pointer transition-colors group"
         >
           <input
             type="file"
@@ -135,12 +135,15 @@ export const TaskDriveAttachmentsTab: React.FC<{
                 </ul>
               </div>
             ) : (
-              <>
-                <span className="text-xs font-bold text-[#E4007E]">Clique para selecionar arquivos (ZIP, Imagens, PSD, Vídeos, PDF, Docs, etc.)</span>
-                <span className="text-[11px] text-slate-300">
-                  Arquivos .PSD e .ZIP são suportados e sincronizados com a pasta da demanda no Google Drive
+              <div className="flex flex-col items-center">
+                <span className="text-xs font-bold text-white group-hover:text-[#E4007E] transition-colors mt-1">Clique para selecionar arquivos</span>
+                <span className="text-[11px] text-slate-400 mt-1">
+                  (ZIP, Imagens, PSD, Vídeos, PDF, Docs, etc.)
                 </span>
-              </>
+                <span className="text-[11px] text-slate-500 mt-1">
+                  Arquivos são sincronizados com a pasta da demanda no Google Drive
+                </span>
+              </div>
             )}
           </div>
         </div>
@@ -334,26 +337,26 @@ export const TaskDriveAttachmentsTab: React.FC<{
                       />
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center bg-[#101010] rounded-xl aspect-square w-full border border-[#2E2E2E]">
-                      <FileText className="w-8 h-8 text-slate-400" />
-                      <span className="text-[9px] text-slate-400 mt-1 font-bold">
-                        {att.bytes ? `${Math.round(att.bytes / 1024)} KB` : 'ARQUIVO'}
+                    <div className="flex flex-col items-center justify-center bg-white/[0.02] rounded-xl aspect-square w-full border border-white/5 opacity-80 group-hover:opacity-100 transition-opacity">
+                      <FileText className="w-8 h-8 text-slate-500" />
+                      <span className="text-[9px] text-slate-500 mt-2 font-medium tracking-wider">
+                        {att.bytes ? `${(att.bytes / (1024 * 1024)).toFixed(1)} MB` : 'SEM MINIATURA'}
                       </span>
                     </div>
                   )}
                 </div>
 
                 {/* Bottom Row of Actions */}
-                <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-[#2E2E2E] relative">
+                <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-white/5 relative">
                   {/* 1. Drive Button */}
                   <a
                     href={viewUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl transition-all shadow-xs flex items-center justify-center cursor-pointer active:scale-95"
+                    className="p-2 bg-[#141414] hover:bg-[#E4007E] text-slate-400 hover:text-white rounded-xl transition-all shadow-xs flex items-center justify-center cursor-pointer active:scale-95 border border-[#2E2E2E] hover:border-[#E4007E]"
                     title="Abrir no Google Drive"
                   >
-                    <ExternalLink className="w-4 h-4 stroke-[2.5] text-white" />
+                    <ExternalLink className="w-4 h-4 stroke-[2.5]" />
                   </a>
 
                   {/* 2. Red Delete Button */}
@@ -361,7 +364,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
                     type="button"
                     onClick={() => handleDeleteAttachment(att.id)}
                     disabled={deletingFileIds.includes(att.id)}
-                    className="p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-all shadow-xs flex items-center justify-center cursor-pointer disabled:opacity-50 active:scale-95"
+                    className="p-2 bg-[#141414] hover:bg-rose-600 text-slate-400 hover:text-white rounded-xl transition-all shadow-xs flex items-center justify-center cursor-pointer disabled:opacity-50 active:scale-95 border border-[#2E2E2E] hover:border-rose-600"
                     title={deletingFileIds.includes(att.id) ? 'Excluindo...' : 'Excluir Arquivo'}
                   >
                     <Trash2 className="w-4 h-4 stroke-[2.5]" />
