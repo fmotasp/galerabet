@@ -858,10 +858,11 @@ export const listDriveFolderContents = async (
   accessToken?: string
 ): Promise<DriveFileItem[]> => {
   try {
-    const query = `'${folderId}' in parents and trashed = false`;
+    // We explicitly request only folders to make it blazingly fast and match user requirement
+    const query = `'${folderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
     const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(
       query
-    )}&supportsAllDrives=true&includeItemsFromAllDrives=true&fields=files(id,name,mimeType,thumbnailLink,webContentLink,webViewLink,iconLink,size,createdTime,description)&orderBy=folder,name`;
+    )}&supportsAllDrives=true&includeItemsFromAllDrives=true&pageSize=1000&fields=files(id,name,mimeType,thumbnailLink,webContentLink,webViewLink,iconLink,size,createdTime,description)&orderBy=name`;
 
     const response = await driveFetch(url, {}, accessToken);
 

@@ -31,6 +31,7 @@ export const Sidebar: React.FC = () => {
   const navItems: Array<{ id: NavigationTab; label: string; icon: React.ComponentType<{ className?: string }> }> = [
     { id: 'dashboard', label: 'Painel', icon: LayoutGrid },
     { id: 'tasks', label: 'Tarefas', icon: ClipboardList },
+    { id: 'files' as NavigationTab, label: 'Arquivos', icon: Folder },
     { id: 'accesses' as NavigationTab, label: 'Acessos', icon: Key },
     { id: 'materials', label: 'Material Auxiliar', icon: Palette },
 

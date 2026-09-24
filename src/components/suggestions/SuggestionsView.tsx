@@ -3,10 +3,12 @@ import { Lightbulb, CheckCircle2, Circle, Trash2, Plus, Clock } from 'lucide-rea
 import { supabase } from '../../lib/supabase';
 import { SystemSuggestion } from '../../types';
 import { useApp } from '../../context/AppContext';
+import { useEmployees } from '../../context/EmployeesContext';
 import { Button, Input } from '../ui';
 
 export const SuggestionsView: React.FC = () => {
   const { currentUser, addToast } = useApp();
+  const { employees } = useEmployees();
   const [suggestions, setSuggestions] = useState<SystemSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newTitle, setNewTitle] = useState('');
@@ -169,27 +171,39 @@ export const SuggestionsView: React.FC = () => {
               </div>
             ) : (
               <div className="grid gap-2">
-                {pending.map(suggestion => (
-                  <div 
-                    key={suggestion.id}
-                    className="flex items-center gap-4 bg-[#151515] border border-[#222] p-4 rounded-xl hover:border-amber-500/30 transition-colors group"
-                  >
-                    <button 
-                      onClick={() => handleToggle(suggestion)}
-                      className="text-slate-500 hover:text-amber-500 transition-colors flex-shrink-0"
+                {pending.map(suggestion => {
+                  const creator = employees.find(e => e.id === suggestion.created_by);
+                  return (
+                    <div 
+                      key={suggestion.id}
+                      className="flex items-center gap-4 bg-[#151515] border border-[#222] p-4 rounded-xl hover:border-amber-500/30 transition-colors group"
                     >
-                      <Circle className="w-6 h-6" />
-                    </button>
-                    <span className="flex-1 text-slate-200 font-medium">{suggestion.title}</span>
-                    <button
-                      onClick={() => handleDelete(suggestion.id)}
-                      className="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-2"
-                      title="Excluir"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                      <button 
+                        onClick={() => handleToggle(suggestion)}
+                        className="text-slate-500 hover:text-amber-500 transition-colors flex-shrink-0"
+                      >
+                        <Circle className="w-6 h-6" />
+                      </button>
+                      
+                      <div className="flex-1 flex flex-col justify-center">
+                        <span className="text-slate-200 font-medium">{suggestion.title}</span>
+                        {creator && (
+                          <span className="text-xs text-slate-500 mt-1">
+                            Sugerido por <span className="font-semibold text-slate-400">{creator.name}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => handleDelete(suggestion.id)}
+                        className="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-2"
+                        title="Excluir"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -205,27 +219,39 @@ export const SuggestionsView: React.FC = () => {
               </div>
               
               <div className="grid gap-2 opacity-60">
-                {completed.map(suggestion => (
-                  <div 
-                    key={suggestion.id}
-                    className="flex items-center gap-4 bg-[#151515] border border-[#222] p-4 rounded-xl"
-                  >
-                    <button 
-                      onClick={() => handleToggle(suggestion)}
-                      className="text-emerald-500 hover:text-slate-400 transition-colors flex-shrink-0"
+                {completed.map(suggestion => {
+                  const creator = employees.find(e => e.id === suggestion.created_by);
+                  return (
+                    <div 
+                      key={suggestion.id}
+                      className="flex items-center gap-4 bg-[#151515] border border-[#222] p-4 rounded-xl"
                     >
-                      <CheckCircle2 className="w-6 h-6" />
-                    </button>
-                    <span className="flex-1 text-slate-400 font-medium line-through">{suggestion.title}</span>
-                    <button
-                      onClick={() => handleDelete(suggestion.id)}
-                      className="text-slate-600 hover:text-red-400 transition-colors p-2"
-                      title="Excluir"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                      <button 
+                        onClick={() => handleToggle(suggestion)}
+                        className="text-emerald-500 hover:text-slate-400 transition-colors flex-shrink-0"
+                      >
+                        <CheckCircle2 className="w-6 h-6" />
+                      </button>
+                      
+                      <div className="flex-1 flex flex-col justify-center">
+                        <span className="text-slate-400 font-medium line-through">{suggestion.title}</span>
+                        {creator && (
+                          <span className="text-xs text-slate-500 mt-1">
+                            Sugerido por <span className="font-semibold text-slate-400">{creator.name}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => handleDelete(suggestion.id)}
+                        className="text-slate-600 hover:text-red-400 transition-colors p-2"
+                        title="Excluir"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

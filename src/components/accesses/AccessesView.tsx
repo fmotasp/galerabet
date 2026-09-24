@@ -4,13 +4,13 @@ import { useAccesses } from '../../hooks/useAccesses';
 import { AccessCard } from './AccessCard';
 import { AccessModal } from '../modals/AccessModal';
 import { Access } from '../../types';
-import { fetchDriveItemsFromLink, listDriveFolderContents, extractDriveFileOrFolderId, DriveFileItem } from '../../lib/googleDrive';
+import { listDriveFolderContents, extractDriveFileOrFolderId, getDriveFileDetails, DriveFileItem } from '../../lib/googleDrive';
 import { ChevronDown, ChevronUp, FileText, Image as ImageIcon, Folder, File } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 
 
-const AccessRow: React.FC<{ access: Access; onEdit: (a: Access) => void; onDelete: (id: string) => void }> = ({ access, onEdit, onDelete }) => {
+const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[]; onEdit: (a: Access) => void; onDelete: (id: string) => void }> = ({ access, preloadedDriveFiles, onEdit, onDelete }) => {
   const { addToast } = useApp();
   const [showPassword, setShowPassword] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -22,15 +22,36 @@ const AccessRow: React.FC<{ access: Access; onEdit: (a: Access) => void; onDelet
 
   const toggleExpand = async () => {
     if (!isExpanded && isDriveLink && !hasFetchedDrive) {
+      if (preloadedDriveFiles) {
+        setDriveFiles(preloadedDriveFiles);
+        setHasFetchedDrive(true);
+        setIsExpanded(true);
+        return;
+      }
       setIsLoadingDrive(true);
       try {
         const extracted = extractDriveFileOrFolderId(access.siteUrl!);
-        if (extracted && extracted.isFolder) {
-          const contents = await listDriveFolderContents(extracted.id);
+        if (extracted) {
+          let folderId = extracted.id;
+          
+          // Se não foi identificado explicitamente como pasta na URL, pode ser um open?id=... que é pasta
+          if (!extracted.isFolder) {
+            const details = await getDriveFileDetails(folderId);
+            if (details && details.mimeType === 'application/vnd.google-apps.folder') {
+               folderId = details.id;
+            } else {
+               // Se for um arquivo mesmo, não mostra nada (queremos só pastas de jogos)
+               setDriveFiles([]);
+               setHasFetchedDrive(true);
+               setIsLoadingDrive(false);
+               return;
+            }
+          }
+          
+          const contents = await listDriveFolderContents(folderId);
           setDriveFiles(contents);
         } else {
-          const result = await fetchDriveItemsFromLink(access.siteUrl!);
-          setDriveFiles(result.files || []);
+          setDriveFiles([]);
         }
         setHasFetchedDrive(true);
       } catch (err) {
@@ -298,10 +319,10 @@ export const AccessesView: React.FC = () => {
       </div>
 
       {/* List View */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden text-slate-800 font-sans flex-1 mb-6">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 text-slate-800 font-sans flex-1 mb-6 overflow-hidden flex flex-col">
+        <div className="overflow-x-auto overflow-y-auto flex-1 h-[0px]">
           <table className="w-full text-left border-collapse" style={{ minWidth: '800px' }}>
-            <thead>
+            <thead className="sticky top-0 bg-white z-10 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
               <tr className="border-b border-slate-200 text-slate-600 font-medium text-sm">
                 <th className="w-1 px-0 py-3"></th>
                 <th className="px-4 py-3 font-medium">Plataforma</th>
