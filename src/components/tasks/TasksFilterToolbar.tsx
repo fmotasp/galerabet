@@ -409,14 +409,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
       </div>
 
       
-      {onNewTask && (
-        <button
-          onClick={onNewTask}
-          className="md:hidden flex items-center justify-center w-10 h-10 shrink-0 bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white rounded-xl shadow-md active:scale-98"
-        >
-          <Plus className="w-5 h-5 stroke-[2.5]" />
-        </button>
-      )}
+
       <div className="hidden md:flex items-center gap-3 shrink-0">
         {/* Toggle Switch para Exibir/Ocultar Coluna de Concluídas */}
         
