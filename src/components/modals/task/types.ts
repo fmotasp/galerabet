@@ -12,6 +12,7 @@ export interface TaskModalFormData {
   status: TaskStatus;
   points: number;
   isFlagged: boolean;
+  isPriority?: boolean;
 }
 
 export interface TaskReferenceImage {

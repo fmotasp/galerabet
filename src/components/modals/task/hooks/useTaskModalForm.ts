@@ -421,6 +421,8 @@ export const useTaskModalForm = ({
       isStatusDirtyRef.current = false;
       isMembersDirtyRef.current = false;
       if (editingTask) {
+        const hasPriority = editingTask.labels?.some(l => l.name.toUpperCase().trim() === 'PRIORIDADE') || false;
+        
         setFormData({
           title: editingTask.title || '',
           description: editingTask.description || '',
@@ -433,6 +435,7 @@ export const useTaskModalForm = ({
           status: editingTask.status || 'backlog',
           points: editingTask.points || 1,
           isFlagged: !!editingTask.isFlagged,
+          isPriority: hasPriority,
         });
 
         setCurrentDriveFolderId(editingTask.driveFolderId || '');
@@ -471,14 +474,14 @@ export const useTaskModalForm = ({
         const initLabels: string[] = [];
         if (editingTask.labels && editingTask.labels.length > 0) {
           editingTask.labels.forEach((l) => {
-            if (l.name && l.name.toUpperCase().trim() !== 'GERAL') {
+            if (l.name && l.name.toUpperCase().trim() !== 'GERAL' && l.name.toUpperCase().trim() !== 'PRIORIDADE') {
               initLabels.push(l.name.toUpperCase().trim());
             }
           });
         } else if (editingTask.category && editingTask.category.toUpperCase().trim() !== 'GERAL') {
           editingTask.category.split(',').forEach((c) => {
             const tr = c.toUpperCase().trim();
-            if (tr && tr !== 'GERAL') initLabels.push(tr);
+            if (tr && tr !== 'GERAL' && tr !== 'PRIORIDADE') initLabels.push(tr);
           });
         }
         setSelectedLabels([...new Set(initLabels)]);
@@ -859,6 +862,14 @@ export const useTaskModalForm = ({
         color: found?.labelColor || '#E4007E',
       };
     });
+    
+    if (formData.isPriority) {
+      labelsPayload.push({
+        id: `lbl-${Date.now()}-priority`,
+        name: 'Prioridade',
+        color: '#f59e0b'
+      });
+    }
 
     const firstRefUrl = (referenceImages && referenceImages.length > 0) ? referenceImages[0].url : undefined;
     const resolvedCover = editingTask?.coverImageUrl || firstRefUrl;
@@ -937,6 +948,7 @@ export const useTaskModalForm = ({
     setPreviewingReference,
     copiedLink,
     selectedLabels,
+    setSelectedLabels,
     taskMembers,
     timelineActions,
     handleShareTask,

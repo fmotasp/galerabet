@@ -8,6 +8,20 @@ export const TaskStatusAndDates: React.FC<{
   spineStatuses: SpineStatusConfig[];
   onStatusChange?: () => void;
 }> = ({ formData, setFormData, spineStatuses, onStatusChange }) => {
+
+  const currentUrgencyState = formData.isFlagged ? 'urgencia' : (formData.isPriority ? 'prioridade' : 'normal');
+
+  const handleUrgencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val === 'urgencia') {
+      setFormData(prev => ({ ...prev, isFlagged: true, isPriority: false }));
+    } else if (val === 'prioridade') {
+      setFormData(prev => ({ ...prev, isFlagged: false, isPriority: true }));
+    } else {
+      setFormData(prev => ({ ...prev, isFlagged: false, isPriority: false }));
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
       {/* Status da tarefa */}
@@ -105,27 +119,32 @@ export const TaskStatusAndDates: React.FC<{
         </div>
       </div>
 
-      {/* URGENTE */}
+      {/* Urgência / Prioridade */}
       <div>
         <label className="block text-xs font-medium text-slate-200 mb-1.5">
-          Urgência
+          Urgência / Prioridade
         </label>
-        <button
-          type="button"
-          onClick={() => setFormData(prev => ({ ...prev, isFlagged: !prev.isFlagged }))}
-          className={`w-full h-[46px] flex items-center justify-between px-3 border rounded-xl text-xs font-semibold transition-all active:scale-95 ${
-            formData.isFlagged
-              ? 'bg-rose-600/20 border-rose-600 text-rose-500'
-              : 'bg-[#1C1C1C] border-[#2E2E2E] text-slate-400 hover:border-rose-500/50'
+        <select
+          value={currentUrgencyState}
+          onChange={handleUrgencyChange}
+          className={`w-full h-[46px] border rounded-xl px-4 text-sm font-semibold focus:outline-none transition-colors appearance-none ${
+            currentUrgencyState === 'urgencia'
+              ? 'bg-rose-600/20 border-rose-600 text-rose-500 focus:border-rose-500'
+              : currentUrgencyState === 'prioridade'
+              ? 'bg-orange-600/20 border-orange-600 text-orange-500 focus:border-orange-500'
+              : 'bg-[#1C1C1C] border-[#2E2E2E] text-slate-400 focus:border-[#E4007E]'
           }`}
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='${currentUrgencyState === 'urgencia' ? '%23f43f5e' : currentUrgencyState === 'prioridade' ? '%23f97316' : '%2394a3b8'}'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 12px center',
+            backgroundSize: '16px'
+          }}
         >
-          <span>MARCAR COMO URGENTE</span>
-          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-            formData.isFlagged ? 'border-rose-500 bg-rose-500' : 'border-slate-500'
-          }`}>
-            {formData.isFlagged && <div className="w-2 h-2 bg-white rounded-full" />}
-          </div>
-        </button>
+          <option value="normal" className="bg-[#141414] text-white">Normal</option>
+          <option value="prioridade" className="bg-[#141414] text-orange-500">🔥 Prioridade</option>
+          <option value="urgencia" className="bg-[#141414] text-rose-500">🚨 Urgência</option>
+        </select>
       </div>
     </div>
   );

@@ -183,12 +183,20 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
     if (wasDeliveredLate(task)) {
       bg = 'bg-rose-600 text-white font-semibold';
       label = `${label} - COM ATRASO`;
-    } else if (task.isFlagged || isTaskOverdue(task) || task.status === 'overdue') {
-      bg = 'bg-rose-600 text-white font-semibold';
-      if (task.isFlagged) {
-        label = `URGENTE - ${label}`;
-      } else if (isTaskOverdue(task) || task.status === 'overdue') {
-        label = `ATRASADO - ${label}`;
+    } else {
+      const isPriority = task.labels?.some(l => l.name === 'Prioridade' || l.id === 'priority');
+      
+      if (task.isFlagged || isPriority || isTaskOverdue(task) || task.status === 'overdue') {
+        if (task.isFlagged) {
+          bg = 'bg-rose-600 text-white font-semibold';
+          label = `URGENTE - ${label}`;
+        } else if (isPriority) {
+          bg = 'bg-orange-500 text-white font-semibold';
+          label = `PRIORIDADE - ${label}`;
+        } else if (isTaskOverdue(task) || task.status === 'overdue') {
+          bg = 'bg-rose-600 text-white font-semibold';
+          label = `ATRASADO - ${label}`;
+        }
       }
     }
 

@@ -67,6 +67,7 @@ export const TaskModal: React.FC = () => {
     setPreviewingReference,
     copiedLink,
     selectedLabels,
+    setSelectedLabels,
     taskMembers,
     timelineActions,
     handleShareTask,
