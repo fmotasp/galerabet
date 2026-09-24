@@ -103,6 +103,7 @@ export const CommandPaletteModal: React.FC = () => {
     .filter(
       (t) =>
         t.title.toLowerCase().includes(cleanQuery) ||
+        (t.description && t.description.toLowerCase().includes(cleanQuery)) ||
         (t.assigneeName && t.assigneeName.toLowerCase().includes(cleanQuery)) ||
         (t.projectName && t.projectName.toLowerCase().includes(cleanQuery)) ||
         (t.category && t.category.toLowerCase().includes(cleanQuery))
