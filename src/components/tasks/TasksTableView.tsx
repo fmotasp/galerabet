@@ -119,19 +119,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
             <span>Exportar</span>
           </button>
 
-          <div className="relative">
-            <select
-              value={sortBy}
-              onChange={(e) => onSortByChange(e.target.value as 'default' | 'title' | 'dueDate' | 'points')}
-              className="appearance-none pl-4 pr-10 py-2.5 bg-[#222222] hover:bg-[#282828] border border-[#303030] rounded-2xl text-xs font-bold text-white focus:outline-none focus:border-[#E4007E] cursor-pointer transition-colors"
-            >
-              <option value="default">Ordenar: padrão</option>
-              <option value="title">Ordenar: nome</option>
-              <option value="dueDate">Ordenar: prazo</option>
-              <option value="points">Ordenar: pontos</option>
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
+
 
           <button
             onClick={() => setIsNewTaskModalOpen(true)}
@@ -218,9 +206,19 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
               ) : (
                 paginatedTasks.map((task) => {
                   const statusConfig = getSpineStatusConfig(task.status);
-                  
-                  // Decode dynamic label color or fallback
-                  const pillColor = `${statusConfig.bg || 'bg-slate-800'} ${statusConfig.color || 'text-slate-200'} border border-current/20`;
+                  let statusBg = 'bg-slate-400';
+                  let statusLabel = statusConfig.label;
+                  const sLabel = statusLabel.toLowerCase();
+                  if (sLabel.includes('feito') || sLabel.includes('conclu') || sLabel.includes('done')) {
+                    statusBg = 'bg-[#00c875]'; // Green
+                  } else if (sLabel.includes('andamento') || sLabel.includes('process') || sLabel.includes('doing') || sLabel.includes('produ') || sLabel.includes('revis')) {
+                    statusBg = 'bg-[#fdab3d]'; // Orange
+                  } else if (sLabel.includes('parado') || sLabel.includes('stuck') || sLabel.includes('block') || sLabel.includes('pend')) {
+                    statusBg = 'bg-[#e2445c]'; // Red
+                  } else {
+                    statusBg = 'bg-slate-700'; // Gray
+                  }
+                  const pillColor = `${statusBg} text-white border-transparent shadow-sm`;
 
                   return (
                     <tr

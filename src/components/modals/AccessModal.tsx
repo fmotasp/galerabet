@@ -84,8 +84,8 @@ export const AccessModal: React.FC<AccessModalProps> = ({ isOpen, onClose, acces
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !login || !password) {
-      addToast('Atenção', 'Preencha Site, Login e Senha.', 'warning');
+    if (!title) {
+      addToast('Atenção', 'Preencha pelo menos o Nome/Título do acesso.', 'warning');
       return;
     }
 
@@ -229,7 +229,6 @@ export const AccessModal: React.FC<AccessModalProps> = ({ isOpen, onClose, acces
                 onChange={(e) => setLogin(e.target.value)}
                 placeholder="Usuário ou E-mail"
                 className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E] focus:ring-1 focus:ring-[#E4007E] transition-all"
-                required
               />
             </div>
 
@@ -242,7 +241,6 @@ export const AccessModal: React.FC<AccessModalProps> = ({ isOpen, onClose, acces
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Senha de acesso"
                 className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E] focus:ring-1 focus:ring-[#E4007E] transition-all font-mono"
-                required
               />
             </div>
           </form>
