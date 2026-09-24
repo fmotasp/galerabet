@@ -17,7 +17,7 @@ export const FilesView: React.FC = () => {
       try {
         const { data, error } = await supabase
           .from('tasks')
-          .select('id, title, project_name, assignee_name, created_at, attachments, cover_image_url')
+          .select('id, title, project_name, assignee_name, created_at, attachments, cover_image_url, last_moved_at, updated_at')
           .in('status', ['in_review', 'ready_to_post', 'done']);
 
         if (error) throw error;
@@ -39,6 +39,10 @@ export const FilesView: React.FC = () => {
 
         if (data) {
           data.forEach((row: any) => {
+            const taskTimestamp = row.last_moved_at 
+              ? new Date(row.last_moved_at).toISOString() 
+              : (row.updated_at || row.created_at || new Date().toISOString());
+
             let taskAttachments: any[] = [];
             if (row.attachments) {
               try {
@@ -97,7 +101,7 @@ export const FilesView: React.FC = () => {
                   attachmentId: att.id || Math.random().toString(),
                   name: att.name,
                   url: att.url,
-                  date: att.date || row.created_at || new Date().toISOString(),
+                  date: att.date || taskTimestamp,
                   thumbnailUrl: att.thumbnailUrl,
                   driveFileId,
                   previewUrl,
@@ -116,7 +120,7 @@ export const FilesView: React.FC = () => {
                   attachmentId: Math.random().toString(),
                   name: 'Capa da Tarefa',
                   url: row.cover_image_url,
-                  date: row.created_at || new Date().toISOString(),
+                  date: taskTimestamp,
                   thumbnailUrl: row.cover_image_url,
                   driveFileId: null,
                   previewUrl: row.cover_image_url,
@@ -126,6 +130,7 @@ export const FilesView: React.FC = () => {
           });
         }
 
+        // Ordenar da mais recente para a mais antiga (baseado no envio ou última movimentação)
         files.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setDeliveredFiles(files);
       } catch (err) {

@@ -311,7 +311,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
 
           if (task.labels && task.labels.length > 0) {
             task.labels.forEach((lbl) => {
-              if (lbl.name) {
+              if (lbl.name && lbl.name.toUpperCase().trim() !== 'PRIORIDADE') {
                 labelItems.push({ name: lbl.name, color: lbl.color });
               }
             });
