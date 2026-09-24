@@ -135,9 +135,9 @@ export const TaskModalHeader: React.FC<{
               const displayDate = formData.deliveredAt || new Date().toLocaleDateString('pt-BR');
 
               return (
-                <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-semibold tracking-wide shadow-xs animate-in fade-in duration-200 select-none">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Data de Entrega: {displayDate}</span>
+                <div className="shrink-0 flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-[10px] sm:text-xs font-semibold tracking-wide shadow-xs animate-in fade-in duration-200 select-none">
+                  <CheckCircle2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-emerald-400 shrink-0" />
+                  <span><span className="hidden sm:inline">Data de Entrega: </span>{displayDate}</span>
                 </div>
               );
             })()}
@@ -164,22 +164,22 @@ export const TaskModalHeader: React.FC<{
               <button
                 type="button"
                 onClick={handleShareTask}
-                className={`px-3 py-2 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 text-xs font-semibold shadow-xs active:scale-95 ${
+                className={`p-2 sm:px-3 sm:py-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center sm:justify-start gap-1.5 text-xs font-semibold active:scale-95 ${
                   copiedLink
                     ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                    : 'text-slate-300 hover:text-white bg-[#222222]/80 hover:bg-[#2A2A2A] border-[#2E2E2E]'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5 border-transparent'
                 }`}
                 title="Copiar link direto para compartilhar esta tarefa"
               >
                 {copiedLink ? (
                   <>
                     <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
-                    <span className="text-emerald-400">Link Copiado!</span>
+                    <span className="text-emerald-400 hidden sm:inline">Link Copiado!</span>
                   </>
                 ) : (
                   <>
                     <Share2 className="w-4 h-4 text-[#E4007E] stroke-[2.5]" />
-                    <span>Compartilhar</span>
+                    <span className="hidden sm:inline">Compartilhar</span>
                   </>
                 )}
               </button>
@@ -188,7 +188,7 @@ export const TaskModalHeader: React.FC<{
             <button
               type="button"
               onClick={handleClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-white bg-[#222222]/80 hover:bg-[#2A2A2A] border border-[#2E2E2E] transition-all cursor-pointer"
+              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
               title="Fechar painel lateral"
             >
               <X className="w-5 h-5 stroke-[2.5]" />

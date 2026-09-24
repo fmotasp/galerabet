@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Star, ChevronDown, Check, CheckCircle2 } from 'lucide-react';
+import { Users, Star, ChevronDown, Check, CheckCircle2, Plus } from 'lucide-react';
 import { Employee } from '../../types';
 import { CurrentUserType } from '../../context/AuthContext';
 import { isDesignerOrVideomaker } from '../../lib/taskUtils';
@@ -12,6 +12,7 @@ export interface RegisteredClient {
 }
 
 export interface TasksFilterToolbarProps {
+  onNewTask?: () => void;
   registeredClients: RegisteredClient[];
   selectedClient: string;
   onClientChange: (clientId: string) => void;
@@ -36,6 +37,7 @@ export interface TasksFilterToolbarProps {
 }
 
 export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(({
+  onNewTask,
   registeredClients,
   selectedClient,
   onClientChange,
@@ -56,15 +58,15 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
   const [clientFilterSearch, setClientFilterSearch] = React.useState('');
 
   return (
-    <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-3 bg-[#181818] p-3 rounded-2xl border border-[#2A2A2A]">
-      <div className="flex flex-wrap md:flex-nowrap items-center gap-3 w-full md:w-auto min-w-0">
+    <div className="flex flex-row items-center justify-between gap-2 md:gap-3 w-full relative z-40">
+      <div className="flex flex-row items-center gap-2 md:gap-3 w-auto min-w-0 flex-1 md:flex-none">
         {/* Client Filter (Responsive) */}
-        <div className="flex items-center gap-2">
-        <div className="relative md:hidden">
+        <div className="flex flex-row items-center gap-2 flex-1 md:flex-none">
+        <div className="relative md:hidden flex-1">
           <button
             type="button"
             onClick={() => setIsClientDropdownOpen(!isClientDropdownOpen)}
-            className="flex items-center justify-between min-w-[160px] gap-2.5 bg-[#222222] hover:bg-[#2A2A2A] border border-[#303030] text-white rounded-xl px-3.5 py-2 text-xs font-bold transition-all active:scale-98 cursor-pointer"
+            className="flex items-center justify-between w-full md:min-w-[160px] h-10 gap-1.5 md:gap-2.5 bg-[#222222] hover:bg-[#2A2A2A] border border-[#303030] text-white rounded-xl px-2 md:px-3.5 text-[10px] md:text-xs font-bold transition-all active:scale-98 cursor-pointer whitespace-nowrap overflow-hidden"
           >
             <div className="flex items-center gap-2 truncate">
               {selectedClient === 'all' ? (
@@ -247,11 +249,11 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
         </div>
 
         {/* Custom Modern Member Filter Dropdown */}
-        <div className="relative">
+        <div className="relative flex-1 md:flex-none">
           <button
             type="button"
             onClick={onMemberDropdownToggle}
-            className="flex items-center gap-2.5 bg-[#222222] hover:bg-[#2A2A2A] border border-[#303030] text-white rounded-xl px-3.5 py-2 text-xs font-bold transition-all active:scale-98 cursor-pointer"
+            className="flex items-center justify-between md:justify-start w-full h-10 gap-1.5 md:gap-2.5 bg-[#222222] hover:bg-[#2A2A2A] border border-[#303030] text-white rounded-xl px-2 md:px-3.5 text-[10px] md:text-xs font-bold transition-all active:scale-98 cursor-pointer whitespace-nowrap overflow-hidden"
           >
             {selectedMember === 'all' && (
               <div className="flex items-center gap-2">
@@ -406,7 +408,16 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
         </div>
       </div>
 
-      <div className="flex items-center gap-4 shrink-0">
+      
+      {onNewTask && (
+        <button
+          onClick={onNewTask}
+          className="md:hidden flex items-center justify-center w-10 h-10 shrink-0 bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white rounded-xl shadow-md active:scale-98"
+        >
+          <Plus className="w-5 h-5 stroke-[2.5]" />
+        </button>
+      )}
+      <div className="hidden md:flex items-center gap-3 shrink-0">
         {/* Toggle Switch para Exibir/Ocultar Coluna de Concluídas */}
         
           <button

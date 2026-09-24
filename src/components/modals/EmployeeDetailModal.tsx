@@ -213,23 +213,21 @@ export const EmployeeDetailModal: React.FC = () => {
 
           <div className="flex items-center gap-2">
             <Button
-              variant="secondary"
+              variant="ghost"
               size="icon"
               onClick={() => {
                 setSelectedEmployeeForDetail(null);
                 setEditingEmployee(emp);
               }}
-              className="bg-[#222222] hover:bg-[#2A2A2A] border-[#303030]"
               title="Editar Perfil"
               aria-label="Editar Perfil"
             >
               <Edit2 className="w-4 h-4" />
             </Button>
             <Button
-              variant="secondary"
+              variant="ghost"
               size="icon"
               onClick={() => setSelectedEmployeeForDetail(null)}
-              className="bg-[#222222] hover:bg-[#2A2A2A] border-[#303030]"
               title="Fechar Detalhes"
               aria-label="Fechar Detalhes"
             >

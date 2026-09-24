@@ -135,6 +135,7 @@ export const TasksView: React.FC = () => {
     spineStatuses,
     currentUser,
     activeFilter,
+    setActiveFilter,
   });
 
   const handleNewTask = useCallback(() => {
@@ -166,6 +167,7 @@ export const TasksView: React.FC = () => {
 
       {/* Filter Toolbar - Filtro de Cliente e Membros */}
       <TasksFilterToolbar
+        onNewTask={handleNewTask}
         registeredClients={registeredClients}
         selectedClient={selectedClient}
         onClientChange={setSelectedClient}
@@ -183,34 +185,7 @@ export const TasksView: React.FC = () => {
         totalFilteredTasks={filteredTasks.length}
       />
 
-      {/* Quick Active Filter Pill (Cmd+K: Minhas Tarefas / Alertas) */}
-      {activeFilter !== 'all' && (
-        <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-[#181818] border border-[#2E2E2E] rounded-2xl w-full sm:w-auto animate-in fade-in slide-in-from-top-1">
-          <div className="flex items-center gap-2">
-            {activeFilter === 'mine' ? (
-              <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#E4007E] to-[#E94E18] animate-pulse" />
-            ) : (
-              <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
-            )}
-            <span className="text-xs text-slate-300 font-medium">
-              Filtro ativo:{' '}
-              <span className="text-white font-extrabold">
-                {activeFilter === 'mine' ? 'Minhas Atividades / Tarefas' : 'Tarefas com Alerta / Prazo'}
-              </span>
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setActiveFilter('all')}
-            className="px-2.5 py-1 bg-[#262626] hover:bg-[#333333] text-slate-200 hover:text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-            title="Remover filtro"
-          >
-            <X className="w-3.5 h-3.5" />
-            <span>Limpar Filtro</span>
-          </button>
-        </div>
-      )}
+      
 
       {/* Board (Kanban) View */}
       {viewMode === 'kanban' ? (

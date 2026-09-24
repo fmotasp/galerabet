@@ -20,6 +20,7 @@ export interface UseTasksFilterProps {
   spineStatuses: SpineStatusConfig[];
   currentUser: CurrentUserType | null;
   activeFilter: 'all' | 'mine' | 'flagged';
+  setActiveFilter?: (filter: 'all' | 'mine' | 'flagged') => void;
 }
 
 export const isDoneStatus = (statusId: string, label: string = '') => {
@@ -79,7 +80,20 @@ export const useTasksFilter = ({
   spineStatuses,
   currentUser,
   activeFilter,
+  setActiveFilter,
 }: UseTasksFilterProps) => {
+
+  // Sync global activeFilter (from Cmd+K or Dashboard) to local selectedMember
+  useEffect(() => {
+    if (activeFilter === 'mine') {
+      setSelectedMember('mine');
+      if (setActiveFilter) setActiveFilter('all');
+    } else if (activeFilter === 'flagged') {
+      // User requested to remove the banner, so there's no UI to clear this.
+      // We'll just reset it immediately to prevent getting trapped.
+      if (setActiveFilter) setActiveFilter('all');
+    }
+  }, [activeFilter, setActiveFilter]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const debouncedSearchQuery = useDebounce(searchQuery, 250);
   const [selectedClient, setSelectedClient] = useState<string>('all');

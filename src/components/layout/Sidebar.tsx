@@ -12,6 +12,7 @@ import {
   ShieldAlert,
   Lightbulb,
   Key,
+  Menu,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { NavigationTab } from '../../types';
@@ -166,7 +167,7 @@ export const Sidebar: React.FC = () => {
 
       {/* Mobile Bottom Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#141414] border-t border-[#262626] z-40 px-2 py-2 flex items-center justify-around pb-safe">
-        {navItems.map((item) => {
+        {navItems.filter(i => ['dashboard', 'tasks', 'reports'].includes(i.id)).map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
@@ -187,18 +188,71 @@ export const Sidebar: React.FC = () => {
             </button>
           );
         })}
-        {canManage && (
-          <button
-            className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 ${
-              activeTab === 'settings'
-                ? 'text-[#E4007E]'
-                : 'text-[#A0A0A0] hover:text-white'
-            }`}
-          >
-            <Settings className={`w-5 h-5 ${activeTab === 'settings' ? 'text-[#E4007E]' : 'text-[#A0A0A0]'}`} />
-            <span className="text-[9px] mt-1 font-semibold">Ajustes</span>
+        
+        <button
+          onClick={() => setIsMobileSidebarOpen(true)}
+          className={`flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200 text-[#A0A0A0] hover:text-white`}
+        >
+          <Menu className="w-5 h-5 mb-1" />
+          <span className="text-[10px] font-medium tracking-tight">
+            Menu
+          </span>
+        </button>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-[60] lg:hidden animate-fade-in" 
+          onClick={() => setIsMobileSidebarOpen(false)} 
+        />
+      )}
+      
+      {/* Mobile Sidebar Drawer */}
+      <div 
+        className={`fixed top-0 left-0 bottom-0 w-64 bg-[#141414] border-r border-[#262626] z-[70] transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
+        <div className="p-6 flex items-center justify-between border-b border-[#262626]">
+          <img src="/sidebar-icon.png" alt="Logo" className="w-8 h-8 object-contain" />
+          <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 text-[#A0A0A0] hover:text-white rounded-full bg-[#1C1C1C]">
+            <X className="w-5 h-5" />
           </button>
-        )}
+        </div>
+        
+        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive 
+                    ? 'bg-[#E4007E]/10 text-[#E4007E] font-semibold' 
+                    : 'text-[#A0A0A0] hover:bg-[#1C1C1C] hover:text-white'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+          
+          {canManage && (
+            <button
+              onClick={() => handleNavClick('settings')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all mt-4 ${
+                activeTab === 'settings' 
+                  ? 'bg-[#E4007E]/10 text-[#E4007E] font-semibold' 
+                  : 'text-[#A0A0A0] hover:bg-[#1C1C1C] hover:text-white'
+              }`}
+            >
+              <Settings className="w-5 h-5" />
+              <span>Ajustes</span>
+            </button>
+          )}
+        </div>
       </div>
     </>
   );

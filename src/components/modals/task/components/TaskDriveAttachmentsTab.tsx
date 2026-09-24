@@ -384,7 +384,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
                     href={viewUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 bg-[#141414] hover:bg-[#E4007E] text-slate-400 hover:text-white rounded-xl transition-all shadow-xs flex items-center justify-center cursor-pointer active:scale-95 border border-[#2E2E2E] hover:border-[#E4007E]"
+                    className="p-2 hover:bg-white/5 text-slate-400 hover:text-white rounded-xl transition-all flex items-center justify-center cursor-pointer active:scale-95 border-transparent"
                     title="Abrir no Google Drive"
                   >
                     <ExternalLink className="w-4 h-4 stroke-[2.5]" />
@@ -395,7 +395,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
                     type="button"
                     onClick={() => handleDeleteAttachment(att.id)}
                     disabled={deletingFileIds.includes(att.id)}
-                    className="p-2 bg-[#141414] hover:bg-rose-600 text-slate-400 hover:text-white rounded-xl transition-all shadow-xs flex items-center justify-center cursor-pointer disabled:opacity-50 active:scale-95 border border-[#2E2E2E] hover:border-rose-600"
+                    className="p-2 hover:bg-white/5 text-slate-400 hover:text-rose-400 rounded-xl transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 active:scale-95 border-transparent"
                     title={deletingFileIds.includes(att.id) ? 'Excluindo...' : 'Excluir Arquivo'}
                   >
                     <Trash2 className="w-4 h-4 stroke-[2.5]" />
@@ -412,7 +412,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
                       className={`p-2 rounded-xl transition-all border cursor-pointer active:scale-95 ${
                         openAttachmentMenuId === att.id
                           ? 'bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white border-[#E4007E] shadow-md shadow-[#E4007E]/30'
-                          : 'bg-[#141414] hover:bg-[#262626] text-slate-300 hover:text-white border-[#2E2E2E]'
+                          : 'hover:bg-white/5 text-slate-400 hover:text-white border-transparent'
                       }`}
                       title="Mais opções do arquivo"
                     >

@@ -114,7 +114,7 @@ export const TaskMembersAndClients: React.FC<{
                   setIsMembersPopoverOpen(!isMembersPopoverOpen);
                   setIsLabelsPopoverOpen(false);
                 }}
-                className="w-9 h-9 rounded-full bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E] flex items-center justify-center text-slate-200 hover:text-white transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+                className="w-9 h-9 rounded-full bg-[#1C1C1C] hover:bg-[#E4007E]/20 flex items-center justify-center text-slate-400 hover:text-[#E4007E] transition-all hover:scale-105 active:scale-95 cursor-pointer border-transparent"
                 title="Adicionar Membro"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -271,7 +271,7 @@ export const TaskMembersAndClients: React.FC<{
                 setIsLabelsPopoverOpen(!isLabelsPopoverOpen);
                 setIsMembersPopoverOpen(false);
               }}
-              className="w-8 h-8 rounded-full bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E] flex items-center justify-center text-slate-200 hover:text-white transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[#1C1C1C] hover:bg-[#E4007E]/20 flex items-center justify-center text-slate-400 hover:text-[#E4007E] transition-all hover:scale-105 active:scale-95 cursor-pointer border-transparent"
               title="Adicionar outro cliente"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />

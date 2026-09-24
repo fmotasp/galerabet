@@ -78,6 +78,9 @@ const getStatusBadge = (task: Task) => {
 export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.memo(
   ({ tasks, isLoading, onTaskClick, onAddTaskClick }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    
+    // Mostra no máximo as 20 tarefas mais recentes
+    const limitedTasks = tasks.slice(0, 20);
 
     return (
       <div className="bg-[#181818] rounded-2xl p-6 border border-[#2A2A2A] shadow-lg">
@@ -85,7 +88,7 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
           <div className="flex items-center gap-3">
             <h3 className="font-bold text-white text-base sm:text-lg">Tarefas Ativas</h3>
             <span className="bg-[#222222] text-[#E4007E] border border-[#303030] text-xs font-bold px-2.5 py-0.5 rounded-full">
-              {tasks.length} tarefas
+              {limitedTasks.length} tarefas
             </span>
           </div>
           <Button
@@ -116,7 +119,7 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
                 </div>
               </div>
             ))
-          ) : tasks.length === 0 ? (
+          ) : limitedTasks.length === 0 ? (
             <div className="py-12 text-center flex flex-col items-center">
               <div className="w-10 h-10 mb-2 opacity-20">
                 <CheckSquare className="w-full h-full text-white" />
@@ -125,7 +128,7 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
               <span className="text-slate-400 text-xs mt-1">Todas as tarefas deste filtro estão concluídas ou vazias.</span>
             </div>
           ) : (
-            (isExpanded ? tasks : tasks.slice(0, 5)).map((task) => (
+            (isExpanded ? limitedTasks : limitedTasks.slice(0, 5)).map((task) => (
               <div
                 key={task.id}
                 id={`task-row-${task.id}`}
@@ -191,7 +194,7 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
         </div>
 
         {/* Expand / Collapse Button for Active Tasks */}
-        {tasks.length > 5 && (
+        {limitedTasks.length > 5 && (
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
@@ -200,7 +203,7 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
             <span>
               {isExpanded
                 ? 'Mostrar menos tarefas'
-                : `Ver mais tarefas (+${tasks.length - 5})`}
+                : `Ver mais tarefas (+${limitedTasks.length - 5})`}
             </span>
             <ChevronDown
               className={`w-3.5 h-3.5 transition-transform ${
