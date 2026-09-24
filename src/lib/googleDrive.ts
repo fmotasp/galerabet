@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase';
 
 // Google Drive Configuration & Helpers
 export const GOOGLE_DRIVE_CONFIG = {
@@ -132,91 +132,26 @@ export const getValidAccessToken = async (
   clientId?: string,
   interactive: boolean = false
 ): Promise<string | null> => {
-  const localToken = localStorage.getItem('spine_google_access_token');
-  const expiry = Number(localStorage.getItem('spine_google_token_expiry')) || 0;
-
-  if (localToken && (expiry === 0 || expiry > Date.now() + 60000)) {
-    return localToken;
-  }
-
-  // Check cloud-synced token from Supabase
-  try {
-    const { data } = await supabase
-      .from('projects')
-      .select('description, logo_url')
-      .eq('id', 'google-drive-token')
-      .maybeSingle();
-
-    if (data?.description) {
-      const cloudExpiry = Number(data.logo_url) || 0;
-      if (cloudExpiry > Date.now() + 60000) {
-        localStorage.setItem('spine_google_access_token', data.description);
-        localStorage.setItem('spine_google_token_expiry', String(cloudExpiry));
-        return data.description;
-      }
-    }
-  } catch (err) {
-    console.warn('Could not check Supabase for Google token:', err);
-  }
-
-  // Only open the OAuth popup window if explicitly requested by user interaction
-  if (interactive) {
-    return await requestDriveToken(clientId);
-  }
-
-  return null;
+  return 'proxy-token';
 };
 
 // Helper fetch wrapper to handle Google Drive token expiry and fallback to API Key
+
 const driveFetch = async (
   url: string,
   options: RequestInit = {},
   customToken?: string,
   interactive: boolean = false
 ): Promise<Response> => {
-  let token = customToken || localStorage.getItem('spine_google_access_token');
-  if (!token) {
-    token = await getValidAccessToken(undefined, interactive);
-  }
-
-  // Se não tem token OAuth, tenta usar a API Key diretamente como query param
-  if (!token) {
-    const separator = url.includes('?') ? '&' : '?';
-    const keyUrl = `${url}${separator}key=${GOOGLE_DRIVE_CONFIG.API_KEY}`;
-    return await fetch(keyUrl, options);
-  }
+  const proxyUrl = `${SUPABASE_URL}/functions/v1/drive-proxy`;
 
   const headers = {
     ...(options.headers || {}),
-    Authorization: `Bearer ${token}`,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'x-drive-url': url
   } as any;
 
-  let response = await fetch(url, { ...options, headers });
-
-  // If unauthorized (401), token has probably expired -> tenta refresh ou fallback com API Key
-  if (response.status === 401) {
-    console.warn('Google Drive token expired or invalid (401).');
-    localStorage.removeItem('spine_google_access_token');
-    if (interactive) {
-      const newToken = await requestDriveToken();
-      if (newToken) {
-        const retryHeaders = {
-          ...(options.headers || {}),
-          Authorization: `Bearer ${newToken}`,
-        } as any;
-        return await fetch(url, { ...options, headers: retryHeaders });
-      }
-    }
-
-    // Fallback com API Key para pastas/arquivos públicos ou compartilhados
-    const separator = url.includes('?') ? '&' : '?';
-    const keyUrl = `${url}${separator}key=${GOOGLE_DRIVE_CONFIG.API_KEY}`;
-    const keyHeaders = { ...(options.headers || {}) } as any;
-    delete keyHeaders.Authorization;
-    response = await fetch(keyUrl, { ...options, headers: keyHeaders });
-  }
-
-  return response;
+  return await fetch(proxyUrl, { ...options, headers });
 };
 
 // Find existing task folder in Google Drive by name to prevent duplicates

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Paperclip,
   Folder,
@@ -63,6 +63,28 @@ export const TaskDriveAttachmentsTab: React.FC<{
   addToast,
 }) => {
   const attachmentFileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      setSelectedAttachmentFiles(Array.from(e.dataTransfer.files));
+    }
+  };
 
   return (
     <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 bg-[#101010]">
@@ -112,7 +134,14 @@ export const TaskDriveAttachmentsTab: React.FC<{
         {/* File Upload Box */}
         <div
           onClick={() => attachmentFileInputRef.current?.click()}
-          className="border border-dashed border-white/10 hover:border-[#E4007E] bg-white/[0.02] hover:bg-white/[0.04] p-6 rounded-2xl text-center cursor-pointer transition-colors group"
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`border border-dashed p-6 rounded-2xl text-center cursor-pointer transition-all group ${
+            isDragging 
+              ? 'border-[#E4007E] bg-[#E4007E]/10 scale-[1.02] shadow-[0_0_20px_rgba(228,0,126,0.15)]' 
+              : 'border-white/10 hover:border-[#E4007E] bg-white/[0.02] hover:bg-white/[0.04]'
+          }`}
         >
           <input
             type="file"
@@ -136,7 +165,9 @@ export const TaskDriveAttachmentsTab: React.FC<{
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <span className="text-xs font-bold text-white group-hover:text-[#E4007E] transition-colors mt-1">Clique para selecionar arquivos</span>
+                <span className="text-xs font-bold text-white group-hover:text-[#E4007E] transition-colors mt-1">
+                  {isDragging ? 'Solte os arquivos aqui...' : 'Clique ou arraste arquivos para cá'}
+                </span>
                 <span className="text-[11px] text-slate-400 mt-1">
                   (ZIP, Imagens, PSD, Vídeos, PDF, Docs, etc.)
                 </span>
