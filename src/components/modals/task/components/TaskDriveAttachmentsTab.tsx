@@ -110,7 +110,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
             type="button"
             disabled={openingDriveFolder}
             onClick={handleOpenDeliveredFolder}
-            className="px-4 py-2.5 bg-[#1C1C1C] hover:bg-[#2E2E2E] text-white border border-[#2E2E2E] hover:border-[#E4007E] font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
+            className="px-4 py-2.5 bg-[#1C1C1C] hover:bg-[#262626] text-slate-300 hover:text-white font-bold text-xs rounded-xl transition-all shadow-none flex items-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
             title="Abrir pasta de Arquivos Entregues desta demanda no Google Drive"
           >
             {openingDriveFolder ? (
@@ -208,7 +208,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
 
       {/* Attachments List / Grid */}
       {attachments.length === 0 && !loadingAttachments ? (
-        <div className="p-8 bg-[#1C1C1C]/40 border border-dashed border-[#2E2E2E] rounded-2xl text-center space-y-2">
+        <div className="p-8 bg-[#181818] rounded-3xl text-center space-y-2">
           <Paperclip className="w-8 h-8 text-slate-500 mx-auto" />
           <p className="text-xs font-bold text-white">
             Nenhum arquivo entregue
@@ -281,7 +281,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
             return (
               <div
                 key={att.id}
-                className="bg-[#1C1C1C] rounded-2xl p-2.5 flex flex-col justify-between gap-2.5 relative border border-[#2E2E2E] hover:border-[#E4007E]/40 transition-colors shadow-sm"
+                className="bg-[#1C1C1C] rounded-2xl p-2.5 flex flex-col justify-between gap-2.5 relative hover:bg-[#1f1f1f] transition-colors shadow-none"
               >
                 {/* Top Header inside card */}
                 <div className="flex items-center justify-between gap-1.5 min-w-0">
@@ -289,9 +289,9 @@ export const TaskDriveAttachmentsTab: React.FC<{
                     <div
                       className={`p-1 rounded-lg text-white shrink-0 flex items-center justify-center font-semibold ${
                         isPsd
-                          ? 'bg-[#181818] text-[#38BDF8] text-[11px] border border-[#2E2E2E] w-6 h-6 shadow-xs'
+                          ? 'bg-[#141414] text-[#38BDF8] text-[11px] w-6 h-6 shadow-none'
                           : isZip
-                            ? 'bg-[#2A2000] text-[#FBBF24] border border-[#78350F] w-6 h-6 shadow-xs'
+                            ? 'bg-[#2A2000] text-[#FBBF24] w-6 h-6 shadow-none'
                             : isImage
                               ? 'bg-[#2E2E2E] text-[#E4007E]'
                               : 'bg-[#E4007E] text-white'
@@ -312,16 +312,16 @@ export const TaskDriveAttachmentsTab: React.FC<{
                       href={viewUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex flex-col items-center justify-center bg-gradient-to-b from-[#181818] to-[#101010] rounded-xl aspect-square w-full border border-[#2E2E2E] hover:border-[#E4007E]/60 p-3 text-center transition-all group/psd cursor-pointer shadow-inner"
+                      className="flex flex-col items-center justify-center bg-[#141414] rounded-xl aspect-square w-full p-3 text-center transition-all group/psd cursor-pointer shadow-none"
                       title="Clique para abrir o arquivo PSD no Google Drive"
                     >
-                      <div className="w-14 h-14 rounded-2xl bg-[#141414] border-2 border-[#38BDF8]/60 flex items-center justify-center shadow-xl mb-2 group-hover/psd:scale-110 transition-transform">
+                      <div className="w-14 h-14 rounded-2xl bg-[#1a1a1a] flex items-center justify-center shadow-none mb-2 group-hover/psd:scale-110 transition-transform">
                         <span className="text-[#38BDF8] font-semibold text-2xl tracking-tighter select-none">Ps</span>
                       </div>
                       <span className="text-[10px] font-bold text-white truncate max-w-full block select-none px-1" title={att.name}>
                         {att.name}
                       </span>
-                      <span className="text-[9px] text-slate-300 font-semibold mt-1 uppercase tracking-wider bg-[#141414] px-2 py-0.5 rounded-md border border-[#2E2E2E] shadow-xs">
+                      <span className="text-[9px] text-slate-400 font-semibold mt-1 uppercase tracking-wider bg-[#101010] px-2 py-0.5 rounded-md shadow-none">
                         {att.bytes ? `${(att.bytes / (1024 * 1024)).toFixed(1)} MB` : 'ARQUIVO PSD'}
                       </span>
                     </a>
@@ -333,20 +333,20 @@ export const TaskDriveAttachmentsTab: React.FC<{
                       className="flex flex-col items-center justify-center bg-gradient-to-b from-[#1c1810] to-[#12100a] rounded-xl aspect-square w-full border border-[#78350F]/50 hover:border-[#FBBF24]/80 p-3 text-center transition-all group/zip cursor-pointer shadow-inner"
                       title="Clique para abrir/baixar o arquivo ZIP"
                     >
-                      <div className="w-14 h-14 rounded-2xl bg-[#1e170a] border-2 border-[#FBBF24]/60 flex items-center justify-center shadow-xl mb-2 group-hover/zip:scale-110 transition-transform">
+                      <div className="w-14 h-14 rounded-2xl bg-[#1e170a] flex items-center justify-center shadow-none mb-2 group-hover/zip:scale-110 transition-transform">
                         <Archive className="w-7 h-7 text-[#FBBF24]" />
                       </div>
                       <span className="text-[10px] font-bold text-amber-200 truncate max-w-full block select-none px-1" title={att.name}>
                         {att.name}
                       </span>
-                      <span className="text-[9px] text-amber-400 font-semibold mt-1 uppercase tracking-wider bg-[#141414] px-2 py-0.5 rounded-md border border-[#78350F] shadow-xs">
+                      <span className="text-[9px] text-amber-400 font-semibold mt-1 uppercase tracking-wider bg-[#101010] px-2 py-0.5 rounded-md shadow-none">
                         {att.bytes ? `${(att.bytes / (1024 * 1024)).toFixed(1)} MB` : 'PACOTE ZIP'}
                       </span>
                     </a>
                   ) : isImage ? (
                     <div
                       onClick={() => onPreview({ name: att.name, url: previewUrl })}
-                      className="relative aspect-square w-full rounded-xl overflow-hidden bg-[#101010] border border-[#2E2E2E] cursor-pointer group hover:opacity-95 transition-opacity"
+                      className="relative aspect-square w-full rounded-xl overflow-hidden bg-[#101010] cursor-pointer group hover:opacity-95 transition-opacity"
                       title="Clique para expandir e visualizar"
                     >
                       <img
@@ -368,7 +368,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
                       />
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center bg-white/[0.02] rounded-xl aspect-square w-full border border-white/5 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <div className="flex flex-col items-center justify-center bg-white/[0.02] rounded-xl aspect-square w-full opacity-80 group-hover:opacity-100 transition-opacity">
                       <FileText className="w-8 h-8 text-slate-500" />
                       <span className="text-[9px] text-slate-500 mt-2 font-medium tracking-wider">
                         {att.bytes ? `${(att.bytes / (1024 * 1024)).toFixed(1)} MB` : 'SEM MINIATURA'}
@@ -378,7 +378,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
                 </div>
 
                 {/* Bottom Row of Actions */}
-                <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-white/5 relative">
+                <div className="flex items-center justify-end gap-1.5 pt-2 relative">
                   {/* 1. Drive Button */}
                   <a
                     href={viewUrl}
@@ -409,9 +409,9 @@ export const TaskDriveAttachmentsTab: React.FC<{
                         e.stopPropagation();
                         setOpenAttachmentMenuId(openAttachmentMenuId === att.id ? null : att.id);
                       }}
-                      className={`p-2 rounded-xl transition-all border cursor-pointer active:scale-95 ${
+                      className={`p-2 rounded-xl transition-all cursor-pointer active:scale-95 ${
                         openAttachmentMenuId === att.id
-                          ? 'bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white border-[#E4007E] shadow-md shadow-[#E4007E]/30'
+                          ? 'bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white shadow-md shadow-[#E4007E]/30'
                           : 'hover:bg-white/5 text-slate-400 hover:text-white border-transparent'
                       }`}
                       title="Mais opções do arquivo"
