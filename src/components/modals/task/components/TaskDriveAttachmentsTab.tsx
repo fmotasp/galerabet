@@ -34,7 +34,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
   handleRenameAttachment: (attId: string, currentName: string) => Promise<void>;
   handleDownloadSingleFile: (att: TaskAttachment) => Promise<void>;
   handleToggleCoverImage: (imgUrl: string) => Promise<void>;
-  setActiveDrawerTab: (tab: 'details' | 'attachments' | 'history') => void;
+  setActiveBottomTab: (tab: 'comments' | 'checklists' | 'attachments' | 'references' | 'history') => void;
   setNewCommentText: React.Dispatch<React.SetStateAction<string>>;
   onPreview: (preview: { name: string; url: string }) => void;
   addToast: (title: string, message?: string, type?: any) => void;
@@ -57,7 +57,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
   handleRenameAttachment,
   handleDownloadSingleFile,
   handleToggleCoverImage,
-  setActiveDrawerTab,
+  setActiveBottomTab,
   setNewCommentText,
   onPreview,
   addToast,
@@ -449,7 +449,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
                             type="button"
                             onClick={() => {
                               setOpenAttachmentMenuId(null);
-                              setActiveDrawerTab('details');
+                              setActiveBottomTab('comments');
                               setNewCommentText((prev) => (prev ? `${prev}\n\nArquivo: ${att.name}` : `Sobre o arquivo "${att.name}": `));
                               addToast('Comentário', `Mencionando "${att.name}" na aba de detalhes.`, 'info');
                             }}

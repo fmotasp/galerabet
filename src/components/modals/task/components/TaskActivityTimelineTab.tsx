@@ -78,110 +78,40 @@ export const TaskActivityTimelineTab: React.FC<{
             <p className="text-xs font-bold text-slate-300">Nenhuma ação registrada nesta demanda ainda.</p>
           </div>
         ) : (
-          <div className="relative pl-5 space-y-2.5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-white/5">
+          <div className="relative pl-6 space-y-4 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-px before:bg-[#2E2E2E]">
             {timelineActions.map((act) => {
-              const getIconAndStyle = () => {
-                switch (act.type) {
-                  case 'created':
-                    return {
-                      icon: <PlusCircle className="w-3 h-3 text-emerald-400" />,
-                      badgeBg: 'bg-emerald-950 text-emerald-300 border-emerald-500/30',
-                      label: 'Criação',
-                    };
-                  case 'status':
-                    return {
-                      icon: <ArrowRight className="w-3 h-3 text-sky-400" />,
-                      badgeBg: 'bg-sky-950 text-sky-300 border-sky-500/30',
-                      label: 'Status',
-                    };
-                  case 'edited':
-                    return {
-                      icon: <Edit2 className="w-3 h-3 text-amber-400" />,
-                      badgeBg: 'bg-amber-950 text-amber-300 border-amber-500/30',
-                      label: 'Edição',
-                    };
-                  case 'file':
-                    return {
-                      icon: <Paperclip className="w-3 h-3 text-[#E4007E]" />,
-                      badgeBg: 'bg-amber-950 text-amber-300 border-amber-500/30',
-                      label: 'Arquivo',
-                    };
-                  case 'comment':
-                    return {
-                      icon: <MessageSquare className="w-3 h-3 text-purple-400" />,
-                      badgeBg: 'bg-purple-950 text-purple-300 border-purple-500/30',
-                      label: 'Comentário',
-                    };
-                  case 'delivery':
-                    return {
-                      icon: <CheckCircle2 className="w-3 h-3 text-[#00A723]" />,
-                      badgeBg: 'bg-emerald-950 text-emerald-300 border-emerald-500/30',
-                      label: 'Entrega',
-                    };
-                  case 'member':
-                    return {
-                      icon: <UserCheck className="w-3 h-3 text-orange-400" />,
-                      badgeBg: 'bg-orange-950 text-orange-300 border-orange-500/30',
-                      label: 'Membro',
-                    };
-                  default:
-                    return {
-                      icon: <Activity className="w-3 h-3 text-slate-300" />,
-                      badgeBg: 'bg-slate-800 text-slate-300 border-slate-700',
-                      label: 'Atualização',
-                    };
-                }
-              };
-
-              const style = getIconAndStyle();
               let formattedDate = act.date;
               try {
                 const d = new Date(act.date);
                 if (!isNaN(d.getTime())) {
-                  formattedDate = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+                  formattedDate = `${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
                 }
               } catch (err) {}
 
               return (
                 <div key={act.id} className="relative group">
                   {/* Timeline node dot */}
-                  <div className="absolute -left-5 top-2.5 w-3.5 h-3.5 rounded-full bg-[#101010] border-2 border-white/10 flex items-center justify-center -translate-x-1/2 z-10 shadow-xs group-hover:border-[#E4007E] transition-colors">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#E4007E]" />
-                  </div>
+                  <div className="absolute left-[-17px] top-[7px] w-2.5 h-2.5 rounded-full bg-[#E94E18] -translate-x-1/2 z-10 ring-[4px] ring-[#101010]" />
 
-                  {/* Compact Action Card */}
-                  <div className="p-2.5 sm:p-3 bg-[#1C1C1C] border border-white/5 rounded-xl shadow-xs space-y-1 hover:border-[#E4007E]/40 transition-colors">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-2">
-                        {act.avatarUrl ? (
-                          <img
-                            src={act.avatarUrl}
-                            alt={act.user}
-                            className="w-5 h-5 rounded-full object-cover ring-1 ring-white/10"
-                          />
-                        ) : (
-                          <div className="w-5 h-5 rounded-full bg-[#101010] border border-white/5 text-white font-semibold text-[9px] flex items-center justify-center">
-                            {act.userInitials}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-white">{act.user}</span>
-                          <span className="text-[10px] font-medium text-slate-400">• {formattedDate}</span>
-                        </div>
-                      </div>
-
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider flex items-center gap-1 border ${style.badgeBg}`}>
-                        {style.icon}
-                        <span>{style.label}</span>
-                      </span>
-                    </div>
-
-                    <p className="text-xs font-bold text-slate-100 leading-snug">{act.title}</p>
-                    {act.details && (
-                      <p className="text-[11px] text-slate-400 font-medium whitespace-pre-wrap break-words mt-1">
+                  {/* Clean Text Layout */}
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-slate-400 leading-relaxed">
+                      <strong className="text-white font-bold">{act.user}</strong>{' '}
+                      {act.title}{' '}
+                      {act.details && act.type !== 'comment' && (
+                        <span className="inline-block bg-[#1C1C1C] border border-[#2E2E2E] px-2 py-0.5 rounded-lg text-slate-200 font-semibold ml-1 shadow-sm">
+                          {act.details}
+                        </span>
+                      )}
+                    </p>
+                    {act.details && act.type === 'comment' && (
+                      <p className="text-[11px] text-slate-300 bg-[#1A1A1A] p-2 rounded-lg mt-1 border border-[#262626]">
                         {act.details}
                       </p>
                     )}
+                    <span className="text-[10px] font-medium text-slate-500 block">
+                      {formattedDate}
+                    </span>
                   </div>
                 </div>
               );

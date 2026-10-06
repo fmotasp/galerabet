@@ -196,55 +196,7 @@ export const TaskModalHeader: React.FC<{
           </div>
         </div>
 
-        {/* Navigation Tabs Header */}
-        {editingTask && (
-          <div className="flex items-center gap-6 pt-2 text-xs font-bold border-t border-[#262626] -mb-[1px]">
-            <button
-              type="button"
-              onClick={() => setActiveDrawerTab('details')}
-              className={`py-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeDrawerTab === 'details'
-                  ? 'border-[#E4007E] text-transparent bg-clip-text bg-gradient-to-r from-[#E4007E] to-[#E94E18] font-semibold'
-                  : 'border-transparent text-slate-300 hover:text-white'
-              }`}
-            >
-              <FileText className={`w-4 h-4 ${activeDrawerTab === 'details' ? 'text-[#E4007E]' : ''}`} />
-              <span>Detalhes & Descrição</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveDrawerTab('attachments')}
-              className={`py-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeDrawerTab === 'attachments'
-                  ? 'border-[#E4007E] text-transparent bg-clip-text bg-gradient-to-r from-[#E4007E] to-[#E94E18] font-semibold'
-                  : 'border-transparent text-slate-300 hover:text-white'
-              }`}
-            >
-              <Paperclip className={`w-4 h-4 ${activeDrawerTab === 'attachments' ? 'text-[#E4007E]' : ''}`} />
-              <span>Arquivos Entregues</span>
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${activeDrawerTab === 'attachments' ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white font-semibold' : 'bg-[#1C1C1C] border border-[#303030] text-white'}`}>
-                {attachments.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveDrawerTab('history')}
-              className={`py-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeDrawerTab === 'history'
-                  ? 'border-[#E4007E] text-transparent bg-clip-text bg-gradient-to-r from-[#E4007E] to-[#E94E18] font-semibold'
-                  : 'border-transparent text-slate-300 hover:text-white'
-              }`}
-            >
-              <History className={`w-4 h-4 ${activeDrawerTab === 'history' ? 'text-[#E4007E]' : ''}`} />
-              <span>Ações & Histórico</span>
-              <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] ${activeDrawerTab === 'history' ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white font-semibold' : 'bg-[#1C1C1C] border border-[#303030] text-white'}`}>
-                {timelineActions.length}
-              </span>
-            </button>
-          </div>
-        )}
+        
       </div>
     </div>
   );

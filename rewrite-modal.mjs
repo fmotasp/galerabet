@@ -1,145 +1,26 @@
-import React from 'react';
-import { Trash2, Check, MessageSquare } from 'lucide-react';
-import { useApp } from '../../../context/AppContext';
-import { TaskModalHeader } from './components/TaskModalHeader';
-import { TaskStatusAndDates } from './components/TaskStatusAndDates';
-import { TaskMembersAndClients } from './components/TaskMembersAndClients';
-import { TaskDescriptionSection } from './components/TaskDescriptionSection';
-import { TaskReferenceImagesSection } from './components/TaskReferenceImagesSection';
-import { TaskChecklistSection } from './components/TaskChecklistSection';
-import { TaskCommentsSection } from './components/TaskCommentsSection';
-import { TaskDriveAttachmentsTab } from './components/TaskDriveAttachmentsTab';
-import { TaskActivityTimelineTab } from './components/TaskActivityTimelineTab';
-import { TaskLightboxModal } from './components/TaskLightboxModal';
-import { useTaskModalForm } from './hooks/useTaskModalForm';
-import { useTaskDriveFiles } from './hooks/useTaskDriveFiles';
+import fs from 'fs';
 
-export const TaskModal: React.FC = () => {
-  const {
-    isNewTaskModalOpen,
-    setIsNewTaskModalOpen,
-    editingTask,
-    setEditingTask,
-    addTask,
-    updateTask,
-    deleteTask,
-    moveTaskStatus,
-    projects,
-    employees,
-    currentSprint,
-    spineStatuses,
-    addToast,
-    currentUser,
-  } = useApp();
+let content = fs.readFileSync('src/components/modals/task/TaskModal.tsx', 'utf8');
 
-  const isOpen = isNewTaskModalOpen || editingTask !== null;
-  const [activeBottomTab, setActiveBottomTab] = React.useState<'comments' | 'checklists' | 'attachments' | 'references' | 'history'>('comments');
+// Inject new state
+content = content.replace(
+  '  const isOpen = isNewTaskModalOpen || editingTask !== null;',
+  "  const isOpen = isNewTaskModalOpen || editingTask !== null;\n  const [activeBottomTab, setActiveBottomTab] = React.useState<'comments' | 'checklists' | 'attachments' | 'references' | 'history'>('comments');"
+);
 
-  const {
-    activeDrawerTab,
-    setActiveDrawerTab,
-    loadingActions,
-    formData,
-    setFormData,
-    comments,
-    setComments,
-    loadingComments,
-    newCommentText,
-    setNewCommentText,
-    isPostingComment,
-    checklists,
-    setChecklists,
-    handleAddChecklistItem,
-    handleToggleChecklistItem,
-    handleDeleteChecklistItem,
-    attachments,
-    setAttachments,
-    loadingAttachments,
-    isEditingDescription,
-    setIsEditingDescription,
-    currentDriveFolderId,
-    setCurrentDriveFolderId,
-    currentDriveFolderUrl,
-    setCurrentDriveFolderUrl,
-    referenceImages,
-    isUploadingReference,
-    uploadingReferenceName,
-    previewingReference,
-    setPreviewingReference,
-    copiedLink,
-    selectedLabels,
-    setSelectedLabels,
-    taskMembers,
-    timelineActions,
-    handleShareTask,
-    handleCopyTaskLink,
-    handleClose,
-    handleAddMember,
-    handleMemberClick,
-    handleRemoveMember,
-    handleToggleLabel,
-    handleAddComment,
-    handleDeleteComment,
-    handleUploadReferenceImage,
-    handleDeleteReferenceImage,
-    handleSubmit,
-    handleStatusChange,
-  } = useTaskModalForm({
-    isOpen,
-    editingTask,
-    setEditingTask,
-    employees,
-    projects,
-    currentSprint,
-    spineStatuses,
-    currentUser,
-    addTask,
-    updateTask,
-    moveTaskStatus,
-    setIsNewTaskModalOpen,
-    addToast,
-  });
+// We need to replace the return statement completely.
+const startIdx = content.indexOf('  return (');
+const endIdx = content.lastIndexOf('  );\n};');
 
-  const {
-    selectedAttachmentFiles,
-    setSelectedAttachmentFiles,
-    isPostingAttachment,
-    uploadTotalCount,
-    uploadProgressCount,
-    openingDriveFolder,
-    deletingFileIds,
-    openAttachmentMenuId,
-    setOpenAttachmentMenuId,
-    handleUploadSelectedFileAttachment,
-    handleOpenDeliveredFolder,
-    handleDownloadSingleFile,
-    handleRenameAttachment,
-    handleToggleCoverImage,
-    handleDeleteAttachment,
-  } = useTaskDriveFiles({
-    editingTask,
-    currentDriveFolderId,
-    setCurrentDriveFolderId,
-    currentDriveFolderUrl,
-    setCurrentDriveFolderUrl,
-    attachments,
-    setAttachments,
-    updateTask,
-    setEditingTask,
-    addToast,
-  });
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-hidden animate-in fade-in duration-200">
+const newReturn = `  return (
+    <div className="fixed inset-0 z-50 flex justify-end overflow-hidden animate-in fade-in duration-200">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300 cursor-pointer"
         onClick={handleClose}
       />
 
-      <div className="relative w-full max-w-2xl lg:max-w-4xl xl:max-w-6xl max-h-[95vh] h-full sm:h-auto sm:min-h-[600px] bg-[#101010] text-white rounded-2xl shadow-2xl border border-[#2E2E2E] overflow-hidden flex flex-col z-10 animate-in zoom-in-95 duration-300 ease-out">
+      <div className="relative w-full max-w-2xl lg:max-w-4xl xl:max-w-6xl h-full bg-[#101010] text-white shadow-2xl border-l border-[#2E2E2E] overflow-hidden flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out">
         <TaskModalHeader
           editingTask={editingTask}
           formData={formData}
@@ -200,11 +81,11 @@ export const TaskModal: React.FC = () => {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveBottomTab(tab.id as any)}
-                      className={`py-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                      className={\`py-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap \${
                         activeBottomTab === tab.id
                           ? 'border-[#E4007E] text-transparent bg-clip-text bg-gradient-to-r from-[#E4007E] to-[#E94E18] font-semibold'
                           : 'border-transparent text-slate-400 hover:text-white'
-                      }`}
+                      }\`}
                     >
                       <span>{tab.label}</span>
                       <span className="text-slate-500 font-medium">({tab.count})</span>
@@ -250,12 +131,6 @@ export const TaskModal: React.FC = () => {
                       handleToggleCoverImage={handleToggleCoverImage}
                       handleDeleteAttachment={handleDeleteAttachment}
                       editingTask={editingTask}
-                      selectedAttachmentFiles={selectedAttachmentFiles}
-                      setSelectedAttachmentFiles={setSelectedAttachmentFiles}
-                      setActiveBottomTab={setActiveBottomTab}
-                      setNewCommentText={setNewCommentText}
-                      onPreview={setPreviewingReference}
-                      addToast={addToast}
                     />
                   )}
                   {activeBottomTab === 'references' && (
@@ -273,7 +148,6 @@ export const TaskModal: React.FC = () => {
                   )}
                   {activeBottomTab === 'history' && (
                     <TaskActivityTimelineTab
-                      editingTask={editingTask!}
                       timelineActions={timelineActions}
                       loadingActions={loadingActions}
                     />
@@ -325,6 +199,9 @@ export const TaskModal: React.FC = () => {
         previewingReference={previewingReference}
         onClose={() => setPreviewingReference(null)}
       />
-    </div>
-  );
-};
+    </div>`;
+
+if (startIdx !== -1 && endIdx !== -1) {
+  content = content.slice(0, startIdx) + newReturn + '\n  );\n};\n';
+  fs.writeFileSync('src/components/modals/task/TaskModal.tsx', content);
+}

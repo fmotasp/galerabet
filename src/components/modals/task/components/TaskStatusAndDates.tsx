@@ -23,7 +23,7 @@ export const TaskStatusAndDates: React.FC<{
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
+    <div className="grid grid-cols-1 gap-4 items-start">
       {/* Status da tarefa */}
       <div>
         <label className="block text-xs font-medium text-slate-200 mb-1.5">

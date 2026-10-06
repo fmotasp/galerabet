@@ -28,7 +28,7 @@ export const TaskMembersAndClients: React.FC<{
 
   return (
     <div
-      className={`grid grid-cols-1 sm:grid-cols-2 gap-4 items-start relative ${
+      className={`grid grid-cols-1 gap-4 items-start relative ${
         isMembersPopoverOpen || isLabelsPopoverOpen ? 'z-50' : 'z-10'
       }`}
     >
@@ -206,7 +206,6 @@ export const TaskMembersAndClients: React.FC<{
                 </div>
               </>
             )}
-            </div>
           </div>
         </div>
       </div>
@@ -217,68 +216,51 @@ export const TaskMembersAndClients: React.FC<{
           Clientes <span className="text-rose-500">*</span>
         </label>
         <div className="flex items-center gap-2 flex-wrap">
-          {selectedLabels.length > 0 ? (
-            selectedLabels.map((lbl) => {
-              const clientObj = projects.find(
-                (p) => p.name.toLowerCase().trim() === lbl.toLowerCase().trim()
-              );
-              return (
-                <div
-                  key={lbl}
-                  onClick={() => {
-                    setIsLabelsPopoverOpen(!isLabelsPopoverOpen);
-                    setIsMembersPopoverOpen(false);
-                  }}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide shadow-xs inline-flex items-center gap-2 cursor-pointer bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E]/60 text-slate-200 hover:text-white transition-all group/client active:scale-95"
-                >
-                  <div className="w-5 h-5 rounded-md bg-[#141414] border border-[#2E2E2E] flex items-center justify-center overflow-hidden shrink-0 p-0.5">
-                    {clientObj?.logoUrl ? (
-                      <img
-                        src={clientObj.logoUrl}
-                        alt={lbl}
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <div className="w-full h-full rounded-xs bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-semibold text-[9px]">
-                        {lbl.slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  <span className="font-extrabold text-white truncate max-w-[130px]">{lbl}</span>
-                  <ChevronDown className="w-3 h-3 text-slate-400 group-hover/client:text-white ml-0.5" />
+          {selectedLabels.length > 0 && selectedLabels.map((lbl) => {
+            const clientObj = projects.find(
+              (p) => p.name.toLowerCase().trim() === lbl.toLowerCase().trim()
+            );
+            return (
+              <div
+                key={lbl}
+                onClick={() => handleToggleLabel(lbl)}
+                className="relative flex group cursor-pointer shrink-0 active:scale-95 transition-transform"
+                title={`${lbl} (Clique para remover)`}
+              >
+                <div className="w-9 h-9 rounded-full bg-[#141414] border-2 border-[#E4007E]/60 group-hover:border-rose-500 transition-all flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                  {clientObj?.logoUrl ? (
+                    <img
+                      src={clientObj.logoUrl}
+                      alt={lbl}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-bold text-xs">
+                      {lbl.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
                 </div>
-              );
-            })
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                setIsLabelsPopoverOpen(!isLabelsPopoverOpen);
-                setIsMembersPopoverOpen(false);
-              }}
-              className="px-4 py-2 rounded-xl text-xs font-bold tracking-wide shadow-xs inline-flex items-center gap-2 cursor-pointer bg-[#1C1C1C] border border-[#2E2E2E] text-slate-300 hover:text-white hover:border-[#E4007E] transition-all active:scale-95"
-            >
-              <Building2 className="w-3.5 h-3.5 text-[#E4007E]" />
-              <span>Selecionar Cliente</span>
-              <ChevronDown className="w-3 h-3 opacity-60 ml-0.5" />
-            </button>
-          )}
+                <div className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <X className="w-2.5 h-2.5" />
+                </div>
+              </div>
+            );
+          })}
 
-          {selectedLabels.length > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                setIsLabelsPopoverOpen(!isLabelsPopoverOpen);
-                setIsMembersPopoverOpen(false);
-              }}
-              className="w-8 h-8 rounded-full bg-[#1C1C1C] hover:bg-[#E4007E]/20 flex items-center justify-center text-slate-400 hover:text-[#E4007E] transition-all hover:scale-105 active:scale-95 cursor-pointer border-transparent"
-              title="Adicionar outro cliente"
-            >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              setIsLabelsPopoverOpen(!isLabelsPopoverOpen);
+              setIsMembersPopoverOpen(false);
+            }}
+            className="w-9 h-9 rounded-full bg-[#1A1A1A] hover:bg-[#222] border border-[#333] hover:border-[#E4007E] border-dashed text-slate-400 hover:text-white flex items-center justify-center transition-all shadow-sm active:scale-95 shrink-0"
+            title="Adicionar Cliente"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
 
-          {/* Clientes Popover Dropdown */}
+        {/* Clientes Popover Dropdown */}
           {isLabelsPopoverOpen && (
             <>
               <div
