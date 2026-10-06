@@ -9,6 +9,7 @@ import {
 } from '../../../../lib/googleDrive';
 import { TaskModalFormData, TaskReferenceImage, TimelineActionItem } from '../types';
 import { supabase } from '../../../../lib/supabase';
+import { decodeTaskDescriptionWithChecklist } from '../../../../lib/taskUtils';
 
 export const useTaskModalForm = ({
   isOpen,
@@ -500,11 +501,13 @@ export const useTaskModalForm = ({
             .single()
             .then(({ data, error }) => {
               if (data && !error) {
-                const desc = data.description || '';
+                const rawDesc = data.description || '';
+                const { cleanDescription: desc, checklists: decodedChecks } = decodeTaskDescriptionWithChecklist(rawDesc);
                 const atts = typeof data.attachments === 'string' ? JSON.parse(data.attachments) : (data.attachments || []);
                 const refs = typeof data.reference_images === 'string' ? JSON.parse(data.reference_images) : (data.reference_images || []);
                 const comms = typeof data.comments === 'string' ? JSON.parse(data.comments) : (data.comments || []);
-                const checks = typeof data.checklists === 'string' ? JSON.parse(data.checklists) : (data.checklists || []);
+                let checks = typeof data.checklists === 'string' ? JSON.parse(data.checklists) : (data.checklists || []);
+                if (!checks || checks.length === 0) checks = decodedChecks;
                 const logs = typeof data.activity_log === 'string' ? JSON.parse(data.activity_log) : (data.activity_log || []);
 
                 setFormData(prev => ({ ...prev, description: desc }));
@@ -708,6 +711,7 @@ export const useTaskModalForm = ({
     setChecklists(nextList);
     if (editingTask) {
       await updateTask(editingTask.id, {
+        description: formData.description,
         checklists: nextList,
         checklistsCount: nextList.length,
       });
@@ -722,6 +726,7 @@ export const useTaskModalForm = ({
     setChecklists(nextList);
     if (editingTask) {
       await updateTask(editingTask.id, {
+        description: formData.description,
         checklists: nextList,
         checklistsCount: nextList.length,
       });
@@ -734,6 +739,7 @@ export const useTaskModalForm = ({
     setChecklists(nextList);
     if (editingTask) {
       await updateTask(editingTask.id, {
+        description: formData.description,
         checklists: nextList,
         checklistsCount: nextList.length,
       });
