@@ -99,6 +99,34 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
           .filter((t) => t.status === col.id)
           .sort(compareTaskDueDatesAscending);
 
+        const isCollapsed = columnTasks.length === 0 && dragOverColumnId !== col.id;
+
+        if (isCollapsed) {
+          return (
+            <div
+              key={col.id}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (dragOverColumnId !== col.id) {
+                  setDragOverColumnId(col.id);
+                }
+              }}
+              onClick={() => setIsNewTaskModalOpen(true)}
+              className="w-12 shrink-0 min-w-[48px] rounded-2xl bg-[#161616] hover:bg-[#1C1C1C] h-[240px] flex flex-col items-center justify-center transition-all duration-300 cursor-pointer border border-[#262626] mt-0"
+              title={`Adicionar tarefa em ${col.label}`}
+            >
+              <div
+                className="flex items-center gap-3 text-slate-400 opacity-60 hover:opacity-100 transition-opacity whitespace-nowrap font-bold"
+                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+              >
+                <span className="text-sm tracking-wider">{col.label}</span>
+                <span className="text-xs">{columnTasks.length}</span>
+              </div>
+            </div>
+          );
+        }
+
         return (
           <div
             key={col.id}
@@ -124,13 +152,13 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
               }
               setDraggedTaskId(null);
             }}
-            className={`w-80 shrink-0 min-w-[320px] rounded-2xl p-4 h-full flex flex-col transition-all duration-200 ${
+            className={`w-80 shrink-0 min-w-[320px] rounded-2xl p-4 h-full flex flex-col transition-all duration-300 ease-in-out ${
               dragOverColumnId === col.id
                 ? 'bg-[#161616] ring-1 ring-[#E4007E] scale-[1.01]'
                 : 'bg-transparent'
             }`}
           >
-            <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="flex flex-col flex-1 min-h-0 overflow-hidden animate-in fade-in duration-300">
               {/* Column Header */}
               <div className="flex items-center justify-between mb-4 px-1 pt-1 shrink-0">
                 <div className="flex items-center gap-2.5">

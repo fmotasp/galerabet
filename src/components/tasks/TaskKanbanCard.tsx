@@ -152,31 +152,31 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
 
   const getPriorityInfo = () => {
     let label = 'BACKLOG';
-    let bg = 'bg-slate-700 text-white font-semibold';
+    let bg = 'bg-[#1A1A1A] text-slate-400 font-semibold';
 
     const customSt = spineStatuses.find((s) => s.id === task.status);
     if (customSt) {
       label = customSt.label.toUpperCase();
       const rawLabel = customSt.label.toLowerCase();
-      bg = customSt.gradient ? `bg-gradient-to-r ${customSt.gradient} text-white font-semibold` : 'bg-[#02376F] text-white font-semibold';
-      if (rawLabel.includes('novo') || rawLabel.includes('pedid')) bg = 'bg-[#0088FF] text-white font-semibold';
-      else if (rawLabel.includes('andamento') || rawLabel.includes('produ')) bg = 'bg-amber-500 text-[#000A17] font-semibold';
-      else if (rawLabel.includes('aprov') || rawLabel.includes('revis')) bg = 'bg-purple-600 text-white font-semibold';
-      else if (rawLabel.includes('concl') || rawLabel.includes('done') || rawLabel.includes('final')) bg = 'bg-emerald-600 text-white font-semibold';
-      else if (rawLabel.includes('backlog')) bg = 'bg-slate-700 text-white font-semibold';
+      bg = customSt.gradient ? `bg-gradient-to-r ${customSt.gradient} text-white font-semibold` : 'bg-[#1A1A1A] text-slate-400 font-semibold';
+      if (rawLabel.includes('novo') || rawLabel.includes('pedid')) bg = 'bg-blue-950/30 text-blue-400 font-semibold';
+      else if (rawLabel.includes('andamento') || rawLabel.includes('produ')) bg = 'bg-amber-950/30 text-amber-500 font-semibold';
+      else if (rawLabel.includes('aprov') || rawLabel.includes('revis')) bg = 'bg-purple-950/30 text-purple-400 font-semibold';
+      else if (rawLabel.includes('concl') || rawLabel.includes('done') || rawLabel.includes('final')) bg = 'bg-emerald-950/30 text-emerald-400 font-semibold';
+      else if (rawLabel.includes('backlog')) bg = 'bg-[#1A1A1A] text-slate-400 font-semibold';
     } else {
       if (task.status === 'blocked') {
         label = 'PRIORIDADE MODERADA';
-        bg = 'bg-orange-600 text-white font-semibold';
+        bg = 'bg-orange-950/30 text-orange-400 font-semibold';
       } else if (task.status === 'in_progress') {
         label = 'EM ANDAMENTO';
-        bg = 'bg-amber-500 text-[#000A17] font-semibold';
+        bg = 'bg-amber-950/30 text-amber-500 font-semibold';
       } else if (task.status === 'in_review') {
         label = 'EM APROVAÇÃO';
-        bg = 'bg-purple-600 text-white font-semibold';
+        bg = 'bg-purple-950/30 text-purple-400 font-semibold';
       } else if (task.status === 'done') {
         label = 'CONCLUÍDO';
-        bg = 'bg-emerald-600 text-white font-semibold';
+        bg = 'bg-emerald-950/30 text-emerald-400 font-semibold';
       }
     }
 
@@ -191,7 +191,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
           bg = 'bg-rose-600 text-white font-semibold';
           label = `URGENTE - ${label}`;
         } else if (isPriority) {
-          bg = 'bg-orange-500 text-white font-semibold';
+          bg = 'bg-orange-600 text-white font-semibold';
           label = `PRIORIDADE - ${label}`;
         } else if (isTaskOverdue(task) || task.status === 'overdue') {
           bg = 'bg-rose-600 text-white font-semibold';
