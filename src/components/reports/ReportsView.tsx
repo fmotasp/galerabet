@@ -16,6 +16,7 @@ import {
 import { useTasks, useProjects, useEmployees, useApp } from '../../context/AppContext';
 import { isTaskOverdue, isTaskCompleted, getTaskOverdueDays, parseTaskDueDate } from '../../lib/taskDateUtils';
 import { getClientLogoFallback } from '../tasks/useTasksFilter';
+import { ReportsDataViz } from './ReportsDataViz';
 
 // Helper para identificar exclusivamente profissionais de Design e Audiovisual/Vídeo
 export const isDesignerOrVideomaker = (emp: { role?: string; department?: string; tags?: string[] }): boolean => {
@@ -491,15 +492,15 @@ export const ReportsView: React.FC = () => {
 
         {/* Barra de Filtros e Botão Exportar (Redesign Impeccable) */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          {/* Filtro de Período em Pílulas */}
-          <div className="flex items-center p-1 bg-[#141414] border border-[#262626] rounded-xl gap-1">
+          {/* Filtro de Período em Pílulas (Frameless - sem caixa externa) */}
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => setPeriodFilter('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 periodFilter === 'all'
                   ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  : 'bg-[#141414] text-slate-400 border border-[#262626] hover:text-white hover:bg-[#1A1A1A] hover:border-[#333]'
               }`}
             >
               Tudo
@@ -507,10 +508,10 @@ export const ReportsView: React.FC = () => {
             <button
               type="button"
               onClick={() => setPeriodFilter('30days')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 periodFilter === '30days'
                   ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  : 'bg-[#141414] text-slate-400 border border-[#262626] hover:text-white hover:bg-[#1A1A1A] hover:border-[#333]'
               }`}
             >
               30 dias
@@ -518,10 +519,10 @@ export const ReportsView: React.FC = () => {
             <button
               type="button"
               onClick={() => setPeriodFilter('7days')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 periodFilter === '7days'
                   ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  : 'bg-[#141414] text-slate-400 border border-[#262626] hover:text-white hover:bg-[#1A1A1A] hover:border-[#333]'
               }`}
             >
               7 dias
@@ -801,7 +802,10 @@ export const ReportsView: React.FC = () => {
       </div>
 
       {/* 2. Gargalos do Funil de Produção & Tempo Médio por Etapa (Lado a Lado) */}
-      {/* 2. Gargalos do Funil de Produção & Tempo Médio por Etapa (Redesign Impeccable sem caixas aninhadas) */}
+      {/* 2. Gráficos Visuais (Recharts) */}
+      <ReportsDataViz tasks={filteredTasks} clientDistribution={clientDistribution} />
+
+      {/* 3. Gargalos do Funil de Produção & Tempo Médio por Etapa (Redesign Impeccable sem caixas aninhadas) */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         
         {/* Funil de Produção - Estilo Trapézio Invertido 3D / Flat Impeccable */}
@@ -968,7 +972,7 @@ export const ReportsView: React.FC = () => {
       {/* 3. Grid Principal: Produtividade por Membro & Volume por Cliente */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Tabela de Produtividade por Membro (7 colunas no grid) */}
-        <div className="xl:col-span-7 p-6 bg-[#141414] border border-[#262626] rounded-2xl space-y-4 shadow-xs">
+        <div className="xl:col-span-12 p-6 bg-[#141414] border border-[#262626] rounded-2xl space-y-4 shadow-xs">
           <div className="flex items-center justify-between pb-3 border-b border-[#242424]">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-sky-400" />
@@ -1061,97 +1065,6 @@ export const ReportsView: React.FC = () => {
                 )}
               </tbody>
             </table>
-          </div>
-        </div>
-
-        {/* Volume e Entregas por Cliente (5 colunas no grid) */}
-        <div className="xl:col-span-5 p-6 bg-[#141414] border border-[#262626] rounded-2xl space-y-4 shadow-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-[#242424]">
-            <div className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-emerald-400" />
-              <h2 className="text-sm font-semibold text-white tracking-tight">Demandas por Cliente</h2>
-            </div>
-            <span className="text-xs text-slate-400 font-medium">{clientDistribution.length} marcas ativas</span>
-          </div>
-
-          <div className="divide-y divide-[#202020] ">
-            {clientDistribution.length === 0 ? (
-              <div className="py-12 text-center text-slate-500 font-medium text-xs">
-                Nenhum cliente com demandas no período selecionado.
-              </div>
-            ) : (
-              clientDistribution.map((client) => (
-                <div key={client.id} className="py-3.5 first:pt-0 last:pb-0 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      {client.logoUrl ? (
-                        <img src={client.logoUrl} alt={client.name} className="w-6 h-6 rounded-md object-contain bg-[#1F1F1F] p-0.5 border border-white/5 shrink-0" />
-                      ) : (
-                        <span className="w-3 h-3 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: client.color }} />
-                      )}
-                      <span className="text-xs font-semibold text-white truncate">{client.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs shrink-0 tabular-nums">
-                      <span className="text-slate-400 font-medium">{client.completed} de {client.total}</span>
-                      <span className="font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded text-[11px] border border-emerald-500/20">
-                        {client.completionRate}%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Barra de progresso contínua */}
-                  <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden flex">
-                    <div
-                      className="bg-emerald-500 h-full transition-all"
-                      style={{ width: `${client.completionRate}%` }}
-                      title={`${client.completed} concluídas`}
-                    />
-                    {client.overdue > 0 && (
-                      <div
-                        className="bg-rose-500 h-full transition-all"
-                        style={{ width: `${Math.round((client.overdue / client.total) * 100)}%` }}
-                        title={`${client.overdue} atrasadas`}
-                      />
-                    )}
-                  </div>
-
-                  {/* Indicadores rápidos de status em pills limpas */}
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
-                    <div className="flex items-center gap-3">
-                      <span>Pendentes: <strong className="text-slate-200 tabular-nums">{client.pending}</strong></span>
-                      {client.overdue > 0 && (
-                        <span className="text-rose-400 font-medium flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                          Atrasadas: <strong className="tabular-nums font-bold text-rose-300">{client.overdue}</strong>
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Distribuição por colunas/status do fluxo */}
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {spineStatuses.map((st) => {
-                      const count = client.statusCounts[st.id] || 0;
-                      if (count === 0) return null; // Não polui a tela com status zerados
-                      return (
-                        <span
-                          key={st.id}
-                          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium bg-[#1A1A1A] text-slate-300 border border-[#2B2B2B]"
-                          title={`${st.label}: ${count}`}
-                        >
-                          <span
-                            className="w-1.5 h-1.5 rounded-full shrink-0"
-                            style={{ backgroundColor: st.dotColor || st.color || '#E4007E' }}
-                          />
-                          <span className="text-slate-400">{st.label}:</span>
-                          <span className="font-semibold text-white tabular-nums">{count}</span>
-                        </span>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))
-            )}
           </div>
         </div>
       </div>
