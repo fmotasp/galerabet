@@ -38,7 +38,7 @@ export const DashboardWorkloadWidget: React.FC<DashboardWorkloadWidgetProps> = R
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           {workloadMembers.length === 0 ? (
             <div className="text-center py-6 text-xs text-slate-400">
               Nenhum designer ou video maker ativo encontrado.
