@@ -139,9 +139,9 @@ export const TaskModal: React.FC = () => {
         onClick={handleClose}
       />
 
-      <div className="relative w-full max-w-2xl lg:max-w-4xl xl:max-w-6xl h-[calc(100vh-2rem)] sm:h-auto sm:max-h-[95vh] sm:min-h-[600px] bg-[#101010] text-white rounded-t-[32px] sm:rounded-2xl shadow-2xl border-t sm:border border-[#262626] overflow-hidden flex flex-col z-10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 ease-out">
+      <div className="relative w-full max-w-2xl lg:max-w-4xl xl:max-w-6xl h-[calc(100vh-2rem)] sm:h-auto sm:max-h-[95vh] sm:min-h-[600px] bg-[#141414] text-white rounded-t-[32px] sm:rounded-2xl shadow-2xl border-t sm:border border-[#262626] overflow-hidden flex flex-col z-10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 ease-out">
         {/* Mobile Drag Handle Indicator */}
-        <div className="w-full flex justify-center pt-3 pb-1 sm:hidden shrink-0 bg-[#101010]">
+        <div className="w-full flex justify-center pt-3 pb-1 sm:hidden shrink-0 bg-[#141414]">
           <div className="w-12 h-1.5 bg-white/15 rounded-full" />
         </div>
 
@@ -161,7 +161,7 @@ export const TaskModal: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col md:flex-row">
           {/* Left Column */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:border-r border-[#262626] bg-[#101010] flex flex-col">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#141414] flex flex-col">
             
             {!editingTask && (
               <div className="w-full mb-6">
@@ -289,7 +289,7 @@ export const TaskModal: React.FC = () => {
           </div>
 
           {/* Right Column */}
-          <div className="relative w-full md:w-[340px] lg:w-[380px] bg-[#141414] shrink-0 flex flex-col overflow-hidden">
+          <div className="relative w-full md:w-[340px] lg:w-[380px] bg-[#1A1A1A] shadow-[-12px_0_40px_-12px_rgba(0,0,0,0.8)] shrink-0 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-y-auto flex flex-col p-4 sm:p-6 custom-scrollbar">
             <h4 className="text-[11px] font-bold text-slate-500 tracking-widest uppercase mb-6">Detalhes</h4>
             
@@ -304,7 +304,7 @@ export const TaskModal: React.FC = () => {
                 handleToggleLabel={handleToggleLabel}
               />
               
-              <div className="w-full h-px bg-[#262626]" />
+               
 
               <TaskStatusAndDates
                 formData={formData}
@@ -314,7 +314,7 @@ export const TaskModal: React.FC = () => {
               />
             </div>
 
-            <div className="mt-8 md:mt-auto pt-6 border-t border-[#262626] flex gap-2">
+            <div className="mt-8 md:mt-auto pt-6 flex gap-2">
               {editingTask && (
                 <button
                   type="button"

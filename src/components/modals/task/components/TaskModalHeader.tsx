@@ -70,7 +70,7 @@ export const TaskModalHeader: React.FC<{
   }
 
   return (
-    <div className="relative shrink-0 px-6 pt-5 pb-0 border-b border-slate-800 bg-[#141414] overflow-hidden">
+    <div className="relative shrink-0 px-6 pt-5 pb-0 shadow-md z-20 bg-[#141414] relative overflow-hidden">
       {/* Cover Image Background Banner with Gradient */}
       {headerCoverImage && (
         <div className="absolute inset-0 pointer-events-none z-0">

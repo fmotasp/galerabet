@@ -192,7 +192,7 @@ export const TasksView: React.FC = () => {
         <div className="flex-1 min-h-0 w-full overflow-hidden">
           <TasksKanbanView
             columns={columns}
-            filteredTasks={filteredTasks}
+            filteredTasks={filteredTasks} isLoadingTasks={isLoadingTasks}
             projects={projects}
             spineStatuses={spineStatuses}
             getTaskNumericTimestamp={getTaskNumericTimestamp}

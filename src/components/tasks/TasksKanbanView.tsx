@@ -25,6 +25,7 @@ export interface TasksKanbanViewProps {
   filteredTasks: Task[];
   projects: Project[];
   spineStatuses: SpineStatusConfig[];
+  isLoadingTasks?: boolean;
   getTaskNumericTimestamp: (t: Task) => number;
   getLabelColorHex: (labelName: string, labelColor?: string) => { bg: string; text: string; border: string };
   getTaskCardBgStyle: (task: Task, projects: Project[]) => { className: string; style?: React.CSSProperties };
@@ -41,6 +42,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
   filteredTasks,
   projects,
   spineStatuses,
+  isLoadingTasks,
   getTaskNumericTimestamp,
   getLabelColorHex,
   getTaskCardBgStyle,
@@ -190,7 +192,26 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
 
               {/* Cards in this column */}
               <div className="space-y-3 flex-1 overflow-y-auto no-scrollbar pr-0.5 min-h-[100px] pb-1">
-                {columnTasks.map((task) => (
+                {isLoadingTasks ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="w-full h-[160px] bg-[#161616] rounded-xl animate-pulse border border-[#262626] overflow-hidden flex flex-col">
+                      <div className="w-full h-7 bg-[#1C1C1C]" />
+                      <div className="p-4 flex-1 flex flex-col gap-3">
+                        <div className="w-1/3 h-5 bg-[#262626] rounded-full" />
+                        <div className="w-3/4 h-3.5 bg-[#262626] rounded" />
+                        <div className="w-1/2 h-3.5 bg-[#262626] rounded" />
+                        <div className="mt-auto flex justify-between items-center pt-2">
+                          <div className="flex gap-1.5">
+                            <div className="w-5 h-5 bg-[#262626] rounded-full" />
+                            <div className="w-5 h-5 bg-[#262626] rounded-full" />
+                          </div>
+                          <div className="w-12 h-3 bg-[#262626] rounded" />
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  columnTasks.map((task) => (
                   <TaskKanbanCard
                     key={task.id}
                     task={task}
@@ -214,7 +235,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
                     updateTask={updateTask}
                     addTask={addTask}
                   />
-                ))}
+                )))}
               </div>
             </div>
 
