@@ -86,30 +86,20 @@ export const DashboardView: React.FC = () => {
       {/* 3 Stat KPI Cards - High Contrast Dark Theme */}
       <DashboardStatCards metrics={dashboardMetrics} />
 
-      {/* Main Grid: Left Column (Active Tasks + Team Workload) & Right Column (Creative Ranking + Sprint Overview) */}
+      {/* Main Grid: Núcleo Operacional (Demandas Ativas vs Produtividade Criativa & Sprint) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column (7 cols): Active Tasks & Team Workload */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* Active Tasks Widget */}
+        {/* Coluna Principal: Demandas Ativas (8 colunas para máxima clareza e leitura) */}
+        <div className="lg:col-span-8 space-y-6">
           <DashboardActiveTasks
             tasks={filteredTasks}
             isLoading={isLoadingTasks}
             onTaskClick={handleTaskClick}
             onAddTaskClick={handleNewTaskClick}
           />
-
-          {/* Team Workload Widget (Visível apenas para Gestor/Admin) */}
-          {isManagerOrAdmin(currentUser) && (
-            <DashboardWorkloadWidget
-              workloadMembers={workloadMembers}
-              totalBacklogCount={totalBacklogCount}
-              onSelectEmployee={handleSelectEmployee}
-            />
-          )}
         </div>
 
-        {/* Right Column (5 cols): Creative Ranking & Sprint Overview */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Coluna Lateral: Métricas de Equipe e Sprint (4 colunas compactas) */}
+        <div className="lg:col-span-4 space-y-6">
           {/* 🏆 Ranking de Produtividade Criativa */}
           <CreativeRankingWidget
             employees={employees}
@@ -121,6 +111,17 @@ export const DashboardView: React.FC = () => {
           <DashboardSprintOverview metrics={dashboardMetrics} />
         </div>
       </div>
+
+      {/* Faixa Executiva Full-Width: Gestão de Capacidade & Carga de Trabalho (Visível apenas para Gestor/Admin) */}
+      {isManagerOrAdmin(currentUser) && (
+        <div className="w-full">
+          <DashboardWorkloadWidget
+            workloadMembers={workloadMembers}
+            totalBacklogCount={totalBacklogCount}
+            onSelectEmployee={handleSelectEmployee}
+          />
+        </div>
+      )}
     </div>
   );
 };

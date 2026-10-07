@@ -47,7 +47,7 @@ export const TaskDescriptionSection: React.FC<{
             <button
               type="button"
               onClick={() => setIsEditingDescription(false)}
-              className="px-4 py-1.5 bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E] text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all shadow-sm cursor-pointer"
+              className="px-4 py-1.5 bg-[#1C1C1C] border border-[#262626] hover:border-[#E4007E] text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all shadow-sm cursor-pointer"
             >
               Concluir
             </button>
@@ -62,10 +62,10 @@ export const TaskDescriptionSection: React.FC<{
             }
             setIsEditingDescription(true);
           }}
-          className="p-4 bg-[#1C1C1C] text-slate-100 border border-[#2E2E2E] rounded-2xl cursor-pointer hover:border-[#E4007E] transition-colors group relative h-[250px] overflow-y-auto custom-scrollbar break-words [overflow-wrap:anywhere]"
+          className="p-4 bg-[#1C1C1C] text-slate-100 border border-[#262626] rounded-2xl cursor-pointer hover:border-[#E4007E] transition-colors group relative h-[250px] overflow-y-auto custom-scrollbar break-words [overflow-wrap:anywhere]"
           title="Clique para editar"
         >
-          <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity bg-[#2E2E2E] text-white text-[10px] font-bold px-2 py-0.5 rounded-lg border border-[#2E2E2E] flex items-center gap-1">
+          <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity bg-[#2E2E2E] text-white text-[10px] font-bold px-2 py-0.5 rounded-lg border border-[#262626] flex items-center gap-1">
             <Edit2 className="w-2.5 h-2.5" />
             <span>Editar</span>
           </div>

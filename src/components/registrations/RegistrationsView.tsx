@@ -190,7 +190,7 @@ export const RegistrationsView: React.FC = () => {
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16 animate-in fade-in duration-200">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#181818] p-6 rounded-3xl border border-[#2A2A2A] shadow-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#141414] p-6 rounded-3xl border border-white/5 shadow-xl">
         <div>
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] flex items-center justify-center text-white font-semibold shadow-lg shadow-[#E4007E]/25">
@@ -216,7 +216,7 @@ export const RegistrationsView: React.FC = () => {
               window.dispatchEvent(new Event('spine_user_logged_in'));
             }}
             title="Atualizar lista de funcionários e clientes do banco de dados"
-            className="px-3.5 py-2.5 text-xs font-bold text-slate-300 hover:text-white bg-[#222222] hover:bg-[#2c2c2c] border border-[#333333] rounded-xl"
+            className="px-3.5 py-2.5 text-xs font-bold text-slate-300 hover:text-white bg-[#101010] hover:bg-[#2c2c2c] border border-[#333333] rounded-xl"
           >
             Sincronizar
           </Button>
@@ -248,8 +248,8 @@ export const RegistrationsView: React.FC = () => {
       </div>
 
       {/* Tabs Navigation (Funcionários vs Clientes) */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#2A2A2A] pb-4">
-        <div className="flex items-center gap-2 bg-[#141414] p-1.5 rounded-2xl border border-[#2A2A2A]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+        <div className="flex items-center gap-2 bg-[#141414] p-1.5 rounded-2xl border border-white/5">
           <button
             onClick={() => {
               setActiveSubTab('employees');
@@ -289,7 +289,7 @@ export const RegistrationsView: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             leftIcon={<Search className="w-4 h-4" />}
-            className="!bg-[#181818] !border-[#2A2A2A] focus:!border-[#E4007E] py-2 text-xs sm:text-sm font-medium"
+            className="!bg-[#141414] !border-white/5 focus:!border-[#E4007E] py-2 text-xs sm:text-sm font-medium"
           />
         </div>
       </div>
@@ -298,7 +298,7 @@ export const RegistrationsView: React.FC = () => {
       {activeSubTab === 'employees' && (
         <div className="space-y-6">
           {/* Department and Tag Filters */}
-          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 bg-[#181818] p-3 rounded-2xl border border-[#2A2A2A]">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 bg-[#141414] p-3 rounded-2xl border border-white/5">
             <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5 px-2 mb-1 sm:mb-0">
               <Tag className="w-3.5 h-3.5 text-[#E4007E]" />
               Filtrar por Tag:
@@ -309,7 +309,7 @@ export const RegistrationsView: React.FC = () => {
               <select
                 value={selectedTagFilter}
                 onChange={(e) => setSelectedTagFilter(e.target.value)}
-                className="appearance-none w-full bg-[#222222] border border-[#2E2E2E] text-white text-sm font-medium py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E] transition-colors"
+                className="appearance-none w-full bg-[#101010] border border-[#262626] text-white text-sm font-medium py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-colors"
               >
                 <option value="All">TODAS AS TAGS</option>
                 {allUniqueTags.map((tag) => (
@@ -327,7 +327,7 @@ export const RegistrationsView: React.FC = () => {
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   selectedTagFilter === 'All'
                     ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white'
-                    : 'bg-[#222222] text-slate-400 hover:text-white border border-[#2E2E2E]'
+                    : 'bg-[#101010] text-slate-400 hover:text-white border border-[#262626]'
                 }`}
               >
                 Todas as tags
@@ -340,7 +340,7 @@ export const RegistrationsView: React.FC = () => {
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                     selectedTagFilter === tag
                       ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-sm'
-                      : 'bg-[#222222] text-slate-300 hover:text-white border border-[#2E2E2E]'
+                      : 'bg-[#101010] text-slate-300 hover:text-white border border-[#262626]'
                   }`}
                 >
                   {tag}
@@ -351,7 +351,7 @@ export const RegistrationsView: React.FC = () => {
 
           {/* Employees List */}
           {filteredEmployees.length === 0 ? (
-            <div className="p-12 text-center bg-[#181818] rounded-3xl border border-[#2A2A2A]">
+            <div className="p-12 text-center bg-[#141414] rounded-3xl border border-white/5">
               <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <h3 className="text-lg font-bold text-white">Nenhum funcionário cadastrado</h3>
               <p className="text-xs text-slate-400 mt-1">
@@ -379,7 +379,7 @@ export const RegistrationsView: React.FC = () => {
                   <div
                     key={emp.id}
                     onClick={() => setEditingEmployee(emp)}
-                    className="group bg-[#181818] hover:bg-[#202020] rounded-3xl border border-[#2A2A2A] hover:border-[#E4007E]/50 transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden relative"
+                    className="group bg-[#141414] hover:bg-[#202020] rounded-3xl border border-white/5 hover:border-[#E4007E]/50 transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden relative"
                   >
                     {/* Top Right Actions */}
                     <div className="absolute top-4 right-4 z-10">
@@ -426,7 +426,7 @@ export const RegistrationsView: React.FC = () => {
                             alt={emp.name}
                             size="xl"
                             status={getStatusDot(emp.status)}
-                            className="!w-16 !h-16 shadow-md [&>div]:bg-[#222222] [&>div]:text-[#E4007E] [&>div]:border [&>div]:border-[#303030] [&>div]:text-lg [&>div]:font-semibold"
+                            className="!w-16 !h-16 shadow-md [&>div]:bg-[#101010] [&>div]:text-[#E4007E] [&>div]:border [&>div]:border-white/5 [&>div]:text-lg [&>div]:font-semibold"
                           />
                         </div>
                       </div>
@@ -481,7 +481,7 @@ export const RegistrationsView: React.FC = () => {
       {activeSubTab === 'clients' && (
         <div className="space-y-6">
           {filteredProjects.length === 0 ? (
-            <div className="p-12 text-center bg-[#181818] rounded-3xl border border-[#2A2A2A]">
+            <div className="p-12 text-center bg-[#141414] rounded-3xl border border-white/5">
               <Building2 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <h3 className="text-lg font-bold text-white">Nenhum cliente cadastrado</h3>
               <p className="text-xs text-slate-400 mt-1">
@@ -508,7 +508,7 @@ export const RegistrationsView: React.FC = () => {
                 return (
                   <div
                     key={proj.id}
-                    className="bg-[#181818] rounded-3xl p-5 border border-[#2A2A2A] hover:border-[#E4007E]/50 shadow-lg transition-all group flex flex-col justify-between"
+                    className="bg-[#141414] rounded-3xl p-5 border border-white/5 hover:border-[#E4007E]/50 shadow-lg transition-all group flex flex-col justify-between"
                   >
                     <div>
                       {/* Card Header: Icon/Logo, Name, Category & Actions */}
@@ -712,7 +712,7 @@ export const RegistrationsView: React.FC = () => {
                       handleAddTagToEmployee(tagModalEmployee);
                     }
                   }}
-                  className="flex-1 py-2 text-sm text-white placeholder-slate-500 font-medium !bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
+                  className="flex-1 py-2 text-sm text-white placeholder-slate-500 font-medium !bg-[#101010] !border-white/5 focus:!border-[#E4007E]"
                 />
                 <Button
                   variant="primary"
@@ -725,12 +725,12 @@ export const RegistrationsView: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-[#2A2A2A] flex justify-end">
+            <div className="mt-6 pt-4 border-t border-white/5 flex justify-end">
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => setTagModalEmployee(null)}
-                className="px-4 py-2 text-white text-xs font-bold bg-[#222222] hover:bg-[#2A2A2A]"
+                className="px-4 py-2 text-white text-xs font-bold bg-[#101010] hover:bg-[#2A2A2A]"
               >
                 Concluir
               </Button>

@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System — RioSãoPaulo / Galera.bet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: "Barlow", sans-serif;
+      --font-condensed: "Barlow Condensed", sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+
+      /* Dark surfaces (Deep Craft) */
+      --bg-base: #0A0A0A;
+      --bg-canvas: #0C0C0C;
+      --bg-surface: #141414;
+      --bg-card: #181818;
+      --bg-card-hover: #1F1F1F;
+      --bg-subtle: #242424;
+      --border-soft: #262626;
+      --border-focus: #3A3A3A;
+
+      /* Brand Accents */
+      --brand-primary: #E4007E;
+      --brand-secondary: #E94E18;
+      --brand-gradient: linear-gradient(135deg, #E4007E 0%, #E94E18 100%);
+      --brand-glow: 0 0 25px rgba(228, 0, 126, 0.25);
+
+      /* Feedback Colors */
+      --color-success: #10B981;
+      --color-success-bg: rgba(16, 185, 129, 0.12);
+      --color-warning: #F59E0B;
+      --color-warning-bg: rgba(245, 158, 11, 0.12);
+      --color-danger: #EF4444;
+      --color-danger-bg: rgba(239, 68, 68, 0.12);
+      --color-info: #0EA5E9;
+      --color-info-bg: rgba(14, 165, 233, 0.12);
+
+      /* Typography */
+      --text-white: #FFFFFF;
+      --text-primary: #F1F2F2;
+      --text-secondary: #A0A0A0;
+      --text-muted: #666666;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    aside.ds-sidebar {
+      width: 280px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-soft);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      flex-shrink: 0;
+    }
+
+    .ds-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .ds-brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--brand-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--brand-glow);
+    }
+
+    .ds-brand-logo svg {
+      width: 20px;
+      height: 20px;
+      fill: #fff;
+    }
+
+    .ds-brand h1 {
+      font-family: var(--font-condensed);
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-white);
+    }
+
+    .ds-brand p {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .ds-nav-group-title {
+      font-family: var(--font-condensed);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+
+    .ds-nav-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .ds-nav-links a {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .ds-nav-links a:hover {
+      color: var(--text-white);
+      background: var(--bg-card);
+    }
+
+    .ds-nav-links a.active {
+      color: var(--brand-primary);
+      background: rgba(228, 0, 126, 0.1);
+      font-weight: 600;
+    }
+
+    /* Main Content Area */
+    main.ds-content {
+      flex: 1;
+      padding: 3rem 4rem 6rem;
+      max-width: 1200px;
+      overflow-y: auto;
+    }
+
+    .ds-header {
+      margin-bottom: 3.5rem;
+      border-bottom: 1px solid var(--border-soft);
+      padding-bottom: 2rem;
+    }
+
+    .ds-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.65rem;
+      background: rgba(228, 0, 126, 0.12);
+      border: 1px solid rgba(228, 0, 126, 0.3);
+      color: var(--brand-primary);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .ds-header h2 {
+      font-family: var(--font-condensed);
+      font-size: 2.75rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: var(--text-white);
+      margin-bottom: 0.75rem;
+    }
+
+    .ds-header p {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      max-width: 760px;
+    }
+
+    /* Sections */
+    section.ds-section {
+      margin-bottom: 4rem;
+      scroll-margin-top: 2rem;
+    }
+
+    .ds-section-title {
+      font-family: var(--font-condensed);
+      font-size: 1.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--text-white);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .ds-section-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    /* Principles Grid (Anti-Box-in-Box) */
+    .principles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .principle-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .principle-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 1.5rem;
+      right: 1.5rem;
+      height: 2px;
+      background: var(--brand-gradient);
+      border-radius: 2px;
+      opacity: 0.8;
+    }
+
+    .principle-item h4 {
+      font-family: var(--font-condensed);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 0.5rem;
+    }
+
+    .principle-item p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Color Swatches Grid */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .color-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
+    }
+
+    .color-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-focus);
+    }
+
+    .color-swatch {
+      height: 84px;
+      position: relative;
+    }
+
+    .color-info {
+      padding: 0.85rem 1rem;
+    }
+
+    .color-name {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .color-hex {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 0.15rem;
+    }
+
+    .color-role {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    /* Typography Showcases */
+    .type-specimen {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .type-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-soft);
+      padding-bottom: 1.25rem;
+    }
+
+    .type-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .type-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      min-width: 140px;
+    }
+
+    .type-sample-display {
+      font-family: var(--font-condensed);
+      font-size: 2.25rem;
+      font-weight: 900;
+      color: var(--text-white);
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+    }
+
+    .type-sample-h1 {
+      font-family: var(--font-condensed);
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text-white);
+      text-transform: uppercase;
+    }
+
+    .type-sample-h2 {
+      font-family: var(--font-condensed);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .type-sample-body {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+
+    .type-sample-caption {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* Component Showroom (Showcase) */
+    .components-canvas {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .component-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      padding: 2rem;
+    }
+
+    .component-block-title {
+      font-family: var(--font-condensed);
+      font-size: 1.15rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-white);
+      margin-bottom: 0.5rem;
+    }
+
+    .component-block-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .component-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* UI Component: Buttons */
+    .btn-brand {
+      background: var(--brand-gradient);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 10px rgba(228, 0, 126, 0.25);
+      transition: all 0.15s ease;
+    }
+
+    .btn-brand:hover {
+      opacity: 0.95;
+      box-shadow: 0 4px 18px rgba(228, 0, 126, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      background: #2a2a2a;
+      border-color: #383838;
+      color: #fff;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-ghost:hover {
+      color: #fff;
+      background: var(--bg-subtle);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    /* UI Component: Chips / Pills */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .chip-active {
+      background: var(--brand-gradient);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(228, 0, 126, 0.25);
+    }
+
+    .chip-idle {
+      background: #1c1c1c;
+      color: var(--text-secondary);
+      border-color: #2b2b2b;
+    }
+
+    .chip-idle:hover {
+      background: #242424;
+      color: #fff;
+    }
+
+    /* UI Component: Status Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-concluido {
+      background: #022c15;
+      color: #34D399;
+      border: 1px solid #065f32;
+    }
+
+    .badge-andamento {
+      background: #082142;
+      color: #60A5FA;
+      border: 1px solid #1E40AF;
+    }
+
+    .badge-revisao {
+      background: #2A1702;
+      color: #FBBF24;
+      border: 1px solid #854D0E;
+    }
+
+    .badge-atrasado {
+      background: #3B0D11;
+      color: #F87171;
+      border: 1px solid #991B1B;
+    }
+
+    .badge-backlog {
+      background: #1C1C1C;
+      color: #A0A0A0;
+      border: 1px solid #2E2E2E;
+    }
+
+    /* Clean Table (Anti Box-in-Box Demonstration) */
+    .clean-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .clean-table th {
+      font-family: var(--font-condensed);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .clean-table td {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.875rem;
+    }
+
+    .clean-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Code Block snippet */
+    .code-box {
+      background: #070707;
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: #D1D5DB;
+      overflow-x: auto;
+    }
+
+    .code-token { color: var(--brand-primary); }
+    .code-val { color: #34D399; }
+    .code-comment { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="ds-sidebar">
+    <div class="ds-brand">
+      <div class="ds-brand-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <h1>RioSãoPaulo</h1>
+        <p>Design System</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="ds-nav-group-title">Fundamentos</div>
+      <ul class="ds-nav-links">
+        <li><a href="#principios" class="active">Filosofia & Arquitetura</a></li>
+        <li><a href="#cores">Paleta de Cores</a></li>
+        <li><a href="#tipografia">Tipografia & Escala</a></li>
+        <li><a href="#espacamento">Espaçamento & Grid</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="ds-nav-group-title">Componentes</div>
+      <ul class="ds-nav-links">
+        <li><a href="#botoes">Botões & Ações</a></li>
+        <li><a href="#chips">Filtros & Pílulas</a></li>
+        <li><a href="#status">Badges de Status</a></li>
+        <li><a href="#listas">Listas & Tabelas (Clean)</a></li>
+        <li><a href="#modais">Layout sem Caixas Aninhadas</a></li>
+      </ul>
+    </div>
+
+    <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-soft);">
+      <span style="font-size: 0.7rem; color: var(--text-muted); display: block;">Versão 2.4 — Live Production</span>
+      <span style="font-size: 0.75rem; color: var(--brand-primary); font-weight: 700;">Design Craft Impeccable</span>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="ds-content">
+    <header class="ds-header">
+      <div class="ds-tag">Design System Oficial</div>
+      <h2>Sistema RioSãoPaulo / Galera.bet</h2>
+      <p>Guia vivo de tokens, componentes e arquitetura de interface. Construído com foco em alta produtividade, fluidez visual dark e eliminação de caixas desnecessárias.</p>
+    </header>
+
+    <!-- 1. Princípios de Design -->
+    <section id="principios" class="ds-section">
+      <h3 class="ds-section-title">01. Filosofia de Interface</h3>
+      <p class="ds-section-desc">Princípios fundamentais adotados para garantir velocidade operacional e acabamento de alto nível.</p>
+
+      <div class="principles-grid">
+        <div class="principle-item">
+          <h4>Eliminação de Caixas em Caixas</h4>
+          <p>Superfícies não devem empilhar contêineres e bordas arbitrariamente. Usamos espaçamento e sutis variações de tom para criar hierarquia, sem poluir a visão periférica com retângulos infinitos.</p>
+        </div>
+        <div class="principle-item">
+          <h4>Dark Craft & Alto Contraste</h4>
+          <p>Fundos neutros profundos (#0A0A0A a #181818) servem de palco neutro para o trabalho criativo, com tipografia nítida e legível em qualquer resolução.</p>
+        </div>
+        <div class="principle-item">
+          <h4>Cor com Propósito Cirúrgico</h4>
+          <p>O gradiente Rosa (#E4007E) para Laranja (#E94E18) sinaliza foco, identidade e ação principal. Cores de status (verde, azul, vermelho) são reservadas estritamente para leitura de prazos.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Cores -->
+    <section id="cores" class="ds-section">
+      <h3 class="ds-section-title">02. Paleta de Cores</h3>
+      <p class="ds-section-desc">Tokens de cor oficiais extraídos e padronizados no sistema.</p>
+
+      <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; letter-spacing: 0.05em;">Marca & Ação Principal</h4>
+      <div class="palette-grid" style="margin-bottom: 2rem;">
+        <div class="color-card">
+          <div class="color-swatch" style="background: #E4007E;"></div>
+          <div class="color-info">
+            <div class="color-name">Brand Pink</div>
+            <div class="color-hex">#E4007E</div>
+            <div class="color-role">Ação Primária / Destaques</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #E94E18;"></div>
+          <div class="color-info">
+            <div class="color-name">Brand Orange</div>
+            <div class="color-hex">#E94E18</div>
+            <div class="color-role">Gradiente & Transições</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: linear-gradient(135deg, #E4007E, #E94E18);"></div>
+          <div class="color-info">
+            <div class="color-name">Brand Gradient</div>
+            <div class="color-hex">#E4007E → #E94E18</div>
+            <div class="color-role">CTAs Principais & Botão Ativo</div>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; letter-spacing: 0.05em;">Superfícies Dark (Hierarquia de Profundidade)</h4>
+      <div class="palette-grid" style="margin-bottom: 2rem;">
+        <div class="color-card">
+          <div class="color-swatch" style="background: #0A0A0A; border-bottom: 1px solid #222;"></div>
+          <div class="color-info">
+            <div class="color-name">bg-base</div>
+            <div class="color-hex">#0A0A0A</div>
+            <div class="color-role">Canvas de fundo</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #141414; border-bottom: 1px solid #222;"></div>
+          <div class="color-info">
+            <div class="color-name">bg-surface</div>
+            <div class="color-hex">#141414</div>
+            <div class="color-role">Sidebar / Header</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #181818; border-bottom: 1px solid #222;"></div>
+          <div class="color-info">
+            <div class="color-name">bg-card</div>
+            <div class="color-hex">#181818</div>
+            <div class="color-role">Paineis & Seções</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #1F1F1F; border-bottom: 1px solid #222;"></div>
+          <div class="color-info">
+            <div class="color-name">bg-card-hover</div>
+            <div class="color-hex">#1F1F1F</div>
+            <div class="color-role">Interações & Hover</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #262626; border-bottom: 1px solid #333;"></div>
+          <div class="color-info">
+            <div class="color-name">border-soft</div>
+            <div class="color-hex">#262626</div>
+            <div class="color-role">Divisores suaves</div>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; letter-spacing: 0.05em;">Status & Semântica</h4>
+      <div class="palette-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background: #10B981;"></div>
+          <div class="color-info">
+            <div class="color-name">Success</div>
+            <div class="color-hex">#10B981</div>
+            <div class="color-role">Concluído / Pontual</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #0EA5E9;"></div>
+          <div class="color-info">
+            <div class="color-name">In Progress</div>
+            <div class="color-hex">#0EA5E9</div>
+            <div class="color-role">Em andamento / Desenvolvimento</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #F59E0B;"></div>
+          <div class="color-info">
+            <div class="color-name">Review / Warning</div>
+            <div class="color-hex">#F59E0B</div>
+            <div class="color-role">Em aprovação / Atenção</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: #EF4444;"></div>
+          <div class="color-info">
+            <div class="color-name">Danger</div>
+            <div class="color-hex">#EF4444</div>
+            <div class="color-role">Atrasado / Erro crítico</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Tipografia -->
+    <section id="tipografia" class="ds-section">
+      <h3 class="ds-section-title">03. Tipografia & Escala</h3>
+      <p class="ds-section-desc">Duas famílias de fontes combinadas para criar ritmo visual dinâmico.</p>
+
+      <div class="type-specimen">
+        <div class="type-row">
+          <span class="type-label">Barlow Condensed 900</span>
+          <span class="type-sample-display">PAINEL DE DEMANDAS 2026</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Barlow Condensed 800</span>
+          <span class="type-sample-h1">ARQUIVOS ENTREGUES</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Barlow Condensed 700</span>
+          <span class="type-sample-h2">Ranking de Produtividade Criativa</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Barlow Regular (Body)</span>
+          <span class="type-sample-body">Visualize com precisão cada etapa de produção, links do Google Drive e aprovações da sua equipe criativa.</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Barlow Medium (12px)</span>
+          <span class="type-sample-caption">Última sincronização feita hoje às 14:32 por Felipe Mota</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Componentes e Soluções -->
+    <section id="botoes" class="ds-section">
+      <h3 class="ds-section-title">04. Biblioteca de Componentes</h3>
+      <p class="ds-section-desc">Elementos testados e validados na interface do sistema.</p>
+
+      <div class="components-canvas">
+        <!-- Botões -->
+        <div class="component-block">
+          <div class="component-block-title">Botões de Ação</div>
+          <div class="component-block-subtitle">Hierarquia clara: Ação Primária em gradiente, secundária em superfície escura e fantasma para cancelamento.</div>
+          <div class="component-row">
+            <button class="btn-brand">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              Salvar Alterações
+            </button>
+            <button class="btn-secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Pasta no Drive
+            </button>
+            <button class="btn-ghost">Cancelar</button>
+            <button class="btn-danger">Excluir Demanda</button>
+          </div>
+        </div>
+
+        <!-- Filtros / Pílulas -->
+        <div id="chips" class="component-block">
+          <div class="component-block-title">Pílulas de Filtro (Chips de Clientes)</div>
+          <div class="component-block-subtitle">Substituem dropdowns verticais por uma barra horizontal escaneável com ícones e status ativos.</div>
+          <div class="component-row">
+            <div class="chip chip-active">Todos</div>
+            <div class="chip chip-idle">
+              <span style="display:inline-block; width:14px; height:14px; border-radius:3px; background:#10B981; font-size:9px; text-align:center; line-height:14px; color:#fff;">B</span>
+              Brasil Bet
+            </div>
+            <div class="chip chip-idle">
+              <span style="display:inline-block; width:14px; height:14px; border-radius:3px; background:#E4007E; font-size:9px; text-align:center; line-height:14px; color:#fff;">F</span>
+              F12 Bet
+            </div>
+            <div class="chip chip-idle">
+              <span style="display:inline-block; width:14px; height:14px; border-radius:3px; background:#3B82F6; font-size:9px; text-align:center; line-height:14px; color:#fff;">L</span>
+              Luva Bet
+            </div>
+            <div class="chip chip-idle">
+              <span style="display:inline-block; width:14px; height:14px; border-radius:3px; background:#F59E0B; font-size:9px; text-align:center; line-height:14px; color:#fff;">G</span>
+              Galera Bet
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Badges -->
+        <div id="status" class="component-block">
+          <div class="component-block-title">Badges de Status</div>
+          <div class="component-block-subtitle">Cores sólidas com alto contraste para leitura instantânea de prazos e fluxo kanban.</div>
+          <div class="component-row">
+            <span class="badge badge-concluido">● Concluída</span>
+            <span class="badge badge-andamento">● Em Progresso</span>
+            <span class="badge badge-revisao">● Em Aprovação</span>
+            <span class="badge badge-atrasado">▲ Atrasada</span>
+            <span class="badge badge-backlog">● Backlog</span>
+          </div>
+        </div>
+
+        <!-- Clean Table vs Caixas em Caixas -->
+        <div id="listas" class="component-block">
+          <div class="component-block-title">Padrão Limpo de Lista (Anti "Caixa em Caixa")</div>
+          <div class="component-block-subtitle">Demonstração de como listar tarefas sem criar retângulos fechados com bordas em volta de cada item.</div>
+          
+          <table class="clean-table">
+            <thead>
+              <tr>
+                <th>Demanda</th>
+                <th>Cliente</th>
+                <th>Responsável</th>
+                <th>Prazo</th>
+                <th style="text-align:right;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:600; color:#fff;">Banner Promoção Brasileirão Série A</td>
+                <td><span style="color:var(--brand-primary); font-weight:700;">Brasil Bet</span></td>
+                <td>Felipe Mota</td>
+                <td style="color:#A0A0A0;">Hoje, 18:00</td>
+                <td style="text-align:right;"><span class="badge badge-andamento">Em Progresso</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; color:#fff;">Animação Reels Instagram Luva Bet</td>
+                <td><span style="color:#60A5FA; font-weight:700;">Luva Bet</span></td>
+                <td>Guilherme M.</td>
+                <td style="color:#A0A0A0;">25/10/2026</td>
+                <td style="text-align:right;"><span class="badge badge-revisao">Em Aprovação</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; color:#fff;">Vídeo Institucional Nova Plataforma</td>
+                <td><span style="color:#34D399; font-weight:700;">F12 Bet</span></td>
+                <td>Matheus T.</td>
+                <td style="color:#34D399; font-weight:600;">Entregue</td>
+                <td style="text-align:right;"><span class="badge badge-concluido">Concluída</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Tokens CSS para Código -->
+    <section class="ds-section">
+      <h3 class="ds-section-title">05. Tokens CSS (Copiar & Colar)</h3>
+      <p class="ds-section-desc">Variáveis globais prontas para uso direto no seu arquivo <code>index.css</code> ou componentes Tailwind.</p>
+
+      <div class="code-box">
+<span class="code-comment">/* Injetado em :root no index.css */</span>
+<span class="code-token">--bg-darkest:</span> <span class="code-val">#0A0A0A;</span>
+<span class="code-token">--bg-canvas:</span> <span class="code-val">#0C0C0C;</span>
+<span class="code-token">--bg-surface:</span> <span class="code-val">#141414;</span>
+<span class="code-token">--bg-card:</span> <span class="code-val">#181818;</span>
+<span class="code-token">--brand-primary:</span> <span class="code-val">#E4007E;</span>
+<span class="code-token">--brand-secondary:</span> <span class="code-val">#E94E18;</span>
+<span class="code-token">--brand-gradient:</span> <span class="code-val">linear-gradient(135deg, #E4007E 0%, #E94E18 100%);</span>
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>

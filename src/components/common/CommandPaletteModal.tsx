@@ -74,7 +74,7 @@ export const CommandPaletteModal: React.FC = () => {
       title: 'Ver Minhas Tarefas',
       subtitle: 'Filtrar cartões atribuídos a você',
       icon: Filter,
-      color: 'bg-[#1C1C1C] text-[#E4007E] border border-[#2E2E2E]',
+      color: 'bg-[#1C1C1C] text-[#E4007E] border border-[#262626]',
       onSelect: () => {
         setIsSearchModalOpen(false);
         setActiveTab('tasks');
@@ -156,10 +156,10 @@ export const CommandPaletteModal: React.FC = () => {
       <div
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDownModal}
-        className="w-full max-w-2xl bg-[#181818] rounded-3xl shadow-2xl border border-[#2A2A2A] overflow-hidden flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-150"
+        className="w-full max-w-2xl bg-[#141414] rounded-3xl shadow-2xl border border-white/5 overflow-hidden flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-150"
       >
         {/* Search Input Bar */}
-        <div className="relative flex items-center px-4 border-b border-[#2A2A2A] bg-[#101010]">
+        <div className="relative flex items-center px-4 border-b border-white/5 bg-[#101010]">
           <Search className="w-5 h-5 text-[#E4007E] shrink-0 mr-3" />
           <input
             ref={inputRef}
@@ -184,7 +184,7 @@ export const CommandPaletteModal: React.FC = () => {
               <X className="w-4 h-4" />
             </Button>
           )}
-          <span className="hidden sm:flex items-center gap-1 text-[11px] font-semibold text-slate-300 bg-[#222222] px-2.5 py-1 rounded-xl border border-[#303030] shadow-sm ml-2">
+          <span className="hidden sm:flex items-center gap-1 text-[11px] font-semibold text-slate-300 bg-[#101010] px-2.5 py-1 rounded-xl border border-white/5 shadow-sm ml-2">
             <Command className="w-3.5 h-3.5 text-[#E4007E]" /> K
           </span>
         </div>
@@ -217,7 +217,7 @@ export const CommandPaletteModal: React.FC = () => {
                         className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all ${
                           isSelected
                             ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-lg shadow-[#E4007E]/25 font-semibold'
-                            : 'bg-[#222222]/70 hover:bg-[#222222] border border-[#2E2E2E] text-white'
+                            : 'bg-[#101010]/70 hover:bg-[#101010] border border-[#262626] text-white'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -285,7 +285,7 @@ export const CommandPaletteModal: React.FC = () => {
                         className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all ${
                           isSelected
                             ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-lg shadow-[#E4007E]/25 font-semibold'
-                            : 'bg-[#222222]/70 hover:bg-[#222222] border border-[#2E2E2E] text-white'
+                            : 'bg-[#101010]/70 hover:bg-[#101010] border border-[#262626] text-white'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
@@ -293,7 +293,7 @@ export const CommandPaletteModal: React.FC = () => {
                             className={`p-2 rounded-xl shrink-0 ${
                               isSelected
                                 ? 'bg-[#101010] text-[#E4007E]'
-                                : 'bg-[#181818] border border-[#303030] text-slate-300'
+                                : 'bg-[#141414] border border-white/5 text-slate-300'
                             }`}
                           >
                             <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
@@ -321,7 +321,7 @@ export const CommandPaletteModal: React.FC = () => {
                           className={`shrink-0 ${
                             isSelected
                               ? '!bg-[#101010] !text-[#E4007E] !border-transparent'
-                              : '!bg-[#181818] !text-slate-300 !border-[#303030]'
+                              : '!bg-[#141414] !text-slate-300 !border-white/5'
                           }`}
                         >
                           {statusLabel}

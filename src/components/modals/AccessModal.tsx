@@ -118,9 +118,9 @@ export const AccessModal: React.FC<AccessModalProps> = ({ isOpen, onClose, acces
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative w-full max-w-lg bg-[#141414] border border-[#2A2A2A] rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-lg bg-[#141414] border border-white/5 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[#2A2A2A]">
+        <div className="flex items-center justify-between p-4 border-b border-white/5">
           <h2 className="text-xl font-bold text-white">
             {accessToEdit ? 'Editar Acesso' : 'Novo Acesso'}
           </h2>
@@ -188,7 +188,7 @@ export const AccessModal: React.FC<AccessModalProps> = ({ isOpen, onClose, acces
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ex: galera.bet ou Conta Comercial"
-                className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E] focus:ring-1 focus:ring-[#E4007E] transition-all"
+                className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all"
                 required
               />
             </div>
@@ -201,7 +201,7 @@ export const AccessModal: React.FC<AccessModalProps> = ({ isOpen, onClose, acces
                 value={siteUrl}
                 onChange={(e) => setSiteUrl(e.target.value)}
                 placeholder="Ex: https://galera.bet"
-                className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E] focus:ring-1 focus:ring-[#E4007E] transition-all"
+                className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all"
               />
             </div>
 
@@ -211,7 +211,7 @@ export const AccessModal: React.FC<AccessModalProps> = ({ isOpen, onClose, acces
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E] focus:ring-1 focus:ring-[#E4007E] transition-all cursor-pointer"
+                className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all cursor-pointer"
               >
                 <option value="">Nenhuma</option>
                 {accessCategories.map(cat => (
@@ -228,7 +228,7 @@ export const AccessModal: React.FC<AccessModalProps> = ({ isOpen, onClose, acces
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
                 placeholder="Usuário ou E-mail"
-                className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E] focus:ring-1 focus:ring-[#E4007E] transition-all"
+                className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all"
               />
             </div>
 
@@ -240,14 +240,14 @@ export const AccessModal: React.FC<AccessModalProps> = ({ isOpen, onClose, acces
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Senha de acesso"
-                className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E] focus:ring-1 focus:ring-[#E4007E] transition-all font-mono"
+                className="w-full bg-[#1A1A1A] border border-[#333] text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all font-mono"
               />
             </div>
           </form>
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-[#2A2A2A] flex justify-end gap-3 bg-[#1A1A1A]">
+        <div className="p-4 border-t border-white/5 flex justify-end gap-3 bg-[#1A1A1A]">
           <button
             type="button"
             onClick={onClose}

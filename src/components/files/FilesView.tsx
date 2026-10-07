@@ -206,11 +206,11 @@ export const FilesView: React.FC = () => {
               placeholder="Buscar por arquivo, tarefa ou projeto..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#1C1C1C] border border-[#303030] text-white pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-[#E4007E]"
+              className="w-full bg-[#1C1C1C] border border-white/5 text-white pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
             />
           </div>
 
-          <div className="flex flex-nowrap items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030] overflow-x-auto min-w-0 [scrollbar-hide::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex flex-nowrap items-center bg-[#101010] p-1 rounded-xl gap-1 border border-white/5 overflow-x-auto min-w-0 [scrollbar-hide::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <button
               onClick={() => setSelectedProject('all')}
               className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -259,10 +259,12 @@ export const FilesView: React.FC = () => {
             <p className="font-bold text-white">Carregando arquivos...</p>
           </div>
         ) : filteredFiles.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-[#808080]">
-            <HardDrive className="w-12 h-12 mb-4 opacity-50" />
-            <p className="font-bold">Nenhum arquivo encontrado.</p>
-            <p className="text-xs mt-1">Nenhum resultado para os filtros atuais.</p>
+          <div className="flex flex-col items-center justify-center py-24 text-center bg-gradient-to-b from-[#181818] to-transparent rounded-3xl border border-white/5 border-dashed">
+            <div className="w-16 h-16 rounded-full bg-[#1C1C1C] flex items-center justify-center mb-4 shadow-inner">
+              <HardDrive className="w-8 h-8 text-slate-500" />
+            </div>
+            <p className="text-lg font-bold text-slate-200">Nenhum arquivo encontrado</p>
+            <p className="text-sm text-slate-500 mt-2 max-w-xs">Nenhum resultado corresponde aos filtros atuais. Tente buscar por outro termo.</p>
           </div>
         ) : (
           <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4 space-y-4">

@@ -16,9 +16,9 @@ export const DashboardSprintOverview: React.FC<DashboardSprintOverviewProps> = R
     const strokeDashoffset = circumference - (donePercent / 100) * circumference;
 
     return (
-      <div className="bg-[#181818] rounded-2xl p-6 border border-[#2A2A2A] shadow-lg">
+      <div className="bg-[#141414] rounded-2xl p-6 shadow-lg">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-white text-base">Visão Geral da Sprint</h3>
+          <h3 className="font-bold text-white text-xl tracking-tight">Visão Geral da Sprint</h3>
           <Button
             variant="ghost"
             size="icon"

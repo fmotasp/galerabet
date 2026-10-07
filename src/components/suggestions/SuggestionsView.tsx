@@ -136,7 +136,7 @@ export const SuggestionsView: React.FC = () => {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               disabled={isSubmitting}
-              className="bg-[#1C1C1C] border-[#2E2E2E]"
+              className="bg-[#1C1C1C] border-[#262626]"
             />
           </div>
           <Button 

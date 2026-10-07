@@ -231,7 +231,7 @@ export const EmployeesView: React.FC = () => {
                 <select
                   value={selectedDept}
                   onChange={(e) => setSelectedDept(e.target.value)}
-                  className="appearance-none bg-[#222222] hover:bg-[#022852] border border-slate-700/80 text-white text-xs font-bold py-2 pl-3.5 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E] cursor-pointer transition-colors"
+                  className="appearance-none bg-[#101010] hover:bg-[#022852] border border-slate-700/80 text-white text-xs font-bold py-2 pl-3.5 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 cursor-pointer transition-colors"
                 >
                   <option value="all">Todas as Equipes</option>
                   {departments.map((d) => (
@@ -248,7 +248,7 @@ export const EmployeesView: React.FC = () => {
                 <select
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value)}
-                  className="appearance-none bg-[#222222] hover:bg-[#022852] border border-slate-700/80 text-white text-xs font-bold py-2 pl-3.5 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E] cursor-pointer transition-colors"
+                  className="appearance-none bg-[#101010] hover:bg-[#022852] border border-slate-700/80 text-white text-xs font-bold py-2 pl-3.5 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 cursor-pointer transition-colors"
                 >
                   <option value="all">Todos os Cargos</option>
                   {roles.map((r) => (
@@ -284,7 +284,7 @@ export const EmployeesView: React.FC = () => {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as 'all' | 'name')}
-                    className="appearance-none bg-[#222222] hover:bg-[#022852] border border-slate-700/80 text-white text-xs font-bold py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-[#E4007E] cursor-pointer transition-colors"
+                    className="appearance-none bg-[#101010] hover:bg-[#022852] border border-slate-700/80 text-white text-xs font-bold py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 cursor-pointer transition-colors"
                   >
                     <option value="all">Padrão</option>
                     <option value="name">Nome (A-Z)</option>
@@ -294,7 +294,7 @@ export const EmployeesView: React.FC = () => {
               </div>
 
               {/* View Toggle Buttons */}
-              <div className="flex items-center bg-[#222222] p-1 rounded-xl border border-slate-700/80">
+              <div className="flex items-center bg-[#101010] p-1 rounded-xl border border-slate-700/80">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-1.5 rounded-lg transition-all cursor-pointer ${
@@ -325,7 +325,7 @@ export const EmployeesView: React.FC = () => {
 
           {/* ================= EMPLOYEE CARDS GRID ================= */}
           {filteredEmployees.length === 0 ? (
-            <div className="py-20 text-center bg-[#181818] rounded-3xl border border-slate-800 p-8">
+            <div className="py-20 text-center bg-[#141414] rounded-3xl border border-slate-800 p-8">
               <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <h3 className="text-lg font-bold text-white">Nenhum funcionário encontrado</h3>
               <p className="text-xs text-slate-400 mt-1">
@@ -350,7 +350,7 @@ export const EmployeesView: React.FC = () => {
                       setSelectedSidebarEmployeeId(emp.id);
                       setEditingEmployee(emp);
                     }}
-                    className={`group bg-[#181818] hover:bg-[#001c3d] rounded-3xl border transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden relative ${
+                    className={`group bg-[#141414] hover:bg-[#001c3d] rounded-3xl border transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden relative ${
                       isSelected
                         ? 'border-[#E4007E] ring-2 ring-[#E4007E]/20'
                         : 'border-slate-800 hover:border-slate-700'
@@ -538,7 +538,7 @@ export const EmployeesView: React.FC = () => {
         {/* ================= RIGHT SIDEBAR PANEL (~25% WIDTH) ================= */}
         <div className="xl:col-span-4 2xl:col-span-3 space-y-6">
           {/* Main Sidebar Box */}
-          <div className="bg-[#181818] rounded-3xl p-6 border border-slate-800 shadow-xl space-y-6">
+          <div className="bg-[#141414] rounded-3xl p-6 border border-slate-800 shadow-xl space-y-6">
             {/* Header: Selected Team / Member */}
             <div className="flex items-start justify-between">
               <div>

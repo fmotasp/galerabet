@@ -10,7 +10,7 @@ interface ReportsHeaderProps {
 export const ReportsHeader: React.FC<ReportsHeaderProps> = React.memo(
   ({ onExportCSV, onPrint }) => {
     return (
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-[#2A2A2A]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-white/5">
         <div>
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] flex items-center justify-center text-white shadow-lg shadow-[#E4007E]/25">

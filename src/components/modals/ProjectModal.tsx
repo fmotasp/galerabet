@@ -203,8 +203,8 @@ export const ProjectModal: React.FC = () => {
               <ImageIcon className="w-3.5 h-3.5 text-[#E4007E]" />
               <span>Logo / Imagem do Cliente</span>
             </label>
-            <div className="flex items-center gap-4 p-3 bg-[#1C1C1C] border border-[#2E2E2E] rounded-2xl">
-              <div className="w-14 h-14 rounded-2xl bg-[#141414] border border-[#2E2E2E] flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+            <div className="flex items-center gap-4 p-3 bg-[#1C1C1C] border border-[#262626] rounded-2xl">
+              <div className="w-14 h-14 rounded-2xl bg-[#141414] border border-[#262626] flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                 {formData.logoUrl ? (
                   <img
                     src={formData.logoUrl}
@@ -254,7 +254,7 @@ export const ProjectModal: React.FC = () => {
                   placeholder="Ou cole a URL da imagem/logo..."
                   value={formData.logoUrl}
                   onChange={(e) => setFormData((p) => ({ ...p, logoUrl: e.target.value }))}
-                  className="w-full px-2.5 py-1.5 text-xs bg-[#141414] border border-[#2E2E2E] rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E4007E]"
+                  className="w-full px-2.5 py-1.5 text-xs bg-[#141414] border border-[#262626] rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
                 />
               </div>
             </div>
@@ -326,7 +326,7 @@ export const ProjectModal: React.FC = () => {
             {formData.colorPalette.map((color, index) => (
               <div
                 key={index}
-                className="flex items-center gap-2 p-2 bg-[#1C1C1C] border border-[#2E2E2E] rounded-xl"
+                className="flex items-center gap-2 p-2 bg-[#1C1C1C] border border-[#262626] rounded-xl"
               >
                 {/* Color Picker Input */}
                 <div className="relative shrink-0">
@@ -345,7 +345,7 @@ export const ProjectModal: React.FC = () => {
                     placeholder="#HEX"
                     value={color.hex}
                     onChange={(e) => handleUpdateColor(index, 'hex', e.target.value.toUpperCase())}
-                    className="w-full px-2 py-1 bg-[#141414] border border-[#2E2E2E] rounded-lg text-xs font-mono font-bold text-white uppercase focus:outline-none focus:border-[#E4007E]"
+                    className="w-full px-2 py-1 bg-[#141414] border border-[#262626] rounded-lg text-xs font-mono font-bold text-white uppercase focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
                   />
                 </div>
 
@@ -356,7 +356,7 @@ export const ProjectModal: React.FC = () => {
                     placeholder="Nome (Ex: Primária, Secundária)"
                     value={color.name}
                     onChange={(e) => handleUpdateColor(index, 'name', e.target.value)}
-                    className="w-full px-2 py-1 bg-[#141414] border border-[#2E2E2E] rounded-lg text-xs font-semibold text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E4007E]"
+                    className="w-full px-2 py-1 bg-[#141414] border border-[#262626] rounded-lg text-xs font-semibold text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
                   />
                 </div>
 
@@ -482,7 +482,7 @@ export const ProjectModal: React.FC = () => {
               variant="ghost"
               size="md"
               onClick={handleClose}
-              className="px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-white rounded-xl hover:bg-[#222222]"
+              className="px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-white rounded-xl hover:bg-[#101010]"
             >
               Cancelar
             </Button>

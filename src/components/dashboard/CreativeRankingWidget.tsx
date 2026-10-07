@@ -156,7 +156,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
   const visibleOthers = isExpanded ? others : others.slice(0, 3);
 
   return (
-    <div className="bg-[#181818] border border-[#2A2A2A] rounded-2xl p-5 sm:p-6 shadow-lg space-y-6 relative overflow-hidden">
+    <div className="bg-[#141414] rounded-2xl p-6 shadow-lg space-y-6 relative overflow-hidden">
       {/* Glows de ambientação nas cores da RioSãoPaulo */}
       <div className="absolute -top-20 -left-20 w-60 h-60 bg-[#E4007E]/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-[#E94E18]/10 rounded-full blur-3xl pointer-events-none" />
@@ -164,16 +164,22 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
       {/* Header com Título e Filtros */}
       <div className="space-y-3 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] flex items-center justify-center text-white shadow-md shadow-[#E4007E]/20">
-              <Trophy className="w-4 h-4" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] flex items-center justify-center text-white shadow-md shadow-[#E4007E]/20 shrink-0">
+              <Trophy className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-base flex items-center gap-1.5">
+              <h3 className="font-bold text-white text-xl tracking-tight flex items-center gap-1.5">
                 <span>Ranking Criativo</span>
-                <Sparkles className="w-3.5 h-3.5 text-[#FFB903]" />
+                <Sparkles className="w-4 h-4 text-[#FFB903]" />
+                <span 
+                  className="ml-1 flex items-center justify-center w-4 h-4 rounded-full bg-white/10 text-slate-300 text-[10px] cursor-help"
+                  title="O ranking contabiliza as tarefas em que o criativo é o responsável. A taxa (%) representa a proporção de tarefas concluídas/entregues sobre o total de demandas atribuídas no período."
+                >
+                  ?
+                </span>
               </h3>
-              <p className="text-[11px] text-slate-400 font-medium">
+              <p className="text-xs text-slate-400 font-medium mt-0.5">
                 Top produtividade de Design & Vídeo
               </p>
             </div>
@@ -183,7 +189,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
         {/* Filtros rápidos compactos */}
         <div className="flex items-center justify-between gap-1.5 flex-wrap pt-1">
           {/* Cargo */}
-          <div className="flex items-center bg-[#121212] p-0.5 rounded-lg border border-[#2E2E2E]">
+          <div className="flex items-center bg-[#121212] p-0.5 rounded-lg border border-[#262626]">
             <button
               type="button"
               onClick={() => setSelectedRole('all')}
@@ -220,7 +226,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
           </div>
 
           {/* Período */}
-          <div className="flex items-center bg-[#121212] p-0.5 rounded-lg border border-[#2E2E2E]">
+          <div className="flex items-center bg-[#121212] p-0.5 rounded-lg border border-[#262626]">
             <button
               type="button"
               onClick={() => setSelectedPeriod('all')}
@@ -272,34 +278,34 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-[#181818] text-slate-200 font-semibold text-xs flex items-center justify-center">
+                    <div className="w-full h-full rounded-full bg-[#141414] text-slate-200 font-semibold text-xs flex items-center justify-center">
                       {top2.employee.initials || top2.employee.name.slice(0, 2)}
                     </div>
                   )}
                 </div>
-                <div className="absolute -bottom-2 px-1.5 py-0.2 rounded-full bg-slate-300 text-slate-900 font-semibold text-[9px] shadow uppercase">
+                <div className="absolute -bottom-2 px-1.5 py-0.2 rounded-full bg-slate-300 text-slate-900 font-bold text-[10px] shadow uppercase">
                   TOP 2
                 </div>
               </div>
 
-              <h4 className="font-extrabold text-white text-[11px] mt-1.5 truncate max-w-[90px]">
+              <h4 className="font-extrabold text-white text-xs mt-1.5 truncate max-w-[90px]">
                 {top2.employee.name.split(' ')[0]}
               </h4>
-              <span className="text-[9px] text-slate-400 truncate max-w-[85px] block">
+              <span className="text-xs text-slate-400 truncate max-w-[85px] block">
                 {top2.employee.role?.split(' ')[0] || 'Criativo'}
               </span>
 
               <div className="mt-2 pt-1.5 border-t border-white/5 w-full">
-                <div className="text-[10px] font-semibold text-white">
-                  {top2.completed} <span className="font-medium text-slate-400 text-[9px]">feitas</span>
+                <div className="text-xs font-semibold text-white">
+                  {top2.completed} <span className="font-medium text-slate-400 text-[10px]">feitas</span>
                 </div>
-                <div className="text-[9px] text-emerald-400 font-bold">
+                <div className="text-xs text-emerald-400 font-bold">
                   {top2.rate}%
                 </div>
               </div>
             </div>
           ) : (
-            <div className="w-full h-32 bg-[#141414] rounded-2xl flex items-center justify-center text-[10px] text-slate-500">
+            <div className="w-full h-32 bg-[#141414] rounded-2xl flex items-center justify-center text-xs text-slate-500">
               -
             </div>
           )}
@@ -326,35 +332,35 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-[#181818] text-[#FFB903] font-semibold text-sm flex items-center justify-center">
+                    <div className="w-full h-full rounded-full bg-[#141414] text-[#FFB903] font-semibold text-sm flex items-center justify-center">
                       {top1.employee.initials || top1.employee.name.slice(0, 2)}
                     </div>
                   )}
                 </div>
-                <div className="absolute -bottom-2.5 px-2 py-0.5 rounded-full bg-[#FFB903] text-slate-950 font-semibold text-[10px] shadow uppercase flex items-center gap-0.5">
-                  <Flame className="w-2.5 h-2.5 fill-slate-950" />
+                <div className="absolute -bottom-2.5 px-2 py-0.5 rounded-full bg-[#FFB903] text-slate-950 font-bold text-[10px] shadow uppercase flex items-center gap-0.5">
+                  <Flame className="w-3 h-3 fill-slate-950" />
                   <span>TOP 1</span>
                 </div>
               </div>
 
-              <h4 className="font-semibold text-white text-xs mt-2 truncate max-w-[100px]">
+              <h4 className="font-bold text-white text-sm mt-2 truncate max-w-[100px]">
                 {top1.employee.name.split(' ')[0]}
               </h4>
-              <span className="text-[10px] text-[#FFE082] font-semibold truncate max-w-[95px] block">
+              <span className="text-xs text-[#FFE082] font-semibold truncate max-w-[95px] block">
                 {top1.employee.role?.split(' ')[0] || 'Líder'}
               </span>
 
               <div className="mt-2 pt-1.5 border-t border-[#FFB903]/20 w-full">
-                <div className="text-xs font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#FFB903] to-[#E94E18]">
+                <div className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#FFB903] to-[#E94E18]">
                   {top1.completed} <span className="font-bold text-slate-300 text-[10px]">feitas</span>
                 </div>
-                <div className="text-[10px] text-emerald-400 font-extrabold">
+                <div className="text-xs text-emerald-400 font-extrabold mt-0.5">
                   {top1.rate}%
                 </div>
               </div>
             </div>
           ) : (
-            <div className="w-full h-36 bg-[#141414] rounded-2xl flex items-center justify-center text-[10px] text-slate-500">
+            <div className="w-full h-36 bg-[#141414] rounded-2xl flex items-center justify-center text-xs text-slate-500">
               -
             </div>
           )}
@@ -376,34 +382,34 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-[#181818] text-[#CD7F32] font-semibold text-xs flex items-center justify-center">
+                    <div className="w-full h-full rounded-full bg-[#141414] text-[#CD7F32] font-semibold text-xs flex items-center justify-center">
                       {top3.employee.initials || top3.employee.name.slice(0, 2)}
                     </div>
                   )}
                 </div>
-                <div className="absolute -bottom-2 px-1.5 py-0.2 rounded-full bg-[#CD7F32] text-white font-semibold text-[9px] shadow uppercase">
+                <div className="absolute -bottom-2 px-1.5 py-0.2 rounded-full bg-[#CD7F32] text-white font-bold text-[10px] shadow uppercase">
                   TOP 3
                 </div>
               </div>
 
-              <h4 className="font-extrabold text-white text-[11px] mt-1.5 truncate max-w-[90px]">
+              <h4 className="font-extrabold text-white text-xs mt-1.5 truncate max-w-[90px]">
                 {top3.employee.name.split(' ')[0]}
               </h4>
-              <span className="text-[9px] text-slate-400 truncate max-w-[85px] block">
+              <span className="text-xs text-slate-400 truncate max-w-[85px] block">
                 {top3.employee.role?.split(' ')[0] || 'Criativo'}
               </span>
 
               <div className="mt-2 pt-1.5 border-t border-white/5 w-full">
-                <div className="text-[10px] font-semibold text-white">
-                  {top3.completed} <span className="font-medium text-slate-400 text-[9px]">feitas</span>
+                <div className="text-xs font-semibold text-white">
+                  {top3.completed} <span className="font-medium text-slate-400 text-[10px]">feitas</span>
                 </div>
-                <div className="text-[9px] text-emerald-400 font-bold">
+                <div className="text-xs text-emerald-400 font-bold">
                   {top3.rate}%
                 </div>
               </div>
             </div>
           ) : (
-            <div className="w-full h-32 bg-[#141414] rounded-2xl flex items-center justify-center text-[10px] text-slate-500">
+            <div className="w-full h-32 bg-[#141414] rounded-2xl flex items-center justify-center text-xs text-slate-500">
               -
             </div>
           )}
@@ -421,7 +427,7 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
             </span>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             {visibleOthers.map((item, idx) => {
               const rankPos = idx + 4;
 
@@ -429,13 +435,13 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
                 <div
                   key={item.employee.id}
                   onClick={() => onSelectEmployee && onSelectEmployee(item.employee)}
-                  className="flex items-center justify-between p-2 rounded-xl bg-[#141414] hover:bg-[#202020] border border-[#282828] transition-all cursor-pointer group"
+                  className="flex items-center justify-between py-2.5 px-3 -mx-3 rounded-xl hover:bg-white/[0.03] transition-colors cursor-pointer group"
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="w-5 h-5 rounded-md bg-[#222222] text-slate-300 font-bold text-[10px] flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="w-6 text-slate-400 font-bold text-xs flex items-center justify-center shrink-0">
                       #{rankPos}
                     </span>
-                    <div className="w-6 h-6 rounded-full bg-[#262626] overflow-hidden shrink-0 flex items-center justify-center font-bold text-[9px] text-[#E4007E]">
+                    <div className="w-8 h-8 rounded-full bg-[#262626] overflow-hidden shrink-0 flex items-center justify-center font-bold text-[10px] text-[#E4007E]">
                       {item.employee.avatarUrl ? (
                         <img
                           src={item.employee.avatarUrl}
@@ -447,20 +453,20 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-bold text-white text-[11px] truncate max-w-[110px] group-hover:text-[#E4007E] transition-colors">
+                      <div className="font-bold text-white text-sm truncate max-w-[120px] group-hover:text-[#E4007E] transition-colors">
                         {item.employee.name}
                       </div>
-                      <div className="text-[9px] text-slate-400 truncate max-w-[100px]">
+                      <div className="text-xs text-slate-400 truncate max-w-[110px]">
                         {item.employee.role || 'Criativo'}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="px-2 py-0.5 rounded-full bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] font-semibold text-[10px]">
+                  <div className="flex items-center gap-4 shrink-0 pr-1">
+                    <span className="text-slate-300 font-medium text-xs">
                       {item.completed} entregas
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-400">
+                    <span className="text-xs font-bold text-emerald-400 w-8 text-right">
                       {item.rate}%
                     </span>
                   </div>

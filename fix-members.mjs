@@ -2,14 +2,27 @@ import fs from 'fs';
 
 let content = fs.readFileSync('src/components/modals/task/components/TaskMembersAndClients.tsx', 'utf8');
 
-content = content.replace(
-  'className="w-9 h-9 rounded-full bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E] flex items-center justify-center text-slate-200 hover:text-white transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"',
-  'className="w-9 h-9 rounded-full bg-[#1C1C1C] hover:bg-[#E4007E]/20 flex items-center justify-center text-slate-400 hover:text-[#E4007E] transition-all hover:scale-105 active:scale-95 cursor-pointer border-transparent"'
-);
+// Members
+content = content.replace(/\.map\(\(emp\) => \{/g, '.map((emp, index) => {');
+content = content.replace(/className=\{\`flex items-center gap-3 p-2\.5 rounded-xl cursor-pointer transition-colors \$\{\n\s*isSelected \? 'bg-\[#262626\]' : 'hover:bg-\[#1C1C1C\]'\n\s*\}\`\}\n\s*style=\{\{ border: isSelected \? '1px solid rgba\(228, 0, 126, 0\.5\)' : '1px solid transparent' \}\}/g, 
+`className={\`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-colors animate-in slide-in-from-right-2 fade-in duration-300 fill-mode-both \${
+                            isSelected ? 'bg-[#262626]' : 'hover:bg-[#1C1C1C]'
+                          }\`}
+                          style={{ 
+                            border: isSelected ? '1px solid rgba(228, 0, 126, 0.5)' : '1px solid transparent',
+                            animationDelay: \`\${index * 20}ms\`
+                          }}`);
 
-content = content.replace(
-  'className="w-8 h-8 rounded-full bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E] flex items-center justify-center text-slate-200 hover:text-white transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"',
-  'className="w-8 h-8 rounded-full bg-[#1C1C1C] hover:bg-[#E4007E]/20 flex items-center justify-center text-slate-400 hover:text-[#E4007E] transition-all hover:scale-105 active:scale-95 cursor-pointer border-transparent"'
-);
+// Clients
+content = content.replace(/\.map\(\(c\) => \{/g, '.map((c, index) => {');
+content = content.replace(/className=\{\`flex items-center gap-3 p-2\.5 rounded-xl cursor-pointer transition-colors \$\{\n\s*isSelected \? 'bg-\[#262626\] border border-\[#E4007E\]\/50' : 'hover:bg-\[#1C1C1C\] border-transparent'\n\s*\}\`\}/g,
+`className={\`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-colors animate-in slide-in-from-right-2 fade-in duration-300 fill-mode-both \${
+                            isSelected ? 'bg-[#262626]' : 'hover:bg-[#1C1C1C]'
+                          }\`}
+                          style={{ 
+                            border: isSelected ? '1px solid rgba(228, 0, 126, 0.5)' : '1px solid transparent',
+                            animationDelay: \`\${index * 20}ms\`
+                          }}`);
 
 fs.writeFileSync('src/components/modals/task/components/TaskMembersAndClients.tsx', content);
+

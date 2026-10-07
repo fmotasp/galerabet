@@ -192,7 +192,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
 
             <button
               onClick={() => setIsNewTaskModalOpen(true)}
-              className="w-full mt-4 py-2.5 bg-[#222222] hover:bg-[#282828] text-[#A0A0A0] hover:text-white border border-[#2E2E2E] rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full mt-4 py-2.5 bg-[#101010] hover:bg-[#282828] text-[#A0A0A0] hover:text-white border border-[#262626] rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Adicionar Cartão</span>

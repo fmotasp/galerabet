@@ -459,7 +459,7 @@ export const EmployeeModal: React.FC = () => {
       isOpen={isOpen}
       onClose={handleClose}
       size="sm"
-      className="!bg-[#181818]"
+      className="!bg-[#141414]"
       icon={<UserCheck className="w-4 h-4" />}
       title={editingEmployee ? 'Editar Membro da Equipe' : 'Cadastrar Novo Membro'}
     >
@@ -472,7 +472,7 @@ export const EmployeeModal: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Avatar Section */}
-        <div className="flex items-center gap-4 p-3 bg-[#1E1E1E] rounded-2xl border border-[#2A2A2A]">
+        <div className="flex items-center gap-4 p-3 bg-[#1E1E1E] rounded-2xl border border-white/5">
           {/* Avatar Preview */}
           <div className="relative shrink-0">
             {avatarPreview ? (
@@ -577,7 +577,7 @@ export const EmployeeModal: React.FC = () => {
             placeholder="Ex: Felipe Mota, Rafael Barbosa..."
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
+            className="!bg-[#101010] !border-white/5 focus:!border-[#E4007E]"
           />
         </div>
 
@@ -592,7 +592,7 @@ export const EmployeeModal: React.FC = () => {
             placeholder="exemplo@gmail.com ou usuario@empresa.com"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
+            className="!bg-[#101010] !border-white/5 focus:!border-[#E4007E]"
           />
         </div>
 
@@ -634,7 +634,7 @@ export const EmployeeModal: React.FC = () => {
                 }
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E] pr-20 font-mono tracking-wider text-xs sm:text-sm"
+                className="!bg-[#101010] !border-white/5 focus:!border-[#E4007E] pr-20 font-mono tracking-wider text-xs sm:text-sm"
               />
               <div className="absolute right-2 flex items-center gap-1 text-slate-400">
                 {formData.password && (
@@ -693,7 +693,7 @@ export const EmployeeModal: React.FC = () => {
             placeholder="Ex: Designer, Video Maker, Gestor, Copywriter..."
             value={formData.role}
             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-            className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
+            className="!bg-[#101010] !border-white/5 focus:!border-[#E4007E]"
           />
           <datalist id="role-suggestions">
             <option value="Designer" />
@@ -719,7 +719,7 @@ export const EmployeeModal: React.FC = () => {
             placeholder="Ex: Design, Audiovisual, Gestão, Conteúdo..."
             value={formData.department}
             onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-            className="!bg-[#222222] !border-[#2A2A2A] focus:!border-[#E4007E]"
+            className="!bg-[#101010] !border-white/5 focus:!border-[#E4007E]"
           />
           <datalist id="dept-suggestions">
             <option value="Design" />
@@ -736,7 +736,7 @@ export const EmployeeModal: React.FC = () => {
             <Palette className="w-3.5 h-3.5 text-[#E4007E]" />
             Cor de Identificação (Avatar)
           </label>
-          <div className="grid grid-cols-9 gap-1.5 p-2 bg-[#222222] rounded-xl border border-[#2A2A2A]">
+          <div className="grid grid-cols-9 gap-1.5 p-2 bg-[#101010] rounded-xl border border-white/5">
             {LABEL_COLORS.map((c) => (
               <button
                 key={c.id}
@@ -754,7 +754,7 @@ export const EmployeeModal: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-5 border-t border-[#2A2A2A] mt-6">
+        <div className="flex items-center justify-between pt-5 border-t border-white/5 mt-6">
           {editingEmployee ? (
             <Button
               variant="ghost"
@@ -781,7 +781,7 @@ export const EmployeeModal: React.FC = () => {
               size="md"
               disabled={isSubmitting}
               onClick={handleClose}
-              className="px-4 py-2.5 hover:bg-[#222222] text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+              className="px-4 py-2.5 hover:bg-[#101010] text-slate-400 hover:text-white rounded-xl text-xs font-bold"
             >
               Cancelar
             </Button>

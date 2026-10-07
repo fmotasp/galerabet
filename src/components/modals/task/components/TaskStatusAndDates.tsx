@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { SpineStatusConfig, TaskStatus } from '../../../../types';
 import { TaskModalFormData } from '../types';
+import { ChevronDown, Check } from 'lucide-react';
 
 export const TaskStatusAndDates: React.FC<{
   formData: TaskModalFormData;
@@ -9,10 +10,28 @@ export const TaskStatusAndDates: React.FC<{
   onStatusChange?: () => void;
 }> = ({ formData, setFormData, spineStatuses, onStatusChange }) => {
 
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
+  const [isUrgencyOpen, setIsUrgencyOpen] = useState(false);
+  
+  const statusRef = useRef<HTMLDivElement>(null);
+  const urgencyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (statusRef.current && !statusRef.current.contains(e.target as Node)) {
+        setIsStatusOpen(false);
+      }
+      if (urgencyRef.current && !urgencyRef.current.contains(e.target as Node)) {
+        setIsUrgencyOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const currentUrgencyState = formData.isFlagged ? 'urgencia' : (formData.isPriority ? 'prioridade' : 'normal');
 
-  const handleUrgencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
+  const handleUrgencyChange = (val: string) => {
     if (val === 'urgencia') {
       setFormData(prev => ({ ...prev, isFlagged: true, isPriority: false }));
     } else if (val === 'prioridade') {
@@ -22,62 +41,79 @@ export const TaskStatusAndDates: React.FC<{
     }
   };
 
+  const currentStatusLabel = spineStatuses.find(s => s.id === formData.status)?.label || formData.status;
+
   return (
     <div className="grid grid-cols-1 gap-4 items-start">
       {/* Status da tarefa */}
-      <div>
-        <label className="block text-xs font-medium text-slate-200 mb-1.5">
-          Status da Tarefa
+      <div ref={statusRef} className="relative">
+        <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+          Status
         </label>
-        <select
-          value={formData.status}
-          onChange={(e) => {
-            onStatusChange?.();
-            const newStatus = e.target.value as TaskStatus;
-            const statusLabel = spineStatuses.find((s) => s.id === newStatus)?.label || newStatus;
-            const isReview =
-              newStatus === 'in_review' ||
-              newStatus.toLowerCase().includes('revis') ||
-              statusLabel.toLowerCase().includes('revis');
-
-            const isDone =
-              newStatus === 'done' ||
-              newStatus === 'postar' ||
-              newStatus.toLowerCase().includes('concl') ||
-              newStatus.toLowerCase().includes('post') ||
-              statusLabel.toLowerCase().includes('concl') ||
-              statusLabel.toLowerCase().includes('post') ||
-              statusLabel.toLowerCase().includes('entreg');
-
-            setFormData((prev) => ({
-              ...prev,
-              status: newStatus,
-              deliveredAt: isReview ? '' : (isDone && !prev.deliveredAt ? new Date().toLocaleDateString('pt-BR') : prev.deliveredAt),
-            }));
-          }}
-          className="w-full h-[46px] px-3 bg-[#1C1C1C] border border-white/5 rounded-xl text-xs font-semibold text-white transition-all shadow-xs focus:outline-none focus:border-[#E4007E] cursor-pointer"
+        <button
+          type="button"
+          onClick={() => setIsStatusOpen(!isStatusOpen)}
+          className={`w-full h-[46px] px-3 bg-[#101010] border border-white/5 rounded-xl text-sm font-semibold text-white transition-all shadow-xs flex items-center justify-between ${isStatusOpen ? 'ring-2 ring-[#E4007E]/30 border-[#E4007E]/50' : 'hover:border-white/10'}`}
         >
-          {spineStatuses.map((st) => (
-            <option key={st.id} value={st.id} className="bg-[#181818] text-white font-bold py-2">
-              {st.label}
-            </option>
-          ))}
-        </select>
+          <span className="truncate">{currentStatusLabel}</span>
+          <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isStatusOpen ? 'rotate-180 text-[#E4007E]' : ''}`} />
+        </button>
+
+        {isStatusOpen && (
+          <div className="absolute top-full mt-1.5 left-0 w-full z-50 bg-[#1C1C1C] border border-white/5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-100">
+            <div className="max-h-[250px] overflow-y-auto custom-scrollbar">
+              {spineStatuses.map((st) => (
+                <button
+                  key={st.id}
+                  type="button"
+                  onClick={() => {
+                    onStatusChange?.();
+                    const newStatus = st.id as TaskStatus;
+                    const isReview =
+                      newStatus === 'in_review' ||
+                      newStatus.toLowerCase().includes('revis') ||
+                      st.label.toLowerCase().includes('revis');
+
+                    const isDone =
+                      newStatus === 'done' ||
+                      newStatus === 'postar' ||
+                      newStatus.toLowerCase().includes('concl') ||
+                      newStatus.toLowerCase().includes('post') ||
+                      st.label.toLowerCase().includes('concl') ||
+                      st.label.toLowerCase().includes('post') ||
+                      st.label.toLowerCase().includes('entreg');
+
+                    setFormData((prev) => ({
+                      ...prev,
+                      status: newStatus,
+                      deliveredAt: isReview ? '' : (isDone && !prev.deliveredAt ? new Date().toLocaleDateString('pt-BR') : prev.deliveredAt),
+                    }));
+                    setIsStatusOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${formData.status === st.id ? 'bg-[#2A2A2A] text-white' : 'text-slate-300 hover:bg-[#101010] hover:text-white'}`}
+                >
+                  <span className="text-sm font-semibold truncate pr-2">{st.label}</span>
+                  {formData.status === st.id && <Check className="w-4 h-4 text-[#E4007E] stroke-[3] shrink-0" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Prazo Previsto */}
       <div>
-        <label className="block text-xs font-medium text-slate-200 mb-1.5">
-          Prazo Previsto <span className="text-rose-500">*</span>
+        <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+          Prazo Previsto <span className="text-[#E4007E]">*</span>
         </label>
         <div className="relative">
           <input
             type="datetime-local"
+            style={{ colorScheme: 'dark' }}
             value={(() => {
               if (!formData.dueDate || formData.dueDate === 'Sem prazo') return '';
               let [dateStr, timeStr] = formData.dueDate.split(' ');
               
-              // Handle if it is already in ISO format (has T)
               if (!timeStr && dateStr.includes('T')) {
                 const splitT = dateStr.split('T');
                 dateStr = splitT[0];
@@ -114,37 +150,62 @@ export const TaskStatusAndDates: React.FC<{
               }
               setFormData((prev) => ({ ...prev, dueDate: newDueDate }));
             }}
-            className="w-full h-[46px] px-3 bg-[#1C1C1C] border border-white/5 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-[#E4007E] cursor-pointer"
+            className="w-full h-[46px] px-3 bg-[#101010] border border-white/5 rounded-xl text-sm font-semibold text-white tabular-nums focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 cursor-pointer transition-all hover:border-white/10"
           />
         </div>
       </div>
 
       {/* Urgência / Prioridade */}
-      <div>
-        <label className="block text-xs font-medium text-slate-200 mb-1.5">
+      <div ref={urgencyRef} className="relative">
+        <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
           Urgência / Prioridade
         </label>
-        <select
-          value={currentUrgencyState}
-          onChange={handleUrgencyChange}
-          className={`w-full h-[46px] border rounded-xl px-4 text-sm font-semibold focus:outline-none transition-colors appearance-none ${
+        
+        <button
+          type="button"
+          onClick={() => setIsUrgencyOpen(!isUrgencyOpen)}
+          className={`w-full h-[46px] border rounded-xl px-3 text-sm font-semibold focus:outline-none transition-all flex items-center justify-between ${
             currentUrgencyState === 'urgencia'
-              ? 'bg-rose-600/20 border-rose-600 text-rose-500 focus:border-rose-500'
+              ? 'bg-rose-600/20 border-rose-600/50 text-rose-500'
               : currentUrgencyState === 'prioridade'
-              ? 'bg-orange-600/20 border-orange-600 text-orange-500 focus:border-orange-500'
-              : 'bg-[#1C1C1C] border-[#2E2E2E] text-slate-400 focus:border-[#E4007E]'
-          }`}
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='${currentUrgencyState === 'urgencia' ? '%23f43f5e' : currentUrgencyState === 'prioridade' ? '%23f97316' : '%2394a3b8'}'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right 12px center',
-            backgroundSize: '16px'
-          }}
+              ? 'bg-orange-600/20 border-orange-600/50 text-orange-500'
+              : 'bg-[#101010] border-white/5 text-slate-300 hover:border-white/10'
+          } ${isUrgencyOpen ? 'ring-2 ring-white/10' : ''}`}
         >
-          <option value="normal" className="bg-[#141414] text-white">Normal</option>
-          <option value="prioridade" className="bg-[#141414] text-orange-500">🔥 Prioridade</option>
-          <option value="urgencia" className="bg-[#141414] text-rose-500">🚨 Urgência</option>
-        </select>
+          <span>
+            {currentUrgencyState === 'urgencia' ? '🚨 Urgência' : currentUrgencyState === 'prioridade' ? '🔥 Prioridade' : 'Normal'}
+          </span>
+          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isUrgencyOpen ? 'rotate-180' : ''} ${currentUrgencyState === 'urgencia' ? 'text-rose-500' : currentUrgencyState === 'prioridade' ? 'text-orange-500' : 'text-slate-500'}`} />
+        </button>
+
+        {isUrgencyOpen && (
+          <div className="absolute top-full mt-1.5 left-0 w-full z-50 bg-[#1C1C1C] border border-white/5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-100">
+            <button
+              type="button"
+              onClick={() => { handleUrgencyChange('normal'); setIsUrgencyOpen(false); }}
+              className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${currentUrgencyState === 'normal' ? 'bg-[#2A2A2A] text-white' : 'text-slate-300 hover:bg-[#101010] hover:text-white'}`}
+            >
+              <span className="text-sm font-semibold">Normal</span>
+              {currentUrgencyState === 'normal' && <Check className="w-4 h-4 text-slate-400 stroke-[3]" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => { handleUrgencyChange('prioridade'); setIsUrgencyOpen(false); }}
+              className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${currentUrgencyState === 'prioridade' ? 'bg-[#2A2A2A] text-orange-400' : 'text-orange-500/80 hover:bg-[#101010] hover:text-orange-400'}`}
+            >
+              <span className="text-sm font-semibold">🔥 Prioridade</span>
+              {currentUrgencyState === 'prioridade' && <Check className="w-4 h-4 text-orange-500 stroke-[3]" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => { handleUrgencyChange('urgencia'); setIsUrgencyOpen(false); }}
+              className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${currentUrgencyState === 'urgencia' ? 'bg-[#2A2A2A] text-rose-400' : 'text-rose-500/80 hover:bg-[#101010] hover:text-rose-400'}`}
+            >
+              <span className="text-sm font-semibold">🚨 Urgência</span>
+              {currentUrgencyState === 'urgencia' && <Check className="w-4 h-4 text-rose-500 stroke-[3]" />}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

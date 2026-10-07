@@ -36,7 +36,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
               onClick={() => onFilterChange('all')}
               className={`px-4 py-1.5 rounded-xl text-[13px] font-medium transition-all cursor-pointer ${
                 activeFilter === 'all'
-                  ? 'bg-[#222222] text-white shadow-sm ring-1 ring-white/5'
+                  ? 'bg-[#101010] text-white shadow-sm ring-1 ring-white/5'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -47,7 +47,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
               onClick={() => onFilterChange('flagged')}
               className={`px-4 py-1.5 rounded-xl text-[13px] font-medium transition-all cursor-pointer ${
                 activeFilter === 'flagged'
-                  ? 'bg-[#222222] text-white shadow-sm ring-1 ring-white/5'
+                  ? 'bg-[#101010] text-white shadow-sm ring-1 ring-white/5'
                   : 'text-slate-400 hover:text-white'
               }`}
             >

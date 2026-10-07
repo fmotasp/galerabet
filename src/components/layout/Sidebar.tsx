@@ -102,7 +102,7 @@ export const Sidebar: React.FC = () => {
                 <Icon className={`w-5 h-5 shrink-0 transition-colors ${isActive ? 'text-[#E4007E]' : 'text-[#A0A0A0] group-hover:text-white'}`} />
                 
                 {/* Custom Tooltip */}
-                <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#2E2E2E] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
+                <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#262626] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
                   {item.label}
                 </div>
               </button>
@@ -128,7 +128,7 @@ export const Sidebar: React.FC = () => {
             )}
             <Settings className={`w-5 h-5 shrink-0 transition-colors ${activeTab === 'settings' ? 'text-[#E4007E]' : 'text-[#A0A0A0] group-hover:text-white'}`} />
             
-            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#2E2E2E] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
+            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#262626] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
               Configurações
             </div>
           </button>
@@ -147,7 +147,7 @@ export const Sidebar: React.FC = () => {
             )}
             <ShieldAlert className={`w-5 h-5 shrink-0 transition-colors ${activeTab === 'logs' ? 'text-[#E4007E]' : 'text-[#A0A0A0] group-hover:text-white'}`} />
             
-            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#2E2E2E] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
+            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#262626] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
               Logs do Sistema
             </div>
           </button>

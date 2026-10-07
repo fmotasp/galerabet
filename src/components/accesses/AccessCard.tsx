@@ -31,9 +31,9 @@ export const AccessCard: React.FC<AccessCardProps> = ({ access, onEdit, onDelete
   const hasUrl = !!access.siteUrl;
 
   return (
-    <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl overflow-hidden hover:border-[#3A3A3A] transition-colors group flex flex-col h-full">
+    <div className="bg-[#1A1A1A] border border-white/5 rounded-2xl overflow-hidden hover:border-[#3A3A3A] transition-colors group flex flex-col h-full">
       {/* Cover Image */}
-      <div className="w-full h-32 bg-[#222] relative border-b border-[#2A2A2A] flex shrink-0">
+      <div className="w-full h-32 bg-[#101010] relative border-b border-white/5 flex shrink-0">
         {access.coverImageUrl ? (
           <img
             src={access.coverImageUrl}
@@ -98,7 +98,7 @@ export const AccessCard: React.FC<AccessCardProps> = ({ access, onEdit, onDelete
           {/* Login Field */}
           <div>
             <span className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1 block">Login</span>
-            <div className="flex items-center gap-2 bg-[#141414] rounded-lg p-2 border border-[#2A2A2A]">
+            <div className="flex items-center gap-2 bg-[#141414] rounded-lg p-2 border border-white/5">
               <span className="text-sm text-white truncate flex-1 font-mono">{access.login}</span>
               <button
                 onClick={() => handleCopy(access.login, 'Login')}
@@ -113,7 +113,7 @@ export const AccessCard: React.FC<AccessCardProps> = ({ access, onEdit, onDelete
           {/* Password Field */}
           <div>
             <span className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1 block">Senha</span>
-            <div className="flex items-center gap-2 bg-[#141414] rounded-lg p-2 border border-[#2A2A2A]">
+            <div className="flex items-center gap-2 bg-[#141414] rounded-lg p-2 border border-white/5">
               <span className="text-sm text-white truncate flex-1 font-mono">
                 {showPassword ? access.password : '••••••••'}
               </span>

@@ -134,9 +134,9 @@ export const TaskRichTextEditor: React.FC<{
 
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-[#2E2E2E] focus-within:border-[#E4007E] transition-all bg-[#1C1C1C]">
+    <div className="rounded-2xl overflow-hidden border border-[#262626] focus-within:border-[#E4007E] transition-all bg-[#1C1C1C]">
 
-      <div className="flex items-center flex-wrap gap-1 p-2 bg-[#181818] border-b border-[#2E2E2E] text-slate-200 select-none">
+      <div className="flex items-center flex-wrap gap-1 p-2 bg-[#141414] border-b border-[#262626] text-slate-200 select-none">
         <button
           type="button"
           onMouseDown={(e) => {
@@ -155,7 +155,7 @@ export const TaskRichTextEditor: React.FC<{
             e.preventDefault();
             toggleCase();
           }}
-          className="px-2 py-1 hover:bg-[#282828] hover:text-[#E4007E] rounded-lg font-bold text-xs transition-colors flex items-center gap-0.5 bg-[#222222]"
+          className="px-2 py-1 hover:bg-[#282828] hover:text-[#E4007E] rounded-lg font-bold text-xs transition-colors flex items-center gap-0.5 bg-[#101010]"
           title="Alternar MAIÚSCULO / Normal"
         >
           <Type className="w-3.5 h-3.5" />

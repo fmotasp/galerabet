@@ -153,7 +153,7 @@ export const Header: React.FC = () => {
           title="Buscar tarefas..."
         >
           <Search className="w-5 h-5" />
-          <span className="hidden md:inline-block text-xs text-[#808080] bg-[#1C1C1C] px-1.5 py-0.5 rounded border border-[#303030]">
+          <span className="hidden md:inline-block text-xs text-[#808080] bg-[#1C1C1C] px-1.5 py-0.5 rounded border border-white/5">
             ⌘K
           </span>
         </button>
@@ -177,9 +177,9 @@ export const Header: React.FC = () => {
           {isNotifOpen && (
             <div
               id="notifications-popover"
-              className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#1C1C1C] rounded-2xl shadow-xl border border-[#303030] p-4 z-50 animate-in fade-in zoom-in-95 duration-150"
+              className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#1C1C1C] rounded-2xl shadow-xl border border-white/5 p-4 z-50 animate-in fade-in zoom-in-95 duration-150"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-[#303030] mb-3">
+              <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-3">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-white text-sm">NOTIFICAÇÕES</span>
                   {unreadCount > 0 && (
@@ -257,7 +257,7 @@ export const Header: React.FC = () => {
                 )}
               </div>
 
-              <div className="pt-3 border-t border-[#303030] mt-3 flex items-center justify-between">
+              <div className="pt-3 border-t border-white/5 mt-3 flex items-center justify-between">
                 <button
                   onClick={() => {
                     setIsNotifOpen(false);
@@ -302,9 +302,9 @@ export const Header: React.FC = () => {
           {isProfileOpen && (
             <div
               id="user-profile-menu"
-              className="absolute right-0 mt-2 w-64 bg-[#1C1C1C] rounded-2xl shadow-2xl border border-[#303030] p-3 z-50 animate-in fade-in zoom-in-95 duration-150 text-white"
+              className="absolute right-0 mt-2 w-64 bg-[#1C1C1C] rounded-2xl shadow-2xl border border-white/5 p-3 z-50 animate-in fade-in zoom-in-95 duration-150 text-white"
             >
-              <div className="flex items-center gap-3 p-2 border-b border-[#303030] pb-3 mb-2">
+              <div className="flex items-center gap-3 p-2 border-b border-white/5 pb-3 mb-2">
                 <div 
                   className="relative group cursor-pointer"
                   onClick={() => fileInputRef.current?.click()}
@@ -383,7 +383,7 @@ export const Header: React.FC = () => {
                   </button>
                 )}
 
-                <div className="pt-2 border-t border-[#303030] mt-1">
+                <div className="pt-2 border-t border-white/5 mt-1">
                   <button
                     onClick={() => {
                       setIsProfileOpen(false);

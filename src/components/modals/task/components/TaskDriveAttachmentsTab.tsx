@@ -208,7 +208,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
 
       {/* Attachments List / Grid */}
       {attachments.length === 0 && !loadingAttachments ? (
-        <div className="p-8 bg-[#181818] rounded-3xl text-center space-y-2">
+        <div className="p-8 bg-[#141414] rounded-3xl text-center space-y-2">
           <Paperclip className="w-8 h-8 text-slate-500 mx-auto" />
           <p className="text-xs font-bold text-white">
             Nenhum arquivo entregue
@@ -430,7 +430,7 @@ export const TaskDriveAttachmentsTab: React.FC<{
                           }}
                         />
                         <div
-                          className="absolute bottom-10 right-0 z-50 min-w-[170px] bg-[#181818] border border-[#2A2A2A] shadow-2xl rounded-2xl p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-100 backdrop-blur-md"
+                          className="absolute bottom-10 right-0 z-50 min-w-[170px] bg-[#141414] border border-white/5 shadow-2xl rounded-2xl p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-100 backdrop-blur-md"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button

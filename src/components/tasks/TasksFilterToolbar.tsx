@@ -66,7 +66,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
           <button
             type="button"
             onClick={() => setIsClientDropdownOpen(!isClientDropdownOpen)}
-            className="flex items-center justify-between w-full md:min-w-[160px] h-10 gap-1.5 md:gap-2.5 bg-[#222222] hover:bg-[#2A2A2A] border border-[#303030] text-white rounded-xl px-2 md:px-3.5 text-[10px] md:text-xs font-bold transition-all active:scale-98 cursor-pointer whitespace-nowrap overflow-hidden"
+            className="flex items-center justify-between w-full md:min-w-[160px] h-10 gap-1.5 md:gap-2.5 bg-[#101010] hover:bg-[#2A2A2A] border border-white/5 text-white rounded-xl px-2 md:px-3.5 text-[10px] md:text-xs font-bold transition-all active:scale-98 cursor-pointer whitespace-nowrap overflow-hidden"
           >
             <div className="flex items-center gap-2 truncate">
               {selectedClient === 'all' ? (
@@ -109,14 +109,14 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                 className="fixed inset-0 z-40"
                 onClick={() => setIsClientDropdownOpen(false)}
               />
-              <div className="absolute left-0 top-full mt-2 w-64 bg-[#1C1C1C] rounded-2xl border border-[#303030] shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute left-0 top-full mt-2 w-64 bg-[#1C1C1C] rounded-2xl border border-white/5 shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
                 <div className="relative mb-2 px-1">
                   <input
                     type="text"
                     placeholder="Buscar cliente..."
                     value={clientFilterSearch}
                     onChange={(e) => setClientFilterSearch(e.target.value)}
-                    className="w-full p-2 bg-[#141414] border border-[#2A2A2A] rounded-xl text-xs text-white placeholder-slate-500 font-medium focus:outline-none focus:border-[#E4007E] transition-all"
+                    className="w-full p-2 bg-[#141414] border border-white/5 rounded-xl text-xs text-white placeholder-slate-500 font-medium focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all"
                   />
                 </div>
                 
@@ -186,7 +186,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
         </div>
 
           {/* Desktop Filter (Icon Buttons) */}
-          <div className="hidden md:flex flex-nowrap items-center bg-[#222222] p-1 rounded-xl gap-1 border border-[#303030] overflow-x-auto min-w-0 [scrollbar-hide::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="hidden md:flex flex-nowrap items-center bg-[#101010] p-1 rounded-xl gap-1 border border-white/5 overflow-x-auto min-w-0 [scrollbar-hide::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <button
               onClick={() => onClientChange('all')}
               aria-label="Filtrar por todos os clientes"
@@ -253,7 +253,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
           <button
             type="button"
             onClick={onMemberDropdownToggle}
-            className="flex items-center justify-between md:justify-start w-full h-10 gap-1.5 md:gap-2.5 bg-[#222222] hover:bg-[#2A2A2A] border border-[#303030] text-white rounded-xl px-2 md:px-3.5 text-[10px] md:text-xs font-bold transition-all active:scale-98 cursor-pointer whitespace-nowrap overflow-hidden"
+            className="flex items-center justify-between md:justify-start w-full h-10 gap-1.5 md:gap-2.5 bg-[#101010] hover:bg-[#2A2A2A] border border-white/5 text-white rounded-xl px-2 md:px-3.5 text-[10px] md:text-xs font-bold transition-all active:scale-98 cursor-pointer whitespace-nowrap overflow-hidden"
           >
             {selectedMember === 'all' && (
               <div className="flex items-center gap-2">
@@ -275,7 +275,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                   {emp.avatarUrl ? (
                     <img src={emp.avatarUrl} alt={emp.name} className="w-4 h-4 rounded-full object-cover" />
                   ) : (
-                    <div className="w-4 h-4 rounded-full bg-[#262626] border border-[#303030] text-[9px] font-semibold flex items-center justify-center text-[#E4007E]">
+                    <div className="w-4 h-4 rounded-full bg-[#262626] border border-white/5 text-[9px] font-semibold flex items-center justify-center text-[#E4007E]">
                       {emp.initials}
                     </div>
                   )}
@@ -292,7 +292,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                 className="fixed inset-0 z-40"
                 onClick={onMemberDropdownClose}
               />
-              <div className="absolute left-0 top-full mt-2 w-72 bg-[#1C1C1C] rounded-2xl border border-[#303030] shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute left-0 top-full mt-2 w-72 bg-[#1C1C1C] rounded-2xl border border-white/5 shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
                 {/* Search Member */}
                 <div className="relative mb-2 px-1">
                   <input
@@ -300,7 +300,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                     placeholder="Buscar membro..."
                     value={memberFilterSearch}
                     onChange={(e) => onMemberFilterSearchChange(e.target.value)}
-                    className="w-full p-2 bg-[#141414] border border-[#2A2A2A] rounded-xl text-xs text-white placeholder-slate-500 font-medium focus:outline-none focus:border-[#E4007E] transition-all"
+                    className="w-full p-2 bg-[#141414] border border-white/5 rounded-xl text-xs text-white placeholder-slate-500 font-medium focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all"
                   />
                 </div>
 

@@ -9,6 +9,9 @@ import {
   Users,
   Briefcase,
   Percent,
+  ChevronDown,
+  Calendar,
+  Filter,
 } from 'lucide-react';
 import { useTasks, useProjects, useEmployees, useApp } from '../../context/AppContext';
 import { isTaskOverdue, isTaskCompleted, getTaskOverdueDays, parseTaskDueDate } from '../../lib/taskDateUtils';
@@ -74,6 +77,8 @@ export const ReportsView: React.FC = () => {
   const [periodFilter, setPeriodFilter] = useState<'all' | '7days' | '30days'>('all');
   const [selectedClientId, setSelectedClientId] = useState<string>('all');
   const [selectedMemberId, setSelectedMemberId] = useState<string>('all');
+  const [isClientMenuOpen, setIsClientMenuOpen] = useState(false);
+  const [isMemberMenuOpen, setIsMemberMenuOpen] = useState(false);
 
   // Helper para parsing seguro de datas
   const parseDateSafe = (val?: string | number | null): Date | null => {
@@ -464,7 +469,7 @@ export const ReportsView: React.FC = () => {
   return (
     <div className="space-y-6 w-full px-4 sm:px-8 pb-16 animate-in fade-in duration-300">
       {/* Header com Filtros Executivos e Ação de Exportar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#2E2E2E]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#262626]">
         <div>
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E]">
@@ -484,50 +489,239 @@ export const ReportsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Barra de Filtros e Botão Exportar */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Filtro de Período */}
-          <select
-            value={periodFilter}
-            onChange={(e) => setPeriodFilter(e.target.value as any)}
-            className="bg-[#181818] text-xs font-bold text-slate-200 border border-[#2E2E2E] rounded-xl px-3 py-2 focus:outline-none focus:border-[#E4007E] cursor-pointer"
-          >
-            <option value="all">Todo o Período</option>
-            <option value="30days">Últimos 30 Dias</option>
-            <option value="7days">Últimos 7 Dias</option>
-          </select>
+        {/* Barra de Filtros e Botão Exportar (Redesign Impeccable) */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          {/* Filtro de Período em Pílulas */}
+          <div className="flex items-center p-1 bg-[#141414] border border-[#262626] rounded-xl gap-1">
+            <button
+              type="button"
+              onClick={() => setPeriodFilter('all')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                periodFilter === 'all'
+                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              Tudo
+            </button>
+            <button
+              type="button"
+              onClick={() => setPeriodFilter('30days')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                periodFilter === '30days'
+                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              30 dias
+            </button>
+            <button
+              type="button"
+              onClick={() => setPeriodFilter('7days')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                periodFilter === '7days'
+                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              7 dias
+            </button>
+          </div>
 
-          {/* Filtro de Cliente */}
-          <select
-            value={selectedClientId}
-            onChange={(e) => setSelectedClientId(e.target.value)}
-            className="bg-[#181818] text-xs font-bold text-slate-200 border border-[#2E2E2E] rounded-xl px-3 py-2 focus:outline-none focus:border-[#E4007E] cursor-pointer max-w-[150px] truncate"
-          >
-            <option value="all">Todos os Clientes</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+          {/* Filtro de Cliente com Logo */}
+          <div className="relative">
+            {isClientMenuOpen && (
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsClientMenuOpen(false)}
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setIsClientMenuOpen(!isClientMenuOpen);
+                setIsMemberMenuOpen(false);
+              }}
+              className="flex items-center gap-2 px-3 py-2 bg-[#141414] hover:bg-[#1C1C1C] border border-[#262626] hover:border-[#383838] text-slate-200 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-98"
+            >
+              {(() => {
+                if (selectedClientId === 'all') {
+                  return (
+                    <>
+                      <div className="w-4 h-4 rounded bg-white/10 flex items-center justify-center text-[10px]">🏢</div>
+                      <span>Todos os Clientes</span>
+                    </>
+                  );
+                }
+                const activeClient = projects.find((p) => p.id === selectedClientId);
+                const logo = getClientLogoFallback(activeClient?.name, activeClient?.logoUrl);
+                return (
+                  <>
+                    {logo ? (
+                      <img src={logo} alt="" className="w-4 h-4 rounded object-contain shrink-0" />
+                    ) : (
+                      <div className="w-4 h-4 rounded bg-[#E4007E] text-white text-[9px] flex items-center justify-center font-bold">
+                        {activeClient?.name.slice(0, 1).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="truncate max-w-[120px]">{activeClient?.name}</span>
+                  </>
+                );
+              })()}
+              <ChevronDown className="w-3.5 h-3.5 text-slate-500 ml-1" />
+            </button>
 
-          {/* Filtro de Membro */}
-          <select
-            value={selectedMemberId}
-            onChange={(e) => setSelectedMemberId(e.target.value)}
-            className="bg-[#181818] text-xs font-bold text-slate-200 border border-[#2E2E2E] rounded-xl px-3 py-2 focus:outline-none focus:border-[#E4007E] cursor-pointer max-w-[170px] truncate"
-          >
-            <option value="all">Designers & Videomakers</option>
-            {creativeEmployees.map((emp) => (
-              <option key={emp.id} value={emp.id}>{emp.name}</option>
-            ))}
-          </select>
+            {isClientMenuOpen && (
+              <div className="absolute left-0 top-11 z-50 min-w-[200px] max-h-64 overflow-y-auto bg-[#181818] border border-[#2E2E2E] rounded-2xl p-1.5 shadow-2xl space-y-0.5 custom-scrollbar">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedClientId('all');
+                    setIsClientMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-left transition-colors cursor-pointer ${
+                    selectedClientId === 'all'
+                      ? 'bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 text-[#E4007E]'
+                      : 'text-slate-300 hover:bg-[#222] hover:text-white'
+                  }`}
+                >
+                  <div className="w-5 h-5 rounded bg-white/5 flex items-center justify-center text-xs">🏢</div>
+                  <span>Todos os Clientes</span>
+                </button>
+
+                {projects.map((p) => {
+                  const logo = getClientLogoFallback(p.name, p.logoUrl);
+                  const isSelected = selectedClientId === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedClientId(p.id);
+                        setIsClientMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-left transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 text-[#E4007E]'
+                          : 'text-slate-300 hover:bg-[#222] hover:text-white'
+                      }`}
+                    >
+                      {logo ? (
+                        <img src={logo} alt="" className="w-5 h-5 rounded object-contain shrink-0" />
+                      ) : (
+                        <div className="w-5 h-5 rounded bg-gradient-to-br from-[#E4007E] to-[#E94E18] text-white text-[10px] flex items-center justify-center font-bold shrink-0">
+                          {p.name.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                      <span className="truncate">{p.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Filtro de Colaborador com Avatar */}
+          <div className="relative">
+            {isMemberMenuOpen && (
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsMemberMenuOpen(false)}
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setIsMemberMenuOpen(!isMemberMenuOpen);
+                setIsClientMenuOpen(false);
+              }}
+              className="flex items-center gap-2 px-3 py-2 bg-[#141414] hover:bg-[#1C1C1C] border border-[#262626] hover:border-[#383838] text-slate-200 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-98"
+            >
+              {(() => {
+                if (selectedMemberId === 'all') {
+                  return (
+                    <>
+                      <div className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[10px]">👥</div>
+                      <span>Todos os Criativos</span>
+                    </>
+                  );
+                }
+                const activeEmp = creativeEmployees.find((e) => e.id === selectedMemberId);
+                return (
+                  <>
+                    {activeEmp?.avatarUrl ? (
+                      <img src={activeEmp.avatarUrl} alt="" className="w-4 h-4 rounded-full object-cover shrink-0" />
+                    ) : (
+                      <div className="w-4 h-4 rounded-full bg-purple-600 text-white text-[9px] flex items-center justify-center font-bold">
+                        {activeEmp?.name.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="truncate max-w-[120px]">{activeEmp?.name}</span>
+                  </>
+                );
+              })()}
+              <ChevronDown className="w-3.5 h-3.5 text-slate-500 ml-1" />
+            </button>
+
+            {isMemberMenuOpen && (
+              <div className="absolute left-0 top-11 z-50 min-w-[210px] max-h-64 overflow-y-auto bg-[#181818] border border-[#2E2E2E] rounded-2xl p-1.5 shadow-2xl space-y-0.5 custom-scrollbar">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedMemberId('all');
+                    setIsMemberMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-left transition-colors cursor-pointer ${
+                    selectedMemberId === 'all'
+                      ? 'bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 text-[#E4007E]'
+                      : 'text-slate-300 hover:bg-[#222] hover:text-white'
+                  }`}
+                >
+                  <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-xs">👥</div>
+                  <span>Todos os Criativos</span>
+                </button>
+
+                {creativeEmployees.map((emp) => {
+                  const isSelected = selectedMemberId === emp.id;
+                  return (
+                    <button
+                      key={emp.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedMemberId(emp.id);
+                        setIsMemberMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-left transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 text-[#E4007E]'
+                          : 'text-slate-300 hover:bg-[#222] hover:text-white'
+                      }`}
+                    >
+                      {emp.avatarUrl ? (
+                        <img src={emp.avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-[9px] flex items-center justify-center font-bold shrink-0">
+                          {emp.name.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0 truncate">
+                        <span className="block truncate">{emp.name}</span>
+                        <span className="text-[10px] text-slate-500 block truncate">{emp.role}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {/* Botão Exportar CSV */}
           <button
             onClick={handleExportCSV}
             type="button"
-            className="px-3.5 py-2 bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white rounded-xl text-xs font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-[#E4007E]/20 cursor-pointer"
+            className="px-3.5 py-2 bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white rounded-xl text-xs font-bold flex items-center gap-2 hover:opacity-95 active:scale-95 transition-all shadow-md shadow-[#E4007E]/20 cursor-pointer ml-auto sm:ml-0"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>Exportar CSV</span>
           </button>
         </div>
@@ -536,7 +730,7 @@ export const ReportsView: React.FC = () => {
       {/* 1. Indicadores Executivos Principais (KPIs) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* SLA / Taxa de Pontualidade */}
-        <div className="p-4 bg-[#181818] border border-[#2E2E2E] rounded-2xl shadow-xs space-y-2">
+        <div className="p-4 bg-[#141414] border border-[#262626] rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-400">Índice de SLA (Prazos)</span>
             <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -553,7 +747,7 @@ export const ReportsView: React.FC = () => {
         </div>
 
         {/* Demandas Concluídas */}
-        <div className="p-4 bg-[#181818] border border-[#2E2E2E] rounded-2xl shadow-xs space-y-2">
+        <div className="p-4 bg-[#141414] border border-[#262626] rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-400">Demandas Concluídas</span>
             <div className="p-1.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
@@ -570,7 +764,7 @@ export const ReportsView: React.FC = () => {
         </div>
 
         {/* Demandas Atrasadas Ativas */}
-        <div className="p-4 bg-[#181818] border border-[#2E2E2E] rounded-2xl shadow-xs space-y-2">
+        <div className="p-4 bg-[#141414] border border-[#262626] rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-400">Atrasadas em Aberto</span>
             <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
@@ -589,7 +783,7 @@ export const ReportsView: React.FC = () => {
         </div>
 
         {/* Lead Time / Tempo Médio de Ciclo */}
-        <div className="p-4 bg-[#181818] border border-[#2E2E2E] rounded-2xl shadow-xs space-y-2">
+        <div className="p-4 bg-[#141414] border border-[#262626] rounded-2xl shadow-xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-400">Tempo Médio de Ciclo</span>
             <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -607,74 +801,165 @@ export const ReportsView: React.FC = () => {
       </div>
 
       {/* 2. Gargalos do Funil de Produção & Tempo Médio por Etapa (Lado a Lado) */}
+      {/* 2. Gargalos do Funil de Produção & Tempo Médio por Etapa (Redesign Impeccable sem caixas aninhadas) */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         
-        {/* Funil de Produção */}
-        <div className="p-5 bg-[#181818] border border-[#2E2E2E] rounded-2xl space-y-4 flex flex-col">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#E4007E]" />
-              <h2 className="text-base font-medium text-white tracking-tight">Funil de Produção</h2>
+        {/* Funil de Produção - Estilo Trapézio Invertido 3D / Flat Impeccable */}
+        <div className="p-6 bg-[#141414] border border-[#262626] rounded-2xl flex flex-col justify-between">
+          <div className="space-y-1 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-[#E4007E]" />
+                <h2 className="text-base font-semibold text-white tracking-tight">Funil de Produção</h2>
+              </div>
+              <span className="text-xs font-semibold text-slate-400 tabular-nums">
+                {metrics.total} demandas no fluxo
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              Taxa de progressão e volume acumulado por estágio da esteira.
+            </p>
+          </div>
+
+          {/* Gráfico de Trapézio Invertido (Visual Sales/Pipeline Funnel) */}
+          <div className="flex flex-col items-center justify-center my-auto py-2">
+            <div className="w-full max-w-[460px] flex flex-col gap-1.5">
+              {statusFunnel.map((st, index) => {
+                const totalStages = statusFunnel.length;
+                // Calculate trapezoid slope (narrowing down)
+                // Top width starts near 100%, bottom tapers to ~46%
+                const topPct = 100 - (index * (54 / Math.max(totalStages, 1)));
+                const bottomPct = 100 - ((index + 1) * (54 / Math.max(totalStages, 1)));
+                
+                // Color palette fallback if dotColor isn't custom
+                const palette = [
+                  '#3B82F6', // Blue
+                  '#06B6D4', // Cyan
+                  '#10B981', // Emerald
+                  '#F59E0B', // Amber
+                  '#F97316', // Orange
+                  '#EC4899', // Pink
+                  '#E4007E', // Magenta Brand
+                  '#8B5CF6', // Purple
+                ];
+                const stageColor = st.dotColor && st.dotColor !== '#E4007E' ? st.dotColor : palette[index % palette.length];
+
+                return (
+                  <div
+                    key={st.id}
+                    className="relative group transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                    title={`${st.label}: ${st.count} demandas (${st.percentage}% do fluxo)`}
+                  >
+                    {/* SVG Trapezoid Segment */}
+                    <div className="relative w-full h-12 flex items-center justify-center">
+                      <svg
+                        className="w-full h-full overflow-visible transition-all duration-300 drop-shadow-sm group-hover:drop-shadow-[0_4px_16px_rgba(228,0,126,0.3)]"
+                        viewBox="0 0 400 48"
+                      >
+                        <defs>
+                          <linearGradient id={`grad-${st.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor={stageColor} stopOpacity="0.95" />
+                            <stop offset="100%" stopColor={stageColor} stopOpacity="0.80" />
+                          </linearGradient>
+                        </defs>
+                        <polygon
+                          points={`${(400 * (100 - topPct)) / 200},0 ${400 - (400 * (100 - topPct)) / 200},0 ${400 - (400 * (100 - bottomPct)) / 200},48 ${(400 * (100 - bottomPct)) / 200},48`}
+                          fill={`url(#grad-${st.id})`}
+                          stroke="rgba(255,255,255,0.22)"
+                          strokeWidth="1"
+                          className="transition-all duration-300 group-hover:brightness-110"
+                        />
+                        {/* Texto nativo dentro do próprio SVG (exatamente como na referência) */}
+                        <text
+                          x="200"
+                          y="27"
+                          textAnchor="middle"
+                          dominantBaseline="central"
+                          fill="#ffffff"
+                          fontSize="13"
+                          fontWeight="700"
+                          letterSpacing="0.3"
+                          style={{ filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.6))', pointerEvents: 'none' }}
+                        >
+                          {`${st.label} (${st.count})`}
+                        </text>
+                      </svg>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-            {statusFunnel.map((st) => (
-              <div key={st.id} className="p-3 bg-[#101010] border border-[#2E2E2E] rounded-xl space-y-2">
-                <div className="flex items-center justify-between gap-1">
-                  <span className="text-[11px] font-bold text-slate-300 truncate" title={st.label}>{st.label}</span>
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: st.dotColor }} />
-                </div>
-                <div className="flex items-baseline justify-between">
-                  <span className="text-lg font-semibold text-white">{st.count}</span>
-                  <span className="text-[10px] text-slate-500 font-bold">{st.percentage}%</span>
-                </div>
-                <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{ width: `${Math.max(st.percentage, 4)}%`, backgroundColor: st.dotColor }}
-                  />
-                </div>
-              </div>
-            ))}
+          {/* Quick Metrics Footer */}
+          <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E4007E]" />
+              Topo ao Fundo: Fluxo Contínuo
+            </span>
+            <span className="tabular-nums font-semibold text-slate-300">
+              Taxa de Conversão Final: {statusFunnel.length > 0 ? `${statusFunnel[statusFunnel.length - 1].percentage}%` : '0%'}
+            </span>
           </div>
         </div>
 
-        {/* Tempo Médio de Ciclo */}
-        <div className="p-5 bg-[#181818] border border-[#2E2E2E] rounded-2xl space-y-4 flex flex-col">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-500" />
-              <h2 className="text-base font-medium text-white tracking-tight">Tempo Médio (Cycle Time)</h2>
+        {/* Tempo Médio de Ciclo (Cycle Time & Gargalos) */}
+        <div className="p-6 bg-[#141414] border border-[#262626] rounded-2xl flex flex-col justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-amber-500" />
+                <h2 className="text-base font-semibold text-white tracking-tight">Tempo Médio por Etapa (Cycle Time)</h2>
+              </div>
+              <span className="text-xs font-semibold text-slate-400">
+                Média de retenção
+              </span>
             </div>
+            <p className="text-xs text-slate-400">
+              Identifique gargalos de tempo onde as demandas ficam retidas mais tempo antes da entrega.
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          {/* Lista Limpa de Tempos por Etapa */}
+          <div className="my-3 divide-y divide-white/5">
             {timeInColumns.map((tc) => (
               <div
                 key={tc.id}
-                className={`p-3 border rounded-xl space-y-2 relative overflow-hidden transition-all ${
-                  tc.isMax
-                    ? 'bg-rose-500/10 border-rose-500/30'
-                    : 'bg-[#101010] border-[#2E2E2E]'
+                className={`py-2.5 flex items-center justify-between gap-3 px-2 rounded-lg transition-colors ${
+                  tc.isMax ? 'bg-rose-500/5' : 'hover:bg-white/[0.02]'
                 }`}
               >
-                {tc.isMax && (
-                  <div className="absolute top-0 right-0 px-2 py-0.5 bg-rose-500 text-[10px] font-medium text-white rounded-bl-lg">
-                    Gargalo
-                  </div>
-                )}
-                <div className="flex items-center justify-between gap-1">
-                  <span className="text-[11px] font-bold text-slate-300 truncate" title={tc.label}>{tc.label}</span>
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: tc.dotColor }} />
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                    style={{ backgroundColor: tc.dotColor || '#E4007E' }}
+                  />
+                  <span className="text-xs font-medium text-slate-200 truncate">
+                    {tc.label}
+                  </span>
+                  {tc.isMax && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold uppercase tracking-wide bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                      Maior Gargalo
+                    </span>
+                  )}
                 </div>
-                <div className="flex flex-col">
-                  <span className={`text-lg font-semibold ${tc.isMax ? 'text-rose-400' : 'text-white'}`}>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  <span
+                    className={`text-xs font-bold tabular-nums ${
+                      tc.isMax ? 'text-rose-400 font-extrabold' : 'text-white'
+                    }`}
+                  >
                     {tc.displayStr}
                   </span>
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
+            <span>Média total do ciclo de vida:</span>
+            <span className="text-white font-bold tabular-nums">{metrics.avgLeadTime} dias</span>
           </div>
         </div>
 
@@ -683,11 +968,11 @@ export const ReportsView: React.FC = () => {
       {/* 3. Grid Principal: Produtividade por Membro & Volume por Cliente */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Tabela de Produtividade por Membro (7 colunas no grid) */}
-        <div className="lg:col-span-7 p-5 bg-[#181818] border border-[#2E2E2E] rounded-2xl space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="xl:col-span-7 p-6 bg-[#141414] border border-[#262626] rounded-2xl space-y-4 shadow-xs">
+          <div className="flex items-center justify-between pb-3 border-b border-[#242424]">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-sky-400" />
-              <h2 className="text-base font-medium text-white tracking-tight">Produtividade (Design & Audiovisual)</h2>
+              <h2 className="text-sm font-semibold text-white tracking-tight">Produtividade da Equipe</h2>
             </div>
             <span className="text-xs text-slate-400 font-medium">{memberProductivity.length} profissionais</span>
           </div>
@@ -695,51 +980,84 @@ export const ReportsView: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-white/5 text-slate-400 font-medium text-xs">
-                  <th className="pb-2.5">Colaborador</th>
-                  <th className="pb-2.5 text-center">Atribuídas</th>
-                  <th className="pb-2.5 text-center">Concluídas</th>
-                  <th className="pb-2.5 text-center">Em Produção</th>
-                  <th className="pb-2.5 text-center">Ajustes</th>
-                  <th className="pb-2.5 text-center">Pontos</th>
+                <tr className="border-b border-[#242424] text-slate-400 font-medium text-[11px] uppercase tracking-wider">
+                  <th className="pb-3 font-medium">Colaborador</th>
+                  <th className="pb-3 text-center font-medium">Atribuídas</th>
+                  <th className="pb-3 text-center font-medium">Entregas</th>
+                  <th className="pb-3 text-center font-medium">Taxa Conclusão</th>
+                  <th className="pb-3 text-center font-medium">Ajustes</th>
+                  <th className="pb-3 text-right font-medium">Pontos</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#242424]">
+              <tbody className="divide-y divide-[#1F1F1F]">
                 {memberProductivity.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center text-slate-500 font-medium">
+                    <td colSpan={6} className="py-8 text-center text-slate-500 font-medium">
                       Nenhuma tarefa vinculada a membros no filtro selecionado.
                     </td>
                   </tr>
                 ) : (
-                  memberProductivity.map((m) => (
-                    <tr key={m.id} className="hover:bg-[#1F1F1F]/60 transition-colors">
-                      <td className="py-2.5 pr-2">
-                        <div className="flex items-center gap-2">
-                          {m.avatarUrl ? (
-                            <img src={m.avatarUrl} alt={m.name} className="w-6 h-6 rounded-full object-cover ring-1 ring-white/10" />
-                          ) : (
-                            <div className="w-6 h-6 rounded-full bg-[#2A2A2A] text-white font-semibold text-[10px] flex items-center justify-center">
-                              {m.initials}
+                  memberProductivity.map((m) => {
+                    const completionRate = m.total > 0 ? Math.round((m.completed / m.total) * 100) : 0;
+                    const isHighAdjustments = m.adjustments > 0 && m.adjustmentRate >= 25;
+
+                    return (
+                      <tr key={m.id} className="hover:bg-[#1A1A1A]/70 transition-colors group">
+                        <td className="py-3 pr-3">
+                          <div className="flex items-center gap-2.5">
+                            {m.avatarUrl ? (
+                              <img src={m.avatarUrl} alt={m.name} className="w-7 h-7 rounded-full object-cover ring-1 ring-white/10 shrink-0" />
+                            ) : (
+                              <div className="w-7 h-7 rounded-full bg-[#242424] text-white font-semibold text-[11px] flex items-center justify-center shrink-0 border border-white/5">
+                                {m.initials}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <span className="font-medium text-white block truncate text-xs group-hover:text-white transition-colors">{m.name}</span>
+                              <span className="text-[10px] text-slate-400 block truncate">{m.department}</span>
                             </div>
-                          )}
-                          <div className="min-w-0">
-                            <span className="font-bold text-white block truncate leading-snug">{m.name}</span>
-                            <span className="text-[10px] text-slate-400 block leading-none">{m.department}</span>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-2.5 text-center font-bold text-slate-300">{m.total}</td>
-                      <td className="py-2.5 text-center font-semibold text-emerald-400">{m.completed}</td>
-                      <td className="py-2.5 text-center font-bold text-sky-400">{m.inProgress}</td>
-                      <td className="py-2.5 text-center">
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${m.adjustments > 0 ? 'bg-rose-950 text-rose-300' : 'text-slate-500'}`}>
-                          {m.adjustments} ({m.adjustmentRate}%)
-                        </span>
-                      </td>
-                      <td className="py-2.5 text-center font-semibold text-amber-400">{m.points}</td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className="py-3 text-center tabular-nums text-slate-300 font-medium">{m.total}</td>
+                        <td className="py-3 text-center">
+                          <div className="flex flex-col items-center">
+                            <span className="tabular-nums font-semibold text-emerald-400">{m.completed}</span>
+                            {m.inProgress > 0 && (
+                              <span className="text-[10px] text-sky-400/80 font-normal">({m.inProgress} em curso)</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 px-2">
+                          <div className="w-28 mx-auto space-y-1">
+                            <div className="flex items-center justify-between text-[10px] tabular-nums">
+                              <span className="text-slate-400">{completionRate}%</span>
+                              <span className="text-slate-400">{m.completed}/{m.total}</span>
+                            </div>
+                            <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden">
+                              <div
+                                className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-300"
+                                style={{ width: `${completionRate}%` }}
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 text-center">
+                          <span
+                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold tabular-nums ${
+                              isHighAdjustments
+                                ? 'bg-rose-500/15 text-rose-300 border border-rose-500/20'
+                                : m.adjustments > 0
+                                ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
+                                : 'text-slate-500'
+                            }`}
+                          >
+                            {m.adjustments} {m.total > 0 && `(${m.adjustmentRate}%)`}
+                          </span>
+                        </td>
+                        <td className="py-3 text-right tabular-nums font-semibold text-amber-400 pr-1">{m.points}</td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -747,40 +1065,42 @@ export const ReportsView: React.FC = () => {
         </div>
 
         {/* Volume e Entregas por Cliente (5 colunas no grid) */}
-        <div className="lg:col-span-5 p-5 bg-[#181818] border border-[#2E2E2E] rounded-2xl space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="xl:col-span-5 p-6 bg-[#141414] border border-[#262626] rounded-2xl space-y-4 shadow-xs">
+          <div className="flex items-center justify-between pb-3 border-b border-[#242424]">
             <div className="flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-emerald-400" />
-              <h2 className="text-base font-medium text-white tracking-tight">Demandas por Cliente</h2>
+              <h2 className="text-sm font-semibold text-white tracking-tight">Demandas por Cliente</h2>
             </div>
-            <span className="text-xs text-slate-400 font-medium">{clientDistribution.length} marcas</span>
+            <span className="text-xs text-slate-400 font-medium">{clientDistribution.length} marcas ativas</span>
           </div>
 
-          <div className="space-y-3">
+          <div className="divide-y divide-[#202020] ">
             {clientDistribution.length === 0 ? (
-              <div className="py-8 text-center text-slate-500 font-medium text-xs">
+              <div className="py-12 text-center text-slate-500 font-medium text-xs">
                 Nenhum cliente com demandas no período selecionado.
               </div>
             ) : (
               clientDistribution.map((client) => (
-                <div key={client.id} className="p-3 bg-[#101010] border border-[#2E2E2E] rounded-xl space-y-2">
+                <div key={client.id} className="py-3.5 first:pt-0 last:pb-0 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       {client.logoUrl ? (
-                        <img src={client.logoUrl} alt={client.name} className="w-5 h-5 rounded object-contain" />
+                        <img src={client.logoUrl} alt={client.name} className="w-6 h-6 rounded-md object-contain bg-[#1F1F1F] p-0.5 border border-white/5 shrink-0" />
                       ) : (
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: client.color }} />
+                        <span className="w-3 h-3 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: client.color }} />
                       )}
-                      <span className="text-xs font-semibold text-white">{client.name}</span>
+                      <span className="text-xs font-semibold text-white truncate">{client.name}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="font-bold text-slate-400">{client.completed} / {client.total}</span>
-                      <span className="font-semibold text-emerald-400 text-[11px]">({client.completionRate}%)</span>
+                    <div className="flex items-center gap-2 text-xs shrink-0 tabular-nums">
+                      <span className="text-slate-400 font-medium">{client.completed} de {client.total}</span>
+                      <span className="font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded text-[11px] border border-emerald-500/20">
+                        {client.completionRate}%
+                      </span>
                     </div>
                   </div>
 
-                  {/* Barra de progresso de conclusão */}
-                  <div className="w-full bg-[#222222] h-2 rounded-full overflow-hidden flex">
+                  {/* Barra de progresso contínua */}
+                  <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden flex">
                     <div
                       className="bg-emerald-500 h-full transition-all"
                       style={{ width: `${client.completionRate}%` }}
@@ -795,43 +1115,39 @@ export const ReportsView: React.FC = () => {
                     )}
                   </div>
 
+                  {/* Indicadores rápidos de status em pills limpas */}
                   <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
-                    <span>Pendentes: <strong className="text-slate-200">{client.pending}</strong></span>
-                    {client.overdue > 0 && (
-                      <span className="text-rose-400 font-bold">Atrasadas: {client.overdue}</span>
-                    )}
+                    <div className="flex items-center gap-3">
+                      <span>Pendentes: <strong className="text-slate-200 tabular-nums">{client.pending}</strong></span>
+                      {client.overdue > 0 && (
+                        <span className="text-rose-400 font-medium flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                          Atrasadas: <strong className="tabular-nums font-bold text-rose-300">{client.overdue}</strong>
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Distribuição detalhada por todas as colunas / status */}
-                  <div className="pt-2 border-t border-[#222222]">
-                    <div className="text-xs font-medium text-slate-400 mb-1.5 flex items-center justify-between">
-                      <span>Status das Colunas:</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {spineStatuses.map((st) => {
-                        const count = client.statusCounts[st.id] || 0;
-                        return (
-                          <div
-                            key={st.id}
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-bold border transition-colors ${
-                              count > 0
-                                ? 'bg-[#181818] border-[#333333] text-white'
-                                : 'bg-[#141414]/50 border-transparent text-slate-500'
-                            }`}
-                            title={`${st.label}: ${count} tarefas`}
-                          >
-                            <span
-                              className="w-1.5 h-1.5 rounded-full shrink-0"
-                              style={{ backgroundColor: count > 0 ? (st.dotColor || st.color || '#E4007E') : '#444444' }}
-                            />
-                            <span>{st.label}:</span>
-                            <span className={count > 0 ? 'text-[#E4007E] font-semibold' : 'text-slate-500 font-medium'}>
-                              {count}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
+                  {/* Distribuição por colunas/status do fluxo */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {spineStatuses.map((st) => {
+                      const count = client.statusCounts[st.id] || 0;
+                      if (count === 0) return null; // Não polui a tela com status zerados
+                      return (
+                        <span
+                          key={st.id}
+                          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium bg-[#1A1A1A] text-slate-300 border border-[#2B2B2B]"
+                          title={`${st.label}: ${count}`}
+                        >
+                          <span
+                            className="w-1.5 h-1.5 rounded-full shrink-0"
+                            style={{ backgroundColor: st.dotColor || st.color || '#E4007E' }}
+                          />
+                          <span className="text-slate-400">{st.label}:</span>
+                          <span className="font-semibold text-white tabular-nums">{count}</span>
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               ))

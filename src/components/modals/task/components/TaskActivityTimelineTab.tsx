@@ -137,86 +137,168 @@ export const TaskActivityTimelineTab: React.FC<{
   timelineActions: TimelineActionItem[];
   loadingActions: boolean;
 }> = ({ editingTask, timelineActions, loadingActions }) => {
-  // Count by type for summary
+  const [filterType, setFilterType] = React.useState<'all' | 'status' | 'file' | 'comment' | 'member'>('all');
+
+  // Count by type for summary and filter tabs
   const statusCount = timelineActions.filter((a) => a.type === 'status' || a.type === 'delivery').length;
+  const fileCount = timelineActions.filter((a) => a.type === 'file').length;
   const commentCount = timelineActions.filter((a) => a.type === 'comment').length;
   const memberCount = timelineActions.filter((a) => a.type === 'member').length;
 
+  const filteredActions = React.useMemo(() => {
+    if (filterType === 'all') return timelineActions;
+    if (filterType === 'status') return timelineActions.filter((a) => a.type === 'status' || a.type === 'delivery');
+    if (filterType === 'file') return timelineActions.filter((a) => a.type === 'file');
+    if (filterType === 'comment') return timelineActions.filter((a) => a.type === 'comment');
+    if (filterType === 'member') return timelineActions.filter((a) => a.type === 'member');
+    return timelineActions;
+  }, [timelineActions, filterType]);
+
+  const filterOptions = [
+    { id: 'all', label: 'Tudo', count: timelineActions.length, icon: Activity },
+    { id: 'file', label: 'Arquivos', count: fileCount, icon: Paperclip },
+    { id: 'status', label: 'Status & Entregas', count: statusCount, icon: ArrowRight },
+    { id: 'comment', label: 'Comentários', count: commentCount, icon: MessageSquare },
+    { id: 'member', label: 'Membros', count: memberCount, icon: UserPlus },
+  ];
+
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#101010] text-white">
-      {/* Summary Cards */}
+      {/* Summary Cards (Also interactive shortcuts) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <div className="px-3 py-2 bg-[#181818] border border-[#2E2E2E] rounded-xl flex items-center gap-2 shadow-xs">
-          <div className="p-1.5 bg-[#E4007E]/20 text-[#E4007E] rounded-lg border border-[#E4007E]/30 shrink-0">
-            <Activity className="w-3.5 h-3.5" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Total</span>
-            <span className="text-sm font-semibold text-white">{timelineActions.length}</span>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={() => setFilterType('all')}
+          className={`px-4 py-3 rounded-xl flex flex-col justify-center text-left transition-all cursor-pointer ${
+            filterType === 'all'
+              ? 'bg-[#101010] ring-1 ring-[#E4007E]/50 shadow-md'
+              : 'bg-[#141414] hover:bg-[#1C1C1C]'
+          }`}
+        >
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Total</span>
+          <span className="text-xl font-bold text-white tabular-nums leading-none">{timelineActions.length}</span>
+        </button>
 
-        <div className="px-3 py-2 bg-[#181818] border border-[#2E2E2E] rounded-xl flex items-center gap-2 shadow-xs">
-          <div className="p-1.5 bg-[#E4007E]/20 text-[#E4007E] rounded-lg border border-[#E4007E]/30 shrink-0">
-            <ArrowRight className="w-3.5 h-3.5" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Status</span>
-            <span className="text-sm font-semibold text-white">{statusCount}</span>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={() => setFilterType(filterType === 'file' ? 'all' : 'file')}
+          className={`px-4 py-3 rounded-xl flex flex-col justify-center text-left transition-all cursor-pointer ${
+            filterType === 'file'
+              ? 'bg-[#101010] ring-1 ring-amber-500/50 shadow-md'
+              : 'bg-[#141414] hover:bg-[#1C1C1C]'
+          }`}
+        >
+          <span className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest block mb-1">Arquivos</span>
+          <span className="text-xl font-bold text-white tabular-nums leading-none">{fileCount}</span>
+        </button>
 
-        <div className="px-3 py-2 bg-[#181818] border border-[#2E2E2E] rounded-xl flex items-center gap-2 shadow-xs">
-          <div className="p-1.5 bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/30 shrink-0">
-            <MessageSquare className="w-3.5 h-3.5" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Comentários</span>
-            <span className="text-sm font-semibold text-white">{commentCount}</span>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={() => setFilterType(filterType === 'status' ? 'all' : 'status')}
+          className={`px-4 py-3 rounded-xl flex flex-col justify-center text-left transition-all cursor-pointer ${
+            filterType === 'status'
+              ? 'bg-[#101010] ring-1 ring-[#E4007E]/50 shadow-md'
+              : 'bg-[#141414] hover:bg-[#1C1C1C]'
+          }`}
+        >
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Status</span>
+          <span className="text-xl font-bold text-white tabular-nums leading-none">{statusCount}</span>
+        </button>
 
-        <div className="px-3 py-2 bg-[#181818] border border-[#2E2E2E] rounded-xl flex items-center gap-2 shadow-xs">
-          <div className="p-1.5 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/30 shrink-0">
-            <Clock className="w-3.5 h-3.5" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Criada</span>
-            <span className="text-[10px] font-semibold text-white truncate block">
-              {editingTask.createdAt ? formatRelativeDate(editingTask.createdAt) : 'Recentemente'}
-            </span>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={() => setFilterType(filterType === 'comment' ? 'all' : 'comment')}
+          className={`px-4 py-3 rounded-xl flex flex-col justify-center text-left transition-all cursor-pointer ${
+            filterType === 'comment'
+              ? 'bg-[#101010] ring-1 ring-blue-500/50 shadow-md'
+              : 'bg-[#141414] hover:bg-[#1C1C1C]'
+          }`}
+        >
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Comentários</span>
+          <span className="text-xl font-bold text-white tabular-nums leading-none">{commentCount}</span>
+        </button>
+      </div>
+
+      {/* Filter Chips Bar */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 hide-scrollbar">
+        {filterOptions.map((opt) => {
+          const Icon = opt.icon;
+          const isActive = filterType === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setFilterType(opt.id as any)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                isActive
+                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
+                  : 'bg-[#1C1C1C] hover:bg-[#252525] text-slate-400 hover:text-white border border-[#262626]'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5 shrink-0" />
+              <span>{opt.label}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
+                isActive ? 'bg-white/20 text-white' : 'bg-white/5 text-slate-500'
+              }`}>
+                {opt.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Timeline */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between pb-1.5 border-b border-[#2E2E2E]">
+        <div className="flex items-center justify-between pb-1.5 border-b border-[#262626]">
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#E4007E] flex items-center gap-1.5">
             <History className="w-3.5 h-3.5" />
-            <span>Histórico de Atividade</span>
+            <span>
+              {filterType === 'all'
+                ? 'Histórico de Atividade'
+                : `Filtrando por: ${filterOptions.find((o) => o.id === filterType)?.label}`}
+            </span>
           </h3>
-          {loadingActions && (
-            <span className="text-[10px] font-bold text-slate-400 animate-pulse">Carregando...</span>
-          )}
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-slate-500 font-medium tabular-nums">
+              {filteredActions.length} de {timelineActions.length} ações
+            </span>
+            {loadingActions && (
+              <span className="text-[10px] font-bold text-slate-400 animate-pulse">Carregando...</span>
+            )}
+          </div>
         </div>
 
-        {timelineActions.length === 0 ? (
-          <div className="py-10 text-center bg-[#181818] rounded-xl border border-[#2E2E2E]">
-            <History className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-            <p className="text-xs font-bold text-slate-300">Nenhuma ação registrada ainda.</p>
-            <p className="text-[11px] text-slate-500 mt-1">As ações aparecerão aqui conforme a demanda evolui.</p>
+        {filteredActions.length === 0 ? (
+          <div className="py-12 flex flex-col items-center justify-center text-center bg-gradient-to-b from-[#181818] to-transparent rounded-xl border border-white/5 border-dashed">
+            <div className="w-12 h-12 rounded-full bg-[#1C1C1C] flex items-center justify-center mb-3">
+              <History className="w-6 h-6 text-slate-500" />
+            </div>
+            <p className="text-sm font-bold text-slate-300">Nenhum evento neste filtro</p>
+            <p className="text-xs text-slate-500 mt-1 max-w-[220px]">
+              {filterType === 'all'
+                ? 'A jornada desta tarefa ainda não começou. Todas as ações aparecerão aqui.'
+                : 'Não há registros desse tipo no histórico desta demanda.'}
+            </p>
+            {filterType !== 'all' && (
+              <button
+                type="button"
+                onClick={() => setFilterType('all')}
+                className="mt-3 text-xs font-bold text-[#E4007E] hover:underline cursor-pointer"
+              >
+                Ver histórico completo
+              </button>
+            )}
           </div>
         ) : (
           <div className="relative pl-8 space-y-3 before:absolute before:left-[13px] before:top-3 before:bottom-3 before:w-px before:bg-gradient-to-b before:from-[#E4007E]/30 before:via-[#2E2E2E] before:to-transparent">
-            {timelineActions.map((act) => {
+            {filteredActions.map((act, index) => {
               const cfg = TYPE_CONFIG[act.type] || TYPE_CONFIG.general;
               return (
-                <div key={act.id} className="relative group">
+                <div key={act.id} className="relative group animate-in slide-in-from-bottom-2 fade-in duration-300 fill-mode-both" style={{ animationDelay: `${index * 50}ms` }}>
                   {/* Timeline dot */}
                   <div className={`absolute left-[-22px] top-[9px] w-2.5 h-2.5 rounded-full ${cfg.bg} border ${cfg.border} z-10 ring-[3px] ring-[#101010]`} />
 
-                  <div className="bg-[#141414] border border-[#1E1E1E] rounded-xl px-3 py-2.5 hover:border-[#2E2E2E] transition-colors">
+                  <div className="py-2">
                     <div className="flex items-start gap-2.5">
                       {/* Type icon */}
                       <div className={`p-1.5 ${cfg.bg} ${cfg.color} rounded-lg border ${cfg.border} shrink-0 mt-0.5`}>
@@ -233,7 +315,7 @@ export const TaskActivityTimelineTab: React.FC<{
 
                         {/* Details */}
                         {act.details && act.type !== 'comment' && (
-                          <div className="mt-1.5 inline-flex items-center gap-1 bg-[#1C1C1C] border border-[#2E2E2E] px-2 py-0.5 rounded-lg">
+                          <div className="mt-1.5 inline-flex items-center gap-1 bg-[#1C1C1C] border-transparent px-2 py-0.5 rounded-lg">
                             <span className="text-[11px] text-slate-200 font-medium">{act.details}</span>
                           </div>
                         )}
@@ -247,13 +329,13 @@ export const TaskActivityTimelineTab: React.FC<{
                         <div className="flex items-center gap-1 mt-1.5">
                           <Clock className="w-2.5 h-2.5 text-slate-600" />
                           <span
-                            className="text-[10px] text-slate-500"
+                            className="text-[11px] text-slate-400 tabular-nums"
                             title={formatAbsoluteDate(act.date)}
                           >
                             {formatRelativeDate(act.date)}
                           </span>
-                          <span className="text-slate-600 text-[10px]">·</span>
-                          <span className="text-[10px] text-slate-600">{formatAbsoluteDate(act.date)}</span>
+                          <span className="text-slate-500 text-[11px]">·</span>
+                          <span className="text-[11px] text-slate-500 tabular-nums">{formatAbsoluteDate(act.date)}</span>
                         </div>
                       </div>
                     </div>

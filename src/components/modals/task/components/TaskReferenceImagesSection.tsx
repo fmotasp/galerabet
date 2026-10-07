@@ -37,7 +37,7 @@ export const TaskReferenceImagesSection: React.FC<{
         </span>
       </div>
 
-      <div className="p-4 bg-[#1C1C1C] border border-[#2E2E2E] rounded-2xl space-y-3 flex-1 flex flex-col">
+      <div className="p-4 bg-[#1C1C1C] border border-[#262626] rounded-2xl space-y-3 flex-1 flex flex-col">
         {/* Hidden File Input */}
         <input
           type="file"
@@ -123,10 +123,10 @@ export const TaskReferenceImagesSection: React.FC<{
               <div
                 key={refImg.id}
                 onClick={() => onPreview({ name: refImg.name, url: displayImgSrc })}
-                className="relative group bg-[#101010] border border-[#2E2E2E] rounded-xl p-2.5 flex items-center gap-3 shadow-2xs overflow-hidden hover:border-[#E4007E] hover:shadow-md transition-all cursor-pointer"
+                className="relative group bg-[#101010] border border-[#262626] rounded-xl p-2.5 flex items-center gap-3 shadow-2xs overflow-hidden hover:border-[#E4007E] hover:shadow-md transition-all cursor-pointer"
               >
                 <div
-                  className="w-14 h-14 shrink-0 rounded-lg overflow-hidden border border-[#2E2E2E] bg-[#1C1C1C] block group-hover:scale-105 transition-transform"
+                  className="w-14 h-14 shrink-0 rounded-lg overflow-hidden border border-[#262626] bg-[#1C1C1C] block group-hover:scale-105 transition-transform"
                 >
                   <img
                     src={displayImgSrc}
@@ -175,7 +175,7 @@ export const TaskReferenceImagesSection: React.FC<{
             href={driveFolderUrl || `https://drive.google.com/drive/folders/${driveFolderId}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full p-3 rounded-xl bg-[#181818] border border-[#2E2E2E] hover:border-[#E4007E]/60 text-slate-200 hover:text-white font-bold text-xs flex items-center justify-between transition-colors group"
+            className="w-full p-3 rounded-xl bg-[#141414] border border-[#262626] hover:border-[#E4007E]/60 text-slate-200 hover:text-white font-bold text-xs flex items-center justify-between transition-colors group"
           >
             <div className="flex items-center gap-2">
               <Folder className="w-4 h-4 text-[#E4007E] group-hover:scale-110 transition-transform" />

@@ -165,7 +165,7 @@ export const EmployeeDetailModal: React.FC = () => {
       {/* Modal Card */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative bg-[#181818] rounded-3xl shadow-2xl border border-[#2E2E2E] max-w-3xl w-full p-6 sm:p-8 z-10 animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto space-y-6 text-white"
+        className="relative bg-[#141414] rounded-3xl shadow-2xl border border-[#262626] max-w-3xl w-full p-6 sm:p-8 z-10 animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto space-y-6 text-white"
       >
         {/* Glow de fundo */}
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#E4007E]/15 rounded-full blur-3xl pointer-events-none" />
@@ -292,7 +292,7 @@ export const EmployeeDetailModal: React.FC = () => {
           </div>
 
           {/* Filtro de Abas por Status */}
-          <div className="flex items-center gap-1 bg-[#121212] p-1 rounded-xl border border-[#2A2A2A] overflow-x-auto">
+          <div className="flex items-center gap-1 bg-[#121212] p-1 rounded-xl border border-white/5 overflow-x-auto">
             <button
               type="button"
               onClick={() => setActiveTab('all')}

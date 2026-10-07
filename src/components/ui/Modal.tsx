@@ -67,7 +67,7 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Modal Container */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`relative bg-[#141414] rounded-3xl shadow-2xl border border-[#2A2A2A] w-full p-6 sm:p-7 z-10 animate-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col ${sizeStyles[size]} ${className}`}
+        className={`relative bg-[#141414] rounded-3xl shadow-2xl border border-white/5 w-full p-6 sm:p-7 z-10 animate-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col ${sizeStyles[size]} ${className}`}
       >
         {/* Header */}
         {(title || icon) && (
@@ -92,7 +92,7 @@ export const Modal: React.FC<ModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-[#222222] transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-[#101010] transition-colors cursor-pointer"
               aria-label="Fechar modal"
             >
               <X className="w-5 h-5" />

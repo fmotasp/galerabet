@@ -304,7 +304,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
       })()}
 
       {/* Main Card Content Body */}
-      <div className="p-3.5 space-y-3 bg-transparent">
+      <div className="p-4 space-y-3.5 bg-transparent">
         {/* Client / Labels Badges Row */}
         {(() => {
           const labelItems: Array<{ name: string; color?: string }> = [];
@@ -344,7 +344,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
                 return (
                   <span
                     key={lIdx}
-                    className="h-6 px-2.5 rounded-full text-[10px] font-semibold tracking-wider uppercase inline-flex items-center gap-1.5 shadow-xs border border-white/10"
+                    className="h-6 px-2.5 rounded-full text-[10px] font-bold tracking-wider uppercase inline-flex items-center gap-1.5 shadow-xs border border-white/10"
                     style={{
                       backgroundColor: style.bg,
                       color: style.text,
@@ -357,11 +357,11 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
                         className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
                       />
                     ) : (
-                      <div className="w-3.5 h-3.5 rounded-full bg-white/20 text-white flex items-center justify-center text-[8px] font-semibold shrink-0">
+                      <div className="w-3.5 h-3.5 rounded-full bg-white/20 text-white flex items-center justify-center text-[8px] font-bold shrink-0">
                         {lbl.name.slice(0, 1).toUpperCase()}
                       </div>
                     )}
-                    <span>{lbl.name}</span>
+                    <span className="truncate max-w-[120px]">{lbl.name}</span>
                   </span>
                 );
               })}
@@ -370,7 +370,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
         })()}
 
         {/* Title */}
-        <h4 className="font-semibold text-[14px] text-white leading-snug tracking-tight">
+        <h4 className="font-bold text-[15px] text-white leading-snug tracking-tight">
           {task.title}
         </h4>
 
@@ -393,8 +393,8 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
           }
 
           return (
-            <div className="flex items-center justify-between pt-2.5 border-t border-white/5 text-[12px] font-medium">
-              <div className="flex items-center gap-3.5 text-slate-300">
+            <div className="flex items-center justify-between gap-2 flex-wrap pt-3 border-t border-white/5 text-xs font-medium">
+              <div className="flex items-center gap-3 text-slate-300 shrink-0">
                 <span className="flex items-center gap-1.5 hover:text-[#E4007E] transition-colors" title="Comentários">
                   <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
                   <span className="text-white font-medium text-[11px]">{cCount}</span>
@@ -413,7 +413,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
                 <button
                   type="button"
                   onClick={handleCloneTask}
-                  className="flex items-center gap-1.5 hover:text-[#E4007E] transition-colors ml-1 cursor-pointer"
+                  className="flex items-center gap-1.5 hover:text-[#E4007E] transition-colors ml-0.5 cursor-pointer"
                   title="Clonar Tarefa"
                 >
                   <Copy className="w-3.5 h-3.5 text-slate-400 hover:text-[#E4007E]" />
@@ -424,13 +424,13 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
                 const overdueDays = getTaskOverdueDays(task);
                 if (overdueDays > 0) {
                   return (
-                    <div className="text-rose-400 font-semibold text-[11px] bg-rose-950/40 px-2 py-0.5 rounded border border-rose-800/40 shadow-xs whitespace-nowrap" title={`Prazo previsto: ${task.dueDate}`}>
+                    <div className="text-rose-400 font-semibold text-[11px] bg-rose-950/40 px-2 py-0.5 rounded border border-rose-800/40 shadow-xs whitespace-nowrap shrink-0 mt-1 sm:mt-0" title={`Prazo previsto: ${task.dueDate}`}>
                       Atrasada ({overdueDays}d)
                     </div>
                   );
                 }
                 return (
-                  <div className="text-slate-400 font-medium text-[11px]">
+                  <div className="text-slate-400 font-medium text-[11px] whitespace-nowrap shrink-0 mt-1 sm:mt-0">
                     {task.dueDate && task.dueDate !== 'Sem prazo' ? task.dueDate : 'Sem prazo'}
                   </div>
                 );

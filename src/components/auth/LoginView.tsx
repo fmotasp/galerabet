@@ -416,7 +416,7 @@ export const LoginView: React.FC = () => {
 
               <form onSubmit={handleFirstAccessSubmit} className="space-y-5">
                 {/* Nova Senha */}
-                <div className="relative border-b-2 border-[#2A2A2A] focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
+                <div className="relative border-b-2 border-white/5 focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
                   <Lock className="w-5 h-5 text-[#E4007E] shrink-0" />
                   <input
                     type={showNewPassword ? 'text' : 'password'}
@@ -439,7 +439,7 @@ export const LoginView: React.FC = () => {
                 </div>
 
                 {/* Confirmar Nova Senha */}
-                <div className="relative border-b-2 border-[#2A2A2A] focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
+                <div className="relative border-b-2 border-white/5 focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
                   <KeyRound className="w-5 h-5 text-[#E4007E] shrink-0" />
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
@@ -496,7 +496,7 @@ export const LoginView: React.FC = () => {
 
               <form onSubmit={handleSubmit} className="space-y-7">
                 {/* Email Input */}
-                <div className="relative border-b-2 border-[#2A2A2A] focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
+                <div className="relative border-b-2 border-white/5 focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
                   <Mail className="w-5 h-5 text-[#E4007E] shrink-0" />
                   <input
                     type="email"
@@ -511,7 +511,7 @@ export const LoginView: React.FC = () => {
                 </div>
 
                 {/* Password Input */}
-                <div className="relative border-b-2 border-[#2A2A2A] focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
+                <div className="relative border-b-2 border-white/5 focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
                   <KeyRound className="w-5 h-5 text-[#E4007E] shrink-0" />
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -548,7 +548,7 @@ export const LoginView: React.FC = () => {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-[#303030] text-[#E4007E] accent-[#E4007E] focus:ring-[#E4007E] bg-[#181818] cursor-pointer"
+                      className="w-4 h-4 rounded border-white/5 text-[#E4007E] accent-[#E4007E] focus:ring-[#E4007E] bg-[#141414] cursor-pointer"
                     />
                     <span className="text-white">Lembrar de mim</span>
                   </label>
@@ -577,7 +577,7 @@ export const LoginView: React.FC = () => {
           </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center p-8">
-            <div className="w-56 h-56 rounded-3xl bg-[#181818] border border-[#2A2A2A] p-6 flex items-center justify-center shadow-2xl">
+            <div className="w-56 h-56 rounded-3xl bg-[#141414] border border-white/5 p-6 flex items-center justify-center shadow-2xl">
               <img
                 src="/login-logo.png"
                 alt="RioSãoPaulo"
@@ -600,7 +600,7 @@ export const LoginView: React.FC = () => {
         </svg>
 
         {/* Right Corner Accent Badge */}
-        <div className="absolute bottom-8 right-8 z-20 flex items-center gap-2 bg-[#101010]/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-[#2A2A2A] text-white text-xs font-bold shadow-lg">
+        <div className="absolute bottom-8 right-8 z-20 flex items-center gap-2 bg-[#101010]/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/5 text-white text-xs font-bold shadow-lg">
           <Sparkles className="w-3.5 h-3.5 text-[#E4007E]" />
           <span>RioSãoPaulo</span>
         </div>
@@ -613,7 +613,7 @@ export const LoginView: React.FC = () => {
           onClick={() => setInfoModal(null)}
         >
           <div
-            className="bg-[#181818] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#2A2A2A] text-center animate-in zoom-in-95 duration-150"
+            className="bg-[#141414] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/5 text-center animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-12 rounded-2xl bg-[#E4007E]/10 text-[#E4007E] flex items-center justify-center mx-auto mb-4 border border-[#E4007E]/20">
@@ -659,7 +659,7 @@ export const LoginView: React.FC = () => {
               />
 
               {/* Icon Container with subtle bounce/pulse */}
-              <div className="w-20 h-20 rounded-full bg-[#181818] border-2 border-[#E4007E]/60 p-3.5 shadow-2xl shadow-[#E4007E]/20 flex items-center justify-center animate-pulse">
+              <div className="w-20 h-20 rounded-full bg-[#141414] border-2 border-[#E4007E]/60 p-3.5 shadow-2xl shadow-[#E4007E]/20 flex items-center justify-center animate-pulse">
                 <img
                   src="/sidebar-icon.png"
                   alt="Logo"
@@ -698,7 +698,7 @@ export const LoginView: React.FC = () => {
               </div>
 
               {/* 5-second dynamic progress bar */}
-              <div className="w-64 h-2 bg-[#262626] rounded-full overflow-hidden relative shadow-inner p-0.5 border border-[#303030]">
+              <div className="w-64 h-2 bg-[#262626] rounded-full overflow-hidden relative shadow-inner p-0.5 border border-white/5">
                 <div
                   className="h-full bg-gradient-to-r from-[#E4007E] via-pink-500 to-[#E94E18] rounded-full transition-all duration-1000 ease-linear shadow-xs"
                   style={{ width: `${Math.min(100, Math.max(10, ((5 - countdown + 1) / 5) * 100))}%` }}

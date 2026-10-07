@@ -16,11 +16,11 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary:
     'bg-[#E4007E] hover:bg-[#C2006B] text-white font-semibold shadow-md shadow-[#E4007E]/25 active:scale-98 border border-transparent',
   secondary:
-    'bg-[#1C1C1C] hover:bg-[#262626] text-slate-200 hover:text-white border border-[#2E2E2E] hover:border-[#E4007E]/50 font-medium active:scale-98',
+    'bg-[#1C1C1C] hover:bg-[#262626] text-slate-200 hover:text-white border border-[#262626] hover:border-[#E4007E]/50 font-medium active:scale-98',
   danger:
-    'bg-[#1C1C1C] hover:bg-rose-950/40 text-rose-500 font-medium border border-[#2E2E2E] hover:border-rose-900/50 active:scale-98',
+    'bg-[#1C1C1C] hover:bg-rose-950/40 text-rose-500 font-medium border border-[#262626] hover:border-rose-900/50 active:scale-98',
   outline:
-    'bg-transparent hover:bg-[#1A1A1A] text-slate-300 hover:text-white border border-[#2E2E2E] hover:border-slate-500 font-medium active:scale-98',
+    'bg-transparent hover:bg-[#1A1A1A] text-slate-300 hover:text-white border border-[#262626] hover:border-slate-500 font-medium active:scale-98',
   ghost:
     'bg-transparent hover:bg-[#1A1A1A] text-slate-400 hover:text-white font-medium border border-transparent',
 };

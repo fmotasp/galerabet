@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Plus, Filter, Edit2, Trash2, Copy, Eye, EyeOff, Link as LinkIcon } from 'lucide-react';
+import { Search, Plus, Filter, Edit2, Trash2, Copy, Eye, EyeOff, Link as LinkIcon, Key } from 'lucide-react';
 import { useAccesses } from '../../hooks/useAccesses';
 import { AccessCard } from './AccessCard';
 import { AccessModal } from '../modals/AccessModal';
@@ -210,7 +210,7 @@ const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-1.5 bg-[#141414] rounded-xl p-4 border border-[#222]">
               {(preloadedDriveFiles || driveFiles).map(file => (
-                <div key={file.id} className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-[#222] transition-colors group/file">
+                <div key={file.id} className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-[#101010] transition-colors group/file">
                   <div className="flex items-center gap-2.5 overflow-hidden">
                     <div className="shrink-0 flex items-center justify-center">
                       {renderDriveIcon(file.mimeType)}
@@ -219,7 +219,7 @@ const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[
                       {file.name}
                     </span>
                   </div>
-                  <a href={file.webViewLink} target="_blank" rel="noopener noreferrer" className="shrink-0 ml-3 flex items-center opacity-0 group-hover/file:opacity-100 transition-opacity px-2 py-1 bg-[#222] text-slate-300 hover:bg-[#333] hover:text-white rounded text-[10px] font-bold border border-[#333]" title="Acessar no Drive">
+                  <a href={file.webViewLink} target="_blank" rel="noopener noreferrer" className="shrink-0 ml-3 flex items-center opacity-0 group-hover/file:opacity-100 transition-opacity px-2 py-1 bg-[#101010] text-slate-300 hover:bg-[#333] hover:text-white rounded text-[10px] font-bold border border-[#333]" title="Acessar no Drive">
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
                       <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
                       <path d="M12 12v9"></path>
@@ -327,7 +327,7 @@ export const AccessesView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-          <div className="flex items-center gap-1.5 bg-[#222] p-1 rounded-xl overflow-x-auto shrink-0 max-w-full hide-scrollbar border border-[#333]">
+          <div className="flex items-center gap-1.5 bg-[#101010] p-1 rounded-xl overflow-x-auto shrink-0 max-w-full hide-scrollbar border border-[#333]">
             <button
               onClick={() => setSelectedCategory('all')}
               className={`px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === 'all' ? 'bg-gradient-to-r from-[#E4007E] to-[#ff4d4d] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-[#333]'}`}
@@ -370,7 +370,7 @@ export const AccessesView: React.FC = () => {
               placeholder="Buscar acessos..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              className="bg-[#1A1A1A] border border-[#333] text-sm text-white rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-[#E4007E] focus:ring-1 focus:ring-[#E4007E] transition-all w-full sm:w-64"
+              className="bg-[#1A1A1A] border border-[#333] text-sm text-white rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all w-full sm:w-64"
             />
           </div>
           <button
@@ -406,8 +406,14 @@ export const AccessesView: React.FC = () => {
                 </tr>
               ) : filteredAccesses.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-16 text-center text-slate-400">
-                    <p>Nenhum acesso encontrado.</p>
+                  <td colSpan={6} className="py-24 text-center">
+                    <div className="flex flex-col items-center justify-center text-center max-w-sm mx-auto">
+                      <div className="w-16 h-16 rounded-full bg-[#1A1A1A] flex items-center justify-center mb-4 border border-white/5 shadow-inner">
+                        <Key className="w-8 h-8 text-slate-500" />
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-200">Nenhum acesso encontrado</h3>
+                      <p className="text-sm text-slate-500 mt-2">Nenhum registro corresponde aos critérios atuais de busca.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (

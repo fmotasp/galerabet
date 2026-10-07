@@ -125,7 +125,7 @@ export const ProjectsView: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="appearance-none w-full bg-[#222222] border border-slate-700/80 text-white text-xs font-bold py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
+              className="appearance-none w-full bg-[#101010] border border-slate-700/80 text-white text-xs font-bold py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
             >
               {['all', 'active', 'planning', 'at_risk', 'completed'].map((status) => (
                 <option key={status} value={status}>
@@ -144,7 +144,7 @@ export const ProjectsView: React.FC = () => {
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold capitalize whitespace-nowrap transition-all border ${
                   statusFilter === status
                     ? 'bg-[#E4007E] text-white border-[#E4007E] shadow-sm'
-                    : 'bg-[#222222] text-slate-400 border-[#303030] hover:text-white hover:border-slate-500'
+                    : 'bg-[#101010] text-slate-400 border-white/5 hover:text-white hover:border-slate-500'
                 }`}
               >
                 {status === 'at_risk' ? 'At Risk' : status}
@@ -160,7 +160,7 @@ export const ProjectsView: React.FC = () => {
             placeholder="Buscar projetos..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-[#222222] border border-[#303030] rounded-2xl text-xs focus:outline-none focus:border-[#E4007E] text-white placeholder-slate-400 font-semibold shadow-inner transition-colors"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#101010] border border-white/5 rounded-2xl text-xs focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 text-white placeholder-slate-400 font-semibold shadow-inner transition-colors"
           />
         </div>
       </div>
@@ -168,20 +168,22 @@ export const ProjectsView: React.FC = () => {
       {/* Projects Card Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProjects.length === 0 ? (
-          <div className="col-span-full py-16 text-center bg-[#181818] rounded-3xl border border-white/5 p-8 shadow-xl">
-            <Box className="w-12 h-12 text-slate-600 mx-auto mb-3 opacity-20" />
-            <h3 className="text-base font-bold text-white">Nenhum projeto encontrado</h3>
-            <p className="text-xs text-slate-400 mt-1">
-              Tente ajustar os filtros ou crie um novo projeto.
+          <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-gradient-to-b from-[#181818] to-transparent rounded-3xl border border-white/5 border-dashed">
+            <div className="w-16 h-16 rounded-full bg-[#1C1C1C] flex items-center justify-center mb-4 shadow-inner">
+              <Box className="w-8 h-8 text-slate-500" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-200">Nenhum projeto encontrado</h3>
+            <p className="text-sm text-slate-500 mt-2 max-w-xs">
+              Tente ajustar os filtros ou crie um novo projeto para começar.
             </p>
             <button
               onClick={() => {
                 setStatusFilter('all');
                 setSearchQuery('');
               }}
-              className="mt-4 text-xs font-bold text-[#E4007E] hover:underline"
+              className="mt-6 px-4 py-2 rounded-xl bg-[#E4007E]/10 text-[#E4007E] font-bold text-sm hover:bg-[#E4007E]/20 transition-colors"
             >
-              Limpar filtros
+              Limpar Filtros
             </button>
           </div>
         ) : (
@@ -198,7 +200,7 @@ export const ProjectsView: React.FC = () => {
                 key={project.id}
                 id={`project-card-${project.id}`}
                 onClick={() => setSelectedProjectForDetail(project)}
-                className="group bg-[#181818] rounded-3xl p-6 border border-white/5 shadow-xl hover:shadow-2xl hover:border-[#E4007E]/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden"
+                className="group bg-[#141414] rounded-3xl p-6 border border-white/5 shadow-xl hover:shadow-2xl hover:border-[#E4007E]/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden"
               >
                 <div>
                   {/* Top row: Icon + Title + Status */}

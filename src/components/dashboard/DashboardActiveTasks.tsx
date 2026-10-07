@@ -83,11 +83,11 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
     const limitedTasks = tasks.slice(0, 20);
 
     return (
-      <div className="bg-[#181818] rounded-2xl p-6 border border-[#2A2A2A] shadow-lg">
+      <div className="bg-[#141414] rounded-2xl p-6 shadow-lg">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <h3 className="font-bold text-white text-base sm:text-lg">Tarefas Ativas</h3>
-            <span className="bg-[#222222] text-[#E4007E] border border-[#303030] text-xs font-bold px-2.5 py-0.5 rounded-full">
+            <h3 className="font-bold text-white text-xl tracking-tight">Tarefas Ativas</h3>
+            <span className="bg-[#101010] text-[#E4007E] text-xs font-bold px-2.5 py-0.5 rounded-full">
               {limitedTasks.length} tarefas
             </span>
           </div>
@@ -104,11 +104,11 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
         </div>
 
         {/* Task rows */}
-        <div className="space-y-3">
+        <div className="space-y-1">
           {isLoading ? (
             // Skeleton Loaders
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-white/5 bg-white/5 animate-pulse">
+              <div key={i} className="flex items-center justify-between gap-3 py-3 animate-pulse">
                 <div className="flex items-center gap-3 w-1/2">
                   <div className="w-3.5 h-3.5 rounded-md bg-white/10 shrink-0" />
                   <div className="h-4 bg-white/10 rounded w-3/4" />
@@ -133,16 +133,16 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
                 key={task.id}
                 id={`task-row-${task.id}`}
                 onClick={() => onTaskClick(task)}
-                className="group flex items-center justify-between gap-3 p-3.5 rounded-xl border border-[#2A2A2A] bg-[#202020]/60 hover:bg-[#262626] hover:border-[#383838] transition-all cursor-pointer"
+                className="group flex items-center justify-between gap-4 py-3.5 px-4 -mx-4 rounded-xl hover:bg-white/[0.03] transition-colors cursor-pointer"
               >
                 {/* Left indicator & Title */}
-                <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="flex items-center gap-4 min-w-0 flex-1">
                   <div
                     className={`w-3.5 h-3.5 rounded-md ${getIndicatorColor(
                       task
                     )} shrink-0 transition-transform group-hover:scale-110`}
                   />
-                  <span className="font-semibold text-white text-sm truncate group-hover:text-[#E4007E] transition-colors">
+                  <span className="font-semibold text-white text-base truncate group-hover:text-[#E4007E] transition-colors">
                     {task.title}
                   </span>
                 </div>
@@ -176,13 +176,13 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
 
                   {/* Assignee Avatar */}
                   <div
-                    className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#02376F] to-[#011C39] border border-[#FFB903]/40 text-white font-bold text-[11px] flex items-center justify-center shadow-xs"
+                    className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#02376F] to-[#011C39] border border-[#FFB903]/40 text-white font-bold text-xs flex items-center justify-center shadow-xs"
                     title={task.assigneeName}
                   >
                     {task.assigneeInitials}
                   </div>
 
-                  <span className="hidden md:inline-block text-xs text-slate-300 font-semibold min-w-[50px] text-right">
+                  <span className="hidden md:inline-block text-sm text-slate-300 font-medium min-w-[50px] text-right">
                     {task.dueDate || 'Sem prazo'}
                   </span>
 

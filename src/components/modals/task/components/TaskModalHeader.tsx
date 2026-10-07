@@ -70,7 +70,7 @@ export const TaskModalHeader: React.FC<{
   }
 
   return (
-    <div className="relative shrink-0 px-6 pt-5 pb-0 border-b border-slate-800 bg-[#181818] overflow-hidden">
+    <div className="relative shrink-0 px-6 pt-5 pb-0 border-b border-slate-800 bg-[#141414] overflow-hidden">
       {/* Cover Image Background Banner with Gradient */}
       {headerCoverImage && (
         <div className="absolute inset-0 pointer-events-none z-0">
@@ -172,15 +172,9 @@ export const TaskModalHeader: React.FC<{
                 title="Copiar link direto para compartilhar esta tarefa"
               >
                 {copiedLink ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
-                    <span className="text-emerald-400 hidden sm:inline">Link Copiado!</span>
-                  </>
+                  <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
                 ) : (
-                  <>
-                    <Share2 className="w-4 h-4 text-[#E4007E] stroke-[2.5]" />
-                    <span className="hidden sm:inline">Compartilhar</span>
-                  </>
+                  <Share2 className="w-4 h-4 text-[#E4007E] stroke-[2.5]" />
                 )}
               </button>
             )}

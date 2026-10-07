@@ -132,14 +132,19 @@ export const TaskModal: React.FC = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-hidden animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-6 overflow-hidden animate-in fade-in duration-200">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300 cursor-pointer"
         onClick={handleClose}
       />
 
-      <div className="relative w-full max-w-2xl lg:max-w-4xl xl:max-w-6xl max-h-[95vh] h-full sm:h-auto sm:min-h-[600px] bg-[#101010] text-white rounded-2xl shadow-2xl border border-[#2E2E2E] overflow-hidden flex flex-col z-10 animate-in zoom-in-95 duration-300 ease-out">
+      <div className="relative w-full max-w-2xl lg:max-w-4xl xl:max-w-6xl h-[calc(100vh-2rem)] sm:h-auto sm:max-h-[95vh] sm:min-h-[600px] bg-[#101010] text-white rounded-t-[32px] sm:rounded-2xl shadow-2xl border-t sm:border border-[#262626] overflow-hidden flex flex-col z-10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 ease-out">
+        {/* Mobile Drag Handle Indicator */}
+        <div className="w-full flex justify-center pt-3 pb-1 sm:hidden shrink-0 bg-[#101010]">
+          <div className="w-12 h-1.5 bg-white/15 rounded-full" />
+        </div>
+
         <TaskModalHeader
           editingTask={editingTask}
           formData={formData}
@@ -156,7 +161,7 @@ export const TaskModal: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col md:flex-row">
           {/* Left Column */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:border-r border-[#2E2E2E] bg-[#101010] flex flex-col">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:border-r border-[#262626] bg-[#101010] flex flex-col">
             
             {!editingTask && (
               <div className="w-full mb-6">
@@ -173,7 +178,7 @@ export const TaskModal: React.FC = () => {
                     const newTitle = e.target.value;
                     setFormData((prev) => ({ ...prev, title: newTitle }));
                   }}
-                  className="w-full p-3 bg-[#1C1C1C] border border-[#2E2E2E] rounded-xl text-sm font-semibold focus:outline-none focus:border-[#E4007E] transition-all text-white placeholder-slate-400"
+                  className="w-full p-3 bg-[#1C1C1C] border border-[#262626] rounded-xl text-sm font-semibold focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all text-white placeholder-slate-400"
                 />
               </div>
             )}
@@ -284,7 +289,8 @@ export const TaskModal: React.FC = () => {
           </div>
 
           {/* Right Column */}
-          <div className="w-full md:w-[340px] lg:w-[380px] bg-[#141414] overflow-y-auto flex flex-col p-4 sm:p-6 shrink-0 relative z-20">
+          <div className="relative w-full md:w-[340px] lg:w-[380px] bg-[#141414] shrink-0 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto flex flex-col p-4 sm:p-6 custom-scrollbar">
             <h4 className="text-[11px] font-bold text-slate-500 tracking-widest uppercase mb-6">Detalhes</h4>
             
             <div className="space-y-6">
@@ -318,7 +324,7 @@ export const TaskModal: React.FC = () => {
                       handleClose();
                     }
                   }}
-                  className="w-12 sm:w-14 shrink-0 flex justify-center items-center bg-[#1C1C1C] hover:bg-rose-950/40 text-slate-400 hover:text-rose-500 border border-[#2E2E2E] hover:border-rose-500/40 rounded-xl transition-all shadow-sm active:scale-95"
+                  className="w-12 sm:w-14 shrink-0 flex justify-center items-center bg-[#1C1C1C] hover:bg-rose-950/40 text-slate-400 hover:text-rose-500 border border-[#262626] hover:border-rose-500/40 rounded-xl transition-all shadow-sm active:scale-95"
                   title="Excluir Tarefa"
                 >
                   <Trash2 className="w-5 h-5" />
@@ -331,6 +337,7 @@ export const TaskModal: React.FC = () => {
                 <Check className="w-5 h-5 stroke-[2.5]" />
                 Salvar Alterações
               </button>
+            </div>
             </div>
           </div>
         </form>

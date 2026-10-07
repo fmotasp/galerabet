@@ -2,50 +2,33 @@ import fs from 'fs';
 
 let content = fs.readFileSync('src/components/modals/task/components/TaskActivityTimelineTab.tsx', 'utf8');
 
-const regex = /<div className="relative pl-5 space-y-2\.5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0\.5 before:bg-white\/5">[\s\S]*?<\/div>\s*\)\s*}/;
+// 1. Add tabular-nums to the big numbers in the summary cards
+content = content.replace(/text-xl font-bold text-white/g, 'text-xl font-bold text-white tabular-nums');
 
-const replacement = `<div className="relative pl-6 space-y-4 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-px before:bg-[#2E2E2E]">
-            {timelineActions.map((act) => {
-              let formattedDate = act.date;
-              try {
-                const d = new Date(act.date);
-                if (!isNaN(d.getTime())) {
-                  formattedDate = \`\${d.toLocaleDateString('pt-BR')} \${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}\`;
-                }
-              } catch (err) {}
+// 2. Add staggered animation to the timeline items
+content = content.replace(/\{timelineActions\.map\(\(act\) => \{/g, '{timelineActions.map((act, index) => {');
+content = content.replace(/<div key=\{act\.id\} className="relative group">/g, '<div key={act.id} className="relative group animate-in slide-in-from-bottom-2 fade-in duration-300 fill-mode-both" style={{ animationDelay: `${index * 50}ms` }}>');
 
-              // We extract details directly to render them inside a pill if they exist
-              let actionText = act.title.toLowerCase();
-              if (actionText.startsWith(act.user.toLowerCase())) {
-                actionText = actionText.substring(act.user.length).trim();
-              }
-              
-              return (
-                <div key={act.id} className="relative group">
-                  {/* Timeline node dot */}
-                  <div className="absolute -left-6 top-1.5 w-3 h-3 rounded-full bg-[#E94E18] -translate-x-1/2 z-10 ring-[5px] ring-[#101010]" />
+// 3. Add tabular nums to the relative and absolute date texts
+content = content.replace(/className="text-\[11px\] text-slate-400"/g, 'className="text-[11px] text-slate-400 tabular-nums"');
+content = content.replace(/className="text-\[11px\] text-slate-500"/g, 'className="text-[11px] text-slate-500 tabular-nums"');
 
-                  {/* Clean Text Layout */}
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-slate-400 leading-relaxed">
-                      <strong className="text-white font-bold">{act.user}</strong>{' '}
-                      {act.title}{' '}
-                      {act.details && (
-                        <span className="inline-block bg-[#1C1C1C] border border-[#2E2E2E] px-2 py-0.5 rounded-lg text-white font-bold ml-1">
-                          {act.details}
-                        </span>
-                      )}
-                    </p>
-                    <span className="text-[10px] font-medium text-slate-500 block">
-                      {formattedDate}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}`;
+// 4. Improve empty state
+const emptyStateOld = `<div className="py-10 text-center bg-[#181818] rounded-xl border-transparent">
+            <History className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+            <p className="text-xs font-bold text-slate-300">Nenhuma ação registrada ainda.</p>
+            <p className="text-[11px] text-slate-500 mt-1">As ações aparecerão aqui conforme a demanda evolui.</p>
+          </div>`;
+          
+const emptyStateNew = `<div className="py-12 flex flex-col items-center justify-center text-center bg-gradient-to-b from-[#181818] to-transparent rounded-xl border border-white/5 border-dashed">
+            <div className="w-12 h-12 rounded-full bg-[#1C1C1C] flex items-center justify-center mb-3">
+              <History className="w-6 h-6 text-slate-500" />
+            </div>
+            <p className="text-sm font-bold text-slate-300">Histórico Limpo</p>
+            <p className="text-xs text-slate-500 mt-1 max-w-[200px]">A jornada desta tarefa ainda não começou. Todas as ações aparecerão aqui.</p>
+          </div>`;
 
-content = content.replace(regex, replacement);
+content = content.replace(emptyStateOld, emptyStateNew);
 
 fs.writeFileSync('src/components/modals/task/components/TaskActivityTimelineTab.tsx', content);
+

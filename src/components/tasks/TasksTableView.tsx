@@ -90,7 +90,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
   return (
     <div className="space-y-6 w-full">
       {/* Action Bar (Search, Counter, Export, Sort, Add) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#181818] border border-[#2A2A2A] p-4 rounded-3xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#141414] border border-white/5 p-4 rounded-3xl shadow-xl">
         {/* Search Input & Total Tasks count */}
         <div className="flex items-center gap-4 flex-1">
           <div className="relative w-full max-w-xs">
@@ -100,7 +100,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
               placeholder="Buscar demandas..."
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#222222] border border-[#303030] rounded-2xl text-xs focus:outline-none focus:border-[#E4007E] text-white placeholder-slate-400 font-semibold shadow-inner transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 bg-[#101010] border border-white/5 rounded-2xl text-xs focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 text-white placeholder-slate-400 font-semibold shadow-inner transition-colors"
             />
           </div>
           <span className="text-xs text-slate-400 font-bold shrink-0">
@@ -113,7 +113,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
           <button
             onClick={exportTasksToCSV}
             aria-label="Exportar tarefas para CSV"
-            className="px-4 py-2.5 bg-[#222222] hover:bg-[#282828] border border-[#303030] text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+            className="px-4 py-2.5 bg-[#101010] hover:bg-[#282828] border border-white/5 text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <Download className="w-4 h-4" />
             <span>Exportar</span>
@@ -139,7 +139,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
             <div className="flex items-center gap-2">
               <Filter className="w-3.5 h-3.5 text-slate-400" />
               {selectedClient !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#181818] border border-[#2A2A2A] text-white rounded-xl text-[10px] font-bold">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#141414] border border-white/5 text-white rounded-xl text-[10px] font-bold">
                   Cliente: {registeredClients.find((c) => c.id === selectedClient)?.name || selectedClient}
                   <button
                     onClick={onClientClear}
@@ -151,7 +151,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
                 </span>
               )}
               {selectedMember !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#181818] border border-[#2A2A2A] text-white rounded-xl text-[10px] font-bold">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#141414] border border-white/5 text-white rounded-xl text-[10px] font-bold">
                   Membro: {selectedMember === 'mine' ? 'Meus' : employees.find((e) => e.id === selectedMember)?.name || selectedMember}
                   <button
                     onClick={onMemberClear}
@@ -183,7 +183,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
                   <input
                     type="checkbox"
                     aria-label="Selecionar todas as tarefas"
-                    className="rounded border-[#303030] text-[#E4007E] focus:ring-[#E4007E]/20 bg-[#222222] cursor-pointer"
+                    className="rounded border-white/5 text-[#E4007E] focus:ring-[#E4007E]/20 bg-[#101010] cursor-pointer"
                   />
                 </th>
                 <th className="px-6 py-4 whitespace-nowrap min-w-[200px]">Demanda & Projeto</th>
@@ -197,10 +197,14 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
             <tbody className="divide-y divide-white/5 font-medium text-white">
               {paginatedTasks.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center">
-                    <CheckSquare className="w-12 h-12 text-slate-600 mx-auto mb-3 opacity-20" />
-                    <h3 className="text-base font-bold text-white">Nenhuma demanda encontrada</h3>
-                    <p className="text-xs text-slate-400 mt-1">Não há tarefas correspondentes aos filtros selecionados.</p>
+                  <td colSpan={7} className="py-20 text-center">
+                    <div className="flex flex-col items-center justify-center text-center max-w-sm mx-auto">
+                      <div className="w-16 h-16 rounded-full bg-[#1A1A1A] flex items-center justify-center mb-4 border border-white/5 shadow-inner">
+                        <CheckSquare className="w-8 h-8 text-slate-500" />
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-200">Nenhuma demanda encontrada</h3>
+                      <p className="text-sm text-slate-500 mt-2">Não há tarefas correspondentes aos filtros selecionados.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -231,7 +235,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
                         <input
                           type="checkbox"
                           aria-label={`Selecionar tarefa ${task.title}`}
-                          className="rounded border-[#303030] text-[#E4007E] focus:ring-[#E4007E]/20 bg-[#222222] cursor-pointer"
+                          className="rounded border-white/5 text-[#E4007E] focus:ring-[#E4007E]/20 bg-[#101010] cursor-pointer"
                         />
                       </td>
 
@@ -264,7 +268,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
 
                       {/* Category */}
                       <td className="px-4 py-4.5">
-                        <span className="bg-[#222222] text-white px-2.5 py-1 rounded-xl font-bold text-[10px] uppercase tracking-wide border border-[#2E2E2E]">
+                        <span className="bg-[#101010] text-white px-2.5 py-1 rounded-xl font-bold text-[10px] uppercase tracking-wide border border-[#262626]">
                           {task.category || 'Geral'}
                         </span>
                       </td>
@@ -319,7 +323,7 @@ export const TasksTableView: React.FC<TasksTableViewProps> = React.memo(({
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => setEditingTask(task)}
-                            className="p-2 hover:bg-[#222222] rounded-xl text-slate-400 hover:text-white transition-colors"
+                            className="p-2 hover:bg-[#101010] rounded-xl text-slate-400 hover:text-white transition-colors"
                             title="Visualizar Detalhes"
                           >
                             <MoreHorizontal className="w-4 h-4" />

@@ -45,13 +45,13 @@ export const TaskCommentsSection: React.FC<{
                 onAddComment(e);
               }
             }}
-            className="flex-1 p-3 bg-[#1C1C1C] border border-[#2E2E2E] rounded-xl text-xs font-semibold text-white placeholder-slate-400 focus:outline-none focus:border-[#E4007E]"
+            className="flex-1 p-3 bg-[#1C1C1C] border border-[#262626] rounded-xl text-xs font-semibold text-white placeholder-slate-400 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
           />
           <button
             type="button"
             disabled={isPostingComment || !newCommentText.trim()}
             onClick={onAddComment}
-            className="px-4 bg-[#1C1C1C] border border-[#2E2E2E] hover:border-[#E4007E] text-slate-300 hover:text-white disabled:opacity-50 disabled:hover:border-[#2E2E2E] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 self-end py-3 shadow-sm cursor-pointer"
+            className="px-4 bg-[#1C1C1C] border border-[#262626] hover:border-[#E4007E] text-slate-300 hover:text-white disabled:opacity-50 disabled:hover:border-[#262626] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 self-end py-3 shadow-sm cursor-pointer"
           >
             <Send className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>{isPostingComment ? 'Enviando...' : 'Enviar'}</span>
@@ -87,7 +87,7 @@ export const TaskCommentsSection: React.FC<{
                 return (
                   <div
                     key={comment.id}
-                    className="p-3 bg-[#1C1C1C] border border-[#2E2E2E] rounded-xl space-y-1 group relative hover:border-[#E4007E]/40 transition-colors"
+                    className="p-3 bg-[#1C1C1C] border border-[#262626] rounded-xl space-y-1 group relative hover:border-[#E4007E]/40 transition-colors"
                   >
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2 font-bold text-[#E4007E]">
