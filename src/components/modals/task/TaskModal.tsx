@@ -308,10 +308,25 @@ export const TaskModal: React.FC = () => {
               />
             </div>
 
-            <div className="mt-8 md:mt-auto pt-6 border-t border-[#262626]">
+            <div className="mt-8 md:mt-auto pt-6 border-t border-[#262626] flex gap-2">
+              {editingTask && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(`Tem certeza que deseja excluir a tarefa "${formData.title}"?`)) {
+                      deleteTask(editingTask.id);
+                      handleClose();
+                    }
+                  }}
+                  className="w-12 sm:w-14 shrink-0 flex justify-center items-center bg-[#1C1C1C] hover:bg-rose-950/40 text-slate-400 hover:text-rose-500 border border-[#2E2E2E] hover:border-rose-500/40 rounded-xl transition-all shadow-sm active:scale-95"
+                  title="Excluir Tarefa"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              )}
               <button
                 type="submit"
-                className="w-full py-3.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(228,0,126,0.2)] hover:shadow-[0_0_25px_rgba(228,0,126,0.4)] active:scale-95 flex justify-center items-center gap-2"
+                className="flex-1 py-3.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(228,0,126,0.2)] hover:shadow-[0_0_25px_rgba(228,0,126,0.4)] active:scale-95 flex justify-center items-center gap-2"
               >
                 <Check className="w-5 h-5 stroke-[2.5]" />
                 Salvar Alterações

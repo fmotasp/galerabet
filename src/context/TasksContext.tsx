@@ -7,6 +7,7 @@ import { encodeTaskDescriptionWithChecklist, decodeTaskDescriptionWithChecklist 
 import { Task, TaskStatus, SpineStatusConfig, Employee } from '../types';
 import { INITIAL_TASKS } from '../data/mockData';
 import { useTasksStore } from '../store/useTasksStore';
+import { createNotifications } from '../lib/notificationsService';
 
 export interface TasksContextType {
   tasks: Task[];
@@ -655,6 +656,28 @@ export const TasksProvider: React.FC<{
       );
       addToast('Status Updated', `Moved to ${statusLabel}`);
     }
+
+    // Notificar todos os membros da tarefa (exceto o próprio ator)
+    try {
+      const actor = getCurrentActor();
+      const actorEmployeeId = currentUser?.employeeId || currentUser?.id || '';
+      const memberIds = (targetTask.members || [])
+        .map((m: any) => m.id)
+        .filter((mid: string) => mid && mid !== actorEmployeeId);
+      if (memberIds.length > 0) {
+        createNotifications({
+          recipientIds: memberIds,
+          actorId: actorEmployeeId,
+          actorName: actor.name,
+          actorInitials: actor.initials,
+          actorAvatarUrl: actor.avatarUrl,
+          type: 'task_status_changed',
+          taskId: targetTask.id,
+          taskTitle: targetTask.title,
+          detail: `para "${statusLabel}"`,
+        });
+      }
+    } catch (_) {}
   }, [spineStatuses, currentUser, addActivity, addToast, setTasks]);
 
   const moveAllBacklogToDoneLocally = () => {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Task, Employee, Project, Sprint, TaskMember, SpineStatusConfig, TaskAttachment, TaskComment, TaskStatus, TaskChecklistItem } from '../../../../types';
+import { Task, Employee, Project, Sprint, TaskMember, SpineStatusConfig, TaskAttachment, TaskComment, TaskStatus, TaskChecklistItem, TaskActivityItem } from '../../../../types';
 import {
   listTaskBriefingFiles,
   listTaskDeliveredFiles,
@@ -9,6 +9,7 @@ import {
 } from '../../../../lib/googleDrive';
 import { TaskModalFormData, TaskReferenceImage, TimelineActionItem } from '../types';
 import { supabase } from '../../../../lib/supabase';
+import { createNotifications } from '../../../../lib/notificationsService';
 import { decodeTaskDescriptionWithChecklist } from '../../../../lib/taskUtils';
 
 export const useTaskModalForm = ({
@@ -198,11 +199,25 @@ export const useTaskModalForm = ({
     }));
 
     if (editingTask) {
+      const actor = getCurrentActor();
+      const memberActivity: TaskActivityItem = {
+        id: `act-member-${Date.now()}`,
+        type: 'member_added',
+        user: actor.name,
+        userInitials: actor.initials,
+        avatarUrl: actor.avatarUrl,
+        description: `adicionou ${emp.name} à demanda`,
+        timestamp: new Date().toISOString(),
+        details: emp.name,
+      };
+      const nextActivityLog = [...(editingTask.activityLog || []), memberActivity];
+
       updateTask(editingTask.id, {
         members: nextMembers,
         assigneeId: primaryAssigneeId,
         assigneeName: nextMembers[0]?.name || 'Sem membro',
         assigneeInitials: nextMembers[0]?.initials || 'SM',
+        activityLog: nextActivityLog,
       });
       setEditingTask((prev) =>
         prev
@@ -212,9 +227,26 @@ export const useTaskModalForm = ({
               assigneeId: primaryAssigneeId,
               assigneeName: nextMembers[0]?.name || 'Sem membro',
               assigneeInitials: nextMembers[0]?.initials || 'SM',
+              activityLog: nextActivityLog,
             }
           : null
       );
+
+      // Notificar o membro recém-adicionado
+      try {
+        const actorEmployeeId = currentUser?.employeeId || currentUser?.id || '';
+        if (emp.id !== actorEmployeeId) {
+          createNotifications({
+            recipientIds: [emp.id],
+            actorId: actorEmployeeId,
+            actorName: actor.name,
+            actorInitials: actor.initials,
+            type: 'task_member_added',
+            taskId: editingTask.id,
+            taskTitle: editingTask.title,
+          });
+        }
+      } catch (_) {}
     }
   };
 
@@ -248,6 +280,7 @@ export const useTaskModalForm = ({
             }
           : null
       );
+
     }
   };
 
@@ -681,13 +714,47 @@ export const useTaskModalForm = ({
     };
     const nextComments = [newComment, ...comments];
     setComments(nextComments);
+
+    const commentActivity: TaskActivityItem = {
+      id: `act-comment-${newComment.id}`,
+      type: 'comment_added',
+      user: actor.name,
+      userInitials: actor.initials,
+      description: 'adicionou um comentário',
+      timestamp: newComment.date,
+      details: newComment.text.slice(0, 80),
+    };
+    const nextActivityLog = [...(editingTask.activityLog || []), commentActivity];
+
     await updateTask(editingTask.id, {
       comments: nextComments,
+      activityLog: nextActivityLog,
     });
-    setEditingTask((prev) => (prev ? { ...prev, comments: nextComments } : null));
+    setEditingTask((prev) => (prev ? { ...prev, comments: nextComments, activityLog: nextActivityLog } : null));
     setNewCommentText('');
     addToast('Comentário Adicionado', 'Seu comentário foi salvo.', 'success');
     setIsPostingComment(false);
+
+    // Notificar membros da tarefa sobre o novo comentário
+    try {
+      const actor = getCurrentActor();
+      const actorEmployeeId = currentUser?.employeeId || currentUser?.id || '';
+      const memberIds = (editingTask.members || [])
+        .map((m: any) => m.id)
+        .filter((mid: string) => mid && mid !== actorEmployeeId);
+      if (memberIds.length > 0) {
+        createNotifications({
+          recipientIds: memberIds,
+          actorId: actorEmployeeId,
+          actorName: actor.name,
+          actorInitials: actor.initials,
+          type: 'task_comment_added',
+          taskId: editingTask.id,
+          taskTitle: editingTask.title,
+          detail: newComment.text.slice(0, 60),
+        });
+      }
+    } catch (_) {}
   };
 
   const handleDeleteComment = async (commentId: string) => {

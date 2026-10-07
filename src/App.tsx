@@ -5,6 +5,7 @@
 
 import React, { Suspense, lazy } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
+import { NotificationsProvider } from './context/NotificationsContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { ToastContainer } from './components/common/ToastContainer';
@@ -177,10 +178,21 @@ const MainLayout: React.FC = () => {
   );
 };
 
+// InnerApp lê o currentUser do AppContext e passa o employeeId para NotificationsProvider
+const InnerApp: React.FC = () => {
+  const { currentUser } = useApp();
+  const recipientId = currentUser?.employeeId || currentUser?.id || null;
+  return (
+    <NotificationsProvider recipientId={recipientId}>
+      <MainLayout />
+    </NotificationsProvider>
+  );
+};
+
 export default function App() {
   return (
     <AppProvider>
-      <MainLayout />
+      <InnerApp />
     </AppProvider>
   );
 }

@@ -127,7 +127,7 @@ export const TaskMembersAndClients: React.FC<{
                   className="fixed inset-0 z-40 backdrop-blur-[2px]"
                   onClick={() => setIsMembersPopoverOpen(false)}
                 />
-                <div className="absolute left-0 top-11 w-72 bg-[#141414] border border-[#2E2E2E] rounded-2xl shadow-2xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[320px] bg-[#141414] border border-[#2E2E2E] rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95 duration-200">
                   <div className="flex items-center justify-between pb-3 border-b border-[#2E2E2E] mb-3">
                     <div className="w-5" />
                     <h4 className="text-sm font-semibold text-center text-white">
@@ -267,7 +267,7 @@ export const TaskMembersAndClients: React.FC<{
                 className="fixed inset-0 z-40"
                 onClick={() => setIsLabelsPopoverOpen(false)}
               />
-              <div className="absolute left-0 top-11 w-80 bg-[#141414] border border-[#2A2A2A] rounded-2xl shadow-2xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[320px] bg-[#141414] border border-[#2A2A2A] rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex items-center justify-between pb-3 border-b border-[#262626] mb-3">
                   <div className="w-5" />
                   <h4 className="text-sm font-semibold text-center text-white">

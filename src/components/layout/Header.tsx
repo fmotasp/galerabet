@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { uploadEmployeeAvatarToDrive } from '../../lib/googleDrive';
 import { useApp } from '../../context/AppContext';
+import { useNotifications } from '../../context/NotificationsContext';
+import { getNotificationLabel, AppNotification } from '../../lib/notificationsService';
 import { supabase } from '../../lib/supabase';
 
 export const Header: React.FC = () => {
@@ -73,6 +75,7 @@ export const Header: React.FC = () => {
     }
   };
 
+  const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -159,12 +162,16 @@ export const Header: React.FC = () => {
         <div className="relative" ref={notifRef}>
           <button
             id="btn-notifications"
-            onClick={() => setIsNotifOpen(!isNotifOpen)}
+            onClick={() => { setIsNotifOpen(!isNotifOpen); }}
             className="p-2 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-[#262626] transition-colors duration-150 relative"
             aria-label="Notificações"
           >
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-gradient-to-r from-[#E4007E] to-[#E94E18] rounded-full ring-2 ring-[#101010] animate-pulse" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold text-white bg-gradient-to-r from-[#E4007E] to-[#E94E18] rounded-full ring-2 ring-[#101010] px-1">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </button>
 
           {isNotifOpen && (
@@ -174,44 +181,80 @@ export const Header: React.FC = () => {
             >
               <div className="flex items-center justify-between pb-3 border-b border-[#303030] mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-white text-sm" style={{ fontFamily: 'var(--font-condensed)' }}>NOTIFICAÇÕES</span>
-                  <span className="text-xs bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 text-[#E4007E] border border-[#E4007E]/30 font-semibold px-2 py-0.5 rounded-full">
-                    {activities.length} novas
-                  </span>
+                  <span className="font-bold text-white text-sm">NOTIFICAÇÕES</span>
+                  {unreadCount > 0 && (
+                    <span className="text-xs bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 text-[#E4007E] border border-[#E4007E]/30 font-semibold px-2 py-0.5 rounded-full">
+                      {unreadCount} {unreadCount === 1 ? 'nova' : 'novas'}
+                    </span>
+                  )}
                 </div>
-                <button
-                  onClick={() => setIsNotifOpen(false)}
-                  className="text-xs text-[#808080] hover:text-white transition-colors duration-150"
-                >
-                  Fechar
-                </button>
+                <div className="flex items-center gap-3">
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={markAllRead}
+                      className="text-xs text-[#E4007E] hover:opacity-80 font-semibold transition-opacity"
+                    >
+                      Marcar todas como lidas
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setIsNotifOpen(false)}
+                    className="text-xs text-[#808080] hover:text-white transition-colors duration-150"
+                  >
+                    Fechar
+                  </button>
+                </div>
               </div>
 
-              <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
-                {activities.slice(0, 5).map((act) => (
-                  <div
-                    key={act.id}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#262626] transition-colors duration-150 text-xs"
-                  >
-                    <div
-                      className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                        act.dotColor === 'orange'
-                          ? 'bg-[#E94E18]'
-                          : act.dotColor === 'green'
-                          ? 'bg-[#10B981]'
-                          : 'bg-gradient-to-r from-[#E4007E] to-[#E94E18]'
-                      }`}
-                    />
-                    <div className="flex-1">
-                      <p className="text-white">
-                        <span className="font-semibold">{act.userName}</span> {act.message}
-                      </p>
-                      <span className="text-[11px] text-[#808080] mt-0.5 block">
-                        {act.timeAgo}
-                      </span>
-                    </div>
+              <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
+                {notifications.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
+                    <Bell className="w-8 h-8 text-[#404040]" />
+                    <p className="text-xs text-[#606060] font-medium">Sem notificações por enquanto</p>
                   </div>
-                ))}
+                ) : (
+                  notifications.slice(0, 15).map((notif: AppNotification) => (
+                    <button
+                      key={notif.id}
+                      onClick={() => markRead(notif.id)}
+                      className={`w-full flex items-start gap-3 p-2.5 rounded-xl transition-colors duration-150 text-left text-xs group ${
+                        notif.is_read ? 'hover:bg-[#202020]' : 'bg-[#1E1E1E] hover:bg-[#262626]'
+                      }`}
+                    >
+                      {/* Avatar / Initials */}
+                      <div className="shrink-0 mt-0.5">
+                        {notif.actor_avatar_url ? (
+                          <img
+                            src={notif.actor_avatar_url}
+                            alt={notif.actor_name}
+                            className="w-7 h-7 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#E4007E] to-[#E94E18] flex items-center justify-center text-white font-bold text-[10px]">
+                            {notif.actor_initials || notif.actor_name.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className={`leading-snug ${notif.is_read ? 'text-[#A0A0A0]' : 'text-white'}`}>
+                          <span className="font-semibold">{notif.actor_name}</span>{' '}
+                          {getNotificationLabel(notif)}
+                        </p>
+                        <span className="text-[10px] text-[#606060] mt-0.5 block">
+                          {new Date(notif.created_at).toLocaleString('pt-BR', {
+                            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+
+                      {/* Dot não lida */}
+                      {!notif.is_read && (
+                        <span className="w-2 h-2 rounded-full bg-[#E4007E] shrink-0 mt-1.5" />
+                      )}
+                    </button>
+                  ))
+                )}
               </div>
 
               <div className="pt-3 border-t border-[#303030] mt-3 flex items-center justify-between">

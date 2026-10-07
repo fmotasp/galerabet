@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Task, TaskStatus, Project, Employee, SpineStatusConfig } from '../../types';
 import { CurrentUserType } from '../../context/AuthContext';
 import { isTaskAssignedToMe, isDesignerOrVideomaker } from '../../lib/taskUtils';
@@ -73,6 +73,34 @@ export const compareTaskDueDatesAscending = (a: Task, b: Task): number => {
   return getTaskNumericTimestamp(b) - getTaskNumericTimestamp(a);
 };
 
+type SortBy = 'default' | 'title' | 'dueDate' | 'points';
+interface PersistedFilters {
+  selectedClient?: string;
+  selectedMember?: string;
+  showDoneColumn?: boolean;
+  sortBy?: SortBy;
+}
+
+const filtersStorageKey = (userId?: string | null) => `tasks-filters:${userId || 'anon'}`;
+
+const loadPersistedFilters = (userId?: string | null): PersistedFilters => {
+  try {
+    const raw = localStorage.getItem(filtersStorageKey(userId));
+    return raw ? (JSON.parse(raw) as PersistedFilters) : {};
+  } catch {
+    return {};
+  }
+};
+
+const savePersistedFilters = (userId: string | null | undefined, data: PersistedFilters) => {
+  try {
+    localStorage.setItem(filtersStorageKey(userId), JSON.stringify(data));
+  } catch {}
+};
+
+const defaultMemberFor = (user: CurrentUserType | null) =>
+  user && isDesignerOrVideomaker(user) ? 'mine' : 'all';
+
 export const useTasksFilter = ({
   tasks,
   projects,
@@ -96,27 +124,39 @@ export const useTasksFilter = ({
   }, [activeFilter, setActiveFilter]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const debouncedSearchQuery = useDebounce(searchQuery, 250);
-  const [selectedClient, setSelectedClient] = useState<string>('all');
-  const [selectedMember, setSelectedMember] = useState<string>(() => {
-    if (currentUser && isDesignerOrVideomaker(currentUser)) {
-      return 'mine';
-    }
-    return 'all';
-  });
-
-  // Sync when current user logs in
-  useEffect(() => {
-    if (currentUser && isDesignerOrVideomaker(currentUser)) {
-      setSelectedMember('mine');
-    } else {
-      setSelectedMember('all');
-    }
-  }, [currentUser?.id]);
+  const [selectedClient, setSelectedClient] = useState<string>(
+    () => loadPersistedFilters(currentUser?.id).selectedClient ?? 'all'
+  );
+  const [selectedMember, setSelectedMember] = useState<string>(
+    () => loadPersistedFilters(currentUser?.id).selectedMember ?? defaultMemberFor(currentUser)
+  );
 
   const [isMemberDropdownOpen, setIsMemberDropdownOpen] = useState<boolean>(false);
   const [memberFilterSearch, setMemberFilterSearch] = useState<string>('');
-  const [showDoneColumn, setShowDoneColumn] = useState<boolean>(true);
-  const [sortBy, setSortBy] = useState<'default' | 'title' | 'dueDate' | 'points'>('default');
+  const [showDoneColumn, setShowDoneColumn] = useState<boolean>(
+    () => loadPersistedFilters(currentUser?.id).showDoneColumn ?? true
+  );
+  const [sortBy, setSortBy] = useState<SortBy>(
+    () => loadPersistedFilters(currentUser?.id).sortBy ?? 'default'
+  );
+
+  // Ao trocar de usuário, restaura os filtros salvos dele (ou o padrão)
+  const lastUserIdRef = useRef<string | undefined>(currentUser?.id);
+  useEffect(() => {
+    if (lastUserIdRef.current === currentUser?.id) return;
+    lastUserIdRef.current = currentUser?.id;
+    const saved = loadPersistedFilters(currentUser?.id);
+    setSelectedClient(saved.selectedClient ?? 'all');
+    setSelectedMember(saved.selectedMember ?? defaultMemberFor(currentUser));
+    setShowDoneColumn(saved.showDoneColumn ?? true);
+    setSortBy(saved.sortBy ?? 'default');
+  }, [currentUser?.id]);
+
+  // Persiste filtros a cada mudança
+  useEffect(() => {
+    savePersistedFilters(currentUser?.id, { selectedClient, selectedMember, showDoneColumn, sortBy });
+  }, [currentUser?.id, selectedClient, selectedMember, showDoneColumn, sortBy]);
+
   const [visibleTasksCount, setVisibleTasksCount] = useState<number>(10);
 
   // Dynamic list of registered clients from projects
@@ -153,6 +193,17 @@ export const useTasksFilter = ({
       ).values()
     );
   }, [projects]);
+
+  // Cliente salvo que não existe mais: volta para "todos"
+  useEffect(() => {
+    if (
+      selectedClient !== 'all' &&
+      registeredClients.length > 0 &&
+      !registeredClients.some((c) => c.id === selectedClient)
+    ) {
+      setSelectedClient('all');
+    }
+  }, [registeredClients, selectedClient]);
 
   const columns = useMemo(() => {
     return spineStatuses
