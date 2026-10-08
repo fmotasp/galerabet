@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
 
@@ -50,12 +51,15 @@ export const Modal: React.FC<ModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, closeOnEscape, onClose]);
 
+  const trapRef = useFocusTrap<HTMLDivElement>(isOpen);
+
   if (!isOpen) return null;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
+      aria-label={typeof title === 'string' ? title : undefined}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
     >
       {/* Backdrop */}
@@ -66,15 +70,16 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Modal Container */}
       <div
+        ref={trapRef}
         onClick={(e) => e.stopPropagation()}
-        className={`relative bg-[#141414] rounded-3xl shadow-2xl border border-white/5 w-full p-6 sm:p-7 z-10 animate-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col ${sizeStyles[size]} ${className}`}
+        className={`relative bg-surface rounded-3xl shadow-2xl border border-white/5 w-full p-6 sm:p-7 z-10 animate-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col ${sizeStyles[size]} ${className}`}
       >
         {/* Header */}
         {(title || icon) && (
-          <div className="flex items-center justify-between pb-4 border-b border-[#262626] shrink-0">
+          <div className="flex items-center justify-between pb-4 border-b border-line shrink-0">
             <div className="flex items-center gap-2.5">
               {icon && (
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-semibold shadow-md shadow-[#E4007E]/25 shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-brand text-white flex items-center justify-center font-semibold shadow-md shrink-0">
                   {icon}
                 </div>
               )}
@@ -92,7 +97,7 @@ export const Modal: React.FC<ModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-[#101010] transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-canvas transition-colors cursor-pointer"
               aria-label="Fechar modal"
             >
               <X className="w-5 h-5" />
@@ -105,7 +110,7 @@ export const Modal: React.FC<ModalProps> = ({
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-between pt-4 border-t border-[#262626] shrink-0">
+          <div className="flex items-center justify-between pt-4 border-t border-line shrink-0">
             {footer}
           </div>
         )}

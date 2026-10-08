@@ -22,6 +22,7 @@ import { useApp } from '../../context/AppContext';
 import { Employee, Project } from '../../types';
 import { Button, Input, Badge, Avatar } from '../ui';
 import { isTaskCompleted } from '../../lib/taskDateUtils';
+import { confirmDialog } from '../../lib/dialogs';
 
 export const RegistrationsView: React.FC = () => {
   const {
@@ -129,7 +130,7 @@ export const RegistrationsView: React.FC = () => {
 
   const getAvatarBorderColor = (index: number) => {
     const borders = [
-      'ring-[#FFB903]',
+      'ring-gold',
       'ring-blue-500',
       'ring-emerald-500',
       'ring-purple-500',
@@ -190,10 +191,10 @@ export const RegistrationsView: React.FC = () => {
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16 animate-in fade-in duration-200">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#141414] p-6 rounded-3xl border border-white/5 shadow-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface p-6 rounded-3xl border border-white/5 shadow-xl">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] flex items-center justify-center text-white font-semibold shadow-lg shadow-[#E4007E]/25">
+            <div className="w-10 h-10 rounded-2xl bg-brand flex items-center justify-center text-white font-semibold shadow-lg">
               <Layers className="w-5 h-5" />
             </div>
             <div>
@@ -216,7 +217,7 @@ export const RegistrationsView: React.FC = () => {
               window.dispatchEvent(new Event('spine_user_logged_in'));
             }}
             title="Atualizar lista de funcionários e clientes do banco de dados"
-            className="px-3.5 py-2.5 text-xs font-bold text-slate-300 hover:text-white bg-[#101010] hover:bg-[#2c2c2c] border border-[#333333] rounded-xl"
+            className="px-3.5 py-2.5 text-xs font-bold text-slate-300 hover:text-white bg-canvas hover:bg-[#2c2c2c] border border-line-hover rounded-xl"
           >
             Sincronizar
           </Button>
@@ -228,7 +229,7 @@ export const RegistrationsView: React.FC = () => {
               size="md"
               onClick={() => setIsNewEmployeeModalOpen(true)}
               leftIcon={<Plus className="w-4 h-4 stroke-[3]" />}
-              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-sm font-semibold"
+              className="px-5 py-2.5 shadow-lg text-sm font-semibold"
             >
               Novo Funcionário
             </Button>
@@ -239,7 +240,7 @@ export const RegistrationsView: React.FC = () => {
               size="md"
               onClick={() => setIsNewProjectModalOpen(true)}
               leftIcon={<Plus className="w-4 h-4 stroke-[3]" />}
-              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-sm font-semibold"
+              className="px-5 py-2.5 shadow-lg text-sm font-semibold"
             >
               Novo Cliente
             </Button>
@@ -249,7 +250,7 @@ export const RegistrationsView: React.FC = () => {
 
       {/* Tabs Navigation (Funcionários vs Clientes) */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
-        <div className="flex items-center gap-2 bg-[#141414] p-1.5 rounded-2xl border border-white/5">
+        <div className="flex items-center gap-2 bg-surface p-1.5 rounded-2xl border border-white/5">
           <button
             onClick={() => {
               setActiveSubTab('employees');
@@ -257,8 +258,8 @@ export const RegistrationsView: React.FC = () => {
             }}
             className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeSubTab === 'employees'
-                ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-md shadow-[#E4007E]/25'
-                : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
+                ? 'bg-gradient-to-r from-brand to-brand-alt text-white shadow-md shadow-brand/25'
+                : 'text-fg-muted hover:text-white hover:bg-line'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -272,8 +273,8 @@ export const RegistrationsView: React.FC = () => {
             }}
             className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeSubTab === 'clients'
-                ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-md shadow-[#E4007E]/25'
-                : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
+                ? 'bg-gradient-to-r from-brand to-brand-alt text-white shadow-md shadow-brand/25'
+                : 'text-fg-muted hover:text-white hover:bg-line'
             }`}
           >
             <Building2 className="w-4 h-4" />
@@ -289,7 +290,7 @@ export const RegistrationsView: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             leftIcon={<Search className="w-4 h-4" />}
-            className="!bg-[#141414] !border-white/5 focus:!border-[#E4007E] py-2 text-xs sm:text-sm font-medium"
+            className="!bg-surface !border-white/5 focus:!border-brand py-2 text-xs sm:text-sm font-medium"
           />
         </div>
       </div>
@@ -298,9 +299,9 @@ export const RegistrationsView: React.FC = () => {
       {activeSubTab === 'employees' && (
         <div className="space-y-6">
           {/* Department and Tag Filters */}
-          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 bg-[#141414] p-3 rounded-2xl border border-white/5">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 bg-surface p-3 rounded-2xl border border-white/5">
             <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5 px-2 mb-1 sm:mb-0">
-              <Tag className="w-3.5 h-3.5 text-[#E4007E]" />
+              <Tag className="w-3.5 h-3.5 text-brand" />
               Filtrar por Tag:
             </span>
 
@@ -309,7 +310,7 @@ export const RegistrationsView: React.FC = () => {
               <select
                 value={selectedTagFilter}
                 onChange={(e) => setSelectedTagFilter(e.target.value)}
-                className="appearance-none w-full bg-[#101010] border border-[#262626] text-white text-sm font-medium py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-colors"
+                className="appearance-none w-full bg-canvas border border-line text-white text-sm font-medium py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30 transition-colors"
               >
                 <option value="All">TODAS AS TAGS</option>
                 {allUniqueTags.map((tag) => (
@@ -326,8 +327,8 @@ export const RegistrationsView: React.FC = () => {
                 onClick={() => setSelectedTagFilter('All')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   selectedTagFilter === 'All'
-                    ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white'
-                    : 'bg-[#101010] text-slate-400 hover:text-white border border-[#262626]'
+                    ? 'bg-gradient-to-r from-brand to-brand-alt text-white'
+                    : 'bg-canvas text-slate-400 hover:text-white border border-line'
                 }`}
               >
                 Todas as tags
@@ -339,8 +340,8 @@ export const RegistrationsView: React.FC = () => {
                   onClick={() => setSelectedTagFilter(tag === selectedTagFilter ? 'All' : tag)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                     selectedTagFilter === tag
-                      ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-sm'
-                      : 'bg-[#101010] text-slate-300 hover:text-white border border-[#262626]'
+                      ? 'bg-gradient-to-r from-brand to-brand-alt text-white shadow-sm'
+                      : 'bg-canvas text-slate-300 hover:text-white border border-line'
                   }`}
                 >
                   {tag}
@@ -351,7 +352,7 @@ export const RegistrationsView: React.FC = () => {
 
           {/* Employees List */}
           {filteredEmployees.length === 0 ? (
-            <div className="p-12 text-center bg-[#141414] rounded-3xl border border-white/5">
+            <div className="p-12 text-center bg-surface rounded-3xl border border-white/5">
               <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <h3 className="text-lg font-bold text-white">Nenhum funcionário cadastrado</h3>
               <p className="text-xs text-slate-400 mt-1">
@@ -362,7 +363,7 @@ export const RegistrationsView: React.FC = () => {
                 size="sm"
                 onClick={() => setIsNewEmployeeModalOpen(true)}
                 leftIcon={<Plus className="w-4 h-4" />}
-                className="mt-4 px-4 py-2 font-bold shadow-md shadow-[#E4007E]/25 text-xs"
+                className="mt-4 px-4 py-2 font-bold shadow-md text-xs"
               >
                 Cadastrar Agora
               </Button>
@@ -379,7 +380,7 @@ export const RegistrationsView: React.FC = () => {
                   <div
                     key={emp.id}
                     onClick={() => setEditingEmployee(emp)}
-                    className="group bg-[#141414] hover:bg-[#202020] rounded-3xl border border-white/5 hover:border-[#E4007E]/50 transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden relative"
+                    className="group bg-surface hover:bg-raised rounded-3xl border border-white/5 hover:border-line-hover transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden relative"
                   >
                     {/* Top Right Actions */}
                     <div className="absolute top-4 right-4 z-10">
@@ -391,7 +392,7 @@ export const RegistrationsView: React.FC = () => {
                             e.stopPropagation();
                             setEditingEmployee(emp);
                           }}
-                          className="p-1.5 text-slate-400 hover:text-[#E4007E] rounded-lg hover:bg-[#262626]"
+                          className="p-1.5 text-slate-400 hover:text-brand rounded-lg hover:bg-line"
                           title="Editar Membro"
                           aria-label="Editar Membro"
                         >
@@ -400,9 +401,9 @@ export const RegistrationsView: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            if (window.confirm(`Deseja realmente excluir ${emp.name}?`)) {
+                            if (await confirmDialog({ message: `Deseja realmente excluir ${emp.name}?`, tone: 'danger' })) {
                               deleteEmployee(emp.id);
                             }
                           }}
@@ -426,13 +427,13 @@ export const RegistrationsView: React.FC = () => {
                             alt={emp.name}
                             size="xl"
                             status={getStatusDot(emp.status)}
-                            className="!w-16 !h-16 shadow-md [&>div]:bg-[#101010] [&>div]:text-[#E4007E] [&>div]:border [&>div]:border-white/5 [&>div]:text-lg [&>div]:font-semibold"
+                            className="!w-16 !h-16 shadow-md [&>div]:bg-canvas [&>div]:text-brand [&>div]:border [&>div]:border-white/5 [&>div]:text-lg [&>div]:font-semibold"
                           />
                         </div>
                       </div>
 
                       {/* Name */}
-                      <h3 className="font-extrabold text-white text-base tracking-tight group-hover:text-[#E4007E] transition-colors leading-tight truncate max-w-[200px]">
+                      <h3 className="font-bold text-white text-base tracking-tight group-hover:text-brand transition-colors leading-tight truncate max-w-[200px]">
                         {emp.name}
                       </h3>
 
@@ -451,7 +452,7 @@ export const RegistrationsView: React.FC = () => {
                               <div
                                 key={sIdx}
                                 className={`h-1.5 rounded-full flex-1 transition-all ${
-                                  isFilled ? 'bg-[#E4007E]' : 'bg-[#262626]'
+                                  isFilled ? 'bg-brand' : 'bg-line'
                                 }`}
                               />
                             );
@@ -464,7 +465,7 @@ export const RegistrationsView: React.FC = () => {
                     </div>
 
                     {/* Card Footer: Role in Uppercase */}
-                    <div className="bg-[#141414] px-4 py-3 border-t border-[#262626] text-center">
+                    <div className="bg-surface px-4 py-3 border-t border-line text-center">
                       <span className="text-xs font-medium text-slate-300 group-hover:text-white transition-colors truncate block">
                         {emp.role || emp.department || 'COLABORADOR'}
                       </span>
@@ -481,7 +482,7 @@ export const RegistrationsView: React.FC = () => {
       {activeSubTab === 'clients' && (
         <div className="space-y-6">
           {filteredProjects.length === 0 ? (
-            <div className="p-12 text-center bg-[#141414] rounded-3xl border border-white/5">
+            <div className="p-12 text-center bg-surface rounded-3xl border border-white/5">
               <Building2 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <h3 className="text-lg font-bold text-white">Nenhum cliente cadastrado</h3>
               <p className="text-xs text-slate-400 mt-1">
@@ -508,7 +509,7 @@ export const RegistrationsView: React.FC = () => {
                 return (
                   <div
                     key={proj.id}
-                    className="bg-[#141414] rounded-3xl p-5 border border-white/5 hover:border-[#E4007E]/50 shadow-lg transition-all group flex flex-col justify-between"
+                    className="bg-surface rounded-3xl p-5 border border-white/5 hover:border-line-hover shadow-lg transition-all group flex flex-col justify-between"
                   >
                     <div>
                       {/* Card Header: Icon/Logo, Name, Category & Actions */}
@@ -534,7 +535,7 @@ export const RegistrationsView: React.FC = () => {
                           )}
 
                           <div>
-                            <h3 className="font-extrabold text-white text-base group-hover:text-[#FFBA00] transition-colors leading-tight">
+                            <h3 className="font-bold text-white text-base group-hover:text-gold transition-colors leading-tight">
                               {proj.name}
                             </h3>
                             <p className="text-xs text-white/90 font-medium mt-0.5">{proj.category}</p>
@@ -547,7 +548,7 @@ export const RegistrationsView: React.FC = () => {
                             variant="ghost"
                             size="icon"
                             onClick={() => setEditingProject(proj)}
-                            className="p-1.5 text-white hover:text-[#FFBA00] rounded-lg hover:bg-slate-800"
+                            className="p-1.5 text-white hover:text-gold rounded-lg hover:bg-slate-800"
                             title="Editar cliente"
                             aria-label="Editar cliente"
                           >
@@ -556,8 +557,8 @@ export const RegistrationsView: React.FC = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => {
-                              if (window.confirm(`Deseja realmente excluir o cliente ${proj.name}?`)) {
+                            onClick={async () => {
+                              if (await confirmDialog({ message: `Deseja realmente excluir o cliente ${proj.name}?`, tone: 'danger' })) {
                                 deleteProject(proj.id);
                               }
                             }}
@@ -597,7 +598,7 @@ export const RegistrationsView: React.FC = () => {
                                 name={emp.name}
                                 alt={emp.name}
                                 size="sm"
-                                className="!w-7 !h-7 ring-2 ring-[#011C39]"
+                                className="!w-7 !h-7 ring-2 ring-field"
                                 title={emp.name}
                               />
                             );
@@ -614,7 +615,7 @@ export const RegistrationsView: React.FC = () => {
                       </div>
                       <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-[#FFBA00] rounded-full transition-all duration-300"
+                          className="h-full bg-gold rounded-full transition-all duration-300"
                           style={{ width: `${progressPct}%` }}
                         />
                       </div>
@@ -623,7 +624,7 @@ export const RegistrationsView: React.FC = () => {
                         <span className="text-white">{projTasks.length} demandas</span>
                         <button
                           onClick={() => setSelectedProjectForDetail(proj)}
-                          className="text-xs font-bold text-white hover:text-[#FFBA00] flex items-center gap-1 cursor-pointer"
+                          className="text-xs font-bold text-white hover:text-gold flex items-center gap-1 cursor-pointer"
                         >
                           <span>Detalhes</span>
                           <ExternalLink className="w-3 h-3" />
@@ -645,10 +646,10 @@ export const RegistrationsView: React.FC = () => {
             className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity"
             onClick={() => setTagModalEmployee(null)}
           />
-          <div className="relative bg-[#011C39] rounded-3xl shadow-2xl border border-slate-700 max-w-md w-full p-6 z-10 animate-in fade-in zoom-in-95 duration-150">
+          <div className="relative bg-field rounded-3xl shadow-2xl border border-slate-700 max-w-md w-full p-6 z-10 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-2">
-                <Tag className="w-5 h-5 text-[#FFBA00]" />
+                <Tag className="w-5 h-5 text-gold" />
                 <h3 className="text-base font-semibold text-white">
                   Etiquetas de {tagModalEmployee.name}
                 </h3>
@@ -712,7 +713,7 @@ export const RegistrationsView: React.FC = () => {
                       handleAddTagToEmployee(tagModalEmployee);
                     }
                   }}
-                  className="flex-1 py-2 text-sm text-white placeholder-slate-500 font-medium !bg-[#101010] !border-white/5 focus:!border-[#E4007E]"
+                  className="flex-1 py-2 text-sm text-white placeholder-slate-500 font-medium !bg-canvas !border-white/5 focus:!border-brand"
                 />
                 <Button
                   variant="primary"
@@ -730,7 +731,7 @@ export const RegistrationsView: React.FC = () => {
                 variant="secondary"
                 size="sm"
                 onClick={() => setTagModalEmployee(null)}
-                className="px-4 py-2 text-white text-xs font-bold bg-[#101010] hover:bg-[#2A2A2A]"
+                className="px-4 py-2 text-white text-xs font-bold bg-canvas hover:bg-chip"
               >
                 Concluir
               </Button>

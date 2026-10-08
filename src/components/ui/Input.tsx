@@ -19,10 +19,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             disabled={disabled}
-            className={`w-full bg-[#1C1C1C] border ${
-              error ? 'border-rose-500/80 focus:border-rose-500' : 'border-[#262626] focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30'
+            className={`w-full bg-raised border ${
+              error ? 'border-rose-500/80 focus:border-rose-500' : 'border-line focus:border-brand/50 focus:ring-2 focus:ring-brand/30'
             } rounded-xl text-xs sm:text-sm font-semibold text-white placeholder-slate-500 focus:outline-none focus:ring-1 ${
-              error ? 'focus:ring-rose-500/50' : 'focus:ring-[#E4007E]/50'
+              error ? 'focus:ring-rose-500/50' : 'focus:ring-brand/50'
             } transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
               leftIcon ? 'pl-9.5' : 'pl-3'
             } ${rightIcon ? 'pr-9.5' : 'pr-3'} py-2.5 sm:py-3 shadow-inner ${className}`}
@@ -34,7 +34,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
         </div>
-        {error && <p className="text-[11px] font-bold text-rose-400">{error}</p>}
+        {error && <p className="text-xs font-bold text-rose-400">{error}</p>}
       </div>
     );
   }

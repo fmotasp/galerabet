@@ -17,6 +17,7 @@ import {
 import { useApp, useEmployees, useTasks } from '../../context/AppContext';
 import { Employee } from '../../types';
 import { Button, Input, Avatar } from '../ui';
+import { confirmDialog } from '../../lib/dialogs';
 
 export const EmployeesView: React.FC = () => {
   const { employees, deleteEmployee } = useEmployees();
@@ -140,7 +141,7 @@ export const EmployeesView: React.FC = () => {
 
   const getAvatarBorderColor = (index: number) => {
     const borders = [
-      'ring-[#E4007E]',
+      'ring-brand',
       'ring-blue-500',
       'ring-emerald-500',
       'ring-purple-500',
@@ -180,7 +181,7 @@ export const EmployeesView: React.FC = () => {
                 >
                   <span>Todos ({employees.length})</span>
                   {activeTab === 'all' && (
-                    <span className="absolute bottom-[-9px] left-0 right-0 h-0.5 bg-[#E4007E] rounded-full" />
+                    <span className="absolute bottom-[-9px] left-0 right-0 h-0.5 bg-brand rounded-full" />
                   )}
                 </button>
 
@@ -192,7 +193,7 @@ export const EmployeesView: React.FC = () => {
                 >
                   <span>Organização / Departamentos</span>
                   {activeTab === 'organization' && (
-                    <span className="absolute bottom-[-9px] left-0 right-0 h-0.5 bg-[#E4007E] rounded-full" />
+                    <span className="absolute bottom-[-9px] left-0 right-0 h-0.5 bg-brand rounded-full" />
                   )}
                 </button>
               </div>
@@ -207,7 +208,7 @@ export const EmployeesView: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   leftIcon={<Search className="w-4 h-4" />}
-                  className="py-2 bg-[#161616] !border-slate-800 focus:!border-[#E4007E] rounded-xl text-[13px] font-medium"
+                  className="py-2 bg-surface !border-slate-800 focus:!border-brand rounded-xl text-sm font-medium"
                 />
               </div>
 
@@ -231,7 +232,7 @@ export const EmployeesView: React.FC = () => {
                 <select
                   value={selectedDept}
                   onChange={(e) => setSelectedDept(e.target.value)}
-                  className="appearance-none bg-[#101010] hover:bg-[#022852] border border-slate-700/80 text-white text-xs font-bold py-2 pl-3.5 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 cursor-pointer transition-colors"
+                  className="appearance-none bg-canvas hover:bg-raised border border-slate-700/80 text-white text-xs font-bold py-2 pl-3.5 pr-8 rounded-xl focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30 cursor-pointer transition-colors"
                 >
                   <option value="all">Todas as Equipes</option>
                   {departments.map((d) => (
@@ -248,7 +249,7 @@ export const EmployeesView: React.FC = () => {
                 <select
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value)}
-                  className="appearance-none bg-[#101010] hover:bg-[#022852] border border-slate-700/80 text-white text-xs font-bold py-2 pl-3.5 pr-8 rounded-xl focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 cursor-pointer transition-colors"
+                  className="appearance-none bg-canvas hover:bg-raised border border-slate-700/80 text-white text-xs font-bold py-2 pl-3.5 pr-8 rounded-xl focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30 cursor-pointer transition-colors"
                 >
                   <option value="all">Todos os Cargos</option>
                   {roles.map((r) => (
@@ -268,7 +269,7 @@ export const EmployeesView: React.FC = () => {
                     setSelectedRole('all');
                     setSearchQuery('');
                   }}
-                  className="text-[11px] text-[#E4007E] hover:underline font-bold px-2 py-1 cursor-pointer"
+                  className="text-xs text-brand hover:underline font-bold px-2 py-1 cursor-pointer"
                 >
                   Limpar
                 </button>
@@ -284,7 +285,7 @@ export const EmployeesView: React.FC = () => {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as 'all' | 'name')}
-                    className="appearance-none bg-[#101010] hover:bg-[#022852] border border-slate-700/80 text-white text-xs font-bold py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 cursor-pointer transition-colors"
+                    className="appearance-none bg-canvas hover:bg-raised border border-slate-700/80 text-white text-xs font-bold py-2 pl-3 pr-7 rounded-xl focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30 cursor-pointer transition-colors"
                   >
                     <option value="all">Padrão</option>
                     <option value="name">Nome (A-Z)</option>
@@ -294,12 +295,12 @@ export const EmployeesView: React.FC = () => {
               </div>
 
               {/* View Toggle Buttons */}
-              <div className="flex items-center bg-[#101010] p-1 rounded-xl border border-slate-700/80">
+              <div className="flex items-center bg-canvas p-1 rounded-xl border border-slate-700/80">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                     viewMode === 'grid'
-                      ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-sm'
+                      ? 'bg-gradient-to-r from-brand to-brand-alt text-white shadow-sm'
                       : 'text-slate-400 hover:text-white'
                   }`}
                   title="Visualização em Grade"
@@ -311,7 +312,7 @@ export const EmployeesView: React.FC = () => {
                   onClick={() => setViewMode('list')}
                   className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                     viewMode === 'list'
-                      ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-sm'
+                      ? 'bg-gradient-to-r from-brand to-brand-alt text-white shadow-sm'
                       : 'text-slate-400 hover:text-white'
                   }`}
                   title="Visualização em Lista"
@@ -325,7 +326,7 @@ export const EmployeesView: React.FC = () => {
 
           {/* ================= EMPLOYEE CARDS GRID ================= */}
           {filteredEmployees.length === 0 ? (
-            <div className="py-20 text-center bg-[#141414] rounded-3xl border border-slate-800 p-8">
+            <div className="py-20 text-center bg-surface rounded-3xl border border-slate-800 p-8">
               <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <h3 className="text-lg font-bold text-white">Nenhum funcionário encontrado</h3>
               <p className="text-xs text-slate-400 mt-1">
@@ -350,9 +351,9 @@ export const EmployeesView: React.FC = () => {
                       setSelectedSidebarEmployeeId(emp.id);
                       setEditingEmployee(emp);
                     }}
-                    className={`group bg-[#141414] hover:bg-[#001c3d] rounded-3xl border transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden relative ${
+                    className={`group bg-surface hover:bg-[#001c3d] rounded-3xl border transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between overflow-hidden relative ${
                       isSelected
-                        ? 'border-[#E4007E] ring-2 ring-[#E4007E]/20'
+                        ? 'border-brand ring-2 ring-brand/20'
                         : 'border-slate-800 hover:border-slate-700'
                     }`}
                   >
@@ -366,7 +367,7 @@ export const EmployeesView: React.FC = () => {
                             e.stopPropagation();
                             setEditingEmployee(emp);
                           }}
-                          className="p-1.5 text-slate-400 hover:text-[#E4007E] rounded-lg hover:bg-slate-800/80"
+                          className="p-1.5 text-slate-400 hover:text-brand rounded-lg hover:bg-slate-800/80"
                           title="Editar Membro"
                           aria-label="Editar Membro"
                         >
@@ -375,9 +376,9 @@ export const EmployeesView: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            if (window.confirm(`Deseja realmente excluir ${emp.name}?`)) {
+                            if (await confirmDialog({ message: `Deseja realmente excluir ${emp.name}?`, tone: 'danger' })) {
                               deleteEmployee(emp.id);
                             }
                           }}
@@ -407,7 +408,7 @@ export const EmployeesView: React.FC = () => {
                       </div>
 
                       {/* Name */}
-                      <h3 className="font-extrabold text-white text-base tracking-tight group-hover:text-[#E4007E] transition-colors leading-tight truncate max-w-[200px]">
+                      <h3 className="font-bold text-white text-base tracking-tight group-hover:text-brand transition-colors leading-tight truncate max-w-[200px]">
                         {emp.name}
                       </h3>
 
@@ -426,7 +427,7 @@ export const EmployeesView: React.FC = () => {
                               <div
                                 key={sIdx}
                                 className={`h-1.5 rounded-full flex-1 transition-all ${
-                                  isFilled ? 'bg-[#E4007E]' : 'bg-slate-800'
+                                  isFilled ? 'bg-brand' : 'bg-slate-800'
                                 }`}
                               />
                             );
@@ -439,7 +440,7 @@ export const EmployeesView: React.FC = () => {
                     </div>
 
                     {/* Card Footer: Role in Uppercase */}
-                    <div className="bg-[#001124] px-4 py-3 border-t border-slate-800/80 text-center">
+                    <div className="bg-surface px-4 py-3 border-t border-slate-800/80 text-center">
                       <span className="text-xs font-medium text-slate-300 group-hover:text-white transition-colors truncate block">
                         {emp.role || emp.department || 'COLABORADOR'}
                       </span>
@@ -450,11 +451,11 @@ export const EmployeesView: React.FC = () => {
             </div>
           ) : (
             /* Table / List View */
-            <div className="bg-[#101010] rounded-3xl border border-white/5 overflow-hidden shadow-xl">
+            <div className="bg-canvas rounded-3xl border border-white/5 overflow-hidden shadow-xl">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
-                  <thead className="sticky top-0 z-20 backdrop-blur-md bg-[#101010]/80">
-                    <tr className="border-b border-white/5 text-[#E4007E] font-semibold text-[11px] uppercase tracking-wider">
+                  <thead className="sticky top-0 z-20 backdrop-blur-md bg-canvas/80">
+                    <tr className="border-b border-white/5 text-brand font-semibold text-xs uppercase tracking-wider">
                       <th className="px-6 py-4 whitespace-nowrap">Membro</th>
                       <th className="px-6 py-4 whitespace-nowrap">Cargo</th>
                       <th className="px-6 py-4 whitespace-nowrap">Departamento</th>
@@ -485,7 +486,7 @@ export const EmployeesView: React.FC = () => {
                             />
                             <div>
                               <div className="font-bold text-white">{emp.name}</div>
-                              <div className="text-[11px] text-slate-400">{emp.email || `${emp.name.toLowerCase().replace(/\s+/g, '.')}@gmail.com`}</div>
+                              <div className="text-xs text-slate-400">{emp.email || `${emp.name.toLowerCase().replace(/\s+/g, '.')}@gmail.com`}</div>
                             </div>
                           </div>
                         </td>
@@ -494,7 +495,7 @@ export const EmployeesView: React.FC = () => {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <div className="w-20 h-2 bg-slate-800 rounded-full overflow-hidden">
-                              <div className="h-full bg-[#E4007E] rounded-full" style={{ width: `${efficiency}%` }} />
+                              <div className="h-full bg-brand rounded-full" style={{ width: `${efficiency}%` }} />
                             </div>
                             <span className="font-bold text-xs">{efficiency}%</span>
                           </div>
@@ -514,8 +515,8 @@ export const EmployeesView: React.FC = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => {
-                                if (window.confirm(`Deseja excluir ${emp.name}?`)) deleteEmployee(emp.id);
+                              onClick={async () => {
+                                if (await confirmDialog({ message: `Deseja excluir ${emp.name}?`, tone: 'danger' })) deleteEmployee(emp.id);
                               }}
                               className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10"
                               title="Excluir"
@@ -538,7 +539,7 @@ export const EmployeesView: React.FC = () => {
         {/* ================= RIGHT SIDEBAR PANEL (~25% WIDTH) ================= */}
         <div className="xl:col-span-4 2xl:col-span-3 space-y-6">
           {/* Main Sidebar Box */}
-          <div className="bg-[#141414] rounded-3xl p-6 border border-slate-800 shadow-xl space-y-6">
+          <div className="bg-surface rounded-3xl p-6 border border-slate-800 shadow-xl space-y-6">
             {/* Header: Selected Team / Member */}
             <div className="flex items-start justify-between">
               <div>
@@ -604,7 +605,7 @@ export const EmployeesView: React.FC = () => {
                     cx="50"
                     cy="50"
                     r="40"
-                    className="text-[#E4007E] transition-all duration-700 ease-out"
+                    className="text-brand transition-all duration-700 ease-out"
                     strokeWidth="8"
                     strokeDasharray={251.2}
                     strokeDashoffset={251.2 - (251.2 * stats.rate) / 100}
@@ -645,11 +646,11 @@ export const EmployeesView: React.FC = () => {
 
             {/* Projects / Demandas Metric 2x2 Grid */}
             <div className="space-y-3 pt-2">
-              <h3 className="text-sm font-extrabold text-white">Demandas & Projetos</h3>
+              <h3 className="text-sm font-bold text-white">Demandas & Projetos</h3>
 
               <div className="grid grid-cols-2 gap-3">
                 {/* Total */}
-                <div className="bg-[#001124] p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
+                <div className="bg-surface p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
                   <div className="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r" />
                   <span className="text-xs font-medium text-slate-400 block pl-1">
                     TOTAL
@@ -660,7 +661,7 @@ export const EmployeesView: React.FC = () => {
                 </div>
 
                 {/* Concluídas */}
-                <div className="bg-[#001124] p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
+                <div className="bg-surface p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
                   <div className="absolute left-0 top-3 bottom-3 w-1 bg-emerald-500 rounded-r" />
                   <span className="text-xs font-medium text-slate-400 block pl-1">
                     CONCLUÍDAS
@@ -671,7 +672,7 @@ export const EmployeesView: React.FC = () => {
                 </div>
 
                 {/* Em Andamento */}
-                <div className="bg-[#001124] p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
+                <div className="bg-surface p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
                   <div className="absolute left-0 top-3 bottom-3 w-1 bg-cyan-400 rounded-r" />
                   <span className="text-xs font-medium text-slate-400 block pl-1">
                     EM ANDAMENTO
@@ -682,7 +683,7 @@ export const EmployeesView: React.FC = () => {
                 </div>
 
                 {/* Aguardando / Pendentes */}
-                <div className="bg-[#001124] p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
+                <div className="bg-surface p-4 rounded-2xl border border-slate-800 relative overflow-hidden">
                   <div className="absolute left-0 top-3 bottom-3 w-1 bg-amber-500 rounded-r" />
                   <span className="text-xs font-medium text-slate-400 block pl-1">
                     AGUARDANDO
@@ -696,17 +697,17 @@ export const EmployeesView: React.FC = () => {
 
             {/* Bottom Widget: Declaration Center / Internal Messages */}
             <div className="pt-2">
-              <div className="bg-[#001124] p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between hover:border-[#FFB903]/40 transition-colors cursor-pointer group">
+              <div className="bg-surface p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between hover:border-gold/40 transition-colors cursor-pointer group">
                 <div className="flex items-center gap-3">
                   <div className="relative w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md">
                     <MessageSquare className="w-4 h-4" />
-                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#001124]" />
+                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-surface" />
                   </div>
                   <div>
                     <span className="text-xs font-medium text-slate-400 block">
                       CENTRAL DE AVISOS
                     </span>
-                    <span className="text-xs font-bold text-white group-hover:text-[#FFB903] transition-colors">
+                    <span className="text-xs font-bold text-white group-hover:text-gold transition-colors">
                       Mensagens internas
                     </span>
                   </div>

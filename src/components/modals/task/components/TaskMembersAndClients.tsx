@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, X, Check } from 'lucide-react';
 import { Employee, Project, TaskMember } from '../../../../types';
 import { Avatar } from '../../../ui/Avatar';
+import { useDropdownA11y } from '../../../../hooks/useDropdownA11y';
 
 export const TaskMembersAndClients: React.FC<{
   taskMembers: TaskMember[];
@@ -21,9 +22,11 @@ export const TaskMembersAndClients: React.FC<{
   handleToggleLabel,
 }) => {
   const [isMembersPopoverOpen, setIsMembersPopoverOpen] = useState(false);
+  useDropdownA11y(isMembersPopoverOpen, () => setIsMembersPopoverOpen(false));
   const [memberSearchQuery, setMemberSearchQuery] = useState('');
 
   const [isLabelsPopoverOpen, setIsLabelsPopoverOpen] = useState(false);
+  useDropdownA11y(isLabelsPopoverOpen, () => setIsLabelsPopoverOpen(false));
   const [labelSearchQuery, setLabelSearchQuery] = useState('');
 
   return (
@@ -71,7 +74,7 @@ export const TaskMembersAndClients: React.FC<{
                     alt={emp.name}
                     size="md"
                     ring
-                    className="!w-9 !h-9 ring-2 ring-[#E4007E]/60 group-hover:ring-rose-500 transition-all shadow-xs text-xs font-semibold"
+                    className="!w-9 !h-9 ring-2 ring-brand/60 group-hover:ring-rose-500 transition-all shadow-xs text-xs font-semibold"
                   />
                   <div className="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                     <X className="w-2.5 h-2.5" />
@@ -84,13 +87,13 @@ export const TaskMembersAndClients: React.FC<{
           {/* Add Member Button */}
           <div className="flex flex-col gap-1.5 items-center">
             <div className="relative flex shrink-0">
-              <button
+              <button aria-haspopup="true" aria-expanded={isMembersPopoverOpen} aria-label="Adicionar Membro"
                 type="button"
                 onClick={() => {
                   setIsMembersPopoverOpen(!isMembersPopoverOpen);
                   setIsLabelsPopoverOpen(false);
                 }}
-                className="w-9 h-9 rounded-full bg-[#1C1C1C] hover:bg-[#E4007E]/20 flex items-center justify-center text-slate-400 hover:text-[#E4007E] transition-all hover:scale-105 active:scale-95 cursor-pointer border-transparent"
+                className="w-9 h-9 rounded-full bg-raised hover:bg-brand/20 flex items-center justify-center text-slate-400 hover:text-brand transition-all hover:scale-105 active:scale-95 cursor-pointer border-transparent"
                 title="Adicionar Membro"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -106,13 +109,13 @@ export const TaskMembersAndClients: React.FC<{
               className="fixed inset-0 z-[55] backdrop-blur-[2px]"
               onClick={() => setIsMembersPopoverOpen(false)}
             />
-            <div className="absolute bottom-0 left-0 right-0 w-full bg-[#141414] border-t border-l border-white/5 rounded-tl-2xl shadow-[0_-20px_50px_rgba(0,0,0,0.5)] p-4 sm:p-6 z-[60] animate-in slide-in-from-bottom-12 duration-200 flex flex-col max-h-full">
-              <div className="flex items-center justify-between pb-3 border-b border-[#262626] mb-3 shrink-0">
+            <div data-menu className="absolute bottom-0 left-0 right-0 w-full bg-surface border-t border-l border-white/5 rounded-tl-2xl shadow-[0_-20px_50px_rgba(0,0,0,0.5)] p-4 sm:p-6 z-[60] animate-in slide-in-from-bottom-12 duration-200 flex flex-col max-h-full">
+              <div className="flex items-center justify-between pb-3 border-b border-line mb-3 shrink-0">
                 <div className="w-5" />
                 <h4 className="text-sm font-semibold text-center text-white">
                   Membros
                 </h4>
-                <button
+                <button aria-label="Fechar"
                   type="button"
                   onClick={() => setIsMembersPopoverOpen(false)}
                   className="text-slate-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer"
@@ -128,7 +131,7 @@ export const TaskMembersAndClients: React.FC<{
                     placeholder="Buscar membros..."
                     value={memberSearchQuery}
                     onChange={(e) => setMemberSearchQuery(e.target.value)}
-                    className="w-full p-2.5 bg-[#101010] border border-white/5 focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 rounded-xl text-xs text-white placeholder-slate-400 font-medium focus:outline-none transition-all"
+                    className="w-full p-2.5 bg-canvas border border-white/5 focus:border-brand/50 focus:ring-2 focus:ring-brand/30 rounded-xl text-xs text-white placeholder-slate-400 font-medium focus:outline-none transition-all"
                   />
                 </div>
 
@@ -149,7 +152,7 @@ export const TaskMembersAndClients: React.FC<{
                             else handleAddMember(emp.id);
                           }}
                           className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-colors animate-in slide-in-from-right-2 fade-in duration-300 fill-mode-both ${
-                            isSelected ? 'bg-[#262626]' : 'hover:bg-[#1C1C1C]'
+                            isSelected ? 'bg-line' : 'hover:bg-raised'
                           }`}
                           style={{ 
                             border: isSelected ? '1px solid rgba(228, 0, 126, 0.5)' : '1px solid transparent',
@@ -157,7 +160,7 @@ export const TaskMembersAndClients: React.FC<{
                           }}
                         >
                           <div 
-                            className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${isSelected ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18]' : ''}`}
+                            className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${isSelected ? 'bg-gradient-to-r from-brand to-brand-alt' : ''}`}
                             style={{ border: isSelected ? 'none' : '1px solid #3E3E3E' }}
                           >
                             {isSelected && <Check className="w-3 h-3 text-white stroke-[3]" />}
@@ -176,7 +179,7 @@ export const TaskMembersAndClients: React.FC<{
                             <span className="font-bold text-xs block truncate text-white">
                               {emp.name}
                             </span>
-                            <span className="text-[11px] text-slate-300 block truncate">
+                            <span className="text-xs text-slate-300 block truncate">
                               {emp.role}
                             </span>
                           </div>
@@ -207,7 +210,7 @@ export const TaskMembersAndClients: React.FC<{
                 className="relative flex group cursor-pointer shrink-0 active:scale-95 transition-transform"
                 title={`${lbl} (Clique para remover)`}
               >
-                <div className="w-9 h-9 rounded-full bg-[#141414] border-2 border-[#E4007E]/60 group-hover:border-rose-500 transition-all flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                <div className="w-9 h-9 rounded-full bg-surface border-2 border-brand/60 group-hover:border-rose-500 transition-all flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
                   {clientObj?.logoUrl ? (
                     <img
                       src={clientObj.logoUrl}
@@ -215,7 +218,7 @@ export const TaskMembersAndClients: React.FC<{
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-bold text-xs">
+                    <div className="w-full h-full bg-brand text-white flex items-center justify-center font-bold text-xs">
                       {lbl.slice(0, 2).toUpperCase()}
                     </div>
                   )}
@@ -227,13 +230,13 @@ export const TaskMembersAndClients: React.FC<{
             );
           })}
 
-          <button
+          <button aria-haspopup="true" aria-expanded={isLabelsPopoverOpen} aria-label="Adicionar Cliente"
             type="button"
             onClick={() => {
               setIsLabelsPopoverOpen(!isLabelsPopoverOpen);
               setIsMembersPopoverOpen(false);
             }}
-            className="w-9 h-9 rounded-full bg-[#1A1A1A] hover:bg-[#101010] border border-[#333] hover:border-[#E4007E] border-dashed text-slate-400 hover:text-white flex items-center justify-center transition-all shadow-sm active:scale-95 shrink-0"
+            className="w-9 h-9 rounded-full bg-field hover:bg-canvas border border-[#333] hover:border-line-hover border-dashed text-slate-400 hover:text-white flex items-center justify-center transition-all shadow-sm active:scale-95 shrink-0"
             title="Adicionar Cliente"
           >
             <Plus className="w-4 h-4" />
@@ -247,13 +250,13 @@ export const TaskMembersAndClients: React.FC<{
               className="fixed inset-0 z-[55] backdrop-blur-[2px]"
               onClick={() => setIsLabelsPopoverOpen(false)}
             />
-            <div className="absolute bottom-0 left-0 right-0 w-full bg-[#141414] border-t border-l border-white/5 rounded-tl-2xl shadow-[0_-20px_50px_rgba(0,0,0,0.5)] p-4 sm:p-6 z-[60] animate-in slide-in-from-bottom-12 duration-200 flex flex-col max-h-full">
-              <div className="flex items-center justify-between pb-3 border-b border-[#262626] mb-3 shrink-0">
+            <div data-menu className="absolute bottom-0 left-0 right-0 w-full bg-surface border-t border-l border-white/5 rounded-tl-2xl shadow-[0_-20px_50px_rgba(0,0,0,0.5)] p-4 sm:p-6 z-[60] animate-in slide-in-from-bottom-12 duration-200 flex flex-col max-h-full">
+              <div className="flex items-center justify-between pb-3 border-b border-line mb-3 shrink-0">
                 <div className="w-5" />
                 <h4 className="text-sm font-semibold text-center text-white">
                   Clientes
                 </h4>
-                <button
+                <button aria-label="Fechar"
                   type="button"
                   onClick={() => setIsLabelsPopoverOpen(false)}
                   className="text-slate-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer"
@@ -269,7 +272,7 @@ export const TaskMembersAndClients: React.FC<{
                     placeholder="Buscar cliente..."
                     value={labelSearchQuery}
                     onChange={(e) => setLabelSearchQuery(e.target.value)}
-                    className="w-full p-2.5 bg-[#101010] border border-white/5 focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 rounded-xl text-xs text-white placeholder-slate-400 font-medium focus:outline-none transition-all"
+                    className="w-full p-2.5 bg-canvas border border-white/5 focus:border-brand/50 focus:ring-2 focus:ring-brand/30 rounded-xl text-xs text-white placeholder-slate-400 font-medium focus:outline-none transition-all"
                   />
                 </div>
 
@@ -297,7 +300,7 @@ export const TaskMembersAndClients: React.FC<{
                           key={c.id}
                           onClick={() => handleToggleLabel(c.name)}
                           className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-colors animate-in slide-in-from-right-2 fade-in duration-300 fill-mode-both ${
-                            isSelected ? 'bg-[#262626]' : 'hover:bg-[#1C1C1C]'
+                            isSelected ? 'bg-line' : 'hover:bg-raised'
                           }`}
                           style={{ 
                             border: isSelected ? '1px solid rgba(228, 0, 126, 0.5)' : '1px solid transparent',
@@ -305,13 +308,13 @@ export const TaskMembersAndClients: React.FC<{
                           }}
                         >
                           <div 
-                            className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${isSelected ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18]' : ''}`}
+                            className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${isSelected ? 'bg-gradient-to-r from-brand to-brand-alt' : ''}`}
                             style={{ border: isSelected ? 'none' : '1px solid #3E3E3E' }}
                           >
                             {isSelected && <Check className="w-3 h-3 text-white stroke-[3]" />}
                           </div>
 
-                          <div className="w-7 h-7 rounded-lg bg-[#101010] border border-[#262626] flex items-center justify-center overflow-hidden shrink-0 p-0.5">
+                          <div className="w-7 h-7 rounded-lg bg-canvas border border-line flex items-center justify-center overflow-hidden shrink-0 p-0.5">
                             {c.logoUrl ? (
                               <img
                                 src={c.logoUrl}
@@ -319,7 +322,7 @@ export const TaskMembersAndClients: React.FC<{
                                 className="w-full h-full object-contain"
                               />
                             ) : (
-                              <div className="w-full h-full rounded-md bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-semibold text-[10px]">
+                              <div className="w-full h-full rounded-md bg-brand text-white flex items-center justify-center font-semibold text-[11px]">
                                 {c.name.slice(0, 2).toUpperCase()}
                               </div>
                             )}
@@ -328,7 +331,7 @@ export const TaskMembersAndClients: React.FC<{
                           <div className="truncate flex-1 min-w-0">
                             <span className="font-bold text-xs block truncate text-white">{c.name}</span>
                             {c.category && (
-                              <span className="text-[11px] text-slate-300 block truncate">{c.category}</span>
+                              <span className="text-xs text-slate-300 block truncate">{c.category}</span>
                             )}
                           </div>
                         </div>

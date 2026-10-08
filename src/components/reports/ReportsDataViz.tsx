@@ -72,7 +72,7 @@ export const ReportsDataViz: React.FC<{
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#1C1C1C] border border-[#262626] p-3 rounded-xl shadow-xl">
+        <div className="bg-raised border border-line p-3 rounded-xl shadow-xl">
           <p className="text-white font-bold mb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center gap-2 text-sm">
@@ -91,9 +91,9 @@ export const ReportsDataViz: React.FC<{
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
       
       {/* Area Chart: Ritmo de Entregas */}
-      <div className="p-6 bg-[#141414] border border-[#262626] rounded-2xl flex flex-col shadow-xs h-[380px]">
+      <div className="p-6 bg-surface border border-line rounded-2xl flex flex-col shadow-xs h-[380px]">
         <div className="flex items-center gap-2 mb-6">
-          <Activity className="w-4 h-4 text-[#E4007E]" />
+          <Activity className="w-4 h-4 text-brand" />
           <h2 className="text-base font-semibold text-white tracking-tight">Ritmo de Entregas (14 dias)</h2>
         </div>
         <div className="flex-1 w-full h-full min-h-0">
@@ -122,7 +122,7 @@ export const ReportsDataViz: React.FC<{
       </div>
 
       {/* Bar Chart: Volume por Cliente */}
-      <div className="p-6 bg-[#141414] border border-[#262626] rounded-2xl flex flex-col shadow-xs h-[380px]">
+      <div className="p-6 bg-surface border border-line rounded-2xl flex flex-col shadow-xs h-[380px]">
         <div className="flex items-center gap-2 mb-6">
           <Briefcase className="w-4 h-4 text-sky-400" />
           <h2 className="text-base font-semibold text-white tracking-tight">Top 5 Clientes (Volume)</h2>
@@ -136,7 +136,7 @@ export const ReportsDataViz: React.FC<{
               <Tooltip content={<CustomTooltip />} cursor={{ fill: '#1C1C1C' }} />
               <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
               <Bar dataKey="Entregues" stackId="a" fill="#10B981" radius={[0, 0, 4, 4]} />
-              <Bar dataKey="Pendentes" stackId="a" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Pendentes" stackId="a" fill="#E4007E" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

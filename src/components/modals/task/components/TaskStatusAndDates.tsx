@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SpineStatusConfig, TaskStatus } from '../../../../types';
 import { TaskModalFormData } from '../types';
 import { ChevronDown, Check } from 'lucide-react';
+import { useDropdownA11y } from '../../../../hooks/useDropdownA11y';
 
 export const TaskStatusAndDates: React.FC<{
   formData: TaskModalFormData;
@@ -11,7 +12,9 @@ export const TaskStatusAndDates: React.FC<{
 }> = ({ formData, setFormData, spineStatuses, onStatusChange }) => {
 
   const [isStatusOpen, setIsStatusOpen] = useState(false);
+  useDropdownA11y(isStatusOpen, () => setIsStatusOpen(false));
   const [isUrgencyOpen, setIsUrgencyOpen] = useState(false);
+  useDropdownA11y(isUrgencyOpen, () => setIsUrgencyOpen(false));
   
   const statusRef = useRef<HTMLDivElement>(null);
   const urgencyRef = useRef<HTMLDivElement>(null);
@@ -47,20 +50,20 @@ export const TaskStatusAndDates: React.FC<{
     <div className="grid grid-cols-1 gap-4 items-start">
       {/* Status da tarefa */}
       <div ref={statusRef} className="relative">
-        <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
           Status
         </label>
-        <button
+        <button aria-haspopup="true" aria-expanded={isStatusOpen}
           type="button"
           onClick={() => setIsStatusOpen(!isStatusOpen)}
-          className={`w-full h-[46px] px-3 bg-[#101010] border border-white/5 rounded-xl text-sm font-semibold text-white transition-all shadow-xs flex items-center justify-between ${isStatusOpen ? 'ring-2 ring-[#E4007E]/30 border-[#E4007E]/50' : 'hover:border-white/10'}`}
+          className={`w-full h-[46px] px-3 bg-canvas border border-white/5 rounded-xl text-sm font-semibold text-white transition-all shadow-xs flex items-center justify-between ${isStatusOpen ? 'ring-2 ring-brand/30 border-brand/50' : 'hover:border-white/10'}`}
         >
           <span className="truncate">{currentStatusLabel}</span>
-          <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isStatusOpen ? 'rotate-180 text-[#E4007E]' : ''}`} />
+          <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isStatusOpen ? 'rotate-180 text-brand' : ''}`} />
         </button>
 
         {isStatusOpen && (
-          <div className="absolute top-full mt-1.5 left-0 w-full z-50 bg-[#1C1C1C] border border-white/5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-100">
+          <div data-menu className="absolute top-full mt-1.5 left-0 w-full z-50 bg-raised border border-white/5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-100">
             <div className="max-h-[250px] overflow-y-auto custom-scrollbar">
               {spineStatuses.map((st) => (
                 <button
@@ -90,10 +93,10 @@ export const TaskStatusAndDates: React.FC<{
                     }));
                     setIsStatusOpen(false);
                   }}
-                  className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${formData.status === st.id ? 'bg-[#2A2A2A] text-white' : 'text-slate-300 hover:bg-[#101010] hover:text-white'}`}
+                  className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${formData.status === st.id ? 'bg-chip text-white' : 'text-slate-300 hover:bg-canvas hover:text-white'}`}
                 >
                   <span className="text-sm font-semibold truncate pr-2">{st.label}</span>
-                  {formData.status === st.id && <Check className="w-4 h-4 text-[#E4007E] stroke-[3] shrink-0" />}
+                  {formData.status === st.id && <Check className="w-4 h-4 text-brand stroke-[3] shrink-0" />}
                 </button>
               ))}
             </div>
@@ -103,8 +106,8 @@ export const TaskStatusAndDates: React.FC<{
 
       {/* Prazo Previsto */}
       <div>
-        <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-          Prazo Previsto <span className="text-[#E4007E]">*</span>
+        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+          Prazo Previsto <span className="text-brand">*</span>
         </label>
         <div className="relative">
           <input
@@ -150,18 +153,18 @@ export const TaskStatusAndDates: React.FC<{
               }
               setFormData((prev) => ({ ...prev, dueDate: newDueDate }));
             }}
-            className="w-full h-[46px] px-3 bg-[#101010] border border-white/5 rounded-xl text-sm font-semibold text-white tabular-nums focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 cursor-pointer transition-all hover:border-white/10"
+            className="w-full h-[46px] px-3 bg-canvas border border-white/5 rounded-xl text-sm font-semibold text-white tabular-nums focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30 cursor-pointer transition-all hover:border-white/10"
           />
         </div>
       </div>
 
       {/* Urgência / Prioridade */}
       <div ref={urgencyRef} className="relative">
-        <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
           Urgência / Prioridade
         </label>
         
-        <button
+        <button aria-haspopup="true" aria-expanded={isUrgencyOpen}
           type="button"
           onClick={() => setIsUrgencyOpen(!isUrgencyOpen)}
           className={`w-full h-[46px] border rounded-xl px-3 text-sm font-semibold focus:outline-none transition-all flex items-center justify-between ${
@@ -169,7 +172,7 @@ export const TaskStatusAndDates: React.FC<{
               ? 'bg-rose-600/20 border-rose-600/50 text-rose-500'
               : currentUrgencyState === 'prioridade'
               ? 'bg-orange-600/20 border-orange-600/50 text-orange-500'
-              : 'bg-[#101010] border-white/5 text-slate-300 hover:border-white/10'
+              : 'bg-canvas border-white/5 text-slate-300 hover:border-white/10'
           } ${isUrgencyOpen ? 'ring-2 ring-white/10' : ''}`}
         >
           <span>
@@ -179,11 +182,11 @@ export const TaskStatusAndDates: React.FC<{
         </button>
 
         {isUrgencyOpen && (
-          <div className="absolute top-full mt-1.5 left-0 w-full z-50 bg-[#1C1C1C] border border-white/5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-100">
+          <div data-menu className="absolute top-full mt-1.5 left-0 w-full z-50 bg-raised border border-white/5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-100">
             <button
               type="button"
               onClick={() => { handleUrgencyChange('normal'); setIsUrgencyOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${currentUrgencyState === 'normal' ? 'bg-[#2A2A2A] text-white' : 'text-slate-300 hover:bg-[#101010] hover:text-white'}`}
+              className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${currentUrgencyState === 'normal' ? 'bg-chip text-white' : 'text-slate-300 hover:bg-canvas hover:text-white'}`}
             >
               <span className="text-sm font-semibold">Normal</span>
               {currentUrgencyState === 'normal' && <Check className="w-4 h-4 text-slate-400 stroke-[3]" />}
@@ -191,7 +194,7 @@ export const TaskStatusAndDates: React.FC<{
             <button
               type="button"
               onClick={() => { handleUrgencyChange('prioridade'); setIsUrgencyOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${currentUrgencyState === 'prioridade' ? 'bg-[#2A2A2A] text-orange-400' : 'text-orange-500/80 hover:bg-[#101010] hover:text-orange-400'}`}
+              className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${currentUrgencyState === 'prioridade' ? 'bg-chip text-orange-400' : 'text-orange-500/80 hover:bg-canvas hover:text-orange-400'}`}
             >
               <span className="text-sm font-semibold">🔥 Prioridade</span>
               {currentUrgencyState === 'prioridade' && <Check className="w-4 h-4 text-orange-500 stroke-[3]" />}
@@ -199,7 +202,7 @@ export const TaskStatusAndDates: React.FC<{
             <button
               type="button"
               onClick={() => { handleUrgencyChange('urgencia'); setIsUrgencyOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${currentUrgencyState === 'urgencia' ? 'bg-[#2A2A2A] text-rose-400' : 'text-rose-500/80 hover:bg-[#101010] hover:text-rose-400'}`}
+              className={`w-full text-left px-3 py-2.5 flex items-center justify-between transition-colors ${currentUrgencyState === 'urgencia' ? 'bg-chip text-rose-400' : 'text-rose-500/80 hover:bg-canvas hover:text-rose-400'}`}
             >
               <span className="text-sm font-semibold">🚨 Urgência</span>
               {currentUrgencyState === 'urgencia' && <Check className="w-4 h-4 text-rose-500 stroke-[3]" />}

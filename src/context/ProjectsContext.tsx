@@ -83,6 +83,14 @@ export const ProjectsProvider: React.FC<{
 }> = ({ children, addToast, addActivity }) => {
   const mapRowToProject = (row: any): Project => {
     const { cleanDescription, brandMeta } = decodeProjectDescription(row.description);
+    const safeParse = (val: any, fallback: any) => {
+      if (Array.isArray(val)) return val;
+      if (typeof val === 'string') {
+        try { return JSON.parse(val); } catch { return fallback; }
+      }
+      return fallback;
+    };
+
     return {
       id: row.id,
       name: row.name || 'Cliente Sem Nome',
@@ -90,20 +98,20 @@ export const ProjectsProvider: React.FC<{
       description: cleanDescription || '',
       clientId: row.client_id,
       clientName: row.client_name,
-      clientIds: Array.isArray(row.client_ids) ? row.client_ids : [],
-      clientNames: Array.isArray(row.client_names) ? row.client_names : [],
+      clientIds: safeParse(row.client_ids, []),
+      clientNames: safeParse(row.client_names, []),
       status: (row.status as any) || 'active',
       progress: Number(row.progress ?? 0),
       currentSprint: row.current_sprint || 'Sprint Ativa',
       iconType: (row.icon_type as any) || 'rocket',
       iconColor: row.icon_color || '#10B981',
-      teamMemberIds: Array.isArray(row.team_member_ids) ? row.team_member_ids : [],
+      teamMemberIds: safeParse(row.team_member_ids, []),
       totalTasks: 0,
       completedTasks: 0,
       labelId: row.label_id,
       labelColor: row.label_color,
       logoUrl: row.logo_url,
-      colorPalette: Array.isArray(row.color_palette) ? row.color_palette : brandMeta.colorPalette || [],
+      colorPalette: safeParse(row.color_palette, brandMeta.colorPalette || []),
       brandManualUrl: row.brand_manual_url || brandMeta.brandManualUrl,
       logosPackUrl: row.logos_pack_url || brandMeta.logosPackUrl,
       typographyUrl: row.typography_url || brandMeta.typographyUrl,
@@ -111,7 +119,7 @@ export const ProjectsProvider: React.FC<{
       tarjasUrl: row.tarjas_url || brandMeta.tarjasUrl,
       psdBaseUrl: row.psd_base_url || brandMeta.psdBaseUrl,
       kvDriveUrl: row.kv_drive_url || brandMeta.kvDriveUrl,
-      kvDriveItems: Array.isArray(row.kv_drive_items) ? row.kv_drive_items : (brandMeta.kvDriveItems || []),
+      kvDriveItems: safeParse(row.kv_drive_items, brandMeta.kvDriveItems || []),
     };
   };
 

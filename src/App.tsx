@@ -9,6 +9,8 @@ import { NotificationsProvider } from './context/NotificationsContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { ToastContainer } from './components/common/ToastContainer';
+import { DialogHost } from './components/common/DialogHost';
+import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
 import { LoginView } from './components/auth/LoginView';
 
 // Lazy Loaded Views (Code Splitting)
@@ -49,7 +51,7 @@ const FilesView = lazy(() =>
 
 // Lazy Loaded Modals & Overlays
 const TaskModal = lazy(() =>
-  import('./components/modals/TaskModal').then((m) => ({ default: m.TaskModal }))
+  import('./components/modals/task/TaskModal').then((m) => ({ default: m.TaskModal }))
 );
 const ProjectModal = lazy(() =>
   import('./components/modals/ProjectModal').then((m) => ({ default: m.ProjectModal }))
@@ -73,32 +75,37 @@ const LogsView = lazy(() =>
 // Fast Skeleton / Shimmer Fallback
 const ViewLoadingFallback: React.FC = () => (
   <div className="w-full min-h-[400px] flex flex-col items-center justify-center p-8 space-y-4 animate-in fade-in duration-150">
-    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] flex items-center justify-center animate-pulse shadow-lg shadow-[#E4007E]/20">
+    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand to-brand-alt flex items-center justify-center animate-pulse shadow-lg shadow-brand/20">
       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
     </div>
-    <div className="w-48 h-1.5 bg-[#222222] rounded-full overflow-hidden relative">
-      <div className="absolute inset-0 bg-gradient-to-r from-[#E4007E] to-[#E94E18] animate-pulse rounded-full" />
+    <div className="w-48 h-1.5 bg-raised rounded-full overflow-hidden relative">
+      <div className="absolute inset-0 bg-gradient-to-r from-brand to-brand-alt animate-pulse rounded-full" />
     </div>
-    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
       Carregando...
     </span>
   </div>
 );
 
 const MainLayout: React.FC = () => {
-  const { activeTab, currentUser, isManagerOrAdmin, isInitialLoading, isAuthChecking } = useApp();
+  const { activeTab, currentUser, isManagerOrAdmin, isInitialLoading, isAuthChecking, setActiveTab, setIsNewTaskModalOpen } = useApp();
+
+  useGlobalShortcuts({
+    onNewTask: () => setIsNewTaskModalOpen(true),
+    onNavigate: (tab) => setActiveTab(tab),
+  });
 
   if (isAuthChecking) {
     return (
-      <div className="min-h-screen bg-[#101010] flex flex-col items-center justify-center p-6 select-none">
+      <div className="min-h-screen bg-canvas flex flex-col items-center justify-center p-6 select-none">
         <div className="flex flex-col items-center gap-6 max-w-sm text-center animate-in fade-in duration-150">
           <img
             src="/login-logo.png"
             alt="RioSãoPaulo"
             className="w-48 h-auto object-contain drop-shadow-2xl animate-pulse"
           />
-          <div className="w-52 h-1.5 bg-[#222222] rounded-full overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#E4007E] to-[#E94E18] animate-pulse rounded-full" />
+          <div className="w-52 h-1.5 bg-raised rounded-full overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-brand to-brand-alt animate-pulse rounded-full" />
           </div>
         </div>
       </div>
@@ -110,21 +117,22 @@ const MainLayout: React.FC = () => {
       <>
         <LoginView />
         <ToastContainer />
+        <DialogHost />
       </>
     );
   }
 
   if (isInitialLoading) {
     return (
-      <div className="min-h-screen bg-[#101010] flex flex-col items-center justify-center p-6 select-none">
+      <div className="min-h-screen bg-canvas flex flex-col items-center justify-center p-6 select-none">
         <div className="flex flex-col items-center gap-6 max-w-sm text-center animate-in fade-in zoom-in-95 duration-300">
           <img
             src="/sidebar-icon.png"
             alt="RioSãoPaulo"
             className="w-24 h-24 object-contain drop-shadow-[0_0_15px_rgba(228,0,126,0.5)] animate-bounce"
           />
-          <div className="w-52 h-1.5 bg-[#222222] rounded-full overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#E4007E] to-[#E94E18] animate-pulse rounded-full" />
+          <div className="w-52 h-1.5 bg-raised rounded-full overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-brand to-brand-alt animate-pulse rounded-full" />
           </div>
           <p className="text-xs font-bold text-slate-400 tracking-wide">
             Carregando painel e sincronizando demandas...
@@ -137,7 +145,7 @@ const MainLayout: React.FC = () => {
   const canManage = isManagerOrAdmin(currentUser);
 
   return (
-    <div className="h-screen w-full overflow-hidden bg-[#101010] text-[#F1F2F2] flex flex-col lg:flex-row antialiased">
+    <div className="h-screen w-full overflow-hidden bg-canvas text-[#F1F2F2] flex flex-col lg:flex-row antialiased">
       {/* Navigation Sidebar */}
       <Sidebar />
 
@@ -174,6 +182,7 @@ const MainLayout: React.FC = () => {
         <CommandPaletteModal />
       </Suspense>
       <ToastContainer />
+      <DialogHost />
     </div>
   );
 };

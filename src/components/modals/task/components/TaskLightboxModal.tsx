@@ -23,7 +23,7 @@ export const TaskLightboxModal: React.FC<{
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold truncate">{previewingReference.name}</h3>
-            <p className="text-[11px] text-slate-400">Imagem de Referência • Visualização em Alta Resolução</p>
+            <p className="text-xs text-slate-400">Imagem de Referência • Visualização em Alta Resolução</p>
           </div>
         </div>
 
@@ -38,7 +38,7 @@ export const TaskLightboxModal: React.FC<{
             <ExternalLink className="w-3.5 h-3.5" />
             <span>Abrir Original</span>
           </a>
-          <button
+          <button aria-label="Fechar Visualizador"
             type="button"
             onClick={onClose}
             className="p-2 rounded-xl bg-white/10 hover:bg-rose-500/80 text-white transition-colors"

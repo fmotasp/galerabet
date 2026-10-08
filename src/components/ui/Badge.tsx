@@ -18,19 +18,19 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  default: 'bg-[#101010] text-slate-300 border-white/5',
-  primary: 'bg-[#E4007E]/20 text-[#E4007E] border-[#E4007E]/40',
-  secondary: 'bg-[#E94E18]/20 text-[#E94E18] border-[#E94E18]/40',
+  default: 'bg-canvas text-slate-300 border-white/5',
+  primary: 'bg-brand/20 text-brand border-brand/40',
+  secondary: 'bg-brand-alt/20 text-brand-alt border-brand-alt/40',
   success: 'bg-emerald-950/80 text-emerald-300 border-emerald-800',
   warning: 'bg-amber-950/80 text-amber-300 border-amber-800',
   danger: 'bg-rose-950/80 text-rose-300 border-rose-800',
-  outline: 'bg-transparent text-slate-300 border-[#262626]',
+  outline: 'bg-transparent text-slate-300 border-line',
 };
 
 const dotColors: Record<BadgeVariant, string> = {
   default: 'bg-slate-400',
-  primary: 'bg-[#E4007E]',
-  secondary: 'bg-[#E94E18]',
+  primary: 'bg-brand',
+  secondary: 'bg-brand-alt',
   success: 'bg-emerald-400',
   warning: 'bg-amber-400',
   danger: 'bg-rose-400',
@@ -38,7 +38,7 @@ const dotColors: Record<BadgeVariant, string> = {
 };
 
 const sizeStyles: Record<BadgeSize, string> = {
-  sm: 'px-2 py-0.5 text-[10px]',
+  sm: 'px-2 py-0.5 text-[11px]',
   md: 'px-2.5 py-1 text-xs',
 };
 

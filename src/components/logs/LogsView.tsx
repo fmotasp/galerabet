@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Lock, History, Trash2, Edit3, PlusCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { alertDialog } from '../../lib/dialogs';
 
 export const LogsView: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -16,7 +17,7 @@ export const LogsView: React.FC = () => {
       setIsAuthenticated(true);
       fetchLogs();
     } else {
-      alert('Senha incorreta!');
+      void alertDialog('Senha incorreta!');
     }
   };
 
@@ -37,9 +38,9 @@ export const LogsView: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="bg-[#141414] border border-[#262626] p-8 rounded-2xl w-full max-w-sm flex flex-col items-center shadow-xl">
-          <div className="w-16 h-16 bg-[#262626] rounded-full flex items-center justify-center mb-6">
-            <Lock className="w-8 h-8 text-[#E4007E]" />
+        <div className="bg-surface border border-line p-8 rounded-2xl w-full max-w-sm flex flex-col items-center shadow-xl">
+          <div className="w-16 h-16 bg-line rounded-full flex items-center justify-center mb-6">
+            <Lock className="w-8 h-8 text-brand" />
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Acesso Restrito</h2>
           <p className="text-slate-400 text-sm text-center mb-6">
@@ -51,11 +52,11 @@ export const LogsView: React.FC = () => {
               placeholder="Senha Master"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#101010] border border-[#262626] text-white px-4 py-3 rounded-xl focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
+              className="w-full bg-canvas border border-line text-white px-4 py-3 rounded-xl focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30"
             />
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white font-bold py-3 rounded-xl hover:opacity-90 transition-opacity"
+              className="w-full bg-gradient-to-r from-brand to-brand-alt text-white font-bold py-3 rounded-xl hover:opacity-90 transition-opacity"
             >
               Acessar Logs
             </button>
@@ -92,16 +93,16 @@ export const LogsView: React.FC = () => {
         </div>
         <button
           onClick={fetchLogs}
-          className="px-4 py-2 bg-[#262626] hover:bg-[#333333] text-white rounded-xl text-sm font-bold transition-colors"
+          className="px-4 py-2 bg-line hover:bg-line-hover text-white rounded-xl text-sm font-bold transition-colors"
         >
           Atualizar Logs
         </button>
       </div>
 
-      <div className="flex-1 bg-[#141414] border border-[#262626] rounded-2xl overflow-hidden flex flex-col">
+      <div className="flex-1 bg-surface border border-line rounded-2xl overflow-hidden flex flex-col">
         {isLoading ? (
           <div className="flex items-center justify-center flex-1">
-            <div className="w-8 h-8 border-4 border-[#E4007E] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" />
           </div>
         ) : logs.length === 0 ? (
           <div className="flex items-center justify-center flex-1 text-slate-500">
@@ -111,8 +112,8 @@ export const LogsView: React.FC = () => {
           <div className="overflow-y-auto flex-1 no-scrollbar p-4">
             <div className="space-y-3">
               {logs.map((log) => (
-                <div key={log.id} className="flex items-start gap-4 p-4 bg-[#101010] border border-[#262626] rounded-xl hover:border-[#333333] transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-[#101010] flex items-center justify-center shrink-0 border border-[#333333]">
+                <div key={log.id} className="flex items-start gap-4 p-4 bg-canvas border border-line rounded-xl hover:border-line-hover transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-canvas flex items-center justify-center shrink-0 border border-line-hover">
                     {getActionIcon(log.action)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -128,7 +129,7 @@ export const LogsView: React.FC = () => {
                       {log.task_title || 'Tarefa sem título (ou ID: ' + log.task_id + ')'}
                     </p>
                     {log.details && Object.keys(log.details).length > 0 && (
-                      <div className="mt-2 text-xs text-slate-400 bg-[#141414] p-2 rounded-lg border border-[#262626]">
+                      <div className="mt-2 text-xs text-slate-400 bg-surface p-2 rounded-lg border border-line">
                         {Object.entries(log.details).map(([key, val]) => (
                           <div key={key}>
                             <span className="font-bold">{key}:</span> {typeof val === 'string' ? val : JSON.stringify(val)}

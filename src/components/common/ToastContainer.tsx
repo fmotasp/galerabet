@@ -19,7 +19,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
 
   return (
     <div
-      className="pointer-events-auto bg-slate-900 text-white rounded-2xl p-4 shadow-xl border border-slate-800 flex items-start gap-3 animate-in slide-in-from-bottom-5 duration-200 transition-all"
+      className="pointer-events-auto bg-popover text-white rounded-2xl p-4 shadow-xl border border-line-strong flex items-start gap-3 animate-in slide-in-from-bottom-5 duration-200 transition-all"
     >
       {toast.type === 'success' && (
         <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
@@ -36,7 +36,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
 
       <div className="flex-1 min-w-0">
         <h5 className="font-bold text-xs text-white leading-tight">{toast.title}</h5>
-        {toast.message && <p className="text-[11px] text-slate-300 mt-0.5">{toast.message}</p>}
+        {toast.message && <p className="text-xs text-slate-300 mt-0.5">{toast.message}</p>}
       </div>
 
       <button
@@ -53,10 +53,9 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
 export const ToastContainer: React.FC = () => {
   const { toasts, removeToast } = useApp();
 
-  if (toasts.length === 0) return null;
-
+  // A região ao vivo fica sempre no DOM: leitores de tela só anunciam o que entra em uma região já existente
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    <div role="status" aria-live="polite" className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
       {toasts.map((t) => (
         <ToastItem key={t.id} toast={t} onRemove={removeToast} />
       ))}

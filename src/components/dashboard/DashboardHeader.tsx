@@ -14,7 +14,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Header Title */}
         <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl bg-[#E4007E] flex items-center justify-center text-white shadow-lg shadow-[#E4007E]/25">
+          <div className="w-10 h-10 rounded-2xl bg-brand flex items-center justify-center text-white shadow-lg">
             <Layers className="w-5 h-5" />
           </div>
           <div>
@@ -30,13 +30,13 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
         {/* Right Header Controls: Filter Pill + New Task */}
         <div className="flex items-center gap-3">
           {/* Segmented Filter Pill */}
-          <div className="flex items-center bg-[#161616] p-1 rounded-2xl border border-[#262626] shadow-sm">
+          <div className="flex items-center bg-surface p-1 rounded-2xl border border-line shadow-sm">
             <button
               id="filter-all"
               onClick={() => onFilterChange('all')}
-              className={`px-4 py-1.5 rounded-xl text-[13px] font-medium transition-all cursor-pointer ${
+              className={`px-4 py-1.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                 activeFilter === 'all'
-                  ? 'bg-[#101010] text-white shadow-sm ring-1 ring-white/5'
+                  ? 'bg-canvas text-white shadow-sm ring-1 ring-white/5'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -45,9 +45,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
             <button
               id="filter-flagged"
               onClick={() => onFilterChange('flagged')}
-              className={`px-4 py-1.5 rounded-xl text-[13px] font-medium transition-all cursor-pointer ${
+              className={`px-4 py-1.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                 activeFilter === 'flagged'
-                  ? 'bg-[#101010] text-white shadow-sm ring-1 ring-white/5'
+                  ? 'bg-canvas text-white shadow-sm ring-1 ring-white/5'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -59,7 +59,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = React.memo(
             id="btn-dashboard-new-task"
             onClick={onNewTaskClick}
             leftIcon={<Plus className="w-4 h-4 stroke-[2.5]" />}
-            className="text-[13px] sm:text-[14px]"
+            className="text-sm sm:text-sm"
           >
             <span>Nova tarefa</span>
           </Button>

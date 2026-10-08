@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Copy, Edit2, Key, Link as LinkIcon, Trash2, Eye, EyeOff } from 'lucide-react';
 import { Access } from '../../types';
 import { useApp } from '../../context/AppContext';
+import { confirmDialog } from '../../lib/dialogs';
 
 interface AccessCardProps {
   access: Access;
@@ -31,9 +32,9 @@ export const AccessCard: React.FC<AccessCardProps> = ({ access, onEdit, onDelete
   const hasUrl = !!access.siteUrl;
 
   return (
-    <div className="bg-[#1A1A1A] border border-white/5 rounded-2xl overflow-hidden hover:border-[#3A3A3A] transition-colors group flex flex-col h-full">
+    <div className="bg-field border border-white/5 rounded-2xl overflow-hidden hover:border-line-hover transition-colors group flex flex-col h-full">
       {/* Cover Image */}
-      <div className="w-full h-32 bg-[#101010] relative border-b border-white/5 flex shrink-0">
+      <div className="w-full h-32 bg-canvas relative border-b border-white/5 flex shrink-0">
         {access.coverImageUrl ? (
           <img
             src={access.coverImageUrl}
@@ -49,16 +50,16 @@ export const AccessCard: React.FC<AccessCardProps> = ({ access, onEdit, onDelete
           </div>
         )}
         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
+          <button aria-label="Editar Acesso"
             onClick={() => onEdit(access)}
             className="p-1.5 bg-black/60 hover:bg-black/80 backdrop-blur-sm text-white rounded-lg transition-colors"
             title="Editar Acesso"
           >
             <Edit2 className="w-4 h-4" />
           </button>
-          <button
-            onClick={() => {
-              if (window.confirm('Tem certeza que deseja excluir este acesso?')) {
+          <button aria-label="Excluir Acesso"
+            onClick={async () => {
+              if (await confirmDialog({ message: 'Tem certeza que deseja excluir este acesso?', tone: 'danger' })) {
                 onDelete(access.id);
               }
             }}
@@ -78,15 +79,15 @@ export const AccessCard: React.FC<AccessCardProps> = ({ access, onEdit, onDelete
               {access.title}
             </h3>
             {access.category && (
-              <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-bold tracking-wider text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-md uppercase">
+              <span className="inline-block mt-1 px-2 py-0.5 text-[11px] font-bold tracking-wider text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-md uppercase">
                 {access.category}
               </span>
             )}
           </div>
           {hasUrl && (
-            <button
+            <button aria-label="Acessar site"
               onClick={handleVisitSite}
-              className="text-[#E4007E] hover:text-[#FF1493] p-1 bg-[#E4007E]/10 rounded-md transition-colors shrink-0"
+              className="text-brand hover:text-[#FF1493] p-1 bg-brand/10 rounded-md transition-colors shrink-0"
               title="Acessar site"
             >
               <LinkIcon className="w-4 h-4" />
@@ -98,9 +99,9 @@ export const AccessCard: React.FC<AccessCardProps> = ({ access, onEdit, onDelete
           {/* Login Field */}
           <div>
             <span className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1 block">Login</span>
-            <div className="flex items-center gap-2 bg-[#141414] rounded-lg p-2 border border-white/5">
+            <div className="flex items-center gap-2 bg-surface rounded-lg p-2 border border-white/5">
               <span className="text-sm text-white truncate flex-1 font-mono">{access.login}</span>
-              <button
+              <button aria-label="Copiar Login"
                 onClick={() => handleCopy(access.login, 'Login')}
                 className="text-slate-400 hover:text-white p-1 rounded transition-colors shrink-0"
                 title="Copiar Login"
@@ -113,18 +114,18 @@ export const AccessCard: React.FC<AccessCardProps> = ({ access, onEdit, onDelete
           {/* Password Field */}
           <div>
             <span className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1 block">Senha</span>
-            <div className="flex items-center gap-2 bg-[#141414] rounded-lg p-2 border border-white/5">
+            <div className="flex items-center gap-2 bg-surface rounded-lg p-2 border border-white/5">
               <span className="text-sm text-white truncate flex-1 font-mono">
                 {showPassword ? access.password : '••••••••'}
               </span>
-              <button
+              <button aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 onClick={() => setShowPassword(!showPassword)}
                 className="text-slate-400 hover:text-white p-1 rounded transition-colors shrink-0"
                 title={showPassword ? 'Ocultar Senha' : 'Mostrar Senha'}
               >
                 {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
               </button>
-              <button
+              <button aria-label="Copiar Senha"
                 onClick={() => handleCopy(access.password || '', 'Senha')}
                 className="text-slate-400 hover:text-white p-1 rounded transition-colors shrink-0"
                 title="Copiar Senha"

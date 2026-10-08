@@ -14,6 +14,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Project, BrandColor } from '../../types';
 import { Button, Input, Textarea, Modal } from '../ui';
+import { confirmDialog, alertDialog } from '../../lib/dialogs';
 
 export const ProjectModal: React.FC = () => {
   const {
@@ -110,7 +111,7 @@ export const ProjectModal: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert('Por favor, selecione uma imagem de até 5MB.');
+        void alertDialog('Por favor, selecione uma imagem de até 5MB.');
         return;
       }
       const reader = new FileReader();
@@ -192,7 +193,7 @@ export const ProjectModal: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Seção 1: Dados Gerais do Cliente */}
         <div className="space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-[#E4007E] flex items-center gap-1.5">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-brand flex items-center gap-1.5">
             <Building2 className="w-3.5 h-3.5" />
             <span>Dados Principais</span>
           </h3>
@@ -200,11 +201,11 @@ export const ProjectModal: React.FC = () => {
           {/* Logo do Cliente */}
           <div>
             <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1.5">
-              <ImageIcon className="w-3.5 h-3.5 text-[#E4007E]" />
+              <ImageIcon className="w-3.5 h-3.5 text-brand" />
               <span>Logo / Imagem do Cliente</span>
             </label>
-            <div className="flex items-center gap-4 p-3 bg-[#1C1C1C] border border-[#262626] rounded-2xl">
-              <div className="w-14 h-14 rounded-2xl bg-[#141414] border border-[#262626] flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+            <div className="flex items-center gap-4 p-3 bg-raised border border-line rounded-2xl">
+              <div className="w-14 h-14 rounded-2xl bg-surface border border-line flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                 {formData.logoUrl ? (
                   <img
                     src={formData.logoUrl}
@@ -227,7 +228,7 @@ export const ProjectModal: React.FC = () => {
                     size="sm"
                     onClick={() => logoFileInputRef.current?.click()}
                     leftIcon={<Upload className="w-3.5 h-3.5" />}
-                    className="bg-[#2E2E2E] hover:bg-[#383838] border-[#3A3A3A]"
+                    className="bg-line-strong hover:bg-line-hover border-line-hover"
                   >
                     Upload Logo
                   </Button>
@@ -254,7 +255,7 @@ export const ProjectModal: React.FC = () => {
                   placeholder="Ou cole a URL da imagem/logo..."
                   value={formData.logoUrl}
                   onChange={(e) => setFormData((p) => ({ ...p, logoUrl: e.target.value }))}
-                  className="w-full px-2.5 py-1.5 text-xs bg-[#141414] border border-[#262626] rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
+                  className="w-full px-2.5 py-1.5 text-xs bg-surface border border-line rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30"
                 />
               </div>
             </div>
@@ -305,9 +306,9 @@ export const ProjectModal: React.FC = () => {
         </div>
 
         {/* Seção 2: Paleta de Cores Oficial */}
-        <div className="space-y-3 pt-3 border-t border-[#262626]">
+        <div className="space-y-3 pt-3 border-t border-line">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#E4007E] flex items-center gap-1.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-brand flex items-center gap-1.5">
               <Palette className="w-3.5 h-3.5" />
               <span>Paleta de Cores da Marca ({formData.colorPalette.length})</span>
             </h3>
@@ -315,7 +316,7 @@ export const ProjectModal: React.FC = () => {
               variant="secondary"
               size="sm"
               onClick={handleAddColor}
-              leftIcon={<Plus className="w-3 h-3 text-[#E4007E]" />}
+              leftIcon={<Plus className="w-3 h-3 text-brand" />}
               className="px-2.5 py-1 text-xs"
             >
               Adicionar Cor
@@ -326,7 +327,7 @@ export const ProjectModal: React.FC = () => {
             {formData.colorPalette.map((color, index) => (
               <div
                 key={index}
-                className="flex items-center gap-2 p-2 bg-[#1C1C1C] border border-[#262626] rounded-xl"
+                className="flex items-center gap-2 p-2 bg-raised border border-line rounded-xl"
               >
                 {/* Color Picker Input */}
                 <div className="relative shrink-0">
@@ -345,7 +346,7 @@ export const ProjectModal: React.FC = () => {
                     placeholder="#HEX"
                     value={color.hex}
                     onChange={(e) => handleUpdateColor(index, 'hex', e.target.value.toUpperCase())}
-                    className="w-full px-2 py-1 bg-[#141414] border border-[#262626] rounded-lg text-xs font-mono font-bold text-white uppercase focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
+                    className="w-full px-2 py-1 bg-surface border border-line rounded-lg text-xs font-mono font-bold text-white uppercase focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30"
                   />
                 </div>
 
@@ -356,7 +357,7 @@ export const ProjectModal: React.FC = () => {
                     placeholder="Nome (Ex: Primária, Secundária)"
                     value={color.name}
                     onChange={(e) => handleUpdateColor(index, 'name', e.target.value)}
-                    className="w-full px-2 py-1 bg-[#141414] border border-[#262626] rounded-lg text-xs font-semibold text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
+                    className="w-full px-2 py-1 bg-surface border border-line rounded-lg text-xs font-semibold text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30"
                   />
                 </div>
 
@@ -377,8 +378,8 @@ export const ProjectModal: React.FC = () => {
         </div>
 
         {/* Seção 3: Links de Materiais Oficiais */}
-        <div className="space-y-3 pt-3 border-t border-[#262626]">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-[#E4007E] flex items-center gap-1.5">
+        <div className="space-y-3 pt-3 border-t border-line">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-brand flex items-center gap-1.5">
             <Link2 className="w-3.5 h-3.5" />
             <span>Links de Materiais Oficiais</span>
           </h3>
@@ -443,7 +444,7 @@ export const ProjectModal: React.FC = () => {
             {/* Link PSD Base */}
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5">
-                <ImageIcon className="w-3.5 h-3.5 text-[#E4007E]" />
+                <ImageIcon className="w-3.5 h-3.5 text-brand" />
                 <span>Link para PSD Base (Google Drive)</span>
               </label>
               <Input
@@ -457,13 +458,13 @@ export const ProjectModal: React.FC = () => {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-5 border-t border-[#262626] mt-6">
+        <div className="flex items-center justify-between pt-5 border-t border-line mt-6">
           {editingProject ? (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
-                if (window.confirm(`Deseja realmente excluir o cliente ${editingProject.name}?`)) {
+              onClick={async () => {
+                if (await confirmDialog({ message: `Deseja realmente excluir o cliente ${editingProject.name}?`, tone: 'danger' })) {
                   deleteProject(editingProject.id);
                   handleClose();
                 }
@@ -482,7 +483,7 @@ export const ProjectModal: React.FC = () => {
               variant="ghost"
               size="md"
               onClick={handleClose}
-              className="px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-white rounded-xl hover:bg-[#101010]"
+              className="px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-white rounded-xl hover:bg-canvas"
             >
               Cancelar
             </Button>
@@ -490,7 +491,7 @@ export const ProjectModal: React.FC = () => {
               type="submit"
               variant="primary"
               size="md"
-              className="px-5 py-2.5 text-xs font-semibold shadow-lg shadow-[#E4007E]/25"
+              className="px-5 py-2.5 text-xs font-semibold shadow-lg"
             >
               {editingProject ? 'Salvar Alterações' : 'Adicionar Cliente'}
             </Button>

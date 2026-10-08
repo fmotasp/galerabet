@@ -14,9 +14,12 @@ import {
   Filter,
 } from 'lucide-react';
 import { useTasks, useProjects, useEmployees, useApp } from '../../context/AppContext';
+import type { Task } from '../../types';
+import { useCountUp } from '../../hooks/useCountUp';
 import { isTaskOverdue, isTaskCompleted, getTaskOverdueDays, parseTaskDueDate } from '../../lib/taskDateUtils';
 import { getClientLogoFallback } from '../tasks/useTasksFilter';
 import { ReportsDataViz } from './ReportsDataViz';
+import { useDropdownA11y } from '../../hooks/useDropdownA11y';
 
 // Helper para identificar exclusivamente profissionais de Design e Audiovisual/Vídeo
 export const isDesignerOrVideomaker = (emp: { id?: string; name?: string; role?: string; department?: string; tags?: string[] }): boolean => {
@@ -68,11 +71,153 @@ export const isDesignerOrVideomaker = (emp: { id?: string; name?: string; role?:
   return matchesDesign || matchesVideo;
 };
 
+// Helper para parsing seguro de datas
+const parseDateSafe = (val?: string | number | null): Date | null => {
+  if (!val) return null;
+  if (typeof val === 'number') {
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  const str = String(val).trim();
+  if (str.includes('/')) {
+    const parts = str.split(' ')[0].split('/');
+    if (parts.length === 3) {
+      const d = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+};
+
+
+// Helper: tarefa entregue (concluída ou enviada para aprovação)
+const isTaskDoneOrInReview = (t: Task): boolean => {
+  const s = (t.status || '').toLowerCase().trim();
+  return (
+    isTaskCompleted(t) ||
+    s === 'in_review' ||
+    s === 'postar' ||
+    s.includes('aprov') ||
+    s.includes('revis') ||
+    Boolean(t.deliveredAt)
+  );
+};
+
+
+// Cálculos de SLA, prazos e ciclo para um conjunto de tarefas
+const computeMetrics = (filteredTasks: Task[]) => {
+  const total = filteredTasks.length;
+  const completed = filteredTasks.filter(isTaskDoneOrInReview);
+  const active = filteredTasks.filter((t) => !isTaskDoneOrInReview(t));
+  const overdueActive = active.filter((t) => isTaskOverdue(t));
+
+  // SLA de tarefas concluídas
+  let onTimeCount = 0;
+  let lateCount = 0;
+  let noDueDateCount = 0;
+  const leadTimes: number[] = [];
+
+  completed.forEach((t) => {
+    const due = parseTaskDueDate(t.dueDate);
+    const delivery = parseDateSafe(t.deliveredAt) || (t.lastMovedAt ? new Date(t.lastMovedAt) : null);
+
+    if (due && delivery) {
+      // Tolerância até o final do dia do prazo
+      const dueEnd = new Date(due);
+      dueEnd.setHours(23, 59, 59, 999);
+      if (delivery.getTime() <= dueEnd.getTime()) {
+        onTimeCount++;
+      } else {
+        lateCount++;
+      }
+    } else if (!due && delivery) {
+      // Sem prazo definido não dá para avaliar pontualidade: fica fora do índice de SLA
+      noDueDateCount++;
+    }
+
+    const created = parseDateSafe(t.createdAt);
+    if (created && delivery && delivery >= created) {
+      const days = (delivery.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+      leadTimes.push(days);
+    }
+  });
+
+  const evaluatedCompleted = onTimeCount + lateCount;
+  // Sem entregas avaliáveis não existe SLA: null evita mostrar um falso 100%
+  const slaRate = evaluatedCompleted > 0 ? Math.round((onTimeCount / evaluatedCompleted) * 100) : null;
+
+  // Média sozinha é distorcida por poucas demandas muito longas: mostramos também mediana e P85
+  const sortedLeadTimes = [...leadTimes].sort((a, b) => a - b);
+  const percentile = (p: number): string | null => {
+    if (sortedLeadTimes.length === 0) return null;
+    const idx = Math.min(sortedLeadTimes.length - 1, Math.ceil(p * sortedLeadTimes.length) - 1);
+    return sortedLeadTimes[Math.max(0, idx)].toFixed(1);
+  };
+  const avgLeadTime = leadTimes.length > 0 ? (leadTimes.reduce((a, b) => a + b, 0) / leadTimes.length).toFixed(1) : null;
+  const medianLeadTime = percentile(0.5);
+  const p85LeadTime = percentile(0.85);
+  const totalPoints = completed.reduce((sum, t) => sum + (t.points || 1), 0);
+
+  return {
+    total,
+    completedCount: completed.length,
+    activeCount: active.length,
+    overdueActiveCount: overdueActive.length,
+    onTimeCount,
+    lateCount,
+    noDueDateCount,
+    slaRate,
+    avgLeadTime,
+    medianLeadTime,
+    p85LeadTime,
+    totalPoints,
+    overdueTasks: overdueActive.sort((a, b) => getTaskOverdueDays(b) - getTaskOverdueDays(a)),
+  };
+};
+
+type DrillKey = 'delivered' | 'late' | 'overdue' | 'active';
+
+const DRILL_TITLES: Record<DrillKey, string> = {
+  delivered: 'Demandas entregues',
+  late: 'Entregas fora do prazo',
+  overdue: 'Atrasadas em aberto',
+  active: 'Demandas em andamento',
+};
+
+// Variação percentual vs período anterior. `lowerIsBetter` inverte a cor (ex.: atrasos, ciclo)
+const Delta: React.FC<{ current: number | null; previous: number | null; lowerIsBetter?: boolean; unit?: 'pct' | 'pp' }> = ({
+  current,
+  previous,
+  lowerIsBetter = false,
+  unit = 'pct',
+}) => {
+  if (current === null || previous === null) return null;
+  const diff = current - previous;
+  if (Math.abs(diff) < 0.05) {
+    return <span className="text-xs text-slate-500">= igual ao período anterior</span>;
+  }
+  let label: string;
+  if (unit === 'pp') {
+    label = `${Math.abs(Math.round(diff))} p.p.`;
+  } else if (previous === 0) {
+    label = 'novo';
+  } else {
+    label = `${Math.abs(Math.round((diff / previous) * 100))}%`;
+  }
+  const good = lowerIsBetter ? diff < 0 : diff > 0;
+  return (
+    <span className={`text-xs font-semibold tabular-nums ${good ? 'text-emerald-400' : 'text-rose-400'}`}>
+      {diff > 0 ? '↑' : '↓'} {label} <span className="text-slate-500 font-normal">vs. período anterior</span>
+    </span>
+  );
+};
+
 export const ReportsView: React.FC = () => {
   const { tasks } = useTasks();
   const { projects } = useProjects();
   const { employees } = useEmployees();
-  const { spineStatuses } = useApp();
+  const { spineStatuses, setEditingTask, setActiveTab } = useApp();
 
   // Filtrar colaboradores válidos: apenas Designers e Videomakers
   const creativeEmployees = useMemo(() => {
@@ -82,68 +227,21 @@ export const ReportsView: React.FC = () => {
   const creativeEmployeeIds = useMemo(() => new Set(creativeEmployees.map((e) => e.id)), [creativeEmployees]);
   const creativeEmployeeNames = useMemo(() => new Set(creativeEmployees.map((e) => e.name.toLowerCase().trim())), [creativeEmployees]);
 
-  const nonCreativeEmployeeIds = useMemo(() => new Set(employees.filter((e) => !isDesignerOrVideomaker(e)).map((e) => e.id)), [employees]);
-  const nonCreativeEmployeeNames = useMemo(() => new Set(employees.filter((e) => !isDesignerOrVideomaker(e)).map((e) => e.name.toLowerCase().trim())), [employees]);
-
   // Filtros Globais
   const [periodFilter, setPeriodFilter] = useState<'all' | '7days' | '30days'>('all');
   const [selectedClientId, setSelectedClientId] = useState<string>('all');
   const [selectedMemberId, setSelectedMemberId] = useState<string>('all');
   const [isClientMenuOpen, setIsClientMenuOpen] = useState(false);
+  useDropdownA11y(isClientMenuOpen, () => setIsClientMenuOpen(false));
   const [isMemberMenuOpen, setIsMemberMenuOpen] = useState(false);
+  useDropdownA11y(isMemberMenuOpen, () => setIsMemberMenuOpen(false));
+  const [drill, setDrill] = useState<DrillKey | null>(null);
 
-  // Helper para parsing seguro de datas
-  const parseDateSafe = (val?: string | number | null): Date | null => {
-    if (!val) return null;
-    if (typeof val === 'number') {
-      const d = new Date(val);
-      return isNaN(d.getTime()) ? null : d;
-    }
-    const str = String(val).trim();
-    if (str.includes('/')) {
-      const parts = str.split(' ')[0].split('/');
-      if (parts.length === 3) {
-        const d = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-        if (!isNaN(d.getTime())) return d;
-      }
-    }
-    const d = new Date(str);
-    return isNaN(d.getTime()) ? null : d;
-  };
+  // 1. Filtragem das tarefas: escopo (cliente + membro) e período
+  const periodDays = periodFilter === '7days' ? 7 : periodFilter === '30days' ? 30 : null;
 
-  // 1. Filtragem das tarefas: apenas escopo de Designers e Videomakers
-  const filteredTasks = useMemo(() => {
-    const now = new Date();
-    const cutoffDate = new Date();
-    if (periodFilter === '7days') {
-      cutoffDate.setDate(now.getDate() - 7);
-    } else if (periodFilter === '30days') {
-      cutoffDate.setDate(now.getDate() - 30);
-    }
-
-    return tasks.filter((t) => {
-      // Regra fundamental: se a tarefa estiver atribuída a alguém que NÃO é designer/videomaker e não tiver membros criativos, exclui
-      const hasCreativeAssignee =
-        (t.assigneeId && creativeEmployeeIds.has(t.assigneeId)) ||
-        (t.assigneeName && creativeEmployeeNames.has(t.assigneeName.toLowerCase().trim()));
-
-      const hasCreativeMember = Array.isArray(t.members) && t.members.some((m) => creativeEmployeeIds.has(m.id) || creativeEmployeeNames.has(m.name.toLowerCase().trim()));
-
-      // isExplicitlyNonCreative removido para contabilizar todas as demandas do fluxo (backlog, novos pedidos, etc), independente de quem assumiu a tarefa
-
-      // Filtro de Período
-      if (periodFilter !== 'all') {
-        const dateCandidates = [
-          parseDateSafe(t.createdAt),
-          parseDateSafe(t.deliveredAt),
-          parseDateSafe(t.dueDate),
-          t.lastMovedAt ? new Date(t.lastMovedAt) : null,
-        ].filter(Boolean) as Date[];
-
-        const isWithinPeriod = dateCandidates.some((d) => d >= cutoffDate);
-        if (!isWithinPeriod) return false;
-      }
-
+  const matchesScope = useCallback(
+    (t: Task): boolean => {
       // Filtro de Cliente
       if (selectedClientId !== 'all') {
         const pObj = projects.find((p) => p.id === selectedClientId);
@@ -172,78 +270,83 @@ export const ReportsView: React.FC = () => {
       }
 
       return true;
+    },
+    [selectedClientId, selectedMemberId, projects, creativeEmployees]
+  );
+
+  const getTaskDates = (t: Task): Date[] =>
+    [
+      parseDateSafe(t.createdAt),
+      parseDateSafe(t.deliveredAt),
+      parseDateSafe(t.dueDate),
+      t.lastMovedAt ? new Date(t.lastMovedAt) : null,
+    ].filter(Boolean) as Date[];
+
+  const filteredTasks = useMemo(() => {
+    const cutoffDate = new Date();
+    if (periodDays) cutoffDate.setDate(cutoffDate.getDate() - periodDays);
+
+    return tasks.filter((t) => {
+      if (periodDays && !getTaskDates(t).some((d) => d >= cutoffDate)) return false;
+      return matchesScope(t);
     });
-  }, [tasks, periodFilter, selectedClientId, selectedMemberId, projects, creativeEmployees, creativeEmployeeIds, creativeEmployeeNames, nonCreativeEmployeeIds, nonCreativeEmployeeNames]);
+  }, [tasks, periodDays, matchesScope]);
 
-  // Helper: tarefa entregue (concluída ou enviada para aprovação)
-  const isTaskDoneOrInReview = (t: Task): boolean => {
-    const s = (t.status || '').toLowerCase().trim();
-    return (
-      isTaskCompleted(t) ||
-      s === 'in_review' ||
-      s === 'postar' ||
-      s.includes('aprov') ||
-      s.includes('revis') ||
-      Boolean(t.deliveredAt)
-    );
-  };
+  // Período anterior (mesma duração, imediatamente antes): só tarefas sem nenhuma data no período atual,
+  // para os dois conjuntos nunca se sobreporem
+  const previousTasks = useMemo(() => {
+    if (!periodDays) return [] as Task[];
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - periodDays);
+    const prevCutoff = new Date(cutoffDate);
+    prevCutoff.setDate(prevCutoff.getDate() - periodDays);
 
-  // 2. Cálculos de SLA e Cumprimento de Prazos
-  const metrics = useMemo(() => {
-    const total = filteredTasks.length;
-    const completed = filteredTasks.filter(isTaskDoneOrInReview);
-    const active = filteredTasks.filter((t) => !isTaskDoneOrInReview(t));
-    const overdueActive = active.filter((t) => isTaskOverdue(t));
-
-    // SLA de tarefas concluídas
-    let onTimeCount = 0;
-    let lateCount = 0;
-    let totalLeadTimeDays = 0;
-    let leadTimeCount = 0;
-
-    completed.forEach((t) => {
-      const due = parseTaskDueDate(t.dueDate);
-      const delivery = parseDateSafe(t.deliveredAt) || (t.lastMovedAt ? new Date(t.lastMovedAt) : null);
-
-      if (due && delivery) {
-        // Tolerância até o final do dia do prazo
-        const dueEnd = new Date(due);
-        dueEnd.setHours(23, 59, 59, 999);
-        if (delivery.getTime() <= dueEnd.getTime()) {
-          onTimeCount++;
-        } else {
-          lateCount++;
-        }
-      } else if (!due && delivery) {
-        onTimeCount++;
-      }
-
-      const created = parseDateSafe(t.createdAt);
-      if (created && delivery && delivery >= created) {
-        const days = (delivery.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
-        totalLeadTimeDays += days;
-        leadTimeCount++;
-      }
+    return tasks.filter((t) => {
+      const dates = getTaskDates(t);
+      if (dates.some((d) => d >= cutoffDate)) return false;
+      if (!dates.some((d) => d >= prevCutoff)) return false;
+      return matchesScope(t);
     });
+  }, [tasks, periodDays, matchesScope]);
 
-    const evaluatedCompleted = onTimeCount + lateCount;
-    const slaRate = evaluatedCompleted > 0 ? Math.round((onTimeCount / evaluatedCompleted) * 100) : 100;
-    const avgLeadTime = leadTimeCount > 0 ? (totalLeadTimeDays / leadTimeCount).toFixed(1) : '0';
-    const totalPoints = completed.reduce((sum, t) => sum + (t.points || 1), 0);
+  // 2. Cálculos de SLA e Cumprimento de Prazos (período atual e anterior)
+  const metrics = useMemo(() => computeMetrics(filteredTasks), [filteredTasks]);
+  const completedShown = useCountUp(metrics.completedCount);
+  const overdueShown = useCountUp(metrics.overdueActiveCount);
+  const previousMetrics = useMemo(
+    () => (periodDays && previousTasks.length > 0 ? computeMetrics(previousTasks) : null),
+    [periodDays, previousTasks]
+  );
 
-    return {
-      total,
-      completedCount: completed.length,
-      activeCount: active.length,
-      overdueActiveCount: overdueActive.length,
-      onTimeCount,
-      lateCount,
-      slaRate,
-      avgLeadTime,
-      totalPoints,
-      overdueTasks: overdueActive.sort((a, b) => getTaskOverdueDays(b) - getTaskOverdueDays(a)),
-    };
-  }, [filteredTasks]);
+  const drillTasks = useMemo(() => {
+    if (!drill) return [] as Task[];
+    const list = filteredTasks.filter(isTaskDoneOrInReview);
+    switch (drill) {
+      case 'delivered':
+        return list;
+      case 'late':
+        return list.filter((t) => {
+          const due = parseTaskDueDate(t.dueDate);
+          const delivery = parseDateSafe(t.deliveredAt) || (t.lastMovedAt ? new Date(t.lastMovedAt) : null);
+          if (!due || !delivery) return false;
+          const dueEnd = new Date(due);
+          dueEnd.setHours(23, 59, 59, 999);
+          return delivery.getTime() > dueEnd.getTime();
+        });
+      case 'overdue':
+        return metrics.overdueTasks;
+      case 'active':
+        return filteredTasks.filter((t) => !isTaskDoneOrInReview(t));
+    }
+  }, [drill, filteredTasks, metrics]);
+
+  const openTaskFromReport = useCallback(
+    (task: Task) => {
+      setActiveTab('tasks');
+      setEditingTask(task);
+    },
+    [setActiveTab, setEditingTask]
+  );
 
   // 3. Produtividade por Membro: apenas Designers e Videomakers
   const memberProductivity = useMemo(() => {
@@ -435,10 +538,12 @@ export const ReportsView: React.FC = () => {
     rows.push(`Gerado em: ${new Date().toLocaleString('pt-BR')}`);
     rows.push(`Filtro de Periodo: ${periodFilter}`);
     rows.push(`Total de Demandas Avaliadas: ${metrics.total}`);
-    rows.push(`SLA / Pontualidade: ${metrics.slaRate}%`);
+    rows.push(`SLA / Pontualidade: ${metrics.slaRate === null ? 'sem dados' : `${metrics.slaRate}%`}`);
     rows.push(`Concluidas: ${metrics.completedCount}`);
     rows.push(`Atrasadas Ativas: ${metrics.overdueActiveCount}`);
-    rows.push(`Tempo Medio de Producao: ${metrics.avgLeadTime} dias`);
+    rows.push(`Tempo Medio de Producao: ${metrics.avgLeadTime === null ? 'sem dados' : `${metrics.avgLeadTime} dias`}`);
+    rows.push(`Tempo de Producao (mediana): ${metrics.medianLeadTime === null ? 'sem dados' : `${metrics.medianLeadTime} dias`}`);
+    rows.push(`Tempo de Producao (P85): ${metrics.p85LeadTime === null ? 'sem dados' : `${metrics.p85LeadTime} dias`}`);
     rows.push('');
 
     // Produtividade por Membro
@@ -481,16 +586,16 @@ export const ReportsView: React.FC = () => {
   return (
     <div className="space-y-6 w-full px-4 sm:px-8 pb-16 animate-in fade-in duration-300">
       {/* Header com Filtros Executivos e Ação de Exportar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#262626]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-line">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E]">
+            <div className="p-2 rounded-xl bg-brand/10 border border-brand/30 text-brand">
               <BarChart3 className="w-5 h-5" />
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-semibold text-white tracking-tight flex items-center gap-2">
                 Relatórios para Gestores
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-medium">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-medium">
                   Dados Reais
                 </span>
               </h1>
@@ -510,8 +615,8 @@ export const ReportsView: React.FC = () => {
               onClick={() => setPeriodFilter('all')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 periodFilter === 'all'
-                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                  : 'bg-[#141414] text-slate-400 border border-[#262626] hover:text-white hover:bg-[#1A1A1A] hover:border-[#333]'
+                  ? 'bg-brand text-white shadow-xs'
+                  : 'bg-surface text-slate-400 border border-line hover:text-white hover:bg-field hover:border-[#333]'
               }`}
             >
               Tudo
@@ -521,8 +626,8 @@ export const ReportsView: React.FC = () => {
               onClick={() => setPeriodFilter('30days')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 periodFilter === '30days'
-                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                  : 'bg-[#141414] text-slate-400 border border-[#262626] hover:text-white hover:bg-[#1A1A1A] hover:border-[#333]'
+                  ? 'bg-brand text-white shadow-xs'
+                  : 'bg-surface text-slate-400 border border-line hover:text-white hover:bg-field hover:border-[#333]'
               }`}
             >
               30 dias
@@ -532,8 +637,8 @@ export const ReportsView: React.FC = () => {
               onClick={() => setPeriodFilter('7days')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 periodFilter === '7days'
-                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                  : 'bg-[#141414] text-slate-400 border border-[#262626] hover:text-white hover:bg-[#1A1A1A] hover:border-[#333]'
+                  ? 'bg-brand text-white shadow-xs'
+                  : 'bg-surface text-slate-400 border border-line hover:text-white hover:bg-field hover:border-[#333]'
               }`}
             >
               7 dias
@@ -548,19 +653,19 @@ export const ReportsView: React.FC = () => {
                 onClick={() => setIsClientMenuOpen(false)}
               />
             )}
-            <button
+            <button aria-haspopup="true" aria-expanded={isClientMenuOpen}
               type="button"
               onClick={() => {
                 setIsClientMenuOpen(!isClientMenuOpen);
                 setIsMemberMenuOpen(false);
               }}
-              className="flex items-center gap-2 px-3 py-2 bg-[#141414] hover:bg-[#1C1C1C] border border-[#262626] hover:border-[#383838] text-slate-200 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-98"
+              className="flex items-center gap-2 px-3 py-2 bg-surface hover:bg-raised border border-line hover:border-line-hover text-slate-200 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-98"
             >
               {(() => {
                 if (selectedClientId === 'all') {
                   return (
                     <>
-                      <div className="w-4 h-4 rounded bg-white/10 flex items-center justify-center text-[10px]">🏢</div>
+                      <div className="w-4 h-4 rounded bg-white/10 flex items-center justify-center text-[11px]">🏢</div>
                       <span>Todos os Clientes</span>
                     </>
                   );
@@ -572,7 +677,7 @@ export const ReportsView: React.FC = () => {
                     {logo ? (
                       <img src={logo} alt="" className="w-4 h-4 rounded object-contain shrink-0" />
                     ) : (
-                      <div className="w-4 h-4 rounded bg-[#E4007E] text-white text-[9px] flex items-center justify-center font-bold">
+                      <div className="w-4 h-4 rounded bg-brand text-white text-[11px] flex items-center justify-center font-bold">
                         {activeClient?.name.slice(0, 1).toUpperCase()}
                       </div>
                     )}
@@ -584,7 +689,7 @@ export const ReportsView: React.FC = () => {
             </button>
 
             {isClientMenuOpen && (
-              <div className="absolute left-0 top-11 z-50 min-w-[200px] max-h-64 overflow-y-auto bg-[#181818] border border-[#2E2E2E] rounded-2xl p-1.5 shadow-2xl space-y-0.5 custom-scrollbar">
+              <div data-menu className="absolute left-0 top-11 z-50 min-w-[200px] max-h-64 overflow-y-auto bg-popover border border-line-strong rounded-2xl p-1.5 shadow-2xl space-y-0.5 custom-scrollbar">
                 <button
                   type="button"
                   onClick={() => {
@@ -593,7 +698,7 @@ export const ReportsView: React.FC = () => {
                   }}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-left transition-colors cursor-pointer ${
                     selectedClientId === 'all'
-                      ? 'bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 text-[#E4007E]'
+                      ? 'bg-brand/15 text-brand'
                       : 'text-slate-300 hover:bg-[#222] hover:text-white'
                   }`}
                 >
@@ -614,14 +719,14 @@ export const ReportsView: React.FC = () => {
                       }}
                       className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-left transition-colors cursor-pointer ${
                         isSelected
-                          ? 'bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 text-[#E4007E]'
+                          ? 'bg-brand/15 text-brand'
                           : 'text-slate-300 hover:bg-[#222] hover:text-white'
                       }`}
                     >
                       {logo ? (
                         <img src={logo} alt="" className="w-5 h-5 rounded object-contain shrink-0" />
                       ) : (
-                        <div className="w-5 h-5 rounded bg-gradient-to-br from-[#E4007E] to-[#E94E18] text-white text-[10px] flex items-center justify-center font-bold shrink-0">
+                        <div className="w-5 h-5 rounded bg-brand text-white text-[11px] flex items-center justify-center font-bold shrink-0">
                           {p.name.slice(0, 1).toUpperCase()}
                         </div>
                       )}
@@ -641,19 +746,19 @@ export const ReportsView: React.FC = () => {
                 onClick={() => setIsMemberMenuOpen(false)}
               />
             )}
-            <button
+            <button aria-haspopup="true" aria-expanded={isMemberMenuOpen}
               type="button"
               onClick={() => {
                 setIsMemberMenuOpen(!isMemberMenuOpen);
                 setIsClientMenuOpen(false);
               }}
-              className="flex items-center gap-2 px-3 py-2 bg-[#141414] hover:bg-[#1C1C1C] border border-[#262626] hover:border-[#383838] text-slate-200 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-98"
+              className="flex items-center gap-2 px-3 py-2 bg-surface hover:bg-raised border border-line hover:border-line-hover text-slate-200 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-98"
             >
               {(() => {
                 if (selectedMemberId === 'all') {
                   return (
                     <>
-                      <div className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[10px]">👥</div>
+                      <div className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[11px]">👥</div>
                       <span>Todos os Criativos</span>
                     </>
                   );
@@ -664,7 +769,7 @@ export const ReportsView: React.FC = () => {
                     {activeEmp?.avatarUrl ? (
                       <img src={activeEmp.avatarUrl} alt="" className="w-4 h-4 rounded-full object-cover shrink-0" />
                     ) : (
-                      <div className="w-4 h-4 rounded-full bg-purple-600 text-white text-[9px] flex items-center justify-center font-bold">
+                      <div className="w-4 h-4 rounded-full bg-purple-600 text-white text-[11px] flex items-center justify-center font-bold">
                         {activeEmp?.name.slice(0, 2).toUpperCase()}
                       </div>
                     )}
@@ -676,7 +781,7 @@ export const ReportsView: React.FC = () => {
             </button>
 
             {isMemberMenuOpen && (
-              <div className="absolute left-0 top-11 z-50 min-w-[210px] max-h-64 overflow-y-auto bg-[#181818] border border-[#2E2E2E] rounded-2xl p-1.5 shadow-2xl space-y-0.5 custom-scrollbar">
+              <div data-menu className="absolute left-0 top-11 z-50 min-w-[210px] max-h-64 overflow-y-auto bg-popover border border-line-strong rounded-2xl p-1.5 shadow-2xl space-y-0.5 custom-scrollbar">
                 <button
                   type="button"
                   onClick={() => {
@@ -685,7 +790,7 @@ export const ReportsView: React.FC = () => {
                   }}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-left transition-colors cursor-pointer ${
                     selectedMemberId === 'all'
-                      ? 'bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 text-[#E4007E]'
+                      ? 'bg-brand/15 text-brand'
                       : 'text-slate-300 hover:bg-[#222] hover:text-white'
                   }`}
                 >
@@ -705,20 +810,20 @@ export const ReportsView: React.FC = () => {
                       }}
                       className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-left transition-colors cursor-pointer ${
                         isSelected
-                          ? 'bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 text-[#E4007E]'
+                          ? 'bg-brand/15 text-brand'
                           : 'text-slate-300 hover:bg-[#222] hover:text-white'
                       }`}
                     >
                       {emp.avatarUrl ? (
                         <img src={emp.avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
                       ) : (
-                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-[9px] flex items-center justify-center font-bold shrink-0">
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-[11px] flex items-center justify-center font-bold shrink-0">
                           {emp.name.slice(0, 2).toUpperCase()}
                         </div>
                       )}
                       <div className="min-w-0 truncate">
                         <span className="block truncate">{emp.name}</span>
-                        <span className="text-[10px] text-slate-500 block truncate">{emp.role}</span>
+                        <span className="text-[11px] text-slate-500 block truncate">{emp.role}</span>
                       </div>
                     </button>
                   );
@@ -731,7 +836,7 @@ export const ReportsView: React.FC = () => {
           <button
             onClick={handleExportCSV}
             type="button"
-            className="px-3.5 py-2 bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white rounded-xl text-xs font-bold flex items-center gap-2 hover:opacity-95 active:scale-95 transition-all shadow-md shadow-[#E4007E]/20 cursor-pointer ml-auto sm:ml-0"
+            className="px-3.5 py-2 bg-gradient-to-r from-brand to-brand-alt text-white rounded-xl text-xs font-bold flex items-center gap-2 hover:opacity-95 active:scale-95 transition-all shadow-md shadow-brand/20 cursor-pointer ml-auto sm:ml-0"
           >
             <Download className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>Exportar CSV</span>
@@ -742,7 +847,12 @@ export const ReportsView: React.FC = () => {
       {/* 1. Indicadores Executivos Principais (KPIs) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* SLA / Taxa de Pontualidade */}
-        <div className="p-4 bg-[#141414] border border-[#262626] rounded-2xl shadow-xs space-y-2">
+        <button
+          type="button"
+          onClick={() => setDrill((d) => (d === 'late' ? null : 'late'))}
+          aria-pressed={drill === 'late'}
+          className={`p-4 bg-surface border rounded-2xl shadow-xs space-y-2 text-left cursor-pointer transition-colors hover:border-line-hover focus-visible:outline-2 focus-visible:outline-brand ${drill === 'late' ? 'border-brand/60' : 'border-line'}`}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-400">Índice de SLA (Prazos)</span>
             <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -750,16 +860,23 @@ export const ReportsView: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-semibold text-white">{metrics.slaRate}%</span>
-            <span className="text-[10px] text-emerald-400 font-semibold">no prazo previsto</span>
+            <span className="text-2xl font-semibold text-white">{metrics.slaRate === null ? '—' : `${metrics.slaRate}%`}</span>
+            <span className="text-[11px] text-emerald-400 font-semibold">{metrics.slaRate === null ? 'sem entregas avaliáveis' : 'no prazo previsto'}</span>
           </div>
-          <p className="text-[11px] text-slate-400">
+          <span className="block text-xs text-slate-400">
             {metrics.onTimeCount} entregas pontuais vs {metrics.lateCount} após o prazo
-          </p>
-        </div>
+            {metrics.noDueDateCount > 0 ? ` · ${metrics.noDueDateCount} sem prazo (fora do índice)` : ''}
+          </span>
+          <Delta current={metrics.slaRate} previous={previousMetrics?.slaRate ?? null} unit="pp" />
+        </button>
 
         {/* Demandas Concluídas */}
-        <div className="p-4 bg-[#141414] border border-[#262626] rounded-2xl shadow-xs space-y-2">
+        <button
+          type="button"
+          onClick={() => setDrill((d) => (d === 'delivered' ? null : 'delivered'))}
+          aria-pressed={drill === 'delivered'}
+          className={`p-4 bg-surface border rounded-2xl shadow-xs space-y-2 text-left cursor-pointer transition-colors hover:border-line-hover focus-visible:outline-2 focus-visible:outline-brand ${drill === 'delivered' ? 'border-brand/60' : 'border-line'}`}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-400">Demandas Concluídas</span>
             <div className="p-1.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
@@ -767,16 +884,22 @@ export const ReportsView: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-semibold text-white">{metrics.completedCount}</span>
-            <span className="text-[10px] text-slate-400 font-semibold">de {metrics.total} tarefas</span>
+            <span className="text-2xl font-semibold text-white tabular-nums">{completedShown}</span>
+            <span className="text-[11px] text-slate-400 font-semibold">de {metrics.total} tarefas</span>
           </div>
-          <p className="text-[11px] text-slate-400">
+          <span className="block text-xs text-slate-400">
             {metrics.totalPoints} pontos de esforço acumulados
-          </p>
-        </div>
+          </span>
+          <Delta current={metrics.completedCount} previous={previousMetrics ? previousMetrics.completedCount : null} />
+        </button>
 
         {/* Demandas Atrasadas Ativas */}
-        <div className="p-4 bg-[#141414] border border-[#262626] rounded-2xl shadow-xs space-y-2">
+        <button
+          type="button"
+          onClick={() => setDrill((d) => (d === 'overdue' ? null : 'overdue'))}
+          aria-pressed={drill === 'overdue'}
+          className={`p-4 bg-surface border rounded-2xl shadow-xs space-y-2 text-left cursor-pointer transition-colors hover:border-line-hover focus-visible:outline-2 focus-visible:outline-brand ${drill === 'overdue' ? 'border-brand/60' : 'border-line'}`}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-400">Atrasadas em Aberto</span>
             <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20">
@@ -784,18 +907,24 @@ export const ReportsView: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={`text-2xl font-semibold ${metrics.overdueActiveCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-              {metrics.overdueActiveCount}
+            <span className={`text-2xl font-semibold tabular-nums ${metrics.overdueActiveCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+              {overdueShown}
             </span>
-            <span className="text-[10px] text-slate-400 font-semibold">demandas críticas</span>
+            <span className="text-[11px] text-slate-400 font-semibold">demandas críticas</span>
           </div>
-          <p className="text-[11px] text-slate-400">
+          <span className="block text-xs text-slate-400">
             {metrics.activeCount} demandas totais em andamento
-          </p>
-        </div>
+          </span>
+          <Delta current={metrics.overdueActiveCount} previous={previousMetrics ? previousMetrics.overdueActiveCount : null} lowerIsBetter />
+        </button>
 
         {/* Lead Time / Tempo Médio de Ciclo */}
-        <div className="p-4 bg-[#141414] border border-[#262626] rounded-2xl shadow-xs space-y-2">
+        <button
+          type="button"
+          onClick={() => setDrill((d) => (d === 'delivered' ? null : 'delivered'))}
+          aria-pressed={drill === 'delivered'}
+          className={`p-4 bg-surface border rounded-2xl shadow-xs space-y-2 text-left cursor-pointer transition-colors hover:border-line-hover focus-visible:outline-2 focus-visible:outline-brand ${drill === 'delivered' ? 'border-brand/60' : 'border-line'}`}
+        >
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-400">Tempo Médio de Ciclo</span>
             <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -803,14 +932,72 @@ export const ReportsView: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-semibold text-white">{metrics.avgLeadTime}</span>
-            <span className="text-xs text-slate-300 font-bold">dias</span>
+            <span className="text-2xl font-semibold text-white">{metrics.avgLeadTime ?? '—'}</span>
+            {metrics.avgLeadTime !== null && <span className="text-xs text-slate-300 font-bold">dias</span>}
           </div>
-          <p className="text-[11px] text-slate-400">
-            Média da criação até a entrega final
-          </p>
-        </div>
+          <span className="block text-xs text-slate-400">
+            {metrics.medianLeadTime !== null
+              ? `Mediana ${metrics.medianLeadTime}d · P85 ${metrics.p85LeadTime}d (criação até a entrega)`
+              : 'Sem entregas para calcular o ciclo'}
+          </span>
+          <Delta
+            current={metrics.medianLeadTime !== null ? Number(metrics.medianLeadTime) : null}
+            previous={previousMetrics?.medianLeadTime != null ? Number(previousMetrics.medianLeadTime) : null}
+            lowerIsBetter
+          />
+        </button>
       </div>
+
+      {drill && (
+        <div className="p-5 bg-surface border border-line rounded-2xl space-y-3" role="region" aria-label={DRILL_TITLES[drill]}>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-base font-medium text-white tracking-tight">
+              {DRILL_TITLES[drill]} <span className="text-slate-500 font-normal">({drillTasks.length})</span>
+            </h2>
+            <button
+              type="button"
+              onClick={() => setDrill(null)}
+              className="text-xs font-semibold text-slate-400 hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-brand rounded"
+            >
+              Fechar
+            </button>
+          </div>
+          {drillTasks.length === 0 ? (
+            <p className="text-sm text-slate-500 py-4">Nenhuma demanda neste recorte.</p>
+          ) : (
+            <div className="overflow-x-auto max-h-96 overflow-y-auto custom-scrollbar">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-line text-slate-400 font-medium">
+                    <th className="pb-2">Demanda</th>
+                    <th className="pb-2">Cliente</th>
+                    <th className="pb-2">Responsável</th>
+                    <th className="pb-2">Prazo</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#1F1F1F]">
+                  {drillTasks.map((task) => (
+                    <tr key={task.id}>
+                      <td className="py-2 max-w-[280px]">
+                        <button
+                          type="button"
+                          onClick={() => openTaskFromReport(task)}
+                          className="font-semibold text-white hover:text-brand truncate max-w-full text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-brand rounded"
+                        >
+                          {task.title}
+                        </button>
+                      </td>
+                      <td className="py-2 text-slate-300">{task.projectName || 'Geral'}</td>
+                      <td className="py-2 text-slate-300">{task.assigneeName || 'Sem membro'}</td>
+                      <td className="py-2 text-slate-300 font-mono">{task.dueDate || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 2. Gargalos do Funil de Produção & Tempo Médio por Etapa (Lado a Lado) */}
       {/* 2. Gráficos Visuais (Recharts) */}
@@ -820,11 +1007,11 @@ export const ReportsView: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         
         {/* Funil de Produção - Estilo Trapézio Invertido 3D / Flat Impeccable */}
-        <div className="p-6 bg-[#141414] border border-[#262626] rounded-2xl flex flex-col justify-between">
+        <div className="p-6 bg-surface border border-line rounded-2xl flex flex-col justify-between">
           <div className="space-y-1 mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-[#E4007E]" />
+                <TrendingUp className="w-4 h-4 text-brand" />
                 <h2 className="text-base font-semibold text-white tracking-tight">Funil de Produção</h2>
               </div>
               <span className="text-xs font-semibold text-slate-400 tabular-nums">
@@ -846,16 +1033,17 @@ export const ReportsView: React.FC = () => {
                 const topPct = 100 - (index * (54 / Math.max(totalStages, 1)));
                 const bottomPct = 100 - ((index + 1) * (54 / Math.max(totalStages, 1)));
                 
-                // Color palette fallback if dotColor isn't custom
+                // Cor das etapas quando o status não tem cor própria
                 const palette = [
-                  '#3B82F6', // Blue
-                  '#06B6D4', // Cyan
-                  '#10B981', // Emerald
-                  '#F59E0B', // Amber
-                  '#F97316', // Orange
-                  '#EC4899', // Pink
-                  '#E4007E', // Magenta Brand
-                  '#8B5CF6', // Purple
+                  // Rampa sequencial rosa -> laranja da marca (etapas iniciais -> finais)
+                  '#E4007E',
+                  '#E5106C',
+                  '#E62059',
+                  '#E73046',
+                  '#E84032',
+                  '#E94E18',
+                  '#F06A2E',
+                  '#F68648',
                 ];
                 const stageColor = st.dotColor && st.dotColor !== '#E4007E' ? st.dotColor : palette[index % palette.length];
 
@@ -907,9 +1095,9 @@ export const ReportsView: React.FC = () => {
           </div>
 
           {/* Quick Metrics Footer */}
-          <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
             <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E4007E]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-brand" />
               Topo ao Fundo: Fluxo Contínuo
             </span>
             <span className="tabular-nums font-semibold text-slate-300">
@@ -919,7 +1107,7 @@ export const ReportsView: React.FC = () => {
         </div>
 
         {/* Tempo Médio de Ciclo (Cycle Time & Gargalos) */}
-        <div className="p-6 bg-[#141414] border border-[#262626] rounded-2xl flex flex-col justify-between">
+        <div className="p-6 bg-surface border border-line rounded-2xl flex flex-col justify-between">
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -953,7 +1141,7 @@ export const ReportsView: React.FC = () => {
                     {tc.label}
                   </span>
                   {tc.isMax && (
-                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold uppercase tracking-wide bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                    <span className="px-1.5 py-0.2 rounded-full text-[11px] font-bold uppercase tracking-wide bg-rose-500/20 text-rose-400 border border-rose-500/30">
                       Maior Gargalo
                     </span>
                   )}
@@ -962,7 +1150,7 @@ export const ReportsView: React.FC = () => {
                 <div className="flex items-center gap-3 shrink-0">
                   <span
                     className={`text-xs font-bold tabular-nums ${
-                      tc.isMax ? 'text-rose-400 font-extrabold' : 'text-white'
+                      tc.isMax ? 'text-rose-400 font-bold' : 'text-white'
                     }`}
                   >
                     {tc.displayStr}
@@ -974,7 +1162,7 @@ export const ReportsView: React.FC = () => {
 
           <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
             <span>Média total do ciclo de vida:</span>
-            <span className="text-white font-bold tabular-nums">{metrics.avgLeadTime} dias</span>
+            <span className="text-white font-bold tabular-nums">{metrics.avgLeadTime ?? '—'}{metrics.avgLeadTime !== null ? ' dias' : ''}</span>
           </div>
         </div>
 
@@ -983,7 +1171,7 @@ export const ReportsView: React.FC = () => {
       {/* 3. Grid Principal: Produtividade por Membro & Volume por Cliente */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Tabela de Produtividade por Membro (7 colunas no grid) */}
-        <div className="xl:col-span-12 p-6 bg-[#141414] border border-[#262626] rounded-2xl space-y-4 shadow-xs">
+        <div className="xl:col-span-12 p-6 bg-surface border border-line rounded-2xl space-y-4 shadow-xs">
           <div className="flex items-center justify-between pb-3 border-b border-[#242424]">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-sky-400" />
@@ -995,7 +1183,7 @@ export const ReportsView: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[#242424] text-slate-400 font-medium text-[11px] uppercase tracking-wider">
+                <tr className="border-b border-[#242424] text-slate-400 font-medium text-xs uppercase tracking-wider">
                   <th className="pb-3 font-medium">Colaborador</th>
                   <th className="pb-3 text-center font-medium">Atribuídas</th>
                   <th className="pb-3 text-center font-medium">Entregas</th>
@@ -1017,19 +1205,19 @@ export const ReportsView: React.FC = () => {
                     const isHighAdjustments = m.adjustments > 0 && m.adjustmentRate >= 25;
 
                     return (
-                      <tr key={m.id} className="hover:bg-[#1A1A1A]/70 transition-colors group">
+                      <tr key={m.id} className="hover:bg-field/70 transition-colors group">
                         <td className="py-3 pr-3">
                           <div className="flex items-center gap-2.5">
                             {m.avatarUrl ? (
                               <img src={m.avatarUrl} alt={m.name} className="w-7 h-7 rounded-full object-cover ring-1 ring-white/10 shrink-0" />
                             ) : (
-                              <div className="w-7 h-7 rounded-full bg-[#242424] text-white font-semibold text-[11px] flex items-center justify-center shrink-0 border border-white/5">
+                              <div className="w-7 h-7 rounded-full bg-[#242424] text-white font-semibold text-xs flex items-center justify-center shrink-0 border border-white/5">
                                 {m.initials}
                               </div>
                             )}
                             <div className="min-w-0">
                               <span className="font-medium text-white block truncate text-xs group-hover:text-white transition-colors">{m.name}</span>
-                              <span className="text-[10px] text-slate-400 block truncate">{m.department}</span>
+                              <span className="text-[11px] text-slate-400 block truncate">{m.department}</span>
                             </div>
                           </div>
                         </td>
@@ -1038,17 +1226,17 @@ export const ReportsView: React.FC = () => {
                           <div className="flex flex-col items-center">
                             <span className="tabular-nums font-semibold text-emerald-400">{m.completed}</span>
                             {m.inProgress > 0 && (
-                              <span className="text-[10px] text-sky-400/80 font-normal">({m.inProgress} em curso)</span>
+                              <span className="text-[11px] text-sky-400/80 font-normal">({m.inProgress} em curso)</span>
                             )}
                           </div>
                         </td>
                         <td className="py-3 px-2">
                           <div className="w-28 mx-auto space-y-1">
-                            <div className="flex items-center justify-between text-[10px] tabular-nums">
+                            <div className="flex items-center justify-between text-[11px] tabular-nums">
                               <span className="text-slate-400">{completionRate}%</span>
                               <span className="text-slate-400">{m.completed}/{m.total}</span>
                             </div>
-                            <div className="w-full bg-[#202020] h-1.5 rounded-full overflow-hidden">
+                            <div className="w-full bg-raised h-1.5 rounded-full overflow-hidden">
                               <div
                                 className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-300"
                                 style={{ width: `${completionRate}%` }}
@@ -1058,7 +1246,7 @@ export const ReportsView: React.FC = () => {
                         </td>
                         <td className="py-3 text-center">
                           <span
-                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold tabular-nums ${
+                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold tabular-nums ${
                               isHighAdjustments
                                 ? 'bg-rose-500/15 text-rose-300 border border-rose-500/20'
                                 : m.adjustments > 0

@@ -78,7 +78,7 @@ export const TaskMembersStack: React.FC<TaskMembersStackProps> = ({ task }) => {
               alt={m.name}
               size="sm"
               ring
-              className="!w-7 !h-7 ring-2 ring-[#101010] shadow-sm text-[10px] font-semibold"
+              className="!w-7 !h-7 ring-2 ring-canvas shadow-sm text-[11px] font-semibold"
             />
           </div>
         ))}
@@ -87,9 +87,9 @@ export const TaskMembersStack: React.FC<TaskMembersStackProps> = ({ task }) => {
       {expanded && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="absolute left-0 bottom-full mb-2 w-56 bg-[#141414] rounded-2xl shadow-2xl border border-white/5 p-3 z-30 animate-in fade-in zoom-in-95 duration-150 text-white"
+          className="absolute left-0 bottom-full mb-2 w-56 bg-surface rounded-2xl shadow-2xl border border-white/5 p-3 z-30 animate-in fade-in zoom-in-95 duration-150 text-white"
         >
-          <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 pb-2 mb-2 border-b border-slate-800">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-300 pb-2 mb-2 border-b border-line">
             <span>Membros ({membersList.length})</span>
             <button
               onClick={() => setExpanded(false)}

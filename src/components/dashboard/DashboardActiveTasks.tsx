@@ -68,7 +68,7 @@ const getStatusBadge = (task: Task) => {
     case 'backlog':
     default:
       return (
-        <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#011C39] text-slate-300 border border-slate-700 whitespace-nowrap">
+        <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-field text-slate-300 border border-slate-700 whitespace-nowrap">
           Backlog
         </span>
       );
@@ -83,11 +83,11 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
     const limitedTasks = tasks.slice(0, 20);
 
     return (
-      <div className="bg-[#141414] rounded-2xl p-6 shadow-lg">
+      <div className="bg-surface rounded-2xl p-6 shadow-lg">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <h3 className="font-bold text-white text-xl tracking-tight">Tarefas Ativas</h3>
-            <span className="bg-[#101010] text-[#E4007E] text-xs font-bold px-2.5 py-0.5 rounded-full">
+            <span className="bg-canvas text-brand text-xs font-bold px-2.5 py-0.5 rounded-full">
               {limitedTasks.length} tarefas
             </span>
           </div>
@@ -142,7 +142,7 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
                       task
                     )} shrink-0 transition-transform group-hover:scale-110`}
                   />
-                  <span className="font-semibold text-white text-base truncate group-hover:text-[#E4007E] transition-colors">
+                  <span className="font-semibold text-white text-base truncate group-hover:text-brand transition-colors">
                     {task.title}
                   </span>
                 </div>
@@ -161,7 +161,7 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
                     const style = getLabelColorHex(firstLabel.name, firstLabel.color);
                     return (
                       <span
-                        className="hidden sm:inline-flex items-center gap-1 text-[11px] px-2.5 py-0.8 rounded-lg font-semibold tracking-wide uppercase shadow-2xs border"
+                        className="hidden sm:inline-flex items-center gap-1 text-xs px-2.5 py-0.8 rounded-lg font-semibold tracking-wide uppercase shadow-2xs border"
                         style={{
                           backgroundColor: style.bg,
                           color: style.text,
@@ -176,7 +176,7 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
 
                   {/* Assignee Avatar */}
                   <div
-                    className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#02376F] to-[#011C39] border border-[#FFB903]/40 text-white font-bold text-xs flex items-center justify-center shadow-xs"
+                    className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#02376F] to-field border border-gold/40 text-white font-bold text-xs flex items-center justify-center shadow-xs"
                     title={task.assigneeName}
                   >
                     {task.assigneeInitials}
@@ -198,7 +198,7 @@ export const DashboardActiveTasks: React.FC<DashboardActiveTasksProps> = React.m
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full py-2.5 text-center text-xs font-bold text-[#E4007E] hover:text-pink-400 transition-colors flex items-center justify-center gap-1 cursor-pointer pt-3 border-t border-[#262626] mt-4"
+            className="w-full py-2.5 text-center text-xs font-bold text-brand hover:text-pink-400 transition-colors flex items-center justify-center gap-1 cursor-pointer pt-3 border-t border-line mt-4"
           >
             <span>
               {isExpanded

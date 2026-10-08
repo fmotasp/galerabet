@@ -376,9 +376,9 @@ export const LoginView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#101010] flex flex-col md:flex-row relative overflow-hidden font-sans select-none antialiased">
+    <div className="min-h-screen w-full bg-canvas flex flex-col md:flex-row relative overflow-hidden font-sans select-none antialiased">
       {/* LEFT COLUMN: FORM AREA */}
-      <div className="w-full md:w-[52%] lg:w-[50%] flex flex-col justify-between p-8 sm:p-14 lg:p-20 z-10 bg-[#101010]">
+      <div className="w-full md:w-[52%] lg:w-[50%] flex flex-col justify-between p-8 sm:p-14 lg:p-20 z-10 bg-canvas">
         {/* Brand Header */}
         <div className="flex items-center gap-3">
           <img
@@ -394,7 +394,7 @@ export const LoginView: React.FC = () => {
             /* ================= TELINHA DE PRIMEIRO ACESSO ================= */
             <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
               <div className="space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] text-[11px] font-semibold tracking-wider uppercase">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand/10 border border-brand/30 text-brand text-xs font-semibold tracking-wider uppercase">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Primeiro Acesso</span>
                 </div>
@@ -416,8 +416,8 @@ export const LoginView: React.FC = () => {
 
               <form onSubmit={handleFirstAccessSubmit} className="space-y-5">
                 {/* Nova Senha */}
-                <div className="relative border-b-2 border-white/5 focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
-                  <Lock className="w-5 h-5 text-[#E4007E] shrink-0" />
+                <div className="relative border-b-2 border-white/5 focus-within:border-brand pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
+                  <Lock className="w-5 h-5 text-brand shrink-0" />
                   <input
                     type={showNewPassword ? 'text' : 'password'}
                     required
@@ -428,7 +428,7 @@ export const LoginView: React.FC = () => {
                     style={{ background: 'transparent', backgroundColor: 'transparent' }}
                     className="login-input w-full text-base font-bold text-white placeholder-slate-400 bg-transparent border-none outline-none focus:outline-none focus:ring-0 shadow-none p-0"
                   />
-                  <button
+                  <button aria-label={showNewPassword ? 'Ocultar senha' : 'Mostrar senha'}
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     className="text-slate-400 hover:text-white p-1 transition-colors cursor-pointer"
@@ -439,8 +439,8 @@ export const LoginView: React.FC = () => {
                 </div>
 
                 {/* Confirmar Nova Senha */}
-                <div className="relative border-b-2 border-white/5 focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
-                  <KeyRound className="w-5 h-5 text-[#E4007E] shrink-0" />
+                <div className="relative border-b-2 border-white/5 focus-within:border-brand pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
+                  <KeyRound className="w-5 h-5 text-brand shrink-0" />
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     required
@@ -450,7 +450,7 @@ export const LoginView: React.FC = () => {
                     style={{ background: 'transparent', backgroundColor: 'transparent' }}
                     className="login-input w-full text-base font-bold text-white placeholder-slate-400 bg-transparent border-none outline-none focus:outline-none focus:ring-0 shadow-none p-0"
                   />
-                  <button
+                  <button aria-label={showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'}
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="text-slate-400 hover:text-white p-1 transition-colors cursor-pointer"
@@ -464,7 +464,7 @@ export const LoginView: React.FC = () => {
                 <button
                   type="submit"
                   disabled={firstAccessLoading}
-                  className="w-full py-3.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-base font-semibold shadow-lg shadow-[#E4007E]/25 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-center"
+                  className="w-full py-3.5 bg-gradient-to-r from-brand to-brand-alt hover:opacity-95 text-white rounded-xl text-base font-semibold shadow-lg shadow-brand/25 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-center"
                 >
                   {firstAccessLoading ? 'Salvando Senha...' : 'Salvar Nova Senha e Entrar'}
                 </button>
@@ -496,8 +496,8 @@ export const LoginView: React.FC = () => {
 
               <form onSubmit={handleSubmit} className="space-y-7">
                 {/* Email Input */}
-                <div className="relative border-b-2 border-white/5 focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
-                  <Mail className="w-5 h-5 text-[#E4007E] shrink-0" />
+                <div className="relative border-b-2 border-white/5 focus-within:border-brand pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
+                  <Mail className="w-5 h-5 text-brand shrink-0" />
                   <input
                     type="email"
                     required
@@ -511,8 +511,8 @@ export const LoginView: React.FC = () => {
                 </div>
 
                 {/* Password Input */}
-                <div className="relative border-b-2 border-white/5 focus-within:border-[#E4007E] pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
-                  <KeyRound className="w-5 h-5 text-[#E4007E] shrink-0" />
+                <div className="relative border-b-2 border-white/5 focus-within:border-brand pb-2.5 transition-colors flex items-center gap-3 bg-transparent">
+                  <KeyRound className="w-5 h-5 text-brand shrink-0" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
@@ -536,7 +536,7 @@ export const LoginView: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-base font-semibold shadow-lg shadow-[#E4007E]/25 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-center"
+                  className="w-full py-3.5 bg-gradient-to-r from-brand to-brand-alt hover:opacity-95 text-white rounded-xl text-base font-semibold shadow-lg shadow-brand/25 transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer text-center"
                 >
                   {loading ? 'Entrando...' : 'Entrar'}
                 </button>
@@ -548,7 +548,7 @@ export const LoginView: React.FC = () => {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/5 text-[#E4007E] accent-[#E4007E] focus:ring-[#E4007E] bg-[#141414] cursor-pointer"
+                      className="w-4 h-4 rounded border-white/5 text-brand accent-brand focus:ring-brand bg-surface cursor-pointer"
                     />
                     <span className="text-white">Lembrar de mim</span>
                   </label>
@@ -565,7 +565,7 @@ export const LoginView: React.FC = () => {
       </div>
 
       {/* RIGHT COLUMN: ART PANEL */}
-      <div className="hidden md:block md:w-[48%] lg:w-[50%] relative overflow-hidden bg-gradient-to-br from-[#1E1E1E] via-[#141414] to-[#101010]">
+      <div className="hidden md:block md:w-[48%] lg:w-[50%] relative overflow-hidden bg-gradient-to-br from-raised via-surface to-canvas">
         {/* Custom Login Art Image if configured */}
         {loginArtUrl ? (
           <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
@@ -577,7 +577,7 @@ export const LoginView: React.FC = () => {
           </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center p-8">
-            <div className="w-56 h-56 rounded-3xl bg-[#141414] border border-white/5 p-6 flex items-center justify-center shadow-2xl">
+            <div className="w-56 h-56 rounded-3xl bg-surface border border-white/5 p-6 flex items-center justify-center shadow-2xl">
               <img
                 src="/login-logo.png"
                 alt="RioSãoPaulo"
@@ -591,7 +591,7 @@ export const LoginView: React.FC = () => {
         <svg
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
-          className="absolute top-0 bottom-0 -left-1 h-full w-14 lg:w-20 text-[#101010] z-20 pointer-events-none fill-[#101010]"
+          className="absolute top-0 bottom-0 -left-1 h-full w-14 lg:w-20 text-canvas z-20 pointer-events-none fill-canvas"
         >
           <path
             d="M0,0 L40,0 Q10,35 60,65 Q95,90 40,100 L0,100 Z"
@@ -600,8 +600,8 @@ export const LoginView: React.FC = () => {
         </svg>
 
         {/* Right Corner Accent Badge */}
-        <div className="absolute bottom-8 right-8 z-20 flex items-center gap-2 bg-[#101010]/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/5 text-white text-xs font-bold shadow-lg">
-          <Sparkles className="w-3.5 h-3.5 text-[#E4007E]" />
+        <div className="absolute bottom-8 right-8 z-20 flex items-center gap-2 bg-canvas/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/5 text-white text-xs font-bold shadow-lg">
+          <Sparkles className="w-3.5 h-3.5 text-brand" />
           <span>RioSãoPaulo</span>
         </div>
       </div>
@@ -613,10 +613,10 @@ export const LoginView: React.FC = () => {
           onClick={() => setInfoModal(null)}
         >
           <div
-            className="bg-[#141414] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/5 text-center animate-in zoom-in-95 duration-150"
+            className="bg-surface rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/5 text-center animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-12 h-12 rounded-2xl bg-[#E4007E]/10 text-[#E4007E] flex items-center justify-center mx-auto mb-4 border border-[#E4007E]/20">
+            <div className="w-12 h-12 rounded-2xl bg-brand/10 text-brand flex items-center justify-center mx-auto mb-4 border border-brand/20">
               <Info className="w-6 h-6" />
             </div>
 
@@ -633,7 +633,7 @@ export const LoginView: React.FC = () => {
             <button
               type="button"
               onClick={() => setInfoModal(null)}
-              className="w-full py-3 bg-[#E4007E] hover:bg-[#c2006b] text-white rounded-xl text-xs font-semibold transition-all shadow-md cursor-pointer"
+              className="w-full py-3 bg-brand hover:bg-brand-dark text-white rounded-xl text-xs font-semibold transition-all shadow-md cursor-pointer"
             >
               Entendido
             </button>
@@ -643,23 +643,23 @@ export const LoginView: React.FC = () => {
 
       {/* FULLSCREEN WELCOME ANIMATION */}
       {welcomeUser && (
-        <div className="fixed inset-0 z-50 bg-[#101010]/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-50 bg-canvas/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
           {/* Ambient Colorful Glows */}
-          <div className="absolute w-96 h-96 bg-[#E4007E]/15 rounded-full blur-3xl pointer-events-none -top-10 animate-pulse" />
-          <div className="absolute w-96 h-96 bg-[#E94E18]/15 rounded-full blur-3xl pointer-events-none -bottom-10 animate-pulse" />
+          <div className="absolute w-96 h-96 bg-brand/15 rounded-full blur-3xl pointer-events-none -top-10 animate-pulse" />
+          <div className="absolute w-96 h-96 bg-brand-alt/15 rounded-full blur-3xl pointer-events-none -bottom-10 animate-pulse" />
 
           <div className="relative z-10 flex flex-col items-center max-w-md w-full space-y-7">
             {/* Animated Logo with Glowing Spinning Ring */}
             <div className="relative w-28 h-28 flex items-center justify-center">
               {/* Outer glowing spinner rings */}
-              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#E4007E] border-r-[#E94E18] border-b-[#E4007E]/30 animate-spin" />
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-brand border-r-brand-alt border-b-brand/30 animate-spin" />
               <div
-                className="absolute -inset-1.5 rounded-full border-2 border-dashed border-[#E4007E]/40 animate-spin"
+                className="absolute -inset-1.5 rounded-full border-2 border-dashed border-brand/40 animate-spin"
                 style={{ animationDirection: 'reverse', animationDuration: '4s' }}
               />
 
               {/* Icon Container with subtle bounce/pulse */}
-              <div className="w-20 h-20 rounded-full bg-[#141414] border-2 border-[#E4007E]/60 p-3.5 shadow-2xl shadow-[#E4007E]/20 flex items-center justify-center animate-pulse">
+              <div className="w-20 h-20 rounded-full bg-surface border-2 border-brand/60 p-3.5 shadow-2xl flex items-center justify-center animate-pulse">
                 <img
                   src="/sidebar-icon.png"
                   alt="Logo"
@@ -673,12 +673,12 @@ export const LoginView: React.FC = () => {
 
             {/* Welcome Title & User Name */}
             <div className="space-y-2.5">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] text-[11px] font-semibold tracking-widest uppercase shadow-xs">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brand/10 border border-brand/30 text-brand text-xs font-semibold tracking-widest uppercase shadow-xs">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Acesso Autorizado</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
-                Bem-vindo(a), <span className="text-[#E4007E]">{welcomeUser.name}</span>!
+                Bem-vindo(a), <span className="text-brand">{welcomeUser.name}</span>!
               </h2>
               <p className="text-xs sm:text-sm text-slate-400 font-medium">
                 Preparando suas demandas no <strong className="text-slate-200 font-bold">RioSãoPaulo</strong>...
@@ -688,19 +688,19 @@ export const LoginView: React.FC = () => {
             {/* Countdown & Loading Status Indicator */}
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-center gap-2.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#E4007E] animate-ping shrink-0" />
+                <div className="w-2.5 h-2.5 rounded-full bg-brand animate-ping shrink-0" />
                 <span className="text-xs font-bold text-slate-200">
                   Carregando os dados...
                 </span>
-                <span className="px-2.5 py-0.5 rounded-lg bg-[#E4007E] text-white font-semibold text-xs shadow-md">
+                <span className="px-2.5 py-0.5 rounded-lg bg-brand text-white font-semibold text-xs shadow-md">
                   {countdown}s
                 </span>
               </div>
 
               {/* 5-second dynamic progress bar */}
-              <div className="w-64 h-2 bg-[#262626] rounded-full overflow-hidden relative shadow-inner p-0.5 border border-white/5">
+              <div className="w-64 h-2 bg-line rounded-full overflow-hidden relative shadow-inner p-0.5 border border-white/5">
                 <div
-                  className="h-full bg-gradient-to-r from-[#E4007E] via-pink-500 to-[#E94E18] rounded-full transition-all duration-1000 ease-linear shadow-xs"
+                  className="h-full bg-gradient-to-r from-brand via-pink-500 to-brand-alt rounded-full transition-all duration-1000 ease-linear shadow-xs"
                   style={{ width: `${Math.min(100, Math.max(10, ((5 - countdown + 1) / 5) * 100))}%` }}
                 />
               </div>

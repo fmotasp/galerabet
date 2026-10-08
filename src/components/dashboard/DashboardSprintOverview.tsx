@@ -16,7 +16,7 @@ export const DashboardSprintOverview: React.FC<DashboardSprintOverviewProps> = R
     const strokeDashoffset = circumference - (donePercent / 100) * circumference;
 
     return (
-      <div className="bg-[#141414] rounded-2xl p-6 shadow-lg">
+      <div className="bg-surface rounded-2xl p-6 shadow-lg">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-white text-xl tracking-tight">Visão Geral da Sprint</h3>
           <Button
@@ -85,7 +85,7 @@ export const DashboardSprintOverview: React.FC<DashboardSprintOverviewProps> = R
 
             <div className="flex items-center justify-between text-slate-300 font-medium">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#E4007E]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-brand" />
                 <span>em progresso</span>
               </div>
               <span className="font-bold text-white">{metrics.inProgressTasks}</span>

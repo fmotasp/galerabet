@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAccessesStore } from '../store/useAccessesStore';
 import { Access } from '../types';
@@ -7,19 +7,18 @@ import { useApp } from '../context/AppContext';
 export const useAccesses = () => {
   const { accesses, setAccesses, accessCategories, setAccessCategories, isLoadingAccesses, setIsLoadingAccesses, hasFetchedOnce, setHasFetchedOnce } = useAccessesStore();
   const { addToast } = useApp();
+  const [loadError, setLoadError] = useState(false);
 
   const fetchAccesses = useCallback(async (force = false) => {
     if (!force && hasFetchedOnce) return;
     
     setIsLoadingAccesses(true);
+    setLoadError(false);
     try {
-      console.log('[Supabase Accesses] Iniciando busca...');
       const { data, error } = await supabase
         .from('accesses')
         .select('*')
         .order('created_at', { ascending: false });
-
-      console.log('[Supabase Accesses] Resposta:', { count: data?.length, error, data });
 
       if (error) throw error;
 
@@ -40,6 +39,7 @@ export const useAccesses = () => {
       }
     } catch (err: any) {
       console.error('Error fetching accesses:', err);
+      setLoadError(true);
       addToast('Erro ao carregar', 'Não foi possível carregar os acessos. Crie a tabela primeiro.', 'error');
     } finally {
       setHasFetchedOnce(true);
@@ -171,6 +171,7 @@ export const useAccesses = () => {
     accesses,
     accessCategories,
     isLoadingAccesses,
+    loadError,
     fetchAccesses,
     fetchAccessCategories,
     saveAccessCategories,

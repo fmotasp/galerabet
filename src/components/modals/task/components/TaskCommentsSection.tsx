@@ -23,7 +23,7 @@ export const TaskCommentsSection: React.FC<{
     <div className="space-y-4 relative z-0 flex-1 flex flex-col min-w-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-[#E4007E]" />
+          <MessageSquare className="w-4 h-4 text-brand" />
           <h3 className="text-xs font-medium text-slate-200 uppercase tracking-wider">
             Comentários ({comments.length})
           </h3>
@@ -45,13 +45,13 @@ export const TaskCommentsSection: React.FC<{
                 onAddComment(e);
               }
             }}
-            className="flex-1 p-3 bg-[#1C1C1C] border border-[#262626] rounded-xl text-xs font-semibold text-white placeholder-slate-400 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
+            className="flex-1 p-3 bg-raised border border-line rounded-xl text-xs font-semibold text-white placeholder-slate-400 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30"
           />
           <button
             type="button"
             disabled={isPostingComment || !newCommentText.trim()}
             onClick={onAddComment}
-            className="px-4 bg-[#1C1C1C] border border-[#262626] hover:border-[#E4007E] text-slate-300 hover:text-white disabled:opacity-50 disabled:hover:border-[#262626] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 self-end py-3 shadow-sm cursor-pointer"
+            className="px-4 bg-raised border border-line hover:border-line-hover text-slate-300 hover:text-white disabled:opacity-50 disabled:hover:border-line rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 self-end py-3 shadow-sm cursor-pointer"
           >
             <Send className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>{isPostingComment ? 'Enviando...' : 'Enviar'}</span>
@@ -87,25 +87,25 @@ export const TaskCommentsSection: React.FC<{
                 return (
                   <div
                     key={comment.id}
-                    className="p-3 bg-[#1C1C1C] border border-[#262626] rounded-xl space-y-1 group relative hover:border-[#E4007E]/40 transition-colors"
+                    className="p-3 bg-raised border border-line rounded-xl space-y-1 group relative hover:border-line-hover transition-colors"
                   >
                     <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2 font-bold text-[#E4007E]">
-                        <div className="w-5 h-5 rounded-full bg-[#2E2E2E] text-white flex items-center justify-center text-[10px]">
+                      <div className="flex items-center gap-2 font-bold text-brand">
+                        <div className="w-5 h-5 rounded-full bg-line-strong text-white flex items-center justify-center text-[11px]">
                           {comment.authorInitials}
                         </div>
                         <span>{comment.authorName}</span>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-xs text-slate-400">
                           {comment.date && comment.date.includes('T')
                             ? comment.date.split('T')[0].split('-').reverse().join('/')
                             : comment.date}
                         </span>
 
                         {canDelete && (
-                          <button
+                          <button aria-label="Excluir este comentário"
                             type="button"
                             onClick={() => onDeleteComment(comment.id)}
                             className="p-1 rounded-md text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 transition-all cursor-pointer opacity-70 group-hover:opacity-100"

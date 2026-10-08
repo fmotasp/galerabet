@@ -76,7 +76,7 @@ export const getLabelColorHex = (labelName: string, labelColor?: string): { bg: 
 
 export const getTaskCardBgStyle = (task: Task, projects: Project[]): { className: string; style?: React.CSSProperties } => {
   return {
-    className: 'bg-[#161616] hover:bg-[#1C1C1C] border border-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] drop-shadow-md',
+    className: 'bg-surface hover:bg-raised border border-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] drop-shadow-md',
   };
 };
 
@@ -101,7 +101,22 @@ export const TasksView: React.FC = () => {
     setActiveFilter,
   } = useApp();
 
-  const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
+  // Lembra a visão escolhida (quadro ou lista) entre acessos
+  const [viewMode, setViewModeState] = useState<'kanban' | 'list'>(() => {
+    try {
+      return localStorage.getItem('tasks-view-mode') === 'list' ? 'list' : 'kanban';
+    } catch {
+      return 'kanban';
+    }
+  });
+  const setViewMode = (mode: 'kanban' | 'list') => {
+    setViewModeState(mode);
+    try {
+      localStorage.setItem('tasks-view-mode', mode);
+    } catch {
+      /* armazenamento indisponível: segue sem persistir */
+    }
+  };
 
   const {
     searchQuery,

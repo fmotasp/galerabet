@@ -70,7 +70,7 @@ export const TaskModalHeader: React.FC<{
   }
 
   return (
-    <div className="relative shrink-0 px-6 pt-5 pb-0 shadow-md z-20 bg-[#141414] relative overflow-hidden">
+    <div className="relative shrink-0 px-6 pt-5 pb-0 shadow-md z-20 bg-surface relative overflow-hidden">
       {/* Cover Image Background Banner with Gradient */}
       {headerCoverImage && (
         <div className="absolute inset-0 pointer-events-none z-0">
@@ -79,8 +79,8 @@ export const TaskModalHeader: React.FC<{
             alt="Capa da Demanda"
             className="w-full h-full object-cover object-center opacity-85"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#181818] via-[#181818]/85 to-[#181818]/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#181818]/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-popover via-popover/85 to-popover/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-popover/70 via-transparent to-transparent" />
         </div>
       )}
 
@@ -135,7 +135,7 @@ export const TaskModalHeader: React.FC<{
               const displayDate = formData.deliveredAt || new Date().toLocaleDateString('pt-BR');
 
               return (
-                <div className="shrink-0 flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-[10px] sm:text-xs font-semibold tracking-wide shadow-xs animate-in fade-in duration-200 select-none">
+                <div className="shrink-0 flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-[11px] sm:text-xs font-semibold tracking-wide shadow-xs animate-in fade-in duration-200 select-none">
                   <CheckCircle2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-emerald-400 shrink-0" />
                   <span><span className="hidden sm:inline">Data de Entrega: </span>{displayDate}</span>
                 </div>
@@ -161,7 +161,7 @@ export const TaskModalHeader: React.FC<{
             })()}
 
             {editingTask && (
-              <button
+              <button aria-label="Copiar link direto para compartilhar esta tarefa"
                 type="button"
                 onClick={handleShareTask}
                 className={`p-2 sm:px-3 sm:py-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center sm:justify-start gap-1.5 text-xs font-semibold active:scale-95 ${
@@ -174,12 +174,12 @@ export const TaskModalHeader: React.FC<{
                 {copiedLink ? (
                   <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
                 ) : (
-                  <Share2 className="w-4 h-4 text-[#E4007E] stroke-[2.5]" />
+                  <Share2 className="w-4 h-4 text-brand stroke-[2.5]" />
                 )}
               </button>
             )}
 
-            <button
+            <button aria-label="Fechar painel lateral"
               type="button"
               onClick={handleClose}
               className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer"

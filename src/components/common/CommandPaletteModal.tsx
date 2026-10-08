@@ -61,7 +61,7 @@ export const CommandPaletteModal: React.FC = () => {
       title: 'Criar Nova Tarefa',
       subtitle: 'Adicionar tarefa ao quadro',
       icon: Plus,
-      color: 'bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white',
+      color: 'bg-brand text-white',
       onSelect: () => {
         setIsSearchModalOpen(false);
         setActiveTab('tasks');
@@ -74,7 +74,7 @@ export const CommandPaletteModal: React.FC = () => {
       title: 'Ver Minhas Tarefas',
       subtitle: 'Filtrar cartões atribuídos a você',
       icon: Filter,
-      color: 'bg-[#1C1C1C] text-[#E4007E] border border-[#262626]',
+      color: 'bg-raised text-brand border border-line',
       onSelect: () => {
         setIsSearchModalOpen(false);
         setActiveTab('tasks');
@@ -156,11 +156,11 @@ export const CommandPaletteModal: React.FC = () => {
       <div
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDownModal}
-        className="w-full max-w-2xl bg-[#141414] rounded-3xl shadow-2xl border border-white/5 overflow-hidden flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-150"
+        className="w-full max-w-2xl bg-surface rounded-3xl shadow-2xl border border-white/5 overflow-hidden flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-150"
       >
         {/* Search Input Bar */}
-        <div className="relative flex items-center px-4 border-b border-white/5 bg-[#101010]">
-          <Search className="w-5 h-5 text-[#E4007E] shrink-0 mr-3" />
+        <div className="relative flex items-center px-4 border-b border-white/5 bg-canvas">
+          <Search className="w-5 h-5 text-brand shrink-0 mr-3" />
           <input
             ref={inputRef}
             type="text"
@@ -184,8 +184,8 @@ export const CommandPaletteModal: React.FC = () => {
               <X className="w-4 h-4" />
             </Button>
           )}
-          <span className="hidden sm:flex items-center gap-1 text-[11px] font-semibold text-slate-300 bg-[#101010] px-2.5 py-1 rounded-xl border border-white/5 shadow-sm ml-2">
-            <Command className="w-3.5 h-3.5 text-[#E4007E]" /> K
+          <span className="hidden sm:flex items-center gap-1 text-xs font-semibold text-slate-300 bg-canvas px-2.5 py-1 rounded-xl border border-white/5 shadow-sm ml-2">
+            <Command className="w-3.5 h-3.5 text-brand" /> K
           </span>
         </div>
 
@@ -216,15 +216,15 @@ export const CommandPaletteModal: React.FC = () => {
                         onMouseEnter={() => setSelectedIndex(globalIdx)}
                         className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all ${
                           isSelected
-                            ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-lg shadow-[#E4007E]/25 font-semibold'
-                            : 'bg-[#101010]/70 hover:bg-[#101010] border border-[#262626] text-white'
+                            ? 'bg-gradient-to-r from-brand to-brand-alt text-white shadow-lg shadow-brand/25 font-semibold'
+                            : 'bg-canvas/70 hover:bg-canvas border border-line text-white'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <div
                             className={`p-2 rounded-xl shrink-0 ${
                               isSelected
-                                ? 'bg-[#101010] text-[#E4007E]'
+                                ? 'bg-canvas text-brand'
                                 : action.color
                             }`}
                           >
@@ -239,7 +239,7 @@ export const CommandPaletteModal: React.FC = () => {
                               {action.title}
                             </div>
                             <div
-                              className={`text-[11px] ${
+                              className={`text-xs ${
                                 isSelected ? 'font-bold text-white/80' : 'font-medium text-slate-400'
                               }`}
                             >
@@ -284,16 +284,16 @@ export const CommandPaletteModal: React.FC = () => {
                         onMouseEnter={() => setSelectedIndex(globalIdx)}
                         className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-all ${
                           isSelected
-                            ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-lg shadow-[#E4007E]/25 font-semibold'
-                            : 'bg-[#101010]/70 hover:bg-[#101010] border border-[#262626] text-white'
+                            ? 'bg-gradient-to-r from-brand to-brand-alt text-white shadow-lg shadow-brand/25 font-semibold'
+                            : 'bg-canvas/70 hover:bg-canvas border border-line text-white'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
                           <div
                             className={`p-2 rounded-xl shrink-0 ${
                               isSelected
-                                ? 'bg-[#101010] text-[#E4007E]'
-                                : 'bg-[#141414] border border-white/5 text-slate-300'
+                                ? 'bg-canvas text-brand'
+                                : 'bg-surface border border-white/5 text-slate-300'
                             }`}
                           >
                             <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
@@ -307,7 +307,7 @@ export const CommandPaletteModal: React.FC = () => {
                               {t.title}
                             </div>
                             <div
-                              className={`text-[11px] truncate ${
+                              className={`text-xs truncate ${
                                 isSelected ? 'font-bold text-white/80' : 'font-medium text-slate-400'
                               }`}
                             >
@@ -320,8 +320,8 @@ export const CommandPaletteModal: React.FC = () => {
                           size="sm"
                           className={`shrink-0 ${
                             isSelected
-                              ? '!bg-[#101010] !text-[#E4007E] !border-transparent'
-                              : '!bg-[#141414] !text-slate-300 !border-white/5'
+                              ? '!bg-canvas !text-brand !border-transparent'
+                              : '!bg-surface !text-slate-300 !border-white/5'
                           }`}
                         >
                           {statusLabel}
@@ -339,15 +339,15 @@ export const CommandPaletteModal: React.FC = () => {
         <div className="px-4 py-3 bg-[#000A17] border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 font-medium">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
-              <span className="bg-[#011C39] border border-slate-700 text-white px-1.5 py-0.5 rounded-lg font-mono text-[10px] font-bold">↑</span>
-              <span className="bg-[#011C39] border border-slate-700 text-white px-1.5 py-0.5 rounded-lg font-mono text-[10px] font-bold">↓</span> Navegar
+              <span className="bg-field border border-slate-700 text-white px-1.5 py-0.5 rounded-lg font-mono text-[11px] font-bold">↑</span>
+              <span className="bg-field border border-slate-700 text-white px-1.5 py-0.5 rounded-lg font-mono text-[11px] font-bold">↓</span> Navegar
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="bg-[#011C39] border border-slate-700 text-white px-1.5 py-0.5 rounded-lg font-mono text-[10px] font-bold">↵</span> Selecionar
+              <span className="bg-field border border-slate-700 text-white px-1.5 py-0.5 rounded-lg font-mono text-[11px] font-bold">↵</span> Selecionar
             </span>
           </div>
           <span className="flex items-center gap-1.5">
-            <span className="bg-[#011C39] border border-slate-700 text-white px-1.5 py-0.5 rounded-lg font-mono text-[10px] font-bold">ESC</span> Fechar
+            <span className="bg-field border border-slate-700 text-white px-1.5 py-0.5 rounded-lg font-mono text-[11px] font-bold">ESC</span> Fechar
           </span>
         </div>
       </div>

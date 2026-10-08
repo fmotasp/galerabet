@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { SignJWT, importPKCS8 } from "https://deno.land/x/jose@v4.14.4/index.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsFor, requireUser } from "../_shared/auth.ts";
 
 async function getGoogleToken(serviceAccount: any, scopes: string[]) {
   const iat = Math.floor(Date.now() / 1000);
@@ -39,11 +36,15 @@ async function getGoogleToken(serviceAccount: any, scopes: string[]) {
 }
 
 serve(async (req) => {
+  const corsHeaders = corsFor(req);
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
+    const denied = await requireUser(req, corsHeaders);
+    if (denied) return denied;
+
     const { fileBase64, mimeType, fileName, folderId } = await req.json();
 
     if (!fileBase64 || !fileName || !folderId) {

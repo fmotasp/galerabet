@@ -13,17 +13,17 @@ export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const sizeStyles: Record<AvatarSize, { container: string; text: string; dot: string }> = {
-  xs: { container: 'w-6 h-6', text: 'text-[9px]', dot: 'w-1.5 h-1.5' },
-  sm: { container: 'w-7 h-7', text: 'text-[10px]', dot: 'w-2 h-2' },
+  xs: { container: 'w-6 h-6', text: 'text-[11px]', dot: 'w-1.5 h-1.5' },
+  sm: { container: 'w-7 h-7', text: 'text-[11px]', dot: 'w-2 h-2' },
   md: { container: 'w-9 h-9', text: 'text-xs', dot: 'w-2.5 h-2.5' },
   lg: { container: 'w-12 h-12', text: 'text-sm', dot: 'w-3 h-3' },
   xl: { container: 'w-16 h-16', text: 'text-lg', dot: 'w-3.5 h-3.5' },
 };
 
 const statusColors: Record<'online' | 'busy' | 'offline', string> = {
-  online: 'bg-emerald-500 ring-[#101010]',
-  busy: 'bg-rose-500 ring-[#101010]',
-  offline: 'bg-slate-500 ring-[#101010]',
+  online: 'bg-emerald-500 ring-canvas',
+  busy: 'bg-rose-500 ring-canvas',
+  offline: 'bg-slate-500 ring-canvas',
 };
 
 function getInitials(name?: string): string {
@@ -56,7 +56,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   const initials = getInitials(name || alt);
   const { container, text, dot } = sizeStyles[size];
 
-  const ringClass = ring ? 'ring-2 ring-[#E4007E]/60' : '';
+  const ringClass = ring ? 'ring-2 ring-brand/60' : '';
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
@@ -89,7 +89,7 @@ export const Avatar: React.FC<AvatarProps> = ({
       ) : (
         <div
           className={`w-full h-full rounded-full flex items-center justify-center font-semibold uppercase text-white shadow-xs ${text} ${
-            !colorHex ? 'bg-gradient-to-tr from-[#222222] to-[#2E2E2E] border border-[#3A3A3A]' : ''
+            !colorHex ? 'bg-gradient-to-tr from-raised to-line-strong border border-line-hover' : ''
           }`}
           style={colorHex ? { backgroundColor: colorHex } : undefined}
         >

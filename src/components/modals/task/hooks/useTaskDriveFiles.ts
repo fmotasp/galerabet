@@ -7,6 +7,7 @@ import {
   getTaskDeliveredFolderUrl,
 } from '../../../../lib/googleDrive';
 import { fetchFileAsBytes, triggerBlobDownload } from '../../../../lib/zipUtils';
+import { promptDialog } from '../../../../lib/dialogs';
 
 export const useTaskDriveFiles = ({
   editingTask,
@@ -250,7 +251,7 @@ export const useTaskDriveFiles = ({
   };
 
   const handleRenameAttachment = async (attId: string, currentName: string) => {
-    const newName = window.prompt('Digite o novo nome do arquivo:', currentName);
+    const newName = await promptDialog({ message: 'Digite o novo nome do arquivo:', defaultValue: currentName });
     if (!newName || !newName.trim() || newName.trim() === currentName) return;
     const nextAtts = attachments.map((a) => (a.id === attId ? { ...a, name: newName.trim() } : a));
     setAttachments(nextAtts);

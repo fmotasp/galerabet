@@ -12,8 +12,6 @@ import {
   ExternalLink,
   Plus,
   Radio,
-  Sun,
-  Moon,
   Camera,
   Loader2,
 } from 'lucide-react';
@@ -22,6 +20,7 @@ import { useApp } from '../../context/AppContext';
 import { useNotifications } from '../../context/NotificationsContext';
 import { getNotificationLabel, AppNotification } from '../../lib/notificationsService';
 import { supabase } from '../../lib/supabase';
+import { useDropdownA11y } from '../../hooks/useDropdownA11y';
 
 export const Header: React.FC = () => {
   const {
@@ -77,32 +76,11 @@ export const Header: React.FC = () => {
 
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  useDropdownA11y(isNotifOpen, () => setIsNotifOpen(false));
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('spine_dark_mode') === 'true';
-  });
-
+  useDropdownA11y(isProfileOpen, () => setIsProfileOpen(false));
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
-
-  const toggleDarkMode = () => {
-    const nextMode = !isDarkMode;
-    setIsDarkMode(nextMode);
-    localStorage.setItem('spine_dark_mode', String(nextMode));
-    if (nextMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -119,7 +97,7 @@ export const Header: React.FC = () => {
   }, []);
 
   return (
-    <header className="h-14 px-4 sm:px-8 border-b border-[#262626] bg-[#141414]/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
+    <header className="h-14 px-4 sm:px-8 border-b border-line bg-surface/90 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between">
       {/* Left section: Mobile Logo (since Sidebar is now bottom nav) */}
       <div className="flex items-center gap-3">
         <div 
@@ -134,56 +112,47 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Right section: Search, Notifications, Dark Mode, User profile */}
+      {/* Right section: Search, Notifications, User profile */}
       <div className="flex items-center gap-2 sm:gap-4">
-        {/* Dark Mode Toggle */}
-        <button
-          onClick={toggleDarkMode}
-          className="p-2 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-[#262626] transition-colors duration-150"
-          title={isDarkMode ? 'Mudar para Modo Claro' : 'Mudar para Modo Escuro'}
-        >
-          {isDarkMode ? <Sun className="w-5 h-5 text-[#E94E18]" /> : <Moon className="w-5 h-5" />}
-        </button>
-
         {/* Quick Search Button */}
         <button
           id="btn-open-search"
           onClick={() => setIsSearchModalOpen(true)}
-          className="p-2 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-[#262626] transition-colors duration-150 flex items-center gap-2"
+          className="p-2 rounded-xl text-fg-muted hover:text-white hover:bg-line transition-colors duration-150 flex items-center gap-2"
           title="Buscar tarefas..."
         >
           <Search className="w-5 h-5" />
-          <span className="hidden md:inline-block text-xs text-[#808080] bg-[#1C1C1C] px-1.5 py-0.5 rounded border border-white/5">
+          <span className="hidden md:inline-block text-xs text-fg-subtle bg-raised px-1.5 py-0.5 rounded border border-white/5">
             ⌘K
           </span>
         </button>
 
         {/* Notifications Popover */}
         <div className="relative" ref={notifRef}>
-          <button
+          <button aria-haspopup="true" aria-expanded={isNotifOpen}
             id="btn-notifications"
             onClick={() => { setIsNotifOpen(!isNotifOpen); }}
-            className="p-2 rounded-xl text-[#A0A0A0] hover:text-white hover:bg-[#262626] transition-colors duration-150 relative"
+            className="p-2 rounded-xl text-fg-muted hover:text-white hover:bg-line transition-colors duration-150 relative"
             aria-label="Notificações"
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold text-white bg-gradient-to-r from-[#E4007E] to-[#E94E18] rounded-full ring-2 ring-[#101010] px-1">
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[11px] font-bold text-white bg-gradient-to-r from-brand to-brand-alt rounded-full ring-2 ring-canvas px-1">
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}
           </button>
 
           {isNotifOpen && (
-            <div
+            <div data-menu
               id="notifications-popover"
-              className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#1C1C1C] rounded-2xl shadow-xl border border-white/5 p-4 z-50 animate-in fade-in zoom-in-95 duration-150"
+              className="absolute right-0 mt-2 w-80 sm:w-96 bg-raised rounded-2xl shadow-xl border border-white/5 p-4 z-50 animate-in fade-in zoom-in-95 duration-150"
             >
               <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-3">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-white text-sm">NOTIFICAÇÕES</span>
                   {unreadCount > 0 && (
-                    <span className="text-xs bg-gradient-to-r from-[#E4007E]/20 to-[#E94E18]/20 text-[#E4007E] border border-[#E4007E]/30 font-semibold px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-brand/15 text-brand border border-brand/30 font-semibold px-2 py-0.5 rounded-full">
                       {unreadCount} {unreadCount === 1 ? 'nova' : 'novas'}
                     </span>
                   )}
@@ -192,14 +161,14 @@ export const Header: React.FC = () => {
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllRead}
-                      className="text-xs text-[#E4007E] hover:opacity-80 font-semibold transition-opacity"
+                      className="text-xs text-brand hover:opacity-80 font-semibold transition-opacity"
                     >
                       Marcar todas como lidas
                     </button>
                   )}
                   <button
                     onClick={() => setIsNotifOpen(false)}
-                    className="text-xs text-[#808080] hover:text-white transition-colors duration-150"
+                    className="text-xs text-fg-subtle hover:text-white transition-colors duration-150"
                   >
                     Fechar
                   </button>
@@ -218,7 +187,7 @@ export const Header: React.FC = () => {
                       key={notif.id}
                       onClick={() => markRead(notif.id)}
                       className={`w-full flex items-start gap-3 p-2.5 rounded-xl transition-colors duration-150 text-left text-xs group ${
-                        notif.is_read ? 'hover:bg-[#202020]' : 'bg-[#1E1E1E] hover:bg-[#262626]'
+                        notif.is_read ? 'hover:bg-raised' : 'bg-raised hover:bg-line'
                       }`}
                     >
                       {/* Avatar / Initials */}
@@ -230,18 +199,18 @@ export const Header: React.FC = () => {
                             className="w-7 h-7 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#E4007E] to-[#E94E18] flex items-center justify-center text-white font-bold text-[10px]">
+                          <div className="w-7 h-7 rounded-full bg-brand flex items-center justify-center text-white font-bold text-[11px]">
                             {notif.actor_initials || notif.actor_name.slice(0, 2).toUpperCase()}
                           </div>
                         )}
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className={`leading-snug ${notif.is_read ? 'text-[#A0A0A0]' : 'text-white'}`}>
+                        <p className={`leading-snug ${notif.is_read ? 'text-fg-muted' : 'text-white'}`}>
                           <span className="font-semibold">{notif.actor_name}</span>{' '}
                           {getNotificationLabel(notif)}
                         </p>
-                        <span className="text-[10px] text-[#606060] mt-0.5 block">
+                        <span className="text-[11px] text-[#606060] mt-0.5 block">
                           {new Date(notif.created_at).toLocaleString('pt-BR', {
                             day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
                           })}
@@ -250,7 +219,7 @@ export const Header: React.FC = () => {
 
                       {/* Dot não lida */}
                       {!notif.is_read && (
-                        <span className="w-2 h-2 rounded-full bg-[#E4007E] shrink-0 mt-1.5" />
+                        <span className="w-2 h-2 rounded-full bg-brand shrink-0 mt-1.5" />
                       )}
                     </button>
                   ))
@@ -263,7 +232,7 @@ export const Header: React.FC = () => {
                     setIsNotifOpen(false);
                     setActiveTab('tasks');
                   }}
-                  className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-80 transition-opacity duration-150"
+                  className="text-xs font-bold text-brand hover:opacity-80 transition-opacity duration-150"
                 >
                   Ver todas as tarefas →
                 </button>
@@ -274,35 +243,35 @@ export const Header: React.FC = () => {
 
         {/* User Profile Avatar with Dropdown */}
         <div className="relative" ref={profileRef}>
-          <button
+          <button aria-haspopup="true" aria-expanded={isProfileOpen}
             id="btn-user-profile"
             onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="flex items-center gap-2 p-1 pl-1.5 pr-2 rounded-full hover:bg-[#262626] transition-colors duration-150"
+            className="flex items-center gap-2 p-1 pl-1.5 pr-2 rounded-full hover:bg-line transition-colors duration-150"
           >
             <div className="relative">
               {currentUser?.avatarUrl ? (
                 <img
                   src={currentUser.avatarUrl}
                   alt={currentUser.name}
-                  className="w-8 h-8 rounded-full object-cover ring-2 ring-[#E4007E]/50 shadow-xs"
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-brand/50 shadow-xs"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white font-extrabold text-xs flex items-center justify-center shadow-xs">
+                <div className="w-8 h-8 rounded-full bg-brand text-white font-bold text-xs flex items-center justify-center shadow-xs">
                   {currentUser?.initials || 'AD'}
                 </div>
               )}
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#10B981] rounded-full ring-2 ring-[#101010]" />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#10B981] rounded-full ring-2 ring-canvas" />
             </div>
             <span className="text-xs font-bold text-slate-200 hidden sm:inline truncate max-w-[120px]">
               {currentUser?.name || 'Administrador'}
             </span>
-            <ChevronDown className="w-4 h-4 text-[#808080]" />
+            <ChevronDown className="w-4 h-4 text-fg-subtle" />
           </button>
 
           {isProfileOpen && (
-            <div
+            <div data-menu
               id="user-profile-menu"
-              className="absolute right-0 mt-2 w-64 bg-[#1C1C1C] rounded-2xl shadow-2xl border border-white/5 p-3 z-50 animate-in fade-in zoom-in-95 duration-150 text-white"
+              className="absolute right-0 mt-2 w-64 bg-raised rounded-2xl shadow-2xl border border-white/5 p-3 z-50 animate-in fade-in zoom-in-95 duration-150 text-white"
             >
               <div className="flex items-center gap-3 p-2 border-b border-white/5 pb-3 mb-2">
                 <div 
@@ -330,22 +299,22 @@ export const Header: React.FC = () => {
                     <img
                       src={currentUser.avatarUrl}
                       alt={currentUser.name}
-                      className="w-12 h-12 rounded-full object-cover shrink-0 ring-2 ring-[#E4007E]/50"
+                      className="w-12 h-12 rounded-full object-cover shrink-0 ring-2 ring-brand/50"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white font-extrabold text-sm flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-brand text-white font-bold text-sm flex items-center justify-center shrink-0">
                       {currentUser?.initials || 'AD'}
                     </div>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="font-extrabold text-sm text-white truncate">
+                  <h4 className="font-bold text-sm text-white truncate">
                     {currentUser?.name || 'Administrador'}
                   </h4>
-                  <p className="text-xs text-[#A0A0A0] font-medium truncate">
+                  <p className="text-xs text-fg-muted font-medium truncate">
                     {currentUser?.email || 'admin@empresa.com'}
                   </p>
-                  <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 bg-gradient-to-r from-[#E4007E]/15 to-[#E94E18]/15 text-[#E4007E] border border-[#E4007E]/30">
+                  <span className="inline-block text-[11px] font-bold px-2 py-0.5 rounded-full mt-1 bg-brand/15 text-brand border border-brand/30">
                     {currentUser?.roleType === 'admin'
                       ? '👑 Administrador Geral'
                       : currentUser?.role?.toLowerCase().includes('gestor')
@@ -365,9 +334,9 @@ export const Header: React.FC = () => {
                     setIsProfileOpen(false);
                     setActiveTab('tasks');
                   }}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-[#262626] text-slate-300 hover:text-white font-semibold flex items-center gap-2 transition-colors"
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-line text-slate-300 hover:text-white font-semibold flex items-center gap-2 transition-colors"
                 >
-                  <CheckCircle2 className="w-4 h-4 text-[#E4007E]" />
+                  <CheckCircle2 className="w-4 h-4 text-brand" />
                   Quadro de Demandas
                 </button>
                 {isManagerOrAdmin(currentUser) && (
@@ -376,9 +345,9 @@ export const Header: React.FC = () => {
                       setIsProfileOpen(false);
                       setActiveTab('registrations');
                     }}
-                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-[#262626] text-slate-300 hover:text-white font-semibold flex items-center gap-2 transition-colors"
+                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-line text-slate-300 hover:text-white font-semibold flex items-center gap-2 transition-colors"
                   >
-                    <User className="w-4 h-4 text-[#E94E18]" />
+                    <User className="w-4 h-4 text-brand-alt" />
                     Gerenciar Cadastros
                   </button>
                 )}

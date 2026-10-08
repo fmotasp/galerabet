@@ -29,15 +29,15 @@ export const TaskReferenceImagesSection: React.FC<{
     <div className="space-y-2 flex-1 flex flex-col min-w-0">
       <div className="flex items-center justify-between">
         <label className="text-xs font-medium text-slate-200 flex items-center gap-1.5">
-          <ImageIcon className="w-4 h-4 text-[#E4007E]" />
+          <ImageIcon className="w-4 h-4 text-brand" />
           <span>Imagem de Referência (Briefing)</span>
         </label>
-        <span className="text-[11px] text-slate-400 font-medium">
+        <span className="text-xs text-slate-400 font-medium">
           {referenceImages.length} {referenceImages.length === 1 ? 'referência' : 'referências'}
         </span>
       </div>
 
-      <div className="p-4 bg-[#1C1C1C] border border-[#262626] rounded-2xl space-y-3 flex-1 flex flex-col">
+      <div className="p-4 bg-raised border border-line rounded-2xl space-y-3 flex-1 flex flex-col">
         {/* Hidden File Input */}
         <input
           type="file"
@@ -62,29 +62,29 @@ export const TaskReferenceImagesSection: React.FC<{
           }}
           className={`border border-dashed rounded-xl p-4 text-center transition-all group flex-1 flex flex-col items-center justify-center min-h-[140px] ${
             isUploadingReference
-              ? 'border-[#E4007E] bg-[#E4007E]/10 cursor-not-allowed'
-              : 'border-[#444444] hover:border-[#E4007E] bg-[#101010]/60 hover:bg-[#1A1A1A] cursor-pointer'
+              ? 'border-brand bg-brand/10 cursor-not-allowed'
+              : 'border-[#444444] hover:border-line-hover bg-canvas/60 hover:bg-field cursor-pointer'
           }`}
         >
         {isUploadingReference ? (
           <div className="flex flex-col items-center justify-center gap-2 text-slate-300 py-1">
-            <Loader2 className="w-7 h-7 text-[#E4007E] animate-spin" />
+            <Loader2 className="w-7 h-7 text-brand animate-spin" />
             <div className="space-y-0.5">
               <span className="text-xs font-bold text-white block">
                 Carregando arquivo de referência...
               </span>
-              <span className="text-[11px] text-[#E4007E] font-medium truncate max-w-[280px] block">
+              <span className="text-xs text-brand font-medium truncate max-w-[280px] block">
                 {uploadingReferenceName || 'Enviando imagem...'}
               </span>
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center gap-1.5 text-slate-400">
-            <ImageIcon className="w-6 h-6 text-[#E4007E] group-hover:scale-110 transition-transform" />
-            <span className="text-xs font-bold text-[#E4007E]">
+            <ImageIcon className="w-6 h-6 text-brand group-hover:scale-110 transition-transform" />
+            <span className="text-xs font-bold text-brand">
               Clique para anexar uma imagem de referência
             </span>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-xs text-slate-400">
               PNG, JPG, WEBP, GIF (use esta área para referências visuais e a aba Anexos para artes prontas)
             </span>
           </div>
@@ -96,16 +96,16 @@ export const TaskReferenceImagesSection: React.FC<{
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           {/* Card de carregamento em tempo real */}
           {isUploadingReference && (
-            <div className="relative bg-[#101010] border-2 border-dashed border-[#E4007E] rounded-xl p-2.5 flex items-center gap-3 shadow-sm overflow-hidden animate-pulse">
-              <div className="w-14 h-14 shrink-0 rounded-lg bg-[#E4007E]/20 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 text-[#E4007E] animate-spin" />
+            <div className="relative bg-canvas border-2 border-dashed border-brand rounded-xl p-2.5 flex items-center gap-3 shadow-sm overflow-hidden animate-pulse">
+              <div className="w-14 h-14 shrink-0 rounded-lg bg-brand/20 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 text-brand animate-spin" />
               </div>
               <div className="flex-1 min-w-0 pr-2">
                 <span className="text-xs font-bold text-white truncate block">
                   {uploadingReferenceName || 'Carregando arquivo...'}
                 </span>
-                <span className="text-[10px] text-[#E4007E] font-medium flex items-center gap-1 mt-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#E4007E] animate-ping" />
+                <span className="text-[11px] text-brand font-medium flex items-center gap-1 mt-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand animate-ping" />
                   Processando e salvando imagem...
                 </span>
               </div>
@@ -123,10 +123,10 @@ export const TaskReferenceImagesSection: React.FC<{
               <div
                 key={refImg.id}
                 onClick={() => onPreview({ name: refImg.name, url: displayImgSrc })}
-                className="relative group bg-[#101010] border border-[#262626] rounded-xl p-2.5 flex items-center gap-3 shadow-2xs overflow-hidden hover:border-[#E4007E] hover:shadow-md transition-all cursor-pointer"
+                className="relative group bg-canvas border border-line rounded-xl p-2.5 flex items-center gap-3 shadow-2xs overflow-hidden hover:border-line-hover hover:shadow-md transition-all cursor-pointer"
               >
                 <div
-                  className="w-14 h-14 shrink-0 rounded-lg overflow-hidden border border-[#262626] bg-[#1C1C1C] block group-hover:scale-105 transition-transform"
+                  className="w-14 h-14 shrink-0 rounded-lg overflow-hidden border border-line bg-raised block group-hover:scale-105 transition-transform"
                 >
                   <img
                     src={displayImgSrc}
@@ -141,16 +141,16 @@ export const TaskReferenceImagesSection: React.FC<{
                 </div>
                 <div className="flex-1 min-w-0 pr-6">
                   <span
-                    className="text-xs font-bold text-slate-200 truncate block group-hover:text-[#E4007E] transition-colors"
+                    className="text-xs font-bold text-slate-200 truncate block group-hover:text-brand transition-colors"
                     title={refImg.name}
                   >
                     {refImg.name}
                   </span>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">
+                  <span className="text-[11px] text-slate-400 block mt-0.5">
                     {refImg.date || 'Referência'} • Clique para ampliar
                   </span>
                 </div>
-                <button
+                <button aria-label="Excluir imagem de referência"
                   type="button"
                   onClick={async (e) => {
                     e.stopPropagation();
@@ -175,10 +175,10 @@ export const TaskReferenceImagesSection: React.FC<{
             href={driveFolderUrl || `https://drive.google.com/drive/folders/${driveFolderId}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full p-3 rounded-xl bg-[#141414] border border-[#262626] hover:border-[#E4007E]/60 text-slate-200 hover:text-white font-bold text-xs flex items-center justify-between transition-colors group"
+            className="w-full p-3 rounded-xl bg-surface border border-line hover:border-line-hover text-slate-200 hover:text-white font-bold text-xs flex items-center justify-between transition-colors group"
           >
             <div className="flex items-center gap-2">
-              <Folder className="w-4 h-4 text-[#E4007E] group-hover:scale-110 transition-transform" />
+              <Folder className="w-4 h-4 text-brand group-hover:scale-110 transition-transform" />
               <span>Abrir Pasta da Demanda no Google Drive</span>
             </div>
             <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-white" />

@@ -7,6 +7,10 @@ import { Access } from '../../types';
 import { listDriveFolderContents, extractDriveFileOrFolderId, getDriveFileDetails, DriveFileItem } from '../../lib/googleDrive';
 import { ChevronDown, ChevronUp, FileText, Image as ImageIcon, Folder, File } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { confirmDialog } from '../../lib/dialogs';
+import { EmptyState } from '../ui/EmptyState';
+import { ErrorState } from '../ui/ErrorState';
+import { SkeletonRows } from '../ui/Skeleton';
 
 
 
@@ -72,7 +76,7 @@ const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[
   };
 
   const renderDriveIcon = (mimeType: string) => {
-    if (mimeType === 'application/vnd.google-apps.folder') return <Folder className="w-4 h-4 text-[#E4007E]" fill="currentColor" />; // using pink/red from brand
+    if (mimeType === 'application/vnd.google-apps.folder') return <Folder className="w-4 h-4 text-brand" fill="currentColor" />; // using pink/red from brand
     if (mimeType.includes('image')) return <ImageIcon className="w-4 h-4 text-emerald-500" />;
     if (mimeType.includes('pdf')) return <FileText className="w-4 h-4 text-red-500" />;
     if (mimeType.includes('spreadsheet') || mimeType.includes('csv')) return <FileText className="w-4 h-4 text-emerald-600" />;
@@ -97,20 +101,20 @@ const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[
   const hasUrl = !!access.siteUrl;
 
   const cat = access.category ? access.category.toLowerCase() : '';
-  let colorClass = "text-slate-600 bg-slate-50 border-slate-200";
+  let colorClass = "text-fg-muted bg-raised border-line";
   let indicatorBg = "bg-slate-400";
   
   if (cat.includes("plataforma")) {
-    colorClass = "text-emerald-600 bg-emerald-50 border-emerald-200";
+    colorClass = "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
     indicatorBg = "bg-emerald-500";
   } else if (cat.includes("provedor")) {
-    colorClass = "text-violet-600 bg-violet-50 border-violet-200";
+    colorClass = "text-violet-400 bg-violet-500/10 border-violet-500/30";
     indicatorBg = "bg-violet-500";
   } else if (cat.includes("sistema")) {
-    colorClass = "text-blue-600 bg-blue-50 border-blue-200";
+    colorClass = "text-blue-400 bg-blue-500/10 border-blue-500/30";
     indicatorBg = "bg-blue-500";
   } else if (cat.includes("banco") || cat.includes("financeiro")) {
-    colorClass = "text-amber-600 bg-amber-50 border-amber-200";
+    colorClass = "text-amber-400 bg-amber-500/10 border-amber-500/30";
     indicatorBg = "bg-amber-500";
   } else {
     indicatorBg = "bg-slate-400";
@@ -118,26 +122,26 @@ const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[
 
   return (
     <React.Fragment>
-      <tr className="hover:bg-slate-50 transition-colors group border-b border-slate-100 last:border-0">
+      <tr className="hover:bg-raised transition-colors group border-b border-line last:border-0">
       <td className="p-0">
         <div className={`w-1 h-12 ${indicatorBg} mx-auto rounded-full`}></div>
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           {isDriveLink && (
-            <button onClick={toggleExpand} className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors" title="Ver arquivos">
+            <button aria-label="Ver arquivos" onClick={toggleExpand} className="p-1 hover:bg-raised rounded text-slate-500 transition-colors" title="Ver arquivos">
               {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
           )}
           <div className="flex flex-col">
-            <span className="font-semibold text-[15px] text-slate-800">{access.title}</span>
+            <span className="font-semibold text-base text-white">{access.title}</span>
 
           </div>
         </div>
       </td>
       <td className="px-4 py-3">
         {access.category ? (
-          <span className={`inline-block px-2.5 py-1 text-[10px] font-bold tracking-wider border rounded-md uppercase ${colorClass}`}>
+          <span className={`inline-block px-2.5 py-1 text-[11px] font-bold tracking-wider border rounded-md uppercase ${colorClass}`}>
             {access.category}
           </span>
         ) : (
@@ -146,9 +150,9 @@ const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-slate-700 font-mono break-all">{access.login || '-'}</span>
+          <span className="text-sm text-white font-mono break-all">{access.login || '-'}</span>
           {access.login && (
-            <button onClick={() => handleCopy(access.login, 'Login')} className="text-slate-400 hover:text-[#E4007E] transition-colors" title="Copiar Login">
+            <button aria-label="Copiar Login" onClick={() => handleCopy(access.login, 'Login')} className="text-slate-400 hover:text-brand transition-colors" title="Copiar Login">
               <Copy className="w-4 h-4" />
             </button>
           )}
@@ -156,15 +160,15 @@ const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-slate-700 font-mono min-w-[80px]">
+          <span className="text-sm text-white font-mono min-w-[80px]">
             {!access.password ? '-' : showPassword ? access.password : '••••••••'}
           </span>
           {access.password && (
             <>
-              <button onClick={() => setShowPassword(!showPassword)} className="text-slate-400 hover:text-slate-600 transition-colors" title={showPassword ? 'Ocultar Senha' : 'Mostrar Senha'}>
+              <button aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'} onClick={() => setShowPassword(!showPassword)} className="text-slate-400 hover:text-white transition-colors" title={showPassword ? 'Ocultar Senha' : 'Mostrar Senha'}>
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
-              <button onClick={() => handleCopy(access.password || '', 'Senha')} className="text-slate-400 hover:text-[#E4007E] transition-colors" title="Copiar Senha">
+              <button aria-label="Copiar Senha" onClick={() => handleCopy(access.password || '', 'Senha')} className="text-slate-400 hover:text-brand transition-colors" title="Copiar Senha">
                 <Copy className="w-4 h-4" />
               </button>
             </>
@@ -174,7 +178,7 @@ const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[
       <td className="px-4 py-3 text-right">
         <div className="flex items-center justify-end gap-2">
           {(!access.login && !access.password) && (
-            <button onClick={handleVisitSite} className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1.5 bg-blue-50 text-blue-600 border border-blue-100 rounded hover:bg-blue-100 transition-colors" title="Acessar via Drive">
+            <button onClick={handleVisitSite} className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 bg-blue-50 text-blue-600 border border-blue-100 rounded hover:bg-blue-100 transition-colors" title="Acessar via Drive">
               <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 1443.061 1249.993">
                 <path fill="#3777e3" d="M240.525 1249.993l240.492-416.664h962.044l-240.514 416.664z"/>
                 <path fill="#ffcf63" d="M962.055 833.329h481.006L962.055 0H481.017z"/>
@@ -184,21 +188,21 @@ const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[
             </button>
           )}
           {(hasUrl && (access.login || access.password)) && (
-            <button onClick={handleVisitSite} className="flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1.5 bg-[#3b82f6]/10 text-[#3b82f6] rounded hover:bg-[#3b82f6]/20 transition-colors" title="Acessar site">
+            <button onClick={handleVisitSite} className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 bg-[#3b82f6]/10 text-[#3b82f6] rounded hover:bg-[#3b82f6]/20 transition-colors" title="Acessar site">
               <LinkIcon className="w-3.5 h-3.5" /> Acessar
             </button>
           )}
-          <button onClick={() => onEdit(access)} className="p-1.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700 rounded transition-colors" title="Editar">
+          <button aria-label="Editar" onClick={() => onEdit(access)} className="p-1.5 text-slate-400 hover:bg-raised hover:text-white rounded transition-colors" title="Editar">
             <Edit2 className="w-4 h-4" />
           </button>
-          <button onClick={() => { if (window.confirm('Excluir este acesso?')) onDelete(access.id); }} className="p-1.5 text-slate-400 hover:bg-rose-100 hover:text-rose-600 rounded transition-colors" title="Excluir">
+          <button aria-label="Excluir" onClick={async () => { if (await confirmDialog({ message: 'Excluir este acesso?', tone: 'danger' })) onDelete(access.id); }} className="p-1.5 text-slate-400 hover:bg-rose-100 hover:text-rose-600 rounded transition-colors" title="Excluir">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </td>
     </tr>
     {isExpanded && (
-      <tr className="bg-slate-100/50 border-b border-slate-200 last:border-0 shadow-inner">
+      <tr className="bg-raised border-b border-line last:border-0 shadow-inner">
         <td colSpan={6} className="px-8 py-4">
           {isLoadingDrive ? (
             <div className="flex items-center justify-center py-4">
@@ -208,18 +212,18 @@ const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[
           ) : (preloadedDriveFiles || driveFiles).length === 0 ? (
             <div className="text-sm text-slate-500 text-center py-4">Nenhum arquivo encontrado nesta pasta ou permissão negada.</div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-1.5 bg-[#141414] rounded-xl p-4 border border-[#222]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-1.5 bg-surface rounded-xl p-4 border border-[#222]">
               {(preloadedDriveFiles || driveFiles).map(file => (
-                <div key={file.id} className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-[#101010] transition-colors group/file">
+                <div key={file.id} className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-canvas transition-colors group/file">
                   <div className="flex items-center gap-2.5 overflow-hidden">
                     <div className="shrink-0 flex items-center justify-center">
                       {renderDriveIcon(file.mimeType)}
                     </div>
-                    <span className="text-[13px] font-medium text-slate-200 truncate group-hover/file:text-white transition-colors" title={file.name}>
+                    <span className="text-sm font-medium text-slate-200 truncate group-hover/file:text-white transition-colors" title={file.name}>
                       {file.name}
                     </span>
                   </div>
-                  <a href={file.webViewLink} target="_blank" rel="noopener noreferrer" className="shrink-0 ml-3 flex items-center opacity-0 group-hover/file:opacity-100 transition-opacity px-2 py-1 bg-[#101010] text-slate-300 hover:bg-[#333] hover:text-white rounded text-[10px] font-bold border border-[#333]" title="Acessar no Drive">
+                  <a href={file.webViewLink} target="_blank" rel="noopener noreferrer" className="shrink-0 ml-3 flex items-center opacity-0 group-hover/file:opacity-100 transition-opacity px-2 py-1 bg-canvas text-slate-300 hover:bg-[#333] hover:text-white rounded text-[11px] font-bold border border-[#333]" title="Acessar no Drive">
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
                       <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
                       <path d="M12 12v9"></path>
@@ -240,7 +244,7 @@ const AccessRow: React.FC<{ access: Access; preloadedDriveFiles?: DriveFileItem[
 
 
 export const AccessesView: React.FC = () => {
-  const { accesses, isLoadingAccesses, fetchAccesses, deleteAccess } = useAccesses();
+  const { accesses, isLoadingAccesses, loadError, fetchAccesses, deleteAccess } = useAccesses();
   const { globalSearchQuery, registeredClients } = useApp();
   
   const [localSearch, setLocalSearch] = useState('');
@@ -327,10 +331,10 @@ export const AccessesView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-          <div className="flex items-center gap-1.5 bg-[#101010] p-1 rounded-xl overflow-x-auto shrink-0 max-w-full hide-scrollbar border border-[#333]">
+          <div className="flex items-center gap-1.5 bg-canvas p-1 rounded-xl overflow-x-auto shrink-0 max-w-full hide-scrollbar border border-[#333]">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === 'all' ? 'bg-gradient-to-r from-[#E4007E] to-[#ff4d4d] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-[#333]'}`}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === 'all' ? 'bg-gradient-to-r from-brand to-[#ff4d4d] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-[#333]'}`}
             >
               Todos
             </button>
@@ -340,7 +344,7 @@ export const AccessesView: React.FC = () => {
               <button
                 key={c}
                 onClick={() => setSelectedCategory(c)}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === c ? 'bg-gradient-to-r from-[#E4007E] to-[#ff4d4d] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-[#333]'}`}
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === c ? 'bg-gradient-to-r from-brand to-[#ff4d4d] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-[#333]'}`}
               >
                 {clientData?.icon ? (
                     <img
@@ -358,7 +362,7 @@ export const AccessesView: React.FC = () => {
             })}
             <button
               onClick={() => setSelectedCategory('Geral')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === 'Geral' ? 'bg-gradient-to-r from-[#E4007E] to-[#ff4d4d] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-[#333]'}`}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === 'Geral' ? 'bg-gradient-to-r from-brand to-[#ff4d4d] text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-[#333]'}`}
             >
               Geral
             </button>
@@ -370,12 +374,12 @@ export const AccessesView: React.FC = () => {
               placeholder="Buscar acessos..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              className="bg-[#1A1A1A] border border-[#333] text-sm text-white rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all w-full sm:w-64"
+              className="bg-field border border-[#333] text-sm text-white rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30 transition-all w-full sm:w-64"
             />
           </div>
           <button
             onClick={handleAddNew}
-            className="flex items-center gap-2 bg-[#E4007E] hover:bg-[#E94E18] text-white px-4 py-2 rounded-lg font-medium transition-all shadow-lg shadow-[#E4007E]/20"
+            className="flex items-center gap-2 bg-brand hover:bg-brand-alt text-white px-4 py-2 rounded-lg font-medium transition-all shadow-lg"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Novo Acesso</span>
@@ -384,11 +388,11 @@ export const AccessesView: React.FC = () => {
       </div>
 
       {/* List View */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 text-slate-800 font-sans flex-1 mb-6 overflow-hidden flex flex-col">
+      <div className="bg-surface rounded-lg shadow-sm border border-line text-white font-sans flex-1 mb-6 overflow-hidden flex flex-col">
         <div className="overflow-x-auto overflow-y-auto flex-1 h-[0px]">
           <table className="w-full text-left border-collapse" style={{ minWidth: '800px' }}>
-            <thead className="sticky top-0 bg-white z-10 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
-              <tr className="border-b border-slate-200 text-slate-600 font-medium text-sm">
+            <thead className="sticky top-0 bg-surface z-10 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+              <tr className="border-b border-line text-fg-muted font-medium text-sm">
                 <th className="w-1 px-0 py-3"></th>
                 <th className="px-4 py-3 font-medium">Plataforma</th>
                 <th className="px-4 py-3 font-medium">Categoria</th>
@@ -399,21 +403,17 @@ export const AccessesView: React.FC = () => {
             </thead>
             <tbody>
               {isLoadingAccesses ? (
+                <SkeletonRows rows={6} columns={6} />
+              ) : loadError ? (
                 <tr>
-                  <td colSpan={6} className="py-16 text-center">
-                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                  <td colSpan={6}>
+                    <ErrorState title="Não foi possível carregar os acessos" onRetry={() => fetchAccesses(true)} />
                   </td>
                 </tr>
               ) : filteredAccesses.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-24 text-center">
-                    <div className="flex flex-col items-center justify-center text-center max-w-sm mx-auto">
-                      <div className="w-16 h-16 rounded-full bg-[#1A1A1A] flex items-center justify-center mb-4 border border-white/5 shadow-inner">
-                        <Key className="w-8 h-8 text-slate-500" />
-                      </div>
-                      <h3 className="text-lg font-bold text-slate-200">Nenhum acesso encontrado</h3>
-                      <p className="text-sm text-slate-500 mt-2">Nenhum registro corresponde aos critérios atuais de busca.</p>
-                    </div>
+                    <EmptyState icon={Key} title="Nenhum acesso encontrado" description="Nenhum registro corresponde aos critérios atuais de busca." className="py-0" />
                   </td>
                 </tr>
               ) : (

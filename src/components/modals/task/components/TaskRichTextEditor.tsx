@@ -11,6 +11,7 @@ import {
   Image as ImageIcon,
   Code,
 } from 'lucide-react';
+import { sanitizeHtml } from '../../../../lib/sanitizeHtml';
 
 export const markdownToHtml = (md: string = ''): string => {
   if (!md) return '';
@@ -19,13 +20,13 @@ export const markdownToHtml = (md: string = ''): string => {
   // Code blocks
   html = html.replace(/```([\s\S]*?)```/g, '<pre class="bg-slate-800 text-slate-100 p-3 rounded-xl text-xs font-mono my-2 overflow-x-auto">$1</pre>');
   // Headers
-  html = html.replace(/^### (.*$)/gim, '<h3 class="text-sm font-extrabold text-slate-900 dark:text-white mt-3 mb-1">$1</h3>');
-  html = html.replace(/^## (.*$)/gim, '<h2 class="text-base font-extrabold text-slate-900 dark:text-white mt-4 mb-1.5">$1</h2>');
-  html = html.replace(/^# (.*$)/gim, '<h1 class="text-lg font-semibold text-slate-900 dark:text-white mt-4 mb-2">$1</h1>');
+  html = html.replace(/^### (.*$)/gim, '<h3 class="text-sm font-bold text-white mt-3 mb-1">$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2 class="text-base font-bold text-white mt-4 mb-1.5">$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1 class="text-lg font-semibold text-white mt-4 mb-2">$1</h1>');
 
   // Bold & Italic
   html = html.replace(/\*\*\*([^*]+?)\*\*\*/g, '<b><i>$1</i></b>');
-  html = html.replace(/\*\*([^*]+?)\*\*/g, '<strong class="font-semibold text-slate-900 dark:text-white">$1</strong>');
+  html = html.replace(/\*\*([^*]+?)\*\*/g, '<strong class="font-semibold text-white">$1</strong>');
   html = html.replace(/\*([^*]+?)\*/g, '<em class="italic">$1</em>');
   html = html.replace(/~~(.*?)~~/g, '<strike class="line-through text-slate-400">$1</strike>');
 
@@ -47,7 +48,8 @@ export const markdownToHtml = (md: string = ''): string => {
   // Line breaks to <br />
   html = html.replace(/\n/g, '<br />');
 
-  return html;
+  // O texto do usuário vira HTML acima: filtra scripts, handlers e URLs perigosas antes de renderizar
+  return sanitizeHtml(html);
 };
 
 export const htmlToMarkdown = (html: string = ''): string => {
@@ -134,16 +136,16 @@ export const TaskRichTextEditor: React.FC<{
 
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-[#262626] focus-within:border-[#E4007E] transition-all bg-[#1C1C1C]">
+    <div className="rounded-2xl overflow-hidden border border-line focus-within:border-brand transition-all bg-raised">
 
-      <div className="flex items-center flex-wrap gap-1 p-2 bg-[#141414] border-b border-[#262626] text-slate-200 select-none">
-        <button
+      <div className="flex items-center flex-wrap gap-1 p-2 bg-surface border-b border-line text-slate-200 select-none">
+        <button aria-label="Título H1"
           type="button"
           onMouseDown={(e) => {
             e.preventDefault();
             exec('formatBlock', '<h1>');
           }}
-          className="p-1.5 hover:bg-[#282828] hover:text-[#E4007E] rounded-lg font-bold text-xs transition-colors flex items-center gap-0.5"
+          className="p-1.5 hover:bg-chip hover:text-brand rounded-lg font-bold text-xs transition-colors flex items-center gap-0.5"
           title="Título H1"
         >
           <Heading1 className="w-3.5 h-3.5" />
@@ -155,86 +157,86 @@ export const TaskRichTextEditor: React.FC<{
             e.preventDefault();
             toggleCase();
           }}
-          className="px-2 py-1 hover:bg-[#282828] hover:text-[#E4007E] rounded-lg font-bold text-xs transition-colors flex items-center gap-0.5 bg-[#101010]"
+          className="px-2 py-1 hover:bg-chip hover:text-brand rounded-lg font-bold text-xs transition-colors flex items-center gap-0.5 bg-canvas"
           title="Alternar MAIÚSCULO / Normal"
         >
           <Type className="w-3.5 h-3.5" />
-          <span className="text-[10px] font-semibold">Tt</span>
+          <span className="text-[11px] font-semibold">Tt</span>
         </button>
 
-        <div className="h-4 w-px bg-[#2E2E2E] mx-0.5" />
+        <div className="h-4 w-px bg-line-strong mx-0.5" />
 
-        <button
+        <button aria-label="Negrito"
           type="button"
           onMouseDown={(e) => {
             e.preventDefault();
             exec('bold');
           }}
-          className="p-1.5 hover:bg-[#282828] hover:text-[#E4007E] rounded-lg font-bold text-xs transition-colors"
+          className="p-1.5 hover:bg-chip hover:text-brand rounded-lg font-bold text-xs transition-colors"
           title="Negrito"
         >
           <Bold className="w-3.5 h-3.5" />
         </button>
 
-        <button
+        <button aria-label="Itálico"
           type="button"
           onMouseDown={(e) => {
             e.preventDefault();
             exec('italic');
           }}
-          className="p-1.5 hover:bg-[#282828] hover:text-[#E4007E] rounded-lg font-bold text-xs transition-colors"
+          className="p-1.5 hover:bg-chip hover:text-brand rounded-lg font-bold text-xs transition-colors"
           title="Itálico"
         >
           <Italic className="w-3.5 h-3.5" />
         </button>
 
-        <button
+        <button aria-label="Tachado"
           type="button"
           onMouseDown={(e) => {
             e.preventDefault();
             exec('strikeThrough');
           }}
-          className="p-1.5 hover:bg-[#282828] hover:text-[#E4007E] rounded-lg font-bold text-xs transition-colors"
+          className="p-1.5 hover:bg-chip hover:text-brand rounded-lg font-bold text-xs transition-colors"
           title="Tachado"
         >
           <Strikethrough className="w-3.5 h-3.5" />
         </button>
 
-        <div className="h-4 w-px bg-[#2E2E2E] mx-0.5" />
+        <div className="h-4 w-px bg-line-strong mx-0.5" />
 
-        <button
+        <button aria-label="Lista com Marcadores"
           type="button"
           onMouseDown={(e) => {
             e.preventDefault();
             exec('insertUnorderedList');
           }}
-          className="p-1.5 hover:bg-[#282828] hover:text-[#E4007E] rounded-lg font-bold text-xs transition-colors"
+          className="p-1.5 hover:bg-chip hover:text-brand rounded-lg font-bold text-xs transition-colors"
           title="Lista com Marcadores"
         >
           <List className="w-3.5 h-3.5" />
         </button>
 
-        <button
+        <button aria-label="Lista Numerada"
           type="button"
           onMouseDown={(e) => {
             e.preventDefault();
             exec('insertOrderedList');
           }}
-          className="p-1.5 hover:bg-[#282828] hover:text-[#E4007E] rounded-lg font-bold text-xs transition-colors"
+          className="p-1.5 hover:bg-chip hover:text-brand rounded-lg font-bold text-xs transition-colors"
           title="Lista Numerada"
         >
           <ListOrdered className="w-3.5 h-3.5" />
         </button>
 
-        <div className="h-4 w-px bg-[#2E2E2E] mx-0.5" />
+        <div className="h-4 w-px bg-line-strong mx-0.5" />
 
-        <button
+        <button aria-label="Inserir Link"
           type="button"
           onMouseDown={(e) => {
             e.preventDefault();
             addLink();
           }}
-          className="p-1.5 hover:bg-[#282828] hover:text-[#E4007E] rounded-lg font-bold text-xs transition-colors"
+          className="p-1.5 hover:bg-chip hover:text-brand rounded-lg font-bold text-xs transition-colors"
           title="Inserir Link"
         >
           <LinkIcon className="w-3.5 h-3.5" />
@@ -242,13 +244,13 @@ export const TaskRichTextEditor: React.FC<{
 
 
 
-        <button
+        <button aria-label="Bloco de Código"
           type="button"
           onMouseDown={(e) => {
             e.preventDefault();
             exec('formatBlock', '<pre>');
           }}
-          className="p-1.5 hover:bg-[#282828] hover:text-[#E4007E] rounded-lg font-bold text-xs transition-colors"
+          className="p-1.5 hover:bg-chip hover:text-brand rounded-lg font-bold text-xs transition-colors"
           title="Bloco de Código"
         >
           <Code className="w-3.5 h-3.5" />
@@ -265,7 +267,7 @@ export const TaskRichTextEditor: React.FC<{
           const text = e.clipboardData.getData('text/plain');
           document.execCommand('insertText', false, text);
         }}
-        className="w-full h-[250px] overflow-y-auto custom-scrollbar p-3 text-xs text-white focus:outline-none leading-relaxed bg-[#1C1C1C]"
+        className="w-full h-[250px] overflow-y-auto custom-scrollbar p-3 text-xs text-white focus:outline-none leading-relaxed bg-raised"
         data-placeholder={placeholder || 'Escreva a descrição da tarefa...'}
       />
     </div>

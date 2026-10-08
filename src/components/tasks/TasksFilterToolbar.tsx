@@ -3,6 +3,7 @@ import { Users, Star, ChevronDown, Check, CheckCircle2, Plus } from 'lucide-reac
 import { Employee } from '../../types';
 import { CurrentUserType } from '../../context/AuthContext';
 import { isDesignerOrVideomaker } from '../../lib/taskUtils';
+import { useDropdownA11y } from '../../hooks/useDropdownA11y';
 
 export interface RegisteredClient {
   id: string;
@@ -55,6 +56,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
   totalFilteredTasks,
 }) => {
   const [isClientDropdownOpen, setIsClientDropdownOpen] = React.useState(false);
+  useDropdownA11y(isClientDropdownOpen, () => setIsClientDropdownOpen(false));
   const [clientFilterSearch, setClientFilterSearch] = React.useState('');
 
   return (
@@ -63,10 +65,10 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
         {/* Client Filter (Responsive) */}
         <div className="flex flex-row items-center gap-2 flex-1 md:flex-none">
         <div className="relative md:hidden flex-1">
-          <button
+          <button aria-haspopup="true" aria-expanded={isClientDropdownOpen}
             type="button"
             onClick={() => setIsClientDropdownOpen(!isClientDropdownOpen)}
-            className="flex items-center justify-between w-full md:min-w-[160px] h-10 gap-1.5 md:gap-2.5 bg-[#101010] hover:bg-[#2A2A2A] border border-white/5 text-white rounded-xl px-2 md:px-3.5 text-[10px] md:text-xs font-bold transition-all active:scale-98 cursor-pointer whitespace-nowrap overflow-hidden"
+            className="flex items-center justify-between w-full md:min-w-[160px] h-10 gap-1.5 md:gap-2.5 bg-canvas hover:bg-chip border border-white/5 text-white rounded-xl px-2 md:px-3.5 text-[11px] md:text-xs font-bold transition-all active:scale-98 cursor-pointer whitespace-nowrap overflow-hidden"
           >
             <div className="flex items-center gap-2 truncate">
               {selectedClient === 'all' ? (
@@ -88,7 +90,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                         />
                       ) : (
                         <span
-                          className="w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-semibold text-white shrink-0"
+                          className="w-4 h-4 rounded-md flex items-center justify-center text-[11px] font-semibold text-white shrink-0"
                           style={{ backgroundColor: client.color }}
                         >
                           {client.name.substring(0, 1).toUpperCase()}
@@ -100,7 +102,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                 })()
               )}
             </div>
-            <ChevronDown className={`w-3.5 h-3.5 text-[#A0A0A0] transition-transform duration-200 ${isClientDropdownOpen ? 'rotate-180 text-[#E4007E]' : ''}`} />
+            <ChevronDown className={`w-3.5 h-3.5 text-fg-muted transition-transform duration-200 ${isClientDropdownOpen ? 'rotate-180 text-brand' : ''}`} />
           </button>
 
           {isClientDropdownOpen && (
@@ -109,14 +111,14 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                 className="fixed inset-0 z-40"
                 onClick={() => setIsClientDropdownOpen(false)}
               />
-              <div className="absolute left-0 top-full mt-2 w-64 bg-[#1C1C1C] rounded-2xl border border-white/5 shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div data-menu className="absolute left-0 top-full mt-2 w-64 bg-raised rounded-2xl border border-white/5 shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
                 <div className="relative mb-2 px-1">
                   <input
                     type="text"
                     placeholder="Buscar cliente..."
                     value={clientFilterSearch}
                     onChange={(e) => setClientFilterSearch(e.target.value)}
-                    className="w-full p-2 bg-[#141414] border border-white/5 rounded-xl text-xs text-white placeholder-slate-500 font-medium focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all"
+                    className="w-full p-2 bg-surface border border-white/5 rounded-xl text-xs text-white placeholder-slate-500 font-medium focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30 transition-all"
                   />
                 </div>
                 
@@ -128,12 +130,12 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                     }}
                     className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all ${
                       selectedClient === 'all'
-                        ? 'bg-[#E4007E]/15 text-[#E4007E] font-bold border border-[#E4007E]/30'
-                        : 'text-[#A0A0A0] hover:bg-[#262626] hover:text-white'
+                        ? 'bg-brand/15 text-brand font-bold border border-brand/30'
+                        : 'text-fg-muted hover:bg-line hover:text-white'
                     }`}
                   >
                     <span className="text-xs font-semibold">Todos os Clientes</span>
-                    {selectedClient === 'all' && <Check className="w-3.5 h-3.5 text-[#E4007E] stroke-[3]" />}
+                    {selectedClient === 'all' && <Check className="w-3.5 h-3.5 text-brand stroke-[3]" />}
                   </div>
                   
                   <div className="h-px bg-white/5 my-1.5" />
@@ -151,8 +153,8 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                           }}
                           className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all ${
                             isSelected
-                              ? 'bg-[#E4007E]/15 text-[#E4007E] font-bold border border-[#E4007E]/30'
-                              : 'text-[#A0A0A0] hover:bg-[#262626] hover:text-white'
+                              ? 'bg-brand/15 text-brand font-bold border border-brand/30'
+                              : 'text-fg-muted hover:bg-line hover:text-white'
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
@@ -167,7 +169,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                               />
                             ) : (
                               <span
-                                className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-semibold text-white shrink-0"
+                                className="w-5 h-5 rounded-md flex items-center justify-center text-[11px] font-semibold text-white shrink-0"
                                 style={{ backgroundColor: client.color }}
                               >
                                 {client.name.substring(0, 1).toUpperCase()}
@@ -175,7 +177,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                             )}
                             <span className="text-xs font-semibold truncate">{client.name}</span>
                           </div>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-[#E4007E] stroke-[3] shrink-0" />}
+                          {isSelected && <Check className="w-3.5 h-3.5 text-brand stroke-[3] shrink-0" />}
                         </div>
                       );
                   })}
@@ -186,14 +188,14 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
         </div>
 
           {/* Desktop Filter (Icon Buttons) */}
-          <div className="hidden md:flex flex-nowrap items-center bg-[#101010] p-1 rounded-xl gap-1 border border-white/5 overflow-x-auto min-w-0 [scrollbar-hide::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="hidden md:flex flex-nowrap items-center bg-canvas p-1 rounded-xl gap-1 border border-white/5 overflow-x-auto min-w-0 [scrollbar-hide::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <button
               onClick={() => onClientChange('all')}
               aria-label="Filtrar por todos os clientes"
               className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 selectedClient === 'all'
-                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-[#303030]'
+                  ? 'bg-gradient-to-r from-brand to-brand-alt text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-chip'
               }`}
               title="Todos os Clientes"
             >
@@ -209,8 +211,8 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                   aria-label={`Filtrar por cliente ${client.name}`}
                   className={`flex items-center shrink-0 gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                      : 'text-slate-300 hover:text-white hover:bg-[#303030]'
+                      ? 'bg-gradient-to-r from-brand to-brand-alt text-white shadow-xs'
+                      : 'text-slate-300 hover:text-white hover:bg-chip'
                   }`}
                   title={`Filtrar por ${client.name}`}
                 >
@@ -225,7 +227,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                         const parent = target.parentElement;
                         if (parent && !parent.querySelector('.client-fallback-badge')) {
                           const span = document.createElement('span');
-                          span.className = 'client-fallback-badge w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-semibold text-white shrink-0';
+                          span.className = 'client-fallback-badge w-4 h-4 rounded-md flex items-center justify-center text-[11px] font-semibold text-white shrink-0';
                           span.style.backgroundColor = client.color || '#10B981';
                           span.textContent = client.name.substring(0, 1).toUpperCase();
                           parent.insertBefore(span, target);
@@ -234,7 +236,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                     />
                   ) : (
                     <span
-                      className="w-4 h-4 rounded-md flex items-center justify-center text-[9px] font-semibold text-white shrink-0"
+                      className="w-4 h-4 rounded-md flex items-center justify-center text-[11px] font-semibold text-white shrink-0"
                       style={{ backgroundColor: client.color }}
                     >
                       {client.name.substring(0, 1).toUpperCase()}
@@ -253,17 +255,17 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
           <button
             type="button"
             onClick={onMemberDropdownToggle}
-            className="flex items-center justify-between md:justify-start w-full h-10 gap-1.5 md:gap-2.5 bg-[#101010] hover:bg-[#2A2A2A] border border-white/5 text-white rounded-xl px-2 md:px-3.5 text-[10px] md:text-xs font-bold transition-all active:scale-98 cursor-pointer whitespace-nowrap overflow-hidden"
+            className="flex items-center justify-between md:justify-start w-full h-10 gap-1.5 md:gap-2.5 bg-canvas hover:bg-chip border border-white/5 text-white rounded-xl px-2 md:px-3.5 text-[11px] md:text-xs font-bold transition-all active:scale-98 cursor-pointer whitespace-nowrap overflow-hidden"
           >
             {selectedMember === 'all' && (
               <div className="flex items-center gap-2">
-                <Users className="w-3.5 h-3.5 text-[#E4007E]" />
+                <Users className="w-3.5 h-3.5 text-brand" />
                 <span>Todos os Membros</span>
               </div>
             )}
             {selectedMember === 'mine' && (
-              <div className="flex items-center gap-2 text-[#E4007E]">
-                <Star className="w-3.5 h-3.5 fill-[#E4007E] text-[#E4007E]" />
+              <div className="flex items-center gap-2 text-brand">
+                <Star className="w-3.5 h-3.5 fill-brand text-brand" />
                 <span>Minhas Atividades</span>
               </div>
             )}
@@ -275,7 +277,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                   {emp.avatarUrl ? (
                     <img src={emp.avatarUrl} alt={emp.name} className="w-4 h-4 rounded-full object-cover" />
                   ) : (
-                    <div className="w-4 h-4 rounded-full bg-[#262626] border border-white/5 text-[9px] font-semibold flex items-center justify-center text-[#E4007E]">
+                    <div className="w-4 h-4 rounded-full bg-line border border-white/5 text-[11px] font-semibold flex items-center justify-center text-brand">
                       {emp.initials}
                     </div>
                   )}
@@ -283,7 +285,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                 </div>
               );
             })()}
-            <ChevronDown className={`w-3.5 h-3.5 text-[#A0A0A0] transition-transform duration-200 ${isMemberDropdownOpen ? 'rotate-180 text-[#E4007E]' : ''}`} />
+            <ChevronDown className={`w-3.5 h-3.5 text-fg-muted transition-transform duration-200 ${isMemberDropdownOpen ? 'rotate-180 text-brand' : ''}`} />
           </button>
 
           {isMemberDropdownOpen && (
@@ -292,7 +294,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                 className="fixed inset-0 z-40"
                 onClick={onMemberDropdownClose}
               />
-              <div className="absolute left-0 top-full mt-2 w-72 bg-[#1C1C1C] rounded-2xl border border-white/5 shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute left-0 top-full mt-2 w-72 bg-raised rounded-2xl border border-white/5 shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150">
                 {/* Search Member */}
                 <div className="relative mb-2 px-1">
                   <input
@@ -300,7 +302,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                     placeholder="Buscar membro..."
                     value={memberFilterSearch}
                     onChange={(e) => onMemberFilterSearchChange(e.target.value)}
-                    className="w-full p-2 bg-[#141414] border border-white/5 rounded-xl text-xs text-white placeholder-slate-500 font-medium focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 transition-all"
+                    className="w-full p-2 bg-surface border border-white/5 rounded-xl text-xs text-white placeholder-slate-500 font-medium focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30 transition-all"
                   />
                 </div>
 
@@ -313,17 +315,17 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                     }}
                     className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all ${
                       selectedMember === 'all'
-                        ? 'bg-[#E4007E]/15 text-[#E4007E] font-bold border border-[#E4007E]/30'
-                        : 'text-[#A0A0A0] hover:bg-[#262626] hover:text-white'
+                        ? 'bg-brand/15 text-brand font-bold border border-brand/30'
+                        : 'text-fg-muted hover:bg-line hover:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-6 h-6 rounded-full bg-[#262626] flex items-center justify-center text-[#E4007E]">
+                      <div className="w-6 h-6 rounded-full bg-line flex items-center justify-center text-brand">
                         <Users className="w-3.5 h-3.5" />
                       </div>
                       <span className="text-xs font-semibold">Todos os Membros</span>
                     </div>
-                    {selectedMember === 'all' && <Check className="w-3.5 h-3.5 text-[#E4007E] stroke-[3]" />}
+                    {selectedMember === 'all' && <Check className="w-3.5 h-3.5 text-brand stroke-[3]" />}
                   </div>
 
                   {/* Mine option */}
@@ -334,22 +336,22 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                     }}
                     className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all ${
                       selectedMember === 'mine'
-                        ? 'bg-[#E4007E]/15 text-[#E4007E] font-bold border border-[#E4007E]/30'
-                        : 'text-[#A0A0A0] hover:bg-[#262626] hover:text-white'
+                        ? 'bg-brand/15 text-brand font-bold border border-brand/30'
+                        : 'text-fg-muted hover:bg-line hover:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-6 h-6 rounded-full bg-[#E4007E]/20 flex items-center justify-center text-[#E4007E]">
-                        <Star className="w-3.5 h-3.5 fill-[#E4007E]" />
+                      <div className="w-6 h-6 rounded-full bg-brand/20 flex items-center justify-center text-brand">
+                        <Star className="w-3.5 h-3.5 fill-brand" />
                       </div>
                       <div className="truncate">
                         <span className="text-xs font-semibold block">Minhas Atividades</span>
-                        <span className="text-[10px] text-[#E4007E]/80 block">
+                        <span className="text-[11px] text-brand/80 block">
                           {currentUser?.name || currentUser?.username || 'Minhas Tarefas'}
                         </span>
                       </div>
                     </div>
-                    {selectedMember === 'mine' && <Check className="w-3.5 h-3.5 text-[#E4007E] stroke-[3]" />}
+                    {selectedMember === 'mine' && <Check className="w-3.5 h-3.5 text-brand stroke-[3]" />}
                   </div>
 
                   <div className="h-px bg-white/5 my-1.5" />
@@ -372,8 +374,8 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                           }}
                           className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all ${
                             isSelected
-                              ? 'bg-[#E4007E]/15 text-[#E4007E] font-bold border border-[#E4007E]/30'
-                              : 'text-[#A0A0A0] hover:bg-[#262626] hover:text-white'
+                              ? 'bg-brand/15 text-brand font-bold border border-brand/30'
+                              : 'text-fg-muted hover:bg-line hover:text-white'
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
@@ -384,7 +386,7 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                                 className="w-6 h-6 rounded-full object-cover shrink-0"
                               />
                             ) : (
-                              <div className="w-6 h-6 rounded-full bg-[#262626] text-[#E4007E] font-semibold text-[10px] flex items-center justify-center shrink-0">
+                              <div className="w-6 h-6 rounded-full bg-line text-brand font-semibold text-[11px] flex items-center justify-center shrink-0">
                                 {emp.initials}
                               </div>
                             )}
@@ -392,12 +394,12 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
                               <span className="text-xs font-semibold block truncate">
                                 {emp.name}
                               </span>
-                              <span className="text-[10px] text-[#A0A0A0] block truncate">
+                              <span className="text-[11px] text-fg-muted block truncate">
                                 {emp.role || 'Membro'}
                               </span>
                             </div>
                           </div>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-[#E4007E] stroke-[3] shrink-0" />}
+                          {isSelected && <Check className="w-3.5 h-3.5 text-brand stroke-[3] shrink-0" />}
                         </div>
                       );
                     })}
@@ -413,14 +415,14 @@ export const TasksFilterToolbar: React.FC<TasksFilterToolbarProps> = React.memo(
       <div className="hidden md:flex items-center gap-3 shrink-0">
         {/* Toggle Switch para Exibir/Ocultar Coluna de Concluídas */}
         
-          <button
+          <button aria-label="Exibir Concluídas"
             id="toggle-done-column" title="Exibir Concluídas"
             type="button"
             role="switch"
             aria-checked={showDoneColumn}
             onClick={onShowDoneColumnToggle}
             className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-              showDoneColumn ? 'bg-emerald-500' : 'bg-[#333333]'
+              showDoneColumn ? 'bg-emerald-500' : 'bg-line-hover'
             }`}
           >
             <span

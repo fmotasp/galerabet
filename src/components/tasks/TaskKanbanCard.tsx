@@ -21,6 +21,7 @@ interface TaskKanbanCardProps {
   onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragEnd: () => void;
   onClick: () => void;
+  onKeyboardMove?: (direction: -1 | 1) => void;
   onClone?: (task: Task) => void;
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
   addTask: (newTaskData: Omit<Task, 'id' | 'createdAt'>) => Promise<Task>;
@@ -36,6 +37,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
   onDragStart,
   onDragEnd,
   onClick,
+  onKeyboardMove,
   onClone,
   updateTask,
   addTask,
@@ -152,18 +154,18 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
 
   const getPriorityInfo = () => {
     let label = 'BACKLOG';
-    let bg = 'bg-[#1A1A1A] text-slate-400 font-semibold';
+    let bg = 'bg-field text-slate-400 font-semibold';
 
     const customSt = spineStatuses.find((s) => s.id === task.status);
     if (customSt) {
       label = customSt.label.toUpperCase();
       const rawLabel = customSt.label.toLowerCase();
-      bg = customSt.gradient ? `bg-gradient-to-r ${customSt.gradient} text-white font-semibold` : 'bg-[#1A1A1A] text-slate-400 font-semibold';
+      bg = customSt.gradient ? `bg-gradient-to-r ${customSt.gradient} text-white font-semibold` : 'bg-field text-slate-400 font-semibold';
       if (rawLabel.includes('novo') || rawLabel.includes('pedid')) bg = 'bg-blue-950/30 text-blue-400 font-semibold';
       else if (rawLabel.includes('andamento') || rawLabel.includes('produ')) bg = 'bg-amber-950/30 text-amber-500 font-semibold';
       else if (rawLabel.includes('aprov') || rawLabel.includes('revis')) bg = 'bg-purple-950/30 text-purple-400 font-semibold';
       else if (rawLabel.includes('concl') || rawLabel.includes('done') || rawLabel.includes('final')) bg = 'bg-emerald-950/30 text-emerald-400 font-semibold';
-      else if (rawLabel.includes('backlog')) bg = 'bg-[#1A1A1A] text-slate-400 font-semibold';
+      else if (rawLabel.includes('backlog')) bg = 'bg-field text-slate-400 font-semibold';
     } else {
       if (task.status === 'blocked') {
         label = 'PRIORIDADE MODERADA';
@@ -213,13 +215,29 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-label={`Abrir tarefa: ${task.title}`}
+      aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
+      data-task-id={task.id}
+      onKeyDown={(e) => {
+        // Só reage quando o foco está no próprio card (não nos botões internos, como Clonar)
+        if (e.target !== e.currentTarget) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        } else if (e.altKey && onKeyboardMove && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+          e.preventDefault();
+          onKeyboardMove(e.key === 'ArrowLeft' ? -1 : 1);
+        }
+      }}
       style={cardTheme.style}
-      className={`${cardTheme.className} rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-grab active:cursor-grabbing group relative ${
+      className={`${cardTheme.className} animate-in fade-in zoom-in-95 duration-200 rounded-xl overflow-hidden transition-all hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-brand focus-visible:outline-offset-2 cursor-grab active:cursor-grabbing group relative ${
         isBeingDragged ? 'opacity-40 scale-95 ring-2 ring-indigo-400' : ''
       }`}
     >
       {/* Top Priority Header Bar */}
-      <div className={`w-full py-1.5 px-3 text-[10px] font-bold tracking-widest uppercase text-left relative ${pInfo.bg}`}>
+      <div className={`w-full py-1.5 px-3 text-[11px] font-bold tracking-widest uppercase text-left relative ${pInfo.bg}`}>
         <span className="relative z-10">{pInfo.label}</span>
       </div>
 
@@ -344,7 +362,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
                 return (
                   <span
                     key={lIdx}
-                    className="h-6 px-2.5 rounded-full text-[10px] font-bold tracking-wider uppercase inline-flex items-center gap-1.5 shadow-xs border border-white/10"
+                    className="h-6 px-2.5 rounded-full text-[11px] font-bold tracking-wider uppercase inline-flex items-center gap-1.5 shadow-xs border border-white/10"
                     style={{
                       backgroundColor: style.bg,
                       color: style.text,
@@ -357,7 +375,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
                         className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
                       />
                     ) : (
-                      <div className="w-3.5 h-3.5 rounded-full bg-white/20 text-white flex items-center justify-center text-[8px] font-bold shrink-0">
+                      <div className="w-3.5 h-3.5 rounded-full bg-white/20 text-white flex items-center justify-center text-[11px] font-bold shrink-0">
                         {lbl.name.slice(0, 1).toUpperCase()}
                       </div>
                     )}
@@ -370,7 +388,7 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
         })()}
 
         {/* Title */}
-        <h4 className="font-bold text-[15px] text-white leading-snug tracking-tight">
+        <h4 className="font-bold text-base text-white leading-snug tracking-tight">
           {task.title}
         </h4>
 
@@ -395,28 +413,29 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
           return (
             <div className="flex items-center justify-between gap-2 flex-wrap pt-3 border-t border-white/5 text-xs font-medium">
               <div className="flex items-center gap-3 text-slate-300 shrink-0">
-                <span className="flex items-center gap-1.5 hover:text-[#E4007E] transition-colors" title="Comentários">
+                <span className="flex items-center gap-1.5 hover:text-brand transition-colors" title="Comentários">
                   <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-white font-medium text-[11px]">{cCount}</span>
+                  <span className="text-white font-medium text-xs">{cCount}</span>
                 </span>
 
-                <span className="flex items-center gap-1.5 hover:text-[#E4007E] transition-colors" title="Arquivos / Anexos">
+                <span className="flex items-center gap-1.5 hover:text-brand transition-colors" title="Arquivos / Anexos">
                   <Paperclip className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-white font-medium text-[11px]">{aCount}</span>
+                  <span className="text-white font-medium text-xs">{aCount}</span>
                 </span>
 
-                <span className="flex items-center gap-1.5 hover:text-[#E4007E] transition-colors" title="Checklists">
+                <span className="flex items-center gap-1.5 hover:text-brand transition-colors" title="Checklists">
                   <CheckSquare className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-white font-medium text-[11px]">{chCount}</span>
+                  <span className="text-white font-medium text-xs">{chCount}</span>
                 </span>
 
                 <button
                   type="button"
                   onClick={handleCloneTask}
-                  className="flex items-center gap-1.5 hover:text-[#E4007E] transition-colors ml-0.5 cursor-pointer"
+                  className="flex items-center gap-1.5 hover:text-brand transition-colors ml-0.5 cursor-pointer"
                   title="Clonar Tarefa"
+                  aria-label="Clonar tarefa"
                 >
-                  <Copy className="w-3.5 h-3.5 text-slate-400 hover:text-[#E4007E]" />
+                  <Copy className="w-3.5 h-3.5 text-slate-400 hover:text-brand" aria-hidden="true" />
                 </button>
               </div>
 
@@ -424,13 +443,13 @@ export const TaskKanbanCard: React.FC<TaskKanbanCardProps> = React.memo(({
                 const overdueDays = getTaskOverdueDays(task);
                 if (overdueDays > 0) {
                   return (
-                    <div className="text-rose-400 font-semibold text-[11px] bg-rose-950/40 px-2 py-0.5 rounded border border-rose-800/40 shadow-xs whitespace-nowrap shrink-0 mt-1 sm:mt-0" title={`Prazo previsto: ${task.dueDate}`}>
+                    <div className="text-rose-400 font-semibold text-xs bg-rose-950/40 px-2 py-0.5 rounded border border-rose-800/40 shadow-xs whitespace-nowrap shrink-0 mt-1 sm:mt-0" title={`Prazo previsto: ${task.dueDate}`}>
                       Atrasada ({overdueDays}d)
                     </div>
                   );
                 }
                 return (
-                  <div className="text-slate-400 font-medium text-[11px] whitespace-nowrap shrink-0 mt-1 sm:mt-0">
+                  <div className="text-slate-400 font-medium text-xs whitespace-nowrap shrink-0 mt-1 sm:mt-0">
                     {task.dueDate && task.dueDate !== 'Sem prazo' ? task.dueDate : 'Sem prazo'}
                   </div>
                 );

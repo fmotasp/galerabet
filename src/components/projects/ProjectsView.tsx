@@ -18,6 +18,7 @@ import {
 import { useApp, useProjects, useEmployees, useTasks } from '../../context/AppContext';
 import { Project } from '../../types';
 import { isTaskCompleted } from '../../lib/taskDateUtils';
+import { EmptyState } from '../ui/EmptyState';
 
 export const ProjectsView: React.FC = () => {
   const { projects, deleteProject } = useProjects();
@@ -79,7 +80,7 @@ export const ProjectsView: React.FC = () => {
       case 'on_hold':
       default:
         return (
-          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-raised text-fg-muted">
             On Hold
           </span>
         );
@@ -103,14 +104,14 @@ export const ProjectsView: React.FC = () => {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Projetos</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Projetos</h1>
           <p className="text-sm text-slate-400 mt-1">Visão geral de iniciativas ativas e sprints.</p>
         </div>
 
         <button
           id="btn-new-project"
           onClick={() => setIsNewProjectModalOpen(true)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-sm font-bold shadow-md shadow-[#E4007E]/25 transition-all active:scale-98"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand to-brand-alt hover:opacity-95 text-white rounded-xl text-sm font-bold shadow-md shadow-brand/25 transition-all active:scale-98"
         >
           <Plus className="w-4 h-4 text-white stroke-[2.5]" />
           <span>Novo Projeto</span>
@@ -125,7 +126,7 @@ export const ProjectsView: React.FC = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="appearance-none w-full bg-[#101010] border border-slate-700/80 text-white text-xs font-bold py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
+              className="appearance-none w-full bg-canvas border border-line text-white text-xs font-bold py-2.5 pl-4 pr-8 rounded-xl focus:outline-none focus:border-indigo-500 transition-colors"
             >
               {['all', 'active', 'planning', 'at_risk', 'completed'].map((status) => (
                 <option key={status} value={status}>
@@ -143,8 +144,8 @@ export const ProjectsView: React.FC = () => {
                 onClick={() => setStatusFilter(status)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold capitalize whitespace-nowrap transition-all border ${
                   statusFilter === status
-                    ? 'bg-[#E4007E] text-white border-[#E4007E] shadow-sm'
-                    : 'bg-[#101010] text-slate-400 border-white/5 hover:text-white hover:border-slate-500'
+                    ? 'bg-brand text-white border-brand shadow-sm'
+                    : 'bg-canvas text-slate-400 border-white/5 hover:text-white hover:border-slate-500'
                 }`}
               >
                 {status === 'at_risk' ? 'At Risk' : status}
@@ -160,7 +161,7 @@ export const ProjectsView: React.FC = () => {
             placeholder="Buscar projetos..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-[#101010] border border-white/5 rounded-2xl text-xs focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 text-white placeholder-slate-400 font-semibold shadow-inner transition-colors"
+            className="w-full pl-10 pr-4 py-2.5 bg-canvas border border-white/5 rounded-2xl text-xs focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30 text-white placeholder-slate-400 font-semibold shadow-inner transition-colors"
           />
         </div>
       </div>
@@ -168,23 +169,8 @@ export const ProjectsView: React.FC = () => {
       {/* Projects Card Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProjects.length === 0 ? (
-          <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-gradient-to-b from-[#181818] to-transparent rounded-3xl border border-white/5 border-dashed">
-            <div className="w-16 h-16 rounded-full bg-[#1C1C1C] flex items-center justify-center mb-4 shadow-inner">
-              <Box className="w-8 h-8 text-slate-500" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-200">Nenhum projeto encontrado</h3>
-            <p className="text-sm text-slate-500 mt-2 max-w-xs">
-              Tente ajustar os filtros ou crie um novo projeto para começar.
-            </p>
-            <button
-              onClick={() => {
-                setStatusFilter('all');
-                setSearchQuery('');
-              }}
-              className="mt-6 px-4 py-2 rounded-xl bg-[#E4007E]/10 text-[#E4007E] font-bold text-sm hover:bg-[#E4007E]/20 transition-colors"
-            >
-              Limpar Filtros
-            </button>
+          <div className="col-span-full">
+            <EmptyState boxed icon={Box} title="Nenhum projeto encontrado" description="Tente ajustar os filtros ou crie um novo projeto para começar." action={{ label: 'Limpar Filtros', onClick: () => { setStatusFilter('all'); setSearchQuery(''); } }} />
           </div>
         ) : (
           filteredProjects.map((project) => {
@@ -200,7 +186,7 @@ export const ProjectsView: React.FC = () => {
                 key={project.id}
                 id={`project-card-${project.id}`}
                 onClick={() => setSelectedProjectForDetail(project)}
-                className="group bg-[#141414] rounded-3xl p-6 border border-white/5 shadow-xl hover:shadow-2xl hover:border-[#E4007E]/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden"
+                className="group bg-surface rounded-3xl p-6 border border-white/5 shadow-xl hover:shadow-2xl hover:border-line-hover hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden"
               >
                 <div>
                   {/* Top row: Icon + Title + Status */}
@@ -214,10 +200,10 @@ export const ProjectsView: React.FC = () => {
                         {getProjectIcon(project.iconType)}
                       </div>
                       <div>
-                        <h3 className="font-extrabold text-white text-lg group-hover:text-[#E4007E] transition-colors leading-tight">
+                        <h3 className="font-bold text-white text-lg group-hover:text-brand transition-colors leading-tight">
                           {project.name}
                         </h3>
-                        <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">{project.category}</p>
+                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{project.category}</p>
                       </div>
                     </div>
 
@@ -237,12 +223,12 @@ export const ProjectsView: React.FC = () => {
                       <span className="text-slate-400">Progresso</span>
                       <span className="text-white">{project.progress}%</span>
                     </div>
-                    <div className="w-full h-1.5 bg-[#101010] rounded-full overflow-hidden border border-white/5">
+                    <div className="w-full h-1.5 bg-canvas rounded-full overflow-hidden border border-white/5">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
                           project.status === 'at_risk'
                             ? 'bg-rose-500'
-                            : 'bg-[#E4007E]'
+                            : 'bg-brand'
                         }`}
                         style={{ width: `${project.progress}%` }}
                       />
@@ -259,11 +245,11 @@ export const ProjectsView: React.FC = () => {
                             <img
                               src={member.avatarUrl}
                               alt={member.name}
-                              className="w-7 h-7 rounded-full object-cover ring-2 ring-[#181818]"
+                              className="w-7 h-7 rounded-full object-cover ring-2 ring-popover"
                             />
                           ) : (
                             <div
-                              className="w-7 h-7 rounded-full bg-[#101010] text-white font-bold text-[9px] flex items-center justify-center ring-2 ring-[#181818] border border-white/10"
+                              className="w-7 h-7 rounded-full bg-canvas text-white font-bold text-[11px] flex items-center justify-center ring-2 ring-popover border border-white/10"
                             >
                               {member.initials}
                             </div>
@@ -271,7 +257,7 @@ export const ProjectsView: React.FC = () => {
                         </div>
                       ))}
                       {teamMembers.length > 3 && (
-                        <div className="w-7 h-7 rounded-full bg-[#101010] text-slate-400 font-bold text-[9px] flex items-center justify-center ring-2 ring-[#181818] border border-white/10">
+                        <div className="w-7 h-7 rounded-full bg-canvas text-slate-400 font-bold text-[11px] flex items-center justify-center ring-2 ring-popover border border-white/10">
                           +{teamMembers.length - 3}
                         </div>
                       )}
@@ -279,7 +265,7 @@ export const ProjectsView: React.FC = () => {
 
                     {/* Sprint tag */}
                     <div className="text-right">
-                      <span className="text-[9px] font-bold text-slate-500 block tracking-wider uppercase">
+                      <span className="text-[11px] font-bold text-slate-500 block tracking-wider uppercase">
                         Sprint
                       </span>
                       <span className="text-xs font-bold text-slate-300">

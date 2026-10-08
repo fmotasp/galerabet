@@ -22,7 +22,7 @@ export const TaskDescriptionSection: React.FC<{
 
     return (
       <div
-        className="leading-relaxed text-xs text-slate-100 font-medium space-y-1.5 prose-sm max-w-none break-words break-all whitespace-pre-wrap [overflow-wrap:anywhere] [&_b]:font-semibold [&_strong]:font-semibold [&_strong]:text-white [&_b]:text-white [&_h1]:text-base [&_h1]:font-semibold [&_h1]:text-white [&_h2]:text-sm [&_h2]:font-extrabold [&_h2]:text-white [&_h3]:text-xs [&_h3]:font-bold [&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5 [&_a]:text-sky-400 [&_a]:hover:text-sky-300 [&_a]:underline [&_a]:cursor-pointer [&_a]:font-semibold"
+        className="leading-relaxed text-xs text-slate-100 font-medium space-y-1.5 prose-sm max-w-none break-words break-all whitespace-pre-wrap [overflow-wrap:anywhere] [&_b]:font-semibold [&_strong]:font-semibold [&_strong]:text-white [&_b]:text-white [&_h1]:text-base [&_h1]:font-semibold [&_h1]:text-white [&_h2]:text-sm [&_h2]:font-bold [&_h2]:text-white [&_h3]:text-xs [&_h3]:font-bold [&_h3]:text-white [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:my-0.5 [&_a]:text-sky-400 [&_a]:hover:text-sky-300 [&_a]:underline [&_a]:cursor-pointer [&_a]:font-semibold"
         dangerouslySetInnerHTML={{ __html: htmlContent }}
       />
     );
@@ -47,7 +47,7 @@ export const TaskDescriptionSection: React.FC<{
             <button
               type="button"
               onClick={() => setIsEditingDescription(false)}
-              className="px-4 py-1.5 bg-[#1C1C1C] border border-[#262626] hover:border-[#E4007E] text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all shadow-sm cursor-pointer"
+              className="px-4 py-1.5 bg-raised border border-line hover:border-line-hover text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition-all shadow-sm cursor-pointer"
             >
               Concluir
             </button>
@@ -62,10 +62,10 @@ export const TaskDescriptionSection: React.FC<{
             }
             setIsEditingDescription(true);
           }}
-          className="p-4 bg-[#1C1C1C] text-slate-100 border border-[#262626] rounded-2xl cursor-pointer hover:border-[#E4007E] transition-colors group relative h-[250px] overflow-y-auto custom-scrollbar break-words [overflow-wrap:anywhere]"
+          className="p-4 bg-raised text-slate-100 border border-line rounded-2xl cursor-pointer hover:border-line-hover transition-colors group relative h-[250px] overflow-y-auto custom-scrollbar break-words [overflow-wrap:anywhere]"
           title="Clique para editar"
         >
-          <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity bg-[#2E2E2E] text-white text-[10px] font-bold px-2 py-0.5 rounded-lg border border-[#262626] flex items-center gap-1">
+          <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity bg-line-strong text-white text-[11px] font-bold px-2 py-0.5 rounded-lg border border-line flex items-center gap-1">
             <Edit2 className="w-2.5 h-2.5" />
             <span>Editar</span>
           </div>

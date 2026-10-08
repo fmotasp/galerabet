@@ -77,13 +77,13 @@ export const MaterialsView: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Top Header & Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#141414] border border-[#262626] rounded-3xl p-5 shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface border border-line rounded-3xl p-5 shadow-xl">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-semibold shadow-lg shadow-[#E4007E]/25 shrink-0">
+          <div className="w-10 h-10 rounded-2xl bg-brand text-white flex items-center justify-center font-semibold shadow-lg shrink-0">
             <Palette className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-white tracking-tight">
+            <h1 className="text-xl font-bold text-white tracking-tight">
               Material Auxiliar
             </h1>
             <p className="text-xs text-slate-400 font-medium">
@@ -100,7 +100,7 @@ export const MaterialsView: React.FC = () => {
               placeholder="Buscar cliente, cor ou categoria..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#1C1C1C] border border-[#262626] focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30 rounded-xl text-xs font-semibold text-white placeholder-slate-500 focus:outline-none transition-all shadow-inner"
+              className="w-full pl-10 pr-4 py-2.5 bg-raised border border-line focus:border-brand/50 focus:ring-2 focus:ring-brand/30 rounded-xl text-xs font-semibold text-white placeholder-slate-500 focus:outline-none transition-all shadow-inner"
             />
           </div>
         </div>
@@ -108,8 +108,8 @@ export const MaterialsView: React.FC = () => {
 
       {/* Grid of Client Brand Materials */}
       {filteredClients.length === 0 ? (
-        <div className="py-20 flex flex-col items-center justify-center text-center bg-gradient-to-b from-[#181818] to-transparent rounded-3xl border border-white/5 border-dashed">
-          <div className="w-16 h-16 rounded-full bg-[#1C1C1C] flex items-center justify-center mb-4 shadow-inner">
+        <div className="py-20 flex flex-col items-center justify-center text-center bg-gradient-to-b from-popover to-transparent rounded-3xl border border-white/5 border-dashed">
+          <div className="w-16 h-16 rounded-full bg-raised flex items-center justify-center mb-4 shadow-inner">
             <Palette className="w-8 h-8 text-slate-500" />
           </div>
           <h3 className="text-lg font-bold text-slate-200">Nenhum cliente ou material</h3>
@@ -132,16 +132,16 @@ export const MaterialsView: React.FC = () => {
             return (
               <div
                 key={client.id}
-                className="bg-[#141414] border border-[#262626] hover:border-[#383838] rounded-3xl p-6 flex flex-col justify-between space-y-5 transition-all shadow-xl hover:shadow-2xl group relative overflow-hidden"
+                className="bg-surface border border-line hover:border-line-hover rounded-3xl p-6 flex flex-col justify-between space-y-5 transition-all shadow-xl hover:shadow-2xl group relative overflow-hidden"
               >
                 {/* Accent Top Subtle Gradient */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#E4007E] via-[#E94E18] to-transparent opacity-40 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand via-brand-alt to-transparent opacity-40 group-hover:opacity-100 transition-opacity" />
 
                 <div className="space-y-4">
                   {/* Card Header: Logo, Name, Category & Edit Action */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="w-13 h-13 rounded-2xl bg-[#1C1C1C] border border-[#262626] flex items-center justify-center overflow-hidden shrink-0 shadow-md p-1.5">
+                      <div className="w-13 h-13 rounded-2xl bg-raised border border-line flex items-center justify-center overflow-hidden shrink-0 shadow-md p-1.5">
                         {client.logoUrl ? (
                           <img
                             src={client.logoUrl}
@@ -149,22 +149,22 @@ export const MaterialsView: React.FC = () => {
                             className="w-full h-full object-contain"
                           />
                         ) : (
-                          <div className="w-full h-full rounded-xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center font-semibold text-sm">
+                          <div className="w-full h-full rounded-xl bg-brand text-white flex items-center justify-center font-semibold text-sm">
                             {client.name.slice(0, 2).toUpperCase()}
                           </div>
                         )}
                       </div>
 
                       <div className="min-w-0">
-                        <h3 className="text-base font-extrabold text-white truncate group-hover:text-white transition-colors" title={client.name}>
+                        <h3 className="text-base font-bold text-white truncate group-hover:text-white transition-colors" title={client.name}>
                           {client.name}
                         </h3>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          <span className="px-2 py-0.5 rounded-lg bg-[#1C1C1C] border border-[#262626] text-[10px] font-bold text-slate-300">
+                          <span className="px-2 py-0.5 rounded-lg bg-raised border border-line text-[11px] font-bold text-slate-300">
                             {client.category || 'Geral'}
                           </span>
                           {client.totalTasks !== undefined && client.totalTasks > 0 && (
-                            <span className="text-[10px] text-slate-400 font-medium">
+                            <span className="text-[11px] text-slate-400 font-medium">
                               {client.totalTasks} demandas
                             </span>
                           )}
@@ -172,12 +172,12 @@ export const MaterialsView: React.FC = () => {
                       </div>
                     </div>
 
-                    <button
+                    <button aria-label="Editar materiais deste cliente"
                       onClick={() => {
                         setEditingProject(client);
                         setIsNewProjectModalOpen(true);
                       }}
-                      className="p-2 rounded-xl text-slate-400 hover:text-white bg-[#1C1C1C] hover:bg-[#262626] border border-[#262626] transition-all cursor-pointer shrink-0 shadow-xs"
+                      className="p-2 rounded-xl text-slate-400 hover:text-white bg-raised hover:bg-line border border-line transition-all cursor-pointer shrink-0 shadow-xs"
                       title="Editar materiais deste cliente"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -192,13 +192,13 @@ export const MaterialsView: React.FC = () => {
                   )}
 
                   {/* Seção de Paleta de Cores */}
-                  <div className="space-y-2 pt-2 border-t border-[#222222]">
+                  <div className="space-y-2 pt-2 border-t border-raised">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                        <Palette className="w-3.5 h-3.5 text-[#E4007E]" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                        <Palette className="w-3.5 h-3.5 text-brand" />
                         <span>Paleta de Cores</span>
                       </span>
-                      <span className="text-[10px] text-slate-400">Clique na cor p/ copiar</span>
+                      <span className="text-[11px] text-slate-400">Clique na cor p/ copiar</span>
                     </div>
 
                     {hasColors ? (
@@ -206,11 +206,11 @@ export const MaterialsView: React.FC = () => {
                         {client.colorPalette!.map((c, i) => {
                           const isCopied = copiedHex === c.hex;
                           return (
-                            <button
+                            <button aria-label={`Copiar cor ${c.hex}`}
                               key={i}
                               type="button"
                               onClick={() => handleCopyColor(c.hex, client.name)}
-                              className="p-2 rounded-xl bg-[#1C1C1C] border border-white/5 hover:border-[#E4007E] transition-all text-left group/color cursor-pointer active:scale-95 relative overflow-hidden"
+                              className="p-2 rounded-xl bg-raised border border-white/5 hover:border-line-hover transition-all text-left group/color cursor-pointer active:scale-95 relative overflow-hidden"
                               title={`Copiar ${c.hex}`}
                             >
                               <div className="flex items-center gap-2">
@@ -219,16 +219,16 @@ export const MaterialsView: React.FC = () => {
                                   style={{ backgroundColor: c.hex }}
                                 />
                                 <div className="min-w-0 flex-1">
-                                  <span className="text-[10px] font-mono font-semibold text-white block truncate uppercase">
+                                  <span className="text-[11px] font-mono font-semibold text-white block truncate uppercase">
                                     {c.hex}
                                   </span>
-                                  <span className="text-[9px] text-slate-300 block truncate font-medium">
+                                  <span className="text-[11px] text-slate-300 block truncate font-medium">
                                     {c.name || `Cor ${i + 1}`}
                                   </span>
                                 </div>
                               </div>
                               {isCopied && (
-                                <div className="absolute inset-0 bg-emerald-600/90 flex items-center justify-center gap-1 text-[10px] font-semibold text-white animate-in fade-in">
+                                <div className="absolute inset-0 bg-emerald-600/90 flex items-center justify-center gap-1 text-[11px] font-semibold text-white animate-in fade-in">
                                   <Check className="w-3 h-3 stroke-[3]" />
                                   <span>Copiado!</span>
                                 </div>
@@ -243,7 +243,7 @@ export const MaterialsView: React.FC = () => {
                           setEditingProject(client);
                           setIsNewProjectModalOpen(true);
                         }}
-                        className="p-3 bg-[#1C1C1C]/60 border border-dashed border-[#262626] hover:border-[#E4007E] rounded-xl text-center cursor-pointer transition-colors"
+                        className="p-3 bg-raised/60 border border-dashed border-line hover:border-line-hover rounded-xl text-center cursor-pointer transition-colors"
                       >
                         <span className="text-xs font-semibold text-slate-300 hover:text-white">
                           + Adicionar cores da marca
@@ -254,7 +254,7 @@ export const MaterialsView: React.FC = () => {
                 </div>
 
                 {/* Card Footer Actions: Manual da Marca, Pack de Logos & Tipografia */}
-                <div className="space-y-2 pt-4 border-t border-[#222222]">
+                <div className="space-y-2 pt-4 border-t border-raised">
                   <div className="grid grid-cols-2 gap-2">
                     {/* Botão 1: Manual da Marca */}
                     {hasManual ? (
@@ -262,7 +262,7 @@ export const MaterialsView: React.FC = () => {
                         href={client.brandManualUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-2.5 bg-[#1C1C1C] hover:bg-[#262626] text-white border border-[#262626] hover:border-amber-500/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link"
+                        className="px-3 py-2.5 bg-raised hover:bg-line text-white border border-line hover:border-amber-500/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link"
                         title="Abrir Manual da Marca"
                       >
                         <div className="flex items-center gap-1.5 min-w-0">
@@ -278,7 +278,7 @@ export const MaterialsView: React.FC = () => {
                           setEditingProject(client);
                           setIsNewProjectModalOpen(true);
                         }}
-                        className="px-3 py-2.5 bg-[#1C1C1C]/40 hover:bg-[#1C1C1C] text-slate-400 hover:text-white border border-dashed border-[#262626] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="px-3 py-2.5 bg-raised/40 hover:bg-raised text-slate-400 hover:text-white border border-dashed border-line rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Manual</span>
@@ -291,7 +291,7 @@ export const MaterialsView: React.FC = () => {
                         href={client.logosPackUrl || client.logoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-2.5 bg-[#1C1C1C] hover:bg-[#262626] text-white border border-[#262626] hover:border-blue-500/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link"
+                        className="px-3 py-2.5 bg-raised hover:bg-line text-white border border-line hover:border-blue-500/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link"
                         title="Abrir Pack de Logos"
                       >
                         <div className="flex items-center gap-1.5 min-w-0">
@@ -307,7 +307,7 @@ export const MaterialsView: React.FC = () => {
                           setEditingProject(client);
                           setIsNewProjectModalOpen(true);
                         }}
-                        className="px-3 py-2.5 bg-[#1C1C1C]/40 hover:bg-[#1C1C1C] text-slate-400 hover:text-white border border-dashed border-[#262626] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="px-3 py-2.5 bg-raised/40 hover:bg-raised text-slate-400 hover:text-white border border-dashed border-line rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Logos</span>
@@ -321,7 +321,7 @@ export const MaterialsView: React.FC = () => {
                           href={client.typographyUrl!.startsWith('www') ? `https://${client.typographyUrl}` : client.typographyUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-2.5 bg-[#1C1C1C] hover:bg-[#262626] text-white border border-[#262626] hover:border-emerald-500/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link"
+                          className="px-3 py-2.5 bg-raised hover:bg-line text-white border border-line hover:border-emerald-500/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link"
                           title="Abrir Tipografia Oficial"
                         >
                           <div className="flex items-center gap-1.5 min-w-0">
@@ -339,7 +339,7 @@ export const MaterialsView: React.FC = () => {
                             }
                             addToast('Tipografia Copiada!', `Fonte "${client.typographyUrl}" copiada.`, 'info');
                           }}
-                          className="px-3 py-2.5 bg-[#1C1C1C] hover:bg-[#262626] text-white border border-[#262626] hover:border-emerald-500/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link cursor-pointer"
+                          className="px-3 py-2.5 bg-raised hover:bg-line text-white border border-line hover:border-emerald-500/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link cursor-pointer"
                           title={`Fonte: ${client.typographyUrl}`}
                         >
                           <div className="flex items-center gap-1.5 min-w-0">
@@ -357,7 +357,7 @@ export const MaterialsView: React.FC = () => {
                           setEditingProject(client);
                           setIsNewProjectModalOpen(true);
                         }}
-                        className="px-3 py-2.5 bg-[#1C1C1C]/40 hover:bg-[#1C1C1C] text-slate-400 hover:text-white border border-dashed border-[#262626] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="px-3 py-2.5 bg-raised/40 hover:bg-raised text-slate-400 hover:text-white border border-dashed border-line rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Tipografia</span>
@@ -370,7 +370,7 @@ export const MaterialsView: React.FC = () => {
                         href={client.tarjasUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-2.5 bg-[#1C1C1C] hover:bg-[#262626] text-white border border-[#262626] hover:border-amber-400/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link"
+                        className="px-3 py-2.5 bg-raised hover:bg-line text-white border border-line hover:border-amber-400/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link"
                         title="Abrir Tarjas"
                       >
                         <div className="flex items-center gap-1.5 min-w-0">
@@ -386,7 +386,7 @@ export const MaterialsView: React.FC = () => {
                           setEditingProject(client);
                           setIsNewProjectModalOpen(true);
                         }}
-                        className="px-3 py-2.5 bg-[#1C1C1C]/40 hover:bg-[#1C1C1C] text-slate-400 hover:text-white border border-dashed border-[#262626] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="px-3 py-2.5 bg-raised/40 hover:bg-raised text-slate-400 hover:text-white border border-dashed border-line rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Tarjas</span>
@@ -399,11 +399,11 @@ export const MaterialsView: React.FC = () => {
                         href={client.psdBaseUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-2.5 bg-[#1C1C1C] hover:bg-[#262626] text-white border border-[#262626] hover:border-[#E4007E]/60 rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link col-span-2"
+                        className="px-3 py-2.5 bg-raised hover:bg-line text-white border border-line hover:border-line-hover rounded-xl text-xs font-bold transition-all flex items-center justify-between group/link col-span-2"
                         title="Abrir PSD Base"
                       >
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <ImageIcon className="w-4 h-4 text-[#E4007E] shrink-0 group-hover/link:scale-110 transition-transform" />
+                          <ImageIcon className="w-4 h-4 text-brand shrink-0 group-hover/link:scale-110 transition-transform" />
                           <span className="truncate text-white">PSD Base</span>
                         </div>
                         <ExternalLink className="w-3 h-3 text-slate-400 group-hover/link:text-white shrink-0 ml-1" />
@@ -415,7 +415,7 @@ export const MaterialsView: React.FC = () => {
                           setEditingProject(client);
                           setIsNewProjectModalOpen(true);
                         }}
-                        className="px-3 py-2.5 bg-[#1C1C1C]/40 hover:bg-[#1C1C1C] text-slate-400 hover:text-white border border-dashed border-[#262626] rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer col-span-2"
+                        className="px-3 py-2.5 bg-raised/40 hover:bg-raised text-slate-400 hover:text-white border border-dashed border-line rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer col-span-2"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>PSD Base</span>

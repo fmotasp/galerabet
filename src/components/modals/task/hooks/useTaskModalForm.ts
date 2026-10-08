@@ -11,6 +11,7 @@ import { TaskModalFormData, TaskReferenceImage, TimelineActionItem } from '../ty
 import { supabase } from '../../../../lib/supabase';
 import { createNotifications } from '../../../../lib/notificationsService';
 import { decodeTaskDescriptionWithChecklist } from '../../../../lib/taskUtils';
+import { confirmDialog } from '../../../../lib/dialogs';
 
 export const useTaskModalForm = ({
   isOpen,
@@ -873,7 +874,7 @@ export const useTaskModalForm = ({
 
   const handleDeleteComment = async (commentId: string) => {
     if (!editingTask) return;
-    if (window.confirm('Deseja excluir seu comentário?')) {
+    if (await confirmDialog({ message: 'Deseja excluir seu comentário?', tone: 'danger' })) {
       const nextComments = comments.filter((c) => c.id !== commentId);
       setComments(nextComments);
       await updateTask(editingTask.id, { comments: nextComments });

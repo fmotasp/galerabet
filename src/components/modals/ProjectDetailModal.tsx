@@ -30,8 +30,8 @@ export const ProjectDetailModal: React.FC = () => {
         className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
         onClick={() => setSelectedProjectForDetail(null)}
       />
-      <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-200/80 max-w-xl w-full p-6 sm:p-8 z-10 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-start justify-between pb-5 border-b border-slate-100">
+      <div className="relative bg-surface rounded-3xl shadow-2xl border border-line max-w-xl w-full p-6 sm:p-8 z-10 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between pb-5 border-b border-line">
           <div className="flex items-center gap-4">
             {project.logoUrl ? (
               <img
@@ -55,12 +55,12 @@ export const ProjectDetailModal: React.FC = () => {
 
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                <h2 className="text-xl font-bold text-white tracking-tight">
                   {project.name}
                 </h2>
                 <Badge
                   size="sm"
-                  className="bg-indigo-50 text-indigo-700 border-transparent capitalize font-bold text-[10px] px-2 py-0.5"
+                  className="bg-brand/10 text-brand border-transparent capitalize font-bold text-[11px] px-2 py-0.5"
                 >
                   {project.status.replace('_', ' ')}
                 </Badge>
@@ -77,7 +77,7 @@ export const ProjectDetailModal: React.FC = () => {
                 setSelectedProjectForDetail(null);
                 setEditingProject(project);
               }}
-              className="p-2 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-slate-100"
+              className="p-2 text-slate-400 hover:text-brand rounded-lg hover:bg-raised"
               title="Edit Project"
               aria-label="Edit Project"
             >
@@ -87,7 +87,7 @@ export const ProjectDetailModal: React.FC = () => {
               variant="ghost"
               size="icon"
               onClick={() => setSelectedProjectForDetail(null)}
-              className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+              className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-raised"
               aria-label="Fechar"
             >
               <X className="w-5 h-5" />
@@ -96,11 +96,11 @@ export const ProjectDetailModal: React.FC = () => {
         </div>
 
         {/* Description */}
-        <p className="text-xs text-slate-600 my-4 leading-relaxed">{project.description}</p>
+        <p className="text-xs text-fg-muted my-4 leading-relaxed">{project.description}</p>
 
         {/* Progress Bar */}
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 mb-5">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+        <div className="p-4 rounded-2xl bg-raised border border-line mb-5">
+          <div className="flex items-center justify-between text-xs font-bold text-white mb-1.5">
             <span>Overall Progress</span>
             <span>{project.progress}%</span>
           </div>
@@ -110,7 +110,7 @@ export const ProjectDetailModal: React.FC = () => {
               style={{ width: `${project.progress}%` }}
             />
           </div>
-          <div className="flex items-center justify-between text-[11px] text-slate-400 mt-2">
+          <div className="flex items-center justify-between text-xs text-slate-400 mt-2">
             <span>Sprint: {project.currentSprint}</span>
             <span>
               {completedCount} of {projectTasks.length} tasks completed
@@ -127,13 +127,13 @@ export const ProjectDetailModal: React.FC = () => {
             {teamMembers.map((m) => (
               <div
                 key={m.id}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-semibold text-slate-800"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-raised text-xs font-semibold text-white"
               >
                 <Avatar
                   name={m.name}
                   src={m.avatarUrl}
                   size="xs"
-                  className="!w-5 !h-5 bg-slate-800 text-white font-bold text-[9px]"
+                  className="!w-5 !h-5 bg-slate-800 text-white font-bold text-[11px]"
                 />
                 <span>{m.name}</span>
               </div>
@@ -155,7 +155,7 @@ export const ProjectDetailModal: React.FC = () => {
                 setIsNewTaskModalOpen(true);
               }}
               leftIcon={<Plus className="w-3.5 h-3.5" />}
-              className="px-0 py-0 text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:bg-transparent"
+              className="px-0 py-0 text-xs font-bold text-brand hover:text-white hover:bg-transparent"
             >
               Add Task
             </Button>
@@ -163,7 +163,7 @@ export const ProjectDetailModal: React.FC = () => {
 
           <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
             {projectTasks.length === 0 ? (
-              <div className="py-6 text-center text-xs text-slate-400 bg-slate-50 rounded-xl">
+              <div className="py-6 text-center text-xs text-slate-400 bg-raised rounded-xl">
                 No tasks created for this project yet.
               </div>
             ) : (
@@ -174,15 +174,15 @@ export const ProjectDetailModal: React.FC = () => {
                     setSelectedProjectForDetail(null);
                     setEditingTask(t);
                   }}
-                  className="p-3 bg-white border border-slate-200/80 hover:border-indigo-300 rounded-xl flex items-center justify-between text-xs cursor-pointer group hover:bg-indigo-50/20"
+                  className="p-3 bg-surface border border-line hover:border-line-hover rounded-xl flex items-center justify-between text-xs cursor-pointer group hover:bg-indigo-50/20"
                 >
                   <div className="flex items-center gap-2.5">
-                    <button
+                    <button aria-label={isTaskCompleted(t) ? 'Reabrir tarefa' : 'Concluir tarefa'}
                       onClick={(e) => {
                         e.stopPropagation();
                         moveTaskStatus(t.id, isTaskCompleted(t) ? 'in_progress' : 'done');
                       }}
-                      className="text-slate-400 hover:text-emerald-600 cursor-pointer"
+                      className="text-slate-400 hover:text-emerald-400 cursor-pointer"
                     >
                       <CheckCircle2
                         className={`w-4 h-4 ${
@@ -194,7 +194,7 @@ export const ProjectDetailModal: React.FC = () => {
                       className={`font-semibold ${
                         isTaskCompleted(t)
                           ? 'line-through text-slate-400'
-                          : 'text-slate-800 group-hover:text-indigo-600'
+                          : 'text-white group-hover:text-brand'
                       }`}
                     >
                       {t.title}
@@ -207,7 +207,7 @@ export const ProjectDetailModal: React.FC = () => {
                     )}
                     <Badge
                       size="sm"
-                      className="bg-slate-100 text-slate-700 border-transparent capitalize font-bold text-[11px] px-2 py-0.5 rounded"
+                      className="bg-raised text-white border-transparent capitalize font-bold text-xs px-2 py-0.5 rounded"
                     >
                       {spineStatuses?.find(s => s.id === t.status)?.label || t.status.replace('_', ' ')}
                     </Badge>

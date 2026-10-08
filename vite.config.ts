@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     define: {
@@ -14,6 +14,8 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    // Em produção remove console.log/debug (mantém console.error/warn para diagnóstico)
+    esbuild: mode === 'production' ? { pure: ['console.log', 'console.debug'] } : {},
     build: {
       chunkSizeWarningLimit: 600,
       rollupOptions: {

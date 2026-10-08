@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { FileImage, Download, Search, HardDrive } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { EmptyState } from '../ui/EmptyState';
 
 export const FilesView: React.FC = () => {
   const { registeredClients } = useApp();
@@ -185,13 +186,13 @@ export const FilesView: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col h-full bg-[#0A0A0A] overflow-hidden">
       {/* Header */}
-      <div className="shrink-0 p-6 sm:p-8 pb-4 border-b border-[#262626]">
+      <div className="shrink-0 p-6 sm:p-8 pb-4 border-b border-line">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-white uppercase tracking-wider font-condensed">
+            <h1 className="text-2xl font-bold text-white uppercase tracking-wider font-condensed">
               ARQUIVOS ENTREGUES
             </h1>
-            <p className="text-sm text-[#A0A0A0] mt-1">
+            <p className="text-sm text-fg-muted mt-1">
               Prévias das imagens finais (estilo mosaico).
             </p>
           </div>
@@ -200,23 +201,23 @@ export const FilesView: React.FC = () => {
         {/* Filters */}
         <div className="mt-6 flex flex-col xl:flex-row gap-4 xl:items-center">
           <div className="relative max-w-md w-full xl:w-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#808080]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-fg-subtle" />
             <input
               type="text"
               placeholder="Buscar por arquivo, tarefa ou projeto..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#1C1C1C] border border-white/5 text-white pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
+              className="w-full bg-raised border border-white/5 text-white pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30"
             />
           </div>
 
-          <div className="flex flex-nowrap items-center bg-[#101010] p-1 rounded-xl gap-1 border border-white/5 overflow-x-auto min-w-0 [scrollbar-hide::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex flex-nowrap items-center bg-canvas p-1 rounded-xl gap-1 border border-white/5 overflow-x-auto min-w-0 [scrollbar-hide::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <button
               onClick={() => setSelectedProject('all')}
               className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 selectedProject === 'all'
-                  ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-[#303030]'
+                  ? 'bg-gradient-to-r from-brand to-brand-alt text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-chip'
               }`}
             >
               Todos
@@ -229,8 +230,8 @@ export const FilesView: React.FC = () => {
                   onClick={() => setSelectedProject(proj)}
                   className={`flex items-center shrink-0 gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     selectedProject === proj
-                      ? 'bg-gradient-to-r from-[#E4007E] to-[#E94E18] text-white shadow-xs'
-                      : 'text-slate-300 hover:text-white hover:bg-[#303030]'
+                      ? 'bg-gradient-to-r from-brand to-brand-alt text-white shadow-xs'
+                      : 'text-slate-300 hover:text-white hover:bg-chip'
                   }`}
                 >
                   {clientData?.icon ? (
@@ -254,28 +255,22 @@ export const FilesView: React.FC = () => {
       {/* List - Masonry Layout */}
       <div className="flex-1 overflow-y-auto p-6 sm:p-8">
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-64 text-[#E4007E]">
-            <div className="w-8 h-8 border-4 border-[#E4007E] border-t-transparent rounded-full animate-spin mb-4"></div>
+          <div className="flex flex-col items-center justify-center h-64 text-brand">
+            <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin mb-4"></div>
             <p className="font-bold text-white">Carregando arquivos...</p>
           </div>
         ) : filteredFiles.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center bg-gradient-to-b from-[#181818] to-transparent rounded-3xl border border-white/5 border-dashed">
-            <div className="w-16 h-16 rounded-full bg-[#1C1C1C] flex items-center justify-center mb-4 shadow-inner">
-              <HardDrive className="w-8 h-8 text-slate-500" />
-            </div>
-            <p className="text-lg font-bold text-slate-200">Nenhum arquivo encontrado</p>
-            <p className="text-sm text-slate-500 mt-2 max-w-xs">Nenhum resultado corresponde aos filtros atuais. Tente buscar por outro termo.</p>
-          </div>
+          <EmptyState boxed icon={HardDrive} title="Nenhum arquivo encontrado" description="Nenhum resultado corresponde aos filtros atuais. Tente buscar por outro termo." />
         ) : (
           <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4 space-y-4">
             {filteredFiles.map((file, idx) => (
               <div 
                 key={`${file.taskId}-${file.attachmentId}-${idx}`}
-                className="bg-[#141414] rounded-2xl overflow-hidden flex flex-col group break-inside-avoid relative hover:shadow-[0_0_15px_rgba(228,0,126,0.5)] transition-shadow duration-300 border border-[#262626] hover:border-[#E4007E]/50"
+                className="bg-surface rounded-2xl overflow-hidden flex flex-col group break-inside-avoid relative hover:shadow-[0_0_15px_rgba(228,0,126,0.5)] transition-shadow duration-300 border border-line hover:border-line-hover"
               >
                 {/* Imagem Cover se existir */}
                 {file.isImage ? (
-                  <div className="relative w-full overflow-hidden bg-[#1C1C1C]">
+                  <div className="relative w-full overflow-hidden bg-raised">
                     <img 
                       src={file.previewUrl || '/placeholder-image.png'} 
                       alt={file.name || 'Arquivo'} 
@@ -297,9 +292,9 @@ export const FilesView: React.FC = () => {
                     />
                   </div>
                 ) : (
-                  <div className="p-6 bg-[#1C1C1C] flex flex-col gap-2 items-center justify-center min-h-[150px]">
-                    <FileImage className="w-12 h-12 text-[#E4007E]" />
-                    <span className="text-xs text-center text-[#808080] font-bold px-2 truncate max-w-full">{file.name}</span>
+                  <div className="p-6 bg-raised flex flex-col gap-2 items-center justify-center min-h-[150px]">
+                    <FileImage className="w-12 h-12 text-brand" />
+                    <span className="text-xs text-center text-fg-subtle font-bold px-2 truncate max-w-full">{file.name}</span>
                   </div>
                 )}
                 
@@ -316,7 +311,7 @@ export const FilesView: React.FC = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-2 bg-[#E4007E] text-white px-5 py-2.5 rounded-full hover:scale-105 transition-transform shadow-[0_0_15px_rgba(228,0,126,0.5)] z-10 font-black uppercase text-xs"
+                    className="flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-full hover:scale-105 transition-transform shadow-[0_0_15px_rgba(228,0,126,0.5)] z-10 font-bold uppercase text-xs"
                   >
                     <Download className="w-4 h-4 text-white" color="white" />
                     <span style={{ color: '#ffffff' }}>BAIXAR IMAGEM</span>
@@ -335,8 +330,8 @@ export const FilesView: React.FC = () => {
           onClick={() => setExpandedFile(null)}
         >
           <div className="relative max-w-full max-h-full flex flex-col items-center">
-            <button 
-              className="absolute -top-10 right-0 sm:-right-10 text-white hover:text-[#E4007E] bg-black/50 rounded-full p-2"
+            <button aria-label="Fechar visualização" 
+              className="absolute -top-10 right-0 sm:-right-10 text-white hover:text-brand bg-black/50 rounded-full p-2"
               onClick={() => setExpandedFile(null)}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -362,10 +357,10 @@ export const FilesView: React.FC = () => {
               />
             ) : (
               <div 
-                className="bg-[#1C1C1C] p-12 rounded-xl flex flex-col items-center gap-4"
+                className="bg-raised p-12 rounded-xl flex flex-col items-center gap-4"
                 onClick={(e) => e.stopPropagation()}
               >
-                <FileImage className="w-24 h-24 text-[#E4007E]" />
+                <FileImage className="w-24 h-24 text-brand" />
                 <span className="text-white font-bold">{expandedFile.name}</span>
               </div>
             )}
@@ -375,7 +370,7 @@ export const FilesView: React.FC = () => {
             >
               <p className="font-bold text-lg leading-tight mb-2">{expandedFile.taskTitle}</p>
               <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
-                <span className="bg-[#262626] px-2 py-1 rounded-md">{expandedFile.projectName}</span>
+                <span className="bg-line px-2 py-1 rounded-md">{expandedFile.projectName}</span>
                 <span>•</span>
                 <span>{expandedFile.assigneeName}</span>
               </div>
@@ -384,7 +379,7 @@ export const FilesView: React.FC = () => {
                   href={expandedFile.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 text-base bg-[#E4007E] hover:bg-[#E94E18] text-white px-8 py-3.5 rounded-xl transition-all font-black uppercase tracking-wider shadow-lg shadow-[#E4007E]/25 hover:scale-105"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 text-base bg-brand hover:bg-brand-alt text-white px-8 py-3.5 rounded-xl transition-all font-bold uppercase tracking-wider shadow-lg hover:scale-105"
                 >
                   <Download className="w-5 h-5 text-white" color="white" /> 
                   <span style={{ color: '#ffffff' }}>BAIXAR ARQUIVO ORIGINAL</span>

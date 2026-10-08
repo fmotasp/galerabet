@@ -5,6 +5,7 @@ import { Employee } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { Button, Input, Modal } from '../ui';
 import { uploadEmployeeAvatarToDrive } from '../../lib/googleDrive';
+import { confirmDialog } from '../../lib/dialogs';
 
 export const EmployeeModal: React.FC = () => {
   const {
@@ -459,7 +460,7 @@ export const EmployeeModal: React.FC = () => {
       isOpen={isOpen}
       onClose={handleClose}
       size="sm"
-      className="!bg-[#141414]"
+      className="!bg-surface"
       icon={<UserCheck className="w-4 h-4" />}
       title={editingEmployee ? 'Editar Membro da Equipe' : 'Cadastrar Novo Membro'}
     >
@@ -472,14 +473,14 @@ export const EmployeeModal: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Avatar Section */}
-        <div className="flex items-center gap-4 p-3 bg-[#1E1E1E] rounded-2xl border border-white/5">
+        <div className="flex items-center gap-4 p-3 bg-raised rounded-2xl border border-white/5">
           {/* Avatar Preview */}
           <div className="relative shrink-0">
             {avatarPreview ? (
               <img
                 src={avatarPreview}
                 alt="Avatar"
-                className="w-16 h-16 rounded-2xl object-cover border-2 border-[#E4007E]/50 shadow-lg"
+                className="w-16 h-16 rounded-2xl object-cover border-2 border-brand/50 shadow-lg"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   const current = target.src;
@@ -496,7 +497,7 @@ export const EmployeeModal: React.FC = () => {
               />
             ) : (
               <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-semibold text-xl shadow-lg border-2 border-[#333333]"
+                className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-semibold text-xl shadow-lg border-2 border-line-hover"
                 style={{
                   backgroundColor:
                     LABEL_COLORS.find((c) => c.id === formData.labelColor)?.hex || '#89609e',
@@ -508,11 +509,11 @@ export const EmployeeModal: React.FC = () => {
               </div>
             )}
             {/* Camera overlay button */}
-            <button
+            <button aria-label="Trocar foto"
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isSubmitting || isUploadingAvatar}
-              className="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-[#E4007E] rounded-full flex items-center justify-center shadow-md hover:bg-[#c2006b] transition-colors cursor-pointer"
+              className="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-brand rounded-full flex items-center justify-center shadow-md hover:bg-brand-dark transition-colors cursor-pointer"
               title="Trocar foto"
             >
               <Camera className="w-3 h-3 text-white" />
@@ -524,7 +525,7 @@ export const EmployeeModal: React.FC = () => {
             <p className="text-xs font-bold text-slate-200 mb-1">
               {avatarPreview ? 'Foto selecionada' : 'Foto de perfil'}
             </p>
-            <p className="text-[11px] text-slate-400 mb-2 leading-relaxed">
+            <p className="text-xs text-slate-400 mb-2 leading-relaxed">
               {avatarFile
                 ? `📎 ${avatarFile.name} · será enviada para o Drive`
                 : avatarUrl
@@ -532,11 +533,11 @@ export const EmployeeModal: React.FC = () => {
                 : 'JPG, PNG ou WebP · máx. 5MB · salvo no Google Drive'}
             </p>
             <div className="flex items-center gap-2">
-              <button
+              <button aria-label="Enviar foto"
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isSubmitting || isUploadingAvatar}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2A2A2A] hover:bg-[#333333] border border-[#383838] text-slate-200 hover:text-white rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-chip hover:bg-line-hover border border-line-hover text-slate-200 hover:text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
               >
                 <Upload className="w-3 h-3" />
                 <span>{avatarPreview ? 'Trocar foto' : 'Enviar foto'}</span>
@@ -546,7 +547,7 @@ export const EmployeeModal: React.FC = () => {
                   type="button"
                   onClick={handleRemoveAvatar}
                   disabled={isSubmitting}
-                  className="flex items-center gap-1 px-2.5 py-1.5 text-slate-400 hover:text-rose-400 rounded-xl text-[11px] font-bold transition-colors cursor-pointer hover:bg-rose-950/20"
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-slate-400 hover:text-rose-400 rounded-xl text-xs font-bold transition-colors cursor-pointer hover:bg-rose-950/20"
                 >
                   <X className="w-3 h-3" />
                   <span>Remover</span>
@@ -577,7 +578,7 @@ export const EmployeeModal: React.FC = () => {
             placeholder="Ex: Felipe Mota, Rafael Barbosa..."
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="!bg-[#101010] !border-white/5 focus:!border-[#E4007E]"
+            className="!bg-canvas !border-white/5 focus:!border-brand"
           />
         </div>
 
@@ -592,7 +593,7 @@ export const EmployeeModal: React.FC = () => {
             placeholder="exemplo@gmail.com ou usuario@empresa.com"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="!bg-[#101010] !border-white/5 focus:!border-[#E4007E]"
+            className="!bg-canvas !border-white/5 focus:!border-brand"
           />
         </div>
 
@@ -600,10 +601,10 @@ export const EmployeeModal: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-[#E4007E]" />
+                <KeyRound className="w-3.5 h-3.5 text-brand" />
                 <span>Senha Atual do Colaborador</span>
               </label>
-              <span className="text-[10px] font-medium">
+              <span className="text-[11px] font-medium">
                 {formData.password === '123456' ? (
                   <span className="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
                     Padrão inicial (123456)
@@ -634,15 +635,15 @@ export const EmployeeModal: React.FC = () => {
                 }
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="!bg-[#101010] !border-white/5 focus:!border-[#E4007E] pr-20 font-mono tracking-wider text-xs sm:text-sm"
+                className="!bg-canvas !border-white/5 focus:!border-brand pr-20 font-mono tracking-wider text-xs sm:text-sm"
               />
               <div className="absolute right-2 flex items-center gap-1 text-slate-400">
                 {formData.password && (
-                  <button
+                  <button aria-label="Copiar senha"
                     type="button"
                     onClick={handleCopyPassword}
                     title="Copiar senha"
-                    className="p-1.5 hover:text-white rounded-lg hover:bg-[#2A2A2A] transition-colors cursor-pointer"
+                    className="p-1.5 hover:text-white rounded-lg hover:bg-chip transition-colors cursor-pointer"
                   >
                     {copiedPassword ? (
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -651,17 +652,17 @@ export const EmployeeModal: React.FC = () => {
                     )}
                   </button>
                 )}
-                <button
+                <button aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   title={showPassword ? 'Ocultar senha' : 'Exibir senha'}
-                  className="p-1.5 hover:text-white rounded-lg hover:bg-[#2A2A2A] transition-colors cursor-pointer"
+                  className="p-1.5 hover:text-white rounded-lg hover:bg-chip transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
               </div>
             </div>
-            <p className="mt-1.5 text-[11px] text-slate-400">
+            <p className="mt-1.5 text-xs text-slate-400">
               {formData.password
                 ? 'Esta é a senha atual de login deste membro. Você pode visualizá-la, copiá-la ou alterá-la digitando uma nova senha.'
                 : 'O colaborador já alterou a senha inicial no Supabase Auth. Digite uma nova senha caso queira redefini-la agora.'}
@@ -670,12 +671,12 @@ export const EmployeeModal: React.FC = () => {
         ) : (
           <div>
             <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5 mb-1.5">
-              <KeyRound className="w-3.5 h-3.5 text-[#E4007E]" />
+              <KeyRound className="w-3.5 h-3.5 text-brand" />
               <span>Senha de Acesso (Login)</span>
             </label>
-            <div className="p-3 rounded-lg border border-slate-700/50 bg-[#1A1A1A] flex items-center justify-between">
+            <div className="p-3 rounded-lg border border-line bg-field flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-slate-200">Senha padrão: <span className="font-mono text-[#E4007E]">123456</span></span>
+                <span className="text-sm font-medium text-slate-200">Senha padrão: <span className="font-mono text-brand">123456</span></span>
                 <span className="text-xs text-slate-400">O usuário precisará alterar a senha no primeiro acesso.</span>
               </div>
             </div>
@@ -693,7 +694,7 @@ export const EmployeeModal: React.FC = () => {
             placeholder="Ex: Designer, Video Maker, Gestor, Copywriter..."
             value={formData.role}
             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-            className="!bg-[#101010] !border-white/5 focus:!border-[#E4007E]"
+            className="!bg-canvas !border-white/5 focus:!border-brand"
           />
           <datalist id="role-suggestions">
             <option value="Designer" />
@@ -719,7 +720,7 @@ export const EmployeeModal: React.FC = () => {
             placeholder="Ex: Design, Audiovisual, Gestão, Conteúdo..."
             value={formData.department}
             onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-            className="!bg-[#101010] !border-white/5 focus:!border-[#E4007E]"
+            className="!bg-canvas !border-white/5 focus:!border-brand"
           />
           <datalist id="dept-suggestions">
             <option value="Design" />
@@ -733,10 +734,10 @@ export const EmployeeModal: React.FC = () => {
 
         <div>
           <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1.5">
-            <Palette className="w-3.5 h-3.5 text-[#E4007E]" />
+            <Palette className="w-3.5 h-3.5 text-brand" />
             Cor de Identificação (Avatar)
           </label>
-          <div className="grid grid-cols-9 gap-1.5 p-2 bg-[#101010] rounded-xl border border-white/5">
+          <div className="grid grid-cols-9 gap-1.5 p-2 bg-canvas rounded-xl border border-white/5">
             {LABEL_COLORS.map((c) => (
               <button
                 key={c.id}
@@ -760,8 +761,8 @@ export const EmployeeModal: React.FC = () => {
               variant="ghost"
               size="sm"
               disabled={isSubmitting}
-              onClick={() => {
-                if (confirm(`Tem certeza que deseja remover ${editingEmployee.name}?`)) {
+              onClick={async () => {
+                if (await confirmDialog({ message: `Tem certeza que deseja remover ${editingEmployee.name}?`, tone: 'danger' })) {
                   deleteEmployee(editingEmployee.id);
                   handleClose();
                 }
@@ -781,7 +782,7 @@ export const EmployeeModal: React.FC = () => {
               size="md"
               disabled={isSubmitting}
               onClick={handleClose}
-              className="px-4 py-2.5 hover:bg-[#101010] text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+              className="px-4 py-2.5 hover:bg-canvas text-slate-400 hover:text-white rounded-xl text-xs font-bold"
             >
               Cancelar
             </Button>
@@ -791,7 +792,7 @@ export const EmployeeModal: React.FC = () => {
               size="md"
               isLoading={isSubmitting}
               disabled={isSubmitting}
-              className="px-5 py-2.5 shadow-lg shadow-[#E4007E]/25 text-xs font-semibold"
+              className="px-5 py-2.5 shadow-lg text-xs font-semibold"
             >
               {editingEmployee ? 'Salvar Alterações' : 'Cadastrar Membro'}
             </Button>

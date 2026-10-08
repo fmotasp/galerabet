@@ -20,9 +20,10 @@ import { SpineStatusConfig } from '../../types';
 import { compressImageFile } from '../../lib/imageUtils';
 import { supabase } from '../../lib/supabase';
 import { useAccesses } from '../../hooks/useAccesses';
+import { confirmDialog, alertDialog } from '../../lib/dialogs';
 
 export const COLOR_PALETTES = [
-  { label: 'Cinza / Neutro', color: 'text-slate-600', bg: 'bg-slate-100', dotColor: '#64748B', gradient: 'from-slate-500 to-slate-700' },
+  { label: 'Cinza / Neutro', color: 'text-fg-muted', bg: 'bg-raised', dotColor: '#64748B', gradient: 'from-slate-500 to-slate-700' },
   { label: 'Índigo / Roxo Real', color: 'text-[#5D55F9]', bg: 'bg-[#ECEBFF]', dotColor: '#5D55F9', gradient: 'from-sky-400 via-blue-500 to-sky-600' },
   { label: 'Azul Celeste / Cyan', color: 'text-[#0284C7]', bg: 'bg-[#E0F2FE]', dotColor: '#0284C7', gradient: 'from-purple-500 to-indigo-600' },
   { label: 'Rosa / Urgente', color: 'text-[#E11D48]', bg: 'bg-[#FFE4E6]', dotColor: '#E11D48', gradient: 'from-rose-500 to-red-600' },
@@ -63,7 +64,7 @@ export const SettingsView: React.FC = () => {
   }, [loginArtUrl, fetchAccessCategories]);
 
   const handleFixOverdueTasks = async () => {
-    if (!window.confirm('Isto irá verificar e tentar corrigir automaticamente tarefas que desapareceram devido ao status "overdue". Deseja continuar?')) return;
+    if (!await confirmDialog({ message: 'Isto irá verificar e tentar corrigir automaticamente tarefas que desapareceram devido ao status "overdue". Deseja continuar?' })) return;
     
     setIsFixingTasks(true);
     try {
@@ -141,7 +142,7 @@ export const SettingsView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight flex items-center gap-3">
-            <span className="w-10 h-10 rounded-2xl bg-[#141414] border border-slate-800 text-[#FFB903] flex items-center justify-center font-semibold text-sm shadow-md">
+            <span className="w-10 h-10 rounded-2xl bg-surface border border-line text-gold flex items-center justify-center font-semibold text-sm shadow-md">
               <Sliders className="w-5 h-5" />
             </span>
             <span>Configurações do Sistema</span>
@@ -153,13 +154,13 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Sub Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800/80 pb-2 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-2 border-b border-line pb-2 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveSettingsTab('statuses')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
             activeSettingsTab === 'statuses'
               ? 'bg-indigo-950/80 text-indigo-300 border border-indigo-500/50 shadow-xs'
-              : 'text-slate-400 hover:text-white hover:bg-[#141414]'
+              : 'text-slate-400 hover:text-white hover:bg-surface'
           }`}
         >
           <Layers className="w-4 h-4 text-indigo-400" />
@@ -170,13 +171,13 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveSettingsTab('login_art')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
             activeSettingsTab === 'login_art'
-              ? 'bg-amber-950/80 text-[#FFB903] border border-amber-500/50 shadow-xs'
-              : 'text-slate-400 hover:text-white hover:bg-[#141414]'
+              ? 'bg-amber-950/80 text-gold border border-amber-500/50 shadow-xs'
+              : 'text-slate-400 hover:text-white hover:bg-surface'
           }`}
         >
-          <ImageIcon className="w-4 h-4 text-[#FFB903]" />
+          <ImageIcon className="w-4 h-4 text-gold" />
           <span>Arte da Tela de Login</span>
-          <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-amber-500/20 text-[#FFB903] border border-amber-500/30 font-semibold">
+          <span className="px-1.5 py-0.2 rounded-full text-[11px] bg-amber-500/20 text-gold border border-amber-500/30 font-semibold">
             NOVO
           </span>
         </button>
@@ -185,8 +186,8 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveSettingsTab('general')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
             activeSettingsTab === 'general'
-              ? 'bg-[#101010] text-sky-300 border border-sky-500/50 shadow-xs'
-              : 'text-slate-400 hover:text-white hover:bg-[#141414]'
+              ? 'bg-canvas text-sky-300 border border-sky-500/50 shadow-xs'
+              : 'text-slate-400 hover:text-white hover:bg-surface'
           }`}
         >
           <Building className="w-4 h-4 text-sky-400" />
@@ -197,8 +198,8 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveSettingsTab('notifications')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
             activeSettingsTab === 'notifications'
-              ? 'bg-[#101010] text-sky-300 border border-sky-500/50 shadow-xs'
-              : 'text-slate-400 hover:text-white hover:bg-[#141414]'
+              ? 'bg-canvas text-sky-300 border border-sky-500/50 shadow-xs'
+              : 'text-slate-400 hover:text-white hover:bg-surface'
           }`}
         >
           <Bell className="w-4 h-4 text-sky-400" />
@@ -209,8 +210,8 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveSettingsTab('access_categories')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
             activeSettingsTab === 'access_categories'
-              ? 'bg-[#101010] text-emerald-300 border border-emerald-500/50 shadow-xs'
-              : 'text-slate-400 hover:text-white hover:bg-[#141414]'
+              ? 'bg-canvas text-emerald-300 border border-emerald-500/50 shadow-xs'
+              : 'text-slate-400 hover:text-white hover:bg-surface'
           }`}
         >
           <Layers className="w-4 h-4 text-emerald-400" />
@@ -221,10 +222,10 @@ export const SettingsView: React.FC = () => {
       {/* Tab: Statuses */}
       {activeSettingsTab === 'statuses' && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="bg-[#141414] rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-6 text-white">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+          <div className="bg-surface rounded-3xl p-6 sm:p-8 border border-line shadow-xl space-y-6 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line">
               <div>
-                <h3 className="font-extrabold text-white text-lg flex items-center gap-2">
+                <h3 className="font-bold text-white text-lg flex items-center gap-2">
                   <Layers className="w-5 h-5 text-indigo-400" />
                   <span>Gerenciador de Status do Kanban</span>
                 </h3>
@@ -235,12 +236,12 @@ export const SettingsView: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => {
-                  if (window.confirm('Deseja restaurar a lista de status para a configuração padrão?')) {
+                onClick={async () => {
+                  if (await confirmDialog({ message: 'Deseja restaurar a lista de status para a configuração padrão?' })) {
                     resetSpineStatusesToDefault();
                   }
                 }}
-                className="flex items-center gap-1.5 text-xs text-slate-300 hover:text-white bg-[#101010] hover:bg-[#012247] border border-slate-700/80 font-bold px-3.5 py-2 rounded-xl transition-all self-start sm:self-auto shrink-0 cursor-pointer shadow-xs"
+                className="flex items-center gap-1.5 text-xs text-slate-300 hover:text-white bg-canvas hover:bg-raised border border-line font-bold px-3.5 py-2 rounded-xl transition-all self-start sm:self-auto shrink-0 cursor-pointer shadow-xs"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
                 <span>Restaurar Padrão</span>
@@ -248,20 +249,20 @@ export const SettingsView: React.FC = () => {
             </div>
 
             {/* Quick Add Form */}
-            <div className="bg-[#101010] border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div className="bg-canvas border border-line rounded-2xl p-5 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <span className="text-xs font-extrabold text-white flex items-center gap-1.5">
+                <span className="text-xs font-bold text-white flex items-center gap-1.5">
                   <Plus className="w-4 h-4 text-indigo-400" />
                   <span>Criar Novo Status Personalizado</span>
                 </span>
-                <span className="text-[11px] font-medium text-slate-400">
+                <span className="text-xs font-medium text-slate-400">
                   Ex: "Aguardando Briefing", "Aprovação do Cliente", etc.
                 </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                 <div className="md:col-span-6">
-                  <label className="block text-[11px] font-bold text-slate-300 mb-1.5">Nome do Status</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Nome do Status</label>
                   <input
                     type="text"
                     placeholder="Ex: Em Aprovação do Cliente"
@@ -280,20 +281,20 @@ export const SettingsView: React.FC = () => {
                         setNewStatusName('');
                       }
                     }}
-                    className="w-full px-3.5 py-2.5 bg-[#141414] border border-slate-700 rounded-xl text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-[#FFB903] transition-colors"
+                    className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-xl text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-gold transition-colors"
                   />
                 </div>
 
                 <div className="md:col-span-4">
-                  <label className="block text-[11px] font-bold text-slate-300 mb-1.5">Estilo / Cor Visual</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Estilo / Cor Visual</label>
                   <div className="relative">
                     <select
                       value={selectedPaletteIdx}
                       onChange={(e) => setSelectedPaletteIdx(Number(e.target.value))}
-                      className="w-full px-3.5 py-2.5 bg-[#141414] border border-slate-700 rounded-xl text-xs font-bold text-white focus:outline-none focus:border-[#FFB903] transition-colors cursor-pointer"
+                      className="w-full px-3.5 py-2.5 bg-surface border border-line rounded-xl text-xs font-bold text-white focus:outline-none focus:border-gold transition-colors cursor-pointer"
                     >
                       {COLOR_PALETTES.map((pal, idx) => (
-                        <option key={idx} value={idx} className="bg-[#141414] text-white">
+                        <option key={idx} value={idx} className="bg-surface text-white">
                           🎨 {pal.label}
                         </option>
                       ))}
@@ -317,7 +318,7 @@ export const SettingsView: React.FC = () => {
                       });
                       setNewStatusName('');
                     }}
-                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white rounded-xl text-xs font-extrabold transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
+                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Adicionar</span>
@@ -328,9 +329,9 @@ export const SettingsView: React.FC = () => {
               {/* Preview badge */}
               {newStatusName.trim() && (
                 <div className="pt-2 flex items-center gap-2">
-                  <span className="text-[11px] font-bold text-slate-400">Prévia:</span>
+                  <span className="text-xs font-bold text-slate-400">Prévia:</span>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-extrabold flex items-center gap-1.5 ${
+                    className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${
                       COLOR_PALETTES[selectedPaletteIdx].bg
                     } ${COLOR_PALETTES[selectedPaletteIdx].color}`}
                   >
@@ -346,12 +347,12 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* List of active statuses */}
-          <div className="bg-[#141414] rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-5 text-white">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-slate-800/60">
+          <div className="bg-surface rounded-3xl p-6 sm:p-8 border border-line shadow-xl space-y-5 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-line">
               <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
                 Status Ativos no Sistema ({spineStatuses.length})
               </h4>
-              <span className="text-[11px] text-slate-400 font-medium">
+              <span className="text-xs text-slate-400 font-medium">
                 Arraste ou use as setas para definir a ordem das colunas no Kanban
               </span>
             </div>
@@ -366,30 +367,30 @@ export const SettingsView: React.FC = () => {
                     className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl border transition-all ${
                       isEditing
                         ? 'bg-indigo-950/60 border-indigo-500 ring-2 ring-indigo-500/20'
-                        : 'bg-[#101010] hover:bg-[#012247] border-slate-800'
+                        : 'bg-canvas hover:bg-raised border-line'
                     }`}
                   >
                     {isEditing ? (
                       <div className="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
                         <div className="sm:col-span-5">
-                          <label className="block text-[10px] font-bold text-slate-400 mb-0.5">Nome</label>
+                          <label className="block text-[11px] font-bold text-slate-400 mb-0.5">Nome</label>
                           <input
                             type="text"
                             value={editingStatusLabel}
                             onChange={(e) => setEditingStatusLabel(e.target.value)}
-                            className="w-full px-3 py-1.5 bg-[#141414] border border-slate-700 rounded-lg text-xs font-bold text-white focus:outline-none focus:border-[#FFB903]"
+                            className="w-full px-3 py-1.5 bg-surface border border-line rounded-lg text-xs font-bold text-white focus:outline-none focus:border-gold"
                           />
                         </div>
 
                         <div className="sm:col-span-4">
-                          <label className="block text-[10px] font-bold text-slate-400 mb-0.5">Paleta de Cores</label>
+                          <label className="block text-[11px] font-bold text-slate-400 mb-0.5">Paleta de Cores</label>
                           <select
                             value={editingPaletteIdx}
                             onChange={(e) => setEditingPaletteIdx(Number(e.target.value))}
-                            className="w-full px-2.5 py-1.5 bg-[#141414] border border-slate-700 rounded-lg text-xs font-bold text-white focus:outline-none focus:border-[#FFB903]"
+                            className="w-full px-2.5 py-1.5 bg-surface border border-line rounded-lg text-xs font-bold text-white focus:outline-none focus:border-gold"
                           >
                             {COLOR_PALETTES.map((pal, pIdx) => (
-                              <option key={pIdx} value={pIdx} className="bg-[#141414] text-white">
+                              <option key={pIdx} value={pIdx} className="bg-surface text-white">
                                 {pal.label}
                               </option>
                             ))}
@@ -428,12 +429,12 @@ export const SettingsView: React.FC = () => {
                     ) : (
                       <>
                         <div className="flex items-center gap-3">
-                          <span className="w-6 h-6 rounded-lg bg-[#141414] border border-slate-700 text-slate-400 text-[11px] font-extrabold flex items-center justify-center shadow-xs">
+                          <span className="w-6 h-6 rounded-lg bg-surface border border-line text-slate-400 text-xs font-bold flex items-center justify-center shadow-xs">
                             {index + 1}
                           </span>
 
                           <span
-                            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-2 border border-white/5 shadow-xs ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 border border-white/5 shadow-xs ${
                               st.bg || 'bg-slate-800'
                             } ${st.color || 'text-white'}`}
                           >
@@ -445,14 +446,14 @@ export const SettingsView: React.FC = () => {
                           </span>
 
                           {st.isDefault && (
-                            <span className="text-[10px] font-bold text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700">
+                            <span className="text-[11px] font-bold text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-md border border-line">
                               Padrão
                             </span>
                           )}
                         </div>
 
                         <div className="flex items-center gap-1">
-                          <button
+                          <button aria-label="Mover para cima (ordem das colunas)"
                             type="button"
                             disabled={index === 0}
                             onClick={() => {
@@ -463,13 +464,13 @@ export const SettingsView: React.FC = () => {
                               copy[index] = temp;
                               reorderSpineStatuses(copy);
                             }}
-                            className="p-1.5 text-slate-400 hover:text-white disabled:opacity-25 rounded-lg hover:bg-[#141414] transition-colors cursor-pointer"
+                            className="p-1.5 text-slate-400 hover:text-white disabled:opacity-25 rounded-lg hover:bg-surface transition-colors cursor-pointer"
                             title="Mover para cima (ordem das colunas)"
                           >
                             <MoveUp className="w-4 h-4" />
                           </button>
 
-                          <button
+                          <button aria-label="Mover para baixo (ordem das colunas)"
                             type="button"
                             disabled={index === spineStatuses.length - 1}
                             onClick={() => {
@@ -480,13 +481,13 @@ export const SettingsView: React.FC = () => {
                               copy[index] = temp;
                               reorderSpineStatuses(copy);
                             }}
-                            className="p-1.5 text-slate-400 hover:text-white disabled:opacity-25 rounded-lg hover:bg-[#141414] transition-colors cursor-pointer"
+                            className="p-1.5 text-slate-400 hover:text-white disabled:opacity-25 rounded-lg hover:bg-surface transition-colors cursor-pointer"
                             title="Mover para baixo (ordem das colunas)"
                           >
                             <MoveDown className="w-4 h-4" />
                           </button>
 
-                          <button
+                          <button aria-label="Editar nome e cor deste status"
                             type="button"
                             onClick={() => {
                               setEditingStatusId(st.id);
@@ -496,23 +497,21 @@ export const SettingsView: React.FC = () => {
                               );
                               setEditingPaletteIdx(matchIdx >= 0 ? matchIdx : 0);
                             }}
-                            className="p-1.5 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-[#141414] transition-colors cursor-pointer"
+                            className="p-1.5 text-slate-400 hover:text-indigo-400 rounded-lg hover:bg-surface transition-colors cursor-pointer"
                             title="Editar nome e cor deste status"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
 
-                          <button
+                          <button aria-label="Excluir este status"
                             type="button"
-                            onClick={() => {
+                            onClick={async () => {
                               if (spineStatuses.length <= 1) {
-                                alert('Você precisa manter pelo menos 1 status ativo no sistema.');
+                                void alertDialog('Você precisa manter pelo menos 1 status ativo no sistema.');
                                 return;
                               }
                               if (
-                                window.confirm(
-                                  `Tem certeza de que deseja excluir o status "${st.label}"? As tarefas existentes com este status serão migradas para o Backlog.`
-                                )
+                                await confirmDialog({ message: `Tem certeza de que deseja excluir o status "${st.label}"? As tarefas existentes com este status serão migradas para o Backlog.`, tone: 'danger' })
                               ) {
                                 deleteSpineStatus(st.id, 'backlog');
                               }
@@ -536,11 +535,11 @@ export const SettingsView: React.FC = () => {
       {/* Tab: Login Art */}
       {activeSettingsTab === 'login_art' && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="bg-[#141414] rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-6 text-white">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+          <div className="bg-surface rounded-3xl p-6 sm:p-8 border border-line shadow-xl space-y-6 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line">
               <div>
-                <h3 className="font-extrabold text-white text-lg flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-[#FFB903]" />
+                <h3 className="font-bold text-white text-lg flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-gold" />
                   <span>Arte da Tela de Login</span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-1 font-medium">
@@ -557,7 +556,7 @@ export const SettingsView: React.FC = () => {
                       updateLoginArtUrl('');
                       addToast('Arte Restaurada', 'A imagem padrão do sistema foi restaurada.', 'info');
                     }}
-                    className="px-4 py-2 bg-[#101010] hover:bg-rose-950/40 text-slate-300 hover:text-rose-400 border border-slate-700/80 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    className="px-4 py-2 bg-canvas hover:bg-rose-950/40 text-slate-300 hover:text-rose-400 border border-line rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Restaurar Padrão</span>
@@ -569,7 +568,7 @@ export const SettingsView: React.FC = () => {
                     updateLoginArtUrl(tempLoginArtUrl);
                     addToast('Arte Salva!', 'A nova imagem da tela de login foi salva com sucesso.', 'success');
                   }}
-                  className="px-5 py-2 bg-gradient-to-r from-[#E4007E] to-[#E94E18] hover:opacity-95 text-white rounded-xl text-xs font-extrabold shadow-sm transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2 bg-gradient-to-r from-brand to-brand-alt hover:opacity-95 text-white rounded-xl text-xs font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
                 >
                   <Check className="w-4 h-4" />
                   <span>Salvar Imagem</span>
@@ -577,14 +576,14 @@ export const SettingsView: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-4 bg-gradient-to-r from-[#E4007E]/10 to-[#E94E18]/10 border border-[#E4007E]/30 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-pink-200">
+            <div className="p-4 bg-brand/10 border border-brand/30 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-pink-200">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#E4007E] to-[#E94E18] text-white flex items-center justify-center shrink-0 shadow-xs">
+                <div className="w-9 h-9 rounded-xl bg-brand text-white flex items-center justify-center shrink-0 shadow-xs">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
                   <h4 className="text-xs font-semibold text-white">Dimensões Recomendadas</h4>
-                  <p className="text-[11px] text-pink-200/80 font-medium">
+                  <p className="text-xs text-pink-200/80 font-medium">
                     Proporção vertical 8:9 ou resolução 1920 × 2160 px. Formatos: PNG, JPG, WebP ou SVG.
                   </p>
                 </div>
@@ -594,7 +593,7 @@ export const SettingsView: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               <div className="lg:col-span-6 space-y-5">
                 <div>
-                  <label className="block text-xs font-extrabold text-slate-200 mb-2">
+                  <label className="block text-xs font-bold text-slate-200 mb-2">
                     Enviar Arquivo de Imagem
                   </label>
                   <input
@@ -627,13 +626,13 @@ export const SettingsView: React.FC = () => {
                   />
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-slate-700 hover:border-[#E4007E] bg-[#101010]/60 hover:bg-[#101010] p-8 rounded-2xl text-center cursor-pointer transition-all group"
+                    className="border-2 border-dashed border-line hover:border-line-hover bg-canvas/60 hover:bg-canvas p-8 rounded-2xl text-center cursor-pointer transition-all group"
                   >
-                    <ImageIcon className="w-10 h-10 mx-auto text-slate-400 group-hover:text-[#E4007E] transition-colors mb-2" />
+                    <ImageIcon className="w-10 h-10 mx-auto text-slate-400 group-hover:text-brand transition-colors mb-2" />
                     <span className="text-xs font-bold text-white block">
                       {isUploadingArt ? 'Processando imagem...' : 'Clique para selecionar arquivo do computador'}
                     </span>
-                    <span className="text-[11px] text-slate-400 block mt-1">PNG, JPG, WebP ou SVG até 20MB</span>
+                    <span className="text-xs text-slate-400 block mt-1">PNG, JPG, WebP ou SVG até 20MB</span>
                   </div>
                 </div>
               </div>
@@ -641,7 +640,7 @@ export const SettingsView: React.FC = () => {
               {/* Preview Container */}
               <div className="lg:col-span-6 flex flex-col items-center">
                 <span className="text-xs font-bold text-slate-400 mb-2">Pré-visualização</span>
-                <div className="w-full max-w-sm h-64 rounded-2xl overflow-hidden border border-slate-700 bg-black flex items-center justify-center relative">
+                <div className="w-full max-w-sm h-64 rounded-2xl overflow-hidden border border-line bg-black flex items-center justify-center relative">
                   {tempLoginArtUrl ? (
                     <img src={tempLoginArtUrl} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
@@ -656,9 +655,9 @@ export const SettingsView: React.FC = () => {
 
       {/* Tab: General */}
       {activeSettingsTab === 'general' && (
-        <div className="bg-[#141414] rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-6 text-white animate-in fade-in duration-200">
-          <div className="pb-3 border-b border-slate-800">
-            <h3 className="font-extrabold text-white text-lg flex items-center gap-2">
+        <div className="bg-surface rounded-3xl p-6 sm:p-8 border border-line shadow-xl space-y-6 text-white animate-in fade-in duration-200">
+          <div className="pb-3 border-b border-line">
+            <h3 className="font-bold text-white text-lg flex items-center gap-2">
               <Building className="w-5 h-5 text-sky-400" />
               <span>Configurações do Workspace</span>
             </h3>
@@ -670,22 +669,22 @@ export const SettingsView: React.FC = () => {
               <input
                 type="text"
                 defaultValue="Organização Geral"
-                className="w-full p-3 text-xs bg-[#101010] border border-slate-700 rounded-xl font-bold text-white focus:outline-none focus:border-[#FFB903]"
+                className="w-full p-3 text-xs bg-canvas border border-line rounded-xl font-bold text-white focus:outline-none focus:border-gold"
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-1.5">Cadência de Sprints</label>
-              <select className="w-full p-3 text-xs bg-[#101010] border border-slate-700 rounded-xl font-bold text-white focus:outline-none focus:border-[#FFB903] cursor-pointer">
-                <option className="bg-[#141414] text-white">2 Semanas (Padrão)</option>
-                <option className="bg-[#141414] text-white">1 Semana (Ágil Rápido)</option>
-                <option className="bg-[#141414] text-white">1 Mês (Milestone)</option>
+              <select className="w-full p-3 text-xs bg-canvas border border-line rounded-xl font-bold text-white focus:outline-none focus:border-gold cursor-pointer">
+                <option className="bg-surface text-white">2 Semanas (Padrão)</option>
+                <option className="bg-surface text-white">1 Semana (Ágil Rápido)</option>
+                <option className="bg-surface text-white">1 Mês (Milestone)</option>
               </select>
             </div>
           </div>
 
           {isManagerOrAdmin(currentUser) && (
-            <div className="mt-8 pt-6 border-t border-slate-800">
-              <h3 className="font-extrabold text-white text-base flex items-center gap-2 mb-2">
+            <div className="mt-8 pt-6 border-t border-line">
+              <h3 className="font-bold text-white text-base flex items-center gap-2 mb-2">
                 <Wrench className="w-4 h-4 text-rose-400" />
                 <span>Manutenção e Reparos</span>
               </h3>
@@ -693,7 +692,7 @@ export const SettingsView: React.FC = () => {
                 Ferramentas avançadas para correção de inconsistências no banco de dados. Use com cuidado.
               </p>
               
-              <div className="bg-[#101010] border border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="bg-canvas border border-line rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <h4 className="text-sm font-bold text-slate-200">Reparar Tarefas Órfãs (Bug Overdue)</h4>
                   <p className="text-xs text-slate-400 mt-1">
@@ -705,7 +704,7 @@ export const SettingsView: React.FC = () => {
                   type="button"
                   onClick={handleFixOverdueTasks}
                   disabled={isFixingTasks}
-                  className="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white rounded-xl text-xs font-extrabold transition-all shadow-md flex items-center gap-2 shrink-0 cursor-pointer"
+                  className="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 shrink-0 cursor-pointer"
                 >
                   <Wrench className="w-3.5 h-3.5" />
                   <span>{isFixingTasks ? 'Reparando...' : 'Rodar Correção Automática'}</span>
@@ -718,20 +717,20 @@ export const SettingsView: React.FC = () => {
 
       {/* Tab: Notifications */}
       {activeSettingsTab === 'notifications' && (
-        <div className="bg-[#141414] rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-6 text-white animate-in fade-in duration-200">
-          <div className="pb-3 border-b border-slate-800">
-            <h3 className="font-extrabold text-white text-lg flex items-center gap-2">
+        <div className="bg-surface rounded-3xl p-6 sm:p-8 border border-line shadow-xl space-y-6 text-white animate-in fade-in duration-200">
+          <div className="pb-3 border-b border-line">
+            <h3 className="font-bold text-white text-lg flex items-center gap-2">
               <Bell className="w-5 h-5 text-sky-400" />
               <span>Regras de Webhooks & Notificações</span>
             </h3>
             <p className="text-xs text-slate-400 mt-1">Envie alertas automáticos de status para Slack & Discord.</p>
           </div>
-          <div className="p-5 bg-[#101010] rounded-2xl border border-slate-800 space-y-2.5">
+          <div className="p-5 bg-canvas rounded-2xl border border-line space-y-2.5">
             <span className="text-xs font-bold text-slate-300 block">URL de Disparo do Slack (Webhook URL)</span>
             <input
               type="text"
               placeholder="https://hooks.slack.com/services/..."
-              className="w-full p-3 text-xs bg-[#141414] border border-slate-700 rounded-xl font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#FFB903]"
+              className="w-full p-3 text-xs bg-surface border border-line rounded-xl font-mono text-white placeholder-slate-500 focus:outline-none focus:border-gold"
             />
           </div>
         </div>
@@ -740,9 +739,9 @@ export const SettingsView: React.FC = () => {
       {/* Tab: Access Categories */}
       {activeSettingsTab === 'access_categories' && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="bg-[#141414] rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-6 text-white">
-            <div className="pb-4 border-b border-slate-800/80">
-              <h3 className="font-extrabold text-white text-lg flex items-center gap-2">
+          <div className="bg-surface rounded-3xl p-6 sm:p-8 border border-line shadow-xl space-y-6 text-white">
+            <div className="pb-4 border-b border-line">
+              <h3 className="font-bold text-white text-lg flex items-center gap-2">
                 <Layers className="w-5 h-5 text-emerald-400" />
                 <span>Categorias de Acessos</span>
               </h3>
@@ -751,7 +750,7 @@ export const SettingsView: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-[#101010] border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div className="bg-canvas border border-line rounded-2xl p-5 space-y-4">
               <div className="flex items-center gap-3">
                 <input
                   type="text"
@@ -764,7 +763,7 @@ export const SettingsView: React.FC = () => {
                       setNewCategoryName('');
                     }
                   }}
-                  className="flex-1 px-4 py-2.5 bg-[#141414] border border-slate-700 rounded-xl text-sm font-bold text-white focus:outline-none focus:border-[#E4007E]/50 focus:ring-2 focus:ring-[#E4007E]/30"
+                  className="flex-1 px-4 py-2.5 bg-surface border border-line rounded-xl text-sm font-bold text-white focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30"
                 />
                 <button
                   type="button"
@@ -774,7 +773,7 @@ export const SettingsView: React.FC = () => {
                       setNewCategoryName('');
                     }
                   }}
-                  className="px-6 py-2.5 bg-[#E4007E] hover:bg-[#E94E18] text-white rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-md"
+                  className="px-6 py-2.5 bg-brand hover:bg-brand-alt text-white rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-md"
                 >
                   <Plus className="w-4 h-4" /> Adicionar
                 </button>
@@ -782,9 +781,9 @@ export const SettingsView: React.FC = () => {
 
               <div className="space-y-2 mt-4">
                 {accessCategories.map((cat, idx) => (
-                  <div key={idx} className="flex items-center justify-between bg-[#141414] p-3 rounded-xl border border-slate-700">
+                  <div key={idx} className="flex items-center justify-between bg-surface p-3 rounded-xl border border-line">
                     <span className="font-semibold text-sm">{cat}</span>
-                    <button
+                    <button aria-label="Remover Categoria"
                       onClick={() => {
                         const newArr = [...accessCategories];
                         newArr.splice(idx, 1);

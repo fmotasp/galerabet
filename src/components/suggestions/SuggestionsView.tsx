@@ -5,6 +5,7 @@ import { SystemSuggestion } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { useEmployees } from '../../context/EmployeesContext';
 import { Button, Input } from '../ui';
+import { confirmDialog } from '../../lib/dialogs';
 
 export const SuggestionsView: React.FC = () => {
   const { currentUser, addToast } = useApp();
@@ -91,7 +92,7 @@ export const SuggestionsView: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Tem certeza que deseja remover esta sugestão?')) return;
+    if (!await confirmDialog({ message: 'Tem certeza que deseja remover esta sugestão?', tone: 'danger' })) return;
     
     try {
       const { error } = await supabase
@@ -128,7 +129,7 @@ export const SuggestionsView: React.FC = () => {
       </div>
 
       {/* Form de Adicionar */}
-      <div className="bg-[#151515] border border-[#222] p-5 rounded-2xl shadow-xl mb-8">
+      <div className="bg-surface border border-[#222] p-5 rounded-2xl shadow-xl mb-8">
         <form onSubmit={handleAdd} className="flex gap-3">
           <div className="flex-1">
             <Input
@@ -136,7 +137,7 @@ export const SuggestionsView: React.FC = () => {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               disabled={isSubmitting}
-              className="bg-[#1C1C1C] border-[#262626]"
+              className="bg-raised border-line"
             />
           </div>
           <Button 
@@ -176,9 +177,9 @@ export const SuggestionsView: React.FC = () => {
                   return (
                     <div 
                       key={suggestion.id}
-                      className="flex items-center gap-4 bg-[#151515] border border-[#222] p-4 rounded-xl hover:border-amber-500/30 transition-colors group"
+                      className="flex items-center gap-4 bg-surface border border-[#222] p-4 rounded-xl hover:border-amber-500/30 transition-colors group"
                     >
-                      <button 
+                      <button aria-label="Marcar como concluída" 
                         onClick={() => handleToggle(suggestion)}
                         className="text-slate-500 hover:text-amber-500 transition-colors flex-shrink-0"
                       >
@@ -194,7 +195,7 @@ export const SuggestionsView: React.FC = () => {
                         )}
                       </div>
 
-                      <button
+                      <button aria-label="Excluir"
                         onClick={() => handleDelete(suggestion.id)}
                         className="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-2"
                         title="Excluir"
@@ -224,9 +225,9 @@ export const SuggestionsView: React.FC = () => {
                   return (
                     <div 
                       key={suggestion.id}
-                      className="flex items-center gap-4 bg-[#151515] border border-[#222] p-4 rounded-xl"
+                      className="flex items-center gap-4 bg-surface border border-[#222] p-4 rounded-xl"
                     >
-                      <button 
+                      <button aria-label="Reabrir sugestão" 
                         onClick={() => handleToggle(suggestion)}
                         className="text-emerald-500 hover:text-slate-400 transition-colors flex-shrink-0"
                       >
@@ -242,7 +243,7 @@ export const SuggestionsView: React.FC = () => {
                         )}
                       </div>
 
-                      <button
+                      <button aria-label="Excluir"
                         onClick={() => handleDelete(suggestion.id)}
                         className="text-slate-600 hover:text-red-400 transition-colors p-2"
                         title="Excluir"

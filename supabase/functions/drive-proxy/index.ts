@@ -1,11 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { SignJWT, importPKCS8 } from "https://deno.land/x/jose@v4.14.4/index.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-drive-url",
-  "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE, PATCH",
-};
+import { corsFor, requireUser } from "../_shared/auth.ts";
+
+// Só encaminha chamadas para a API do Google Drive (evita uso como proxy aberto / SSRF)
+const ALLOWED_DRIVE_PREFIXES = [
+  "https://www.googleapis.com/drive/",
+  "https://www.googleapis.com/upload/drive/",
+];
 
 let cachedToken: string | null = null;
 let tokenExp: number = 0;
@@ -50,20 +52,29 @@ async function getGoogleToken(serviceAccount: any, scopes: string[]) {
 }
 
 serve(async (req) => {
+  const corsHeaders = corsFor(req, "x-drive-url");
+
   if (req.method === 'OPTIONS') {
-    const requestedHeaders = req.headers.get('Access-Control-Request-Headers') || 'authorization, x-client-info, apikey, content-type, x-drive-url';
     return new Response('ok', { 
       headers: {
-        ...corsHeaders,
-        'Access-Control-Allow-Headers': requestedHeaders
+        ...corsHeaders
       }
     });
   }
 
   try {
+    const denied = await requireUser(req, corsHeaders);
+    if (denied) return denied;
+
     const targetUrl = req.headers.get('x-drive-url');
     if (!targetUrl) {
       throw new Error("Missing x-drive-url header");
+    }
+    if (!ALLOWED_DRIVE_PREFIXES.some((prefix) => targetUrl.startsWith(prefix))) {
+      return new Response(JSON.stringify({ error: "Destino não permitido." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const serviceAccountStr = Deno.env.get("GOOGLE_SERVICE_ACCOUNT");

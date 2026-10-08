@@ -51,7 +51,7 @@ export const Sidebar: React.FC = () => {
   };
 
   const sidebarContent = (
-    <div className="h-full flex flex-col justify-between py-6 px-3 bg-[#141414] border-r border-[#262626] w-20 items-center select-none">
+    <div className="h-full flex flex-col justify-between py-6 px-3 bg-surface border-r border-line w-20 items-center select-none">
       {/* Top Brand Logo */}
       <div className="flex flex-col items-center w-full">
         <div className="flex items-center justify-center mb-8 w-full">
@@ -71,10 +71,10 @@ export const Sidebar: React.FC = () => {
           </div>
 
           {/* Close for mobile */}
-          <button
+          <button aria-label="Fechar menu"
             id="btn-close-mobile-sidebar"
             onClick={() => setIsMobileSidebarOpen(false)}
-            className="lg:hidden absolute top-4 right-4 p-1.5 text-[#A0A0A0] hover:text-white rounded-lg hover:bg-[#262626] transition-colors duration-150"
+            className="lg:hidden absolute top-4 right-4 p-1.5 text-fg-muted hover:text-white rounded-lg hover:bg-line transition-colors duration-150"
           >
             <X className="w-5 h-5" />
           </button>
@@ -86,23 +86,23 @@ export const Sidebar: React.FC = () => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
-              <button
+              <button aria-label={item.label}
                 key={item.id}
                 id={`nav-item-${item.id}`}
                 onClick={() => handleNavClick(item.id)}
                 className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-200 group relative ${
                   isActive
-                    ? 'bg-gradient-to-r from-[#E4007E]/15 to-transparent'
-                    : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
+                    ? 'bg-gradient-to-r from-brand/15 to-transparent'
+                    : 'text-fg-muted hover:text-white hover:bg-line'
                 }`}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#E4007E] rounded-r-full shadow-[0_0_8px_#E4007E]" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand rounded-r-full shadow-[0_0_8px_#E4007E]" />
                 )}
-                <Icon className={`w-5 h-5 shrink-0 transition-colors ${isActive ? 'text-[#E4007E]' : 'text-[#A0A0A0] group-hover:text-white'}`} />
+                <Icon className={`w-5 h-5 shrink-0 transition-colors ${isActive ? 'text-brand' : 'text-fg-muted group-hover:text-white'}`} />
                 
                 {/* Custom Tooltip */}
-                <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#262626] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
+                <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-raised border border-line text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
                   {item.label}
                 </div>
               </button>
@@ -119,16 +119,16 @@ export const Sidebar: React.FC = () => {
             onClick={() => handleNavClick('settings')}
             className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-200 group relative ${
               activeTab === 'settings'
-                ? 'bg-gradient-to-r from-[#E4007E]/15 to-transparent'
-                : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
+                ? 'bg-gradient-to-r from-brand/15 to-transparent'
+                : 'text-fg-muted hover:text-white hover:bg-line'
             }`}
           >
             {activeTab === 'settings' && (
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#E4007E] rounded-r-full shadow-[0_0_8px_#E4007E]" />
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand rounded-r-full shadow-[0_0_8px_#E4007E]" />
             )}
-            <Settings className={`w-5 h-5 shrink-0 transition-colors ${activeTab === 'settings' ? 'text-[#E4007E]' : 'text-[#A0A0A0] group-hover:text-white'}`} />
+            <Settings className={`w-5 h-5 shrink-0 transition-colors ${activeTab === 'settings' ? 'text-brand' : 'text-fg-muted group-hover:text-white'}`} />
             
-            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#262626] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
+            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-raised border border-line text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
               Configurações
             </div>
           </button>
@@ -138,16 +138,16 @@ export const Sidebar: React.FC = () => {
             onClick={() => handleNavClick('logs')}
             className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-200 group relative ${
               activeTab === 'logs'
-                ? 'bg-gradient-to-r from-[#E4007E]/15 to-transparent'
-                : 'text-[#A0A0A0] hover:text-white hover:bg-[#262626]'
+                ? 'bg-gradient-to-r from-brand/15 to-transparent'
+                : 'text-fg-muted hover:text-white hover:bg-line'
             }`}
           >
             {activeTab === 'logs' && (
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#E4007E] rounded-r-full shadow-[0_0_8px_#E4007E]" />
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-brand rounded-r-full shadow-[0_0_8px_#E4007E]" />
             )}
-            <ShieldAlert className={`w-5 h-5 shrink-0 transition-colors ${activeTab === 'logs' ? 'text-[#E4007E]' : 'text-[#A0A0A0] group-hover:text-white'}`} />
+            <ShieldAlert className={`w-5 h-5 shrink-0 transition-colors ${activeTab === 'logs' ? 'text-brand' : 'text-fg-muted group-hover:text-white'}`} />
             
-            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[#1C1C1C] border border-[#262626] text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
+            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-raised border border-line text-white text-xs font-semibold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl whitespace-nowrap z-50 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none">
               Logs do Sistema
             </div>
           </button>
@@ -166,23 +166,23 @@ export const Sidebar: React.FC = () => {
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#141414] border-t border-[#262626] z-40 px-2 py-2 flex items-center justify-around pb-safe">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-line z-40 px-2 py-2 flex items-center justify-around pb-safe">
         {navItems.filter(i => ['dashboard', 'tasks', 'reports'].includes(i.id)).map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
-            <button
+            <button aria-label={item.label}
               key={item.id}
               id={`nav-item-mobile-${item.id}`}
               onClick={() => handleNavClick(item.id)}
               className={`flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200 ${
                 isActive
-                  ? 'bg-[#E4007E] text-white shadow-md shadow-[#E4007E]/20'
-                  : 'text-[#A0A0A0] hover:text-white'
+                  ? 'bg-brand text-white shadow-md'
+                  : 'text-fg-muted hover:text-white'
               }`}
             >
               <Icon className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-medium tracking-tight">
+              <span className="text-[11px] font-medium tracking-tight">
                 {item.label}
               </span>
             </button>
@@ -191,10 +191,10 @@ export const Sidebar: React.FC = () => {
         
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
-          className={`flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200 text-[#A0A0A0] hover:text-white`}
+          className={`flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all duration-200 text-fg-muted hover:text-white`}
         >
           <Menu className="w-5 h-5 mb-1" />
-          <span className="text-[10px] font-medium tracking-tight">
+          <span className="text-[11px] font-medium tracking-tight">
             Menu
           </span>
         </button>
@@ -210,11 +210,11 @@ export const Sidebar: React.FC = () => {
       
       {/* Mobile Sidebar Drawer */}
       <div 
-        className={`fixed top-0 left-0 bottom-0 w-64 bg-[#141414] border-r border-[#262626] z-[70] transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 left-0 bottom-0 w-64 bg-surface border-r border-line z-[70] transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="p-6 flex items-center justify-between border-b border-[#262626]">
+        <div className="p-6 flex items-center justify-between border-b border-line">
           <img src="/sidebar-icon.png" alt="Logo" className="w-8 h-8 object-contain" />
-          <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 text-[#A0A0A0] hover:text-white rounded-full bg-[#1C1C1C]">
+          <button aria-label="Fechar menu" onClick={() => setIsMobileSidebarOpen(false)} className="p-2 text-fg-muted hover:text-white rounded-full bg-raised">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -224,13 +224,13 @@ export const Sidebar: React.FC = () => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
-              <button
+              <button aria-label={item.label}
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                   isActive 
-                    ? 'bg-[#E4007E]/10 text-[#E4007E] font-semibold' 
-                    : 'text-[#A0A0A0] hover:bg-[#1C1C1C] hover:text-white'
+                    ? 'bg-brand/10 text-brand font-semibold' 
+                    : 'text-fg-muted hover:bg-raised hover:text-white'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -244,8 +244,8 @@ export const Sidebar: React.FC = () => {
               onClick={() => handleNavClick('settings')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all mt-4 ${
                 activeTab === 'settings' 
-                  ? 'bg-[#E4007E]/10 text-[#E4007E] font-semibold' 
-                  : 'text-[#A0A0A0] hover:bg-[#1C1C1C] hover:text-white'
+                  ? 'bg-brand/10 text-brand font-semibold' 
+                  : 'text-fg-muted hover:bg-raised hover:text-white'
               }`}
             >
               <Settings className="w-5 h-5" />

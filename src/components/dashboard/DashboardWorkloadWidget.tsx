@@ -15,13 +15,13 @@ export const DashboardWorkloadWidget: React.FC<DashboardWorkloadWidgetProps> = R
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
-      <div className="bg-[#141414] rounded-2xl p-6 shadow-lg space-y-4">
+      <div className="bg-surface rounded-2xl p-6 shadow-lg space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-bold text-white text-xl tracking-tight flex items-center gap-1.5">
               Carga de Trabalho da Equipe
               <span 
-                className="ml-1 flex items-center justify-center w-4 h-4 rounded-full bg-white/10 text-slate-300 text-[10px] cursor-help font-normal tracking-normal"
+                className="ml-1 flex items-center justify-center w-4 h-4 rounded-full bg-white/10 text-slate-300 text-[11px] cursor-help font-normal tracking-normal"
                 title="A capacidade ideal padrão é de 3 demandas ativas (em progresso ou aprovação) por pessoa. A sugestão de distribuição prioriza criativos com capacidade ociosa."
               >
                 ?
@@ -32,7 +32,7 @@ export const DashboardWorkloadWidget: React.FC<DashboardWorkloadWidgetProps> = R
             </p>
           </div>
           {totalBacklogCount > 0 && (
-            <span className="text-xs font-semibold bg-[#E4007E]/10 border border-[#E4007E]/30 text-[#E4007E] px-2.5 py-1 rounded-full animate-pulse shrink-0">
+            <span className="text-xs font-semibold bg-brand/10 border border-brand/30 text-brand px-2.5 py-1 rounded-full animate-pulse shrink-0">
               {totalBacklogCount} no Backlog
             </span>
           )}
@@ -56,7 +56,7 @@ export const DashboardWorkloadWidget: React.FC<DashboardWorkloadWidgetProps> = R
                     key={emp.id}
                     id={`workload-member-${emp.id}`}
                     onClick={() => onSelectEmployee(emp)}
-                    className="group cursor-pointer p-4 rounded-xl bg-[#101010]/60 hover:bg-[#161616] border border-white/5 hover:border-[#E4007E]/30 transition-all shadow-xs flex flex-col justify-between"
+                    className="group cursor-pointer p-4 rounded-xl bg-canvas/60 hover:bg-surface border border-white/5 hover:border-line-hover transition-all shadow-xs flex flex-col justify-between"
                   >
                     <div className="flex items-center justify-between mb-2 gap-2">
                       {/* Member Info */}
@@ -66,10 +66,10 @@ export const DashboardWorkloadWidget: React.FC<DashboardWorkloadWidgetProps> = R
                           name={emp.name}
                           alt={emp.name}
                           size="md"
-                          className="!w-9 !h-9 ring-1 ring-[#E4007E]/40 shrink-0 [&>div]:bg-[#101010] [&>div]:border [&>div]:border-[#E4007E]/40 [&>div]:text-[#E4007E] [&>div]:font-bold [&>div]:text-xs shadow-xs"
+                          className="!w-9 !h-9 ring-1 ring-brand/40 shrink-0 [&>div]:bg-canvas [&>div]:border [&>div]:border-brand/40 [&>div]:text-brand [&>div]:font-bold [&>div]:text-xs shadow-xs"
                         />
                         <div className="min-w-0">
-                          <div className="font-bold text-white text-sm group-hover:text-[#E4007E] transition-colors truncate">
+                          <div className="font-bold text-white text-sm group-hover:text-brand transition-colors truncate">
                             {emp.name}
                           </div>
                           <div className="text-xs text-slate-400 font-medium">
@@ -81,13 +81,13 @@ export const DashboardWorkloadWidget: React.FC<DashboardWorkloadWidgetProps> = R
                       {/* Demands Count Badge */}
                       <div className="flex items-center gap-1.5 shrink-0">
                         <span
-                          className="text-xs bg-[#101010] border border-white/5 text-slate-200 font-bold px-2 py-0.5 rounded-lg"
+                          className="text-xs bg-canvas border border-white/5 text-slate-200 font-bold px-2 py-0.5 rounded-lg"
                           title="Total de demandas atribuídas"
                         >
-                          <strong className="text-[#E4007E]">{totalDemands}</strong> total
+                          <strong className="text-brand">{totalDemands}</strong> total
                         </span>
                         <span
-                          className="text-xs bg-[#2A2A2A] border border-[#383838] text-pink-300 font-bold px-2 py-0.5 rounded-lg"
+                          className="text-xs bg-chip border border-line-hover text-pink-300 font-bold px-2 py-0.5 rounded-lg"
                           title="Demandas ativas em produção"
                         >
                           {activeDemands} ativas
@@ -117,15 +117,15 @@ export const DashboardWorkloadWidget: React.FC<DashboardWorkloadWidgetProps> = R
                     </div>
 
                     {/* Capacity Progress Bar */}
-                    <div className="w-full h-1.5 bg-[#101010] rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-canvas rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${
                           percentUsed >= 100
                             ? 'bg-rose-500'
                             : percentUsed >= 75
-                            ? 'bg-[#E94E18]'
+                            ? 'bg-brand-alt'
                             : percentUsed >= 50
-                            ? 'bg-[#E4007E]'
+                            ? 'bg-brand'
                             : 'bg-emerald-500'
                         }`}
                         style={{
@@ -149,7 +149,7 @@ export const DashboardWorkloadWidget: React.FC<DashboardWorkloadWidgetProps> = R
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full py-2.5 text-center text-xs font-bold text-[#E4007E] hover:text-pink-400 transition-colors flex items-center justify-center gap-1 cursor-pointer pt-3 border-t border-[#262626] mt-4"
+            className="w-full py-2.5 text-center text-xs font-bold text-brand hover:text-pink-400 transition-colors flex items-center justify-center gap-1 cursor-pointer pt-3 border-t border-line mt-4"
           >
             <span>
               {isExpanded

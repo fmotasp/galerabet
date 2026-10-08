@@ -165,13 +165,13 @@ export const EmployeeDetailModal: React.FC = () => {
       {/* Modal Card */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative bg-[#141414] rounded-3xl shadow-2xl border border-[#262626] max-w-3xl w-full p-6 sm:p-8 z-10 animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto space-y-6 text-white"
+        className="relative bg-surface rounded-3xl shadow-2xl border border-line max-w-3xl w-full p-6 sm:p-8 z-10 animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto space-y-6 text-white"
       >
         {/* Glow de fundo */}
-        <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#E4007E]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-20 -right-20 w-64 h-64 bg-brand/15 rounded-full blur-3xl pointer-events-none" />
 
         {/* 1. Header do Perfil */}
-        <div className="flex items-start justify-between pb-6 border-b border-[#282828] relative z-10">
+        <div className="flex items-start justify-between pb-6 border-b border-chip relative z-10">
           <div className="flex items-center gap-4">
             <Avatar
               src={emp.avatarUrl}
@@ -180,7 +180,7 @@ export const EmployeeDetailModal: React.FC = () => {
               size="xl"
               ring
               status={emp.status === 'online' ? 'online' : emp.status === 'busy' ? 'busy' : 'offline'}
-              className="!w-20 !h-20 rounded-2xl shadow-lg [&>img]:rounded-2xl [&>div]:rounded-2xl [&>div]:text-2xl [&>div]:bg-gradient-to-tr [&>div]:from-[#222222] [&>div]:to-[#121212] [&>div]:border-2 [&>div]:border-[#E4007E]/50 [&>div]:text-[#E4007E]"
+              className="!w-20 !h-20 rounded-2xl shadow-lg [&>img]:rounded-2xl [&>div]:rounded-2xl [&>div]:text-2xl [&>div]:bg-gradient-to-tr [&>div]:from-raised [&>div]:to-canvas [&>div]:border-2 [&>div]:border-brand/50 [&>div]:text-brand"
             />
 
             <div>
@@ -197,13 +197,13 @@ export const EmployeeDetailModal: React.FC = () => {
               </p>
 
               <div className="flex items-center gap-3 text-xs text-slate-400 mt-2 flex-wrap">
-                <span className="flex items-center gap-1.5 bg-[#121212] px-2.5 py-1 rounded-lg border border-[#282828]">
-                  <Mail className="w-3.5 h-3.5 text-[#E4007E]" />
+                <span className="flex items-center gap-1.5 bg-canvas px-2.5 py-1 rounded-lg border border-chip">
+                  <Mail className="w-3.5 h-3.5 text-brand" />
                   {emp.email}
                 </span>
                 {emp.location && (
-                  <span className="flex items-center gap-1.5 bg-[#121212] px-2.5 py-1 rounded-lg border border-[#282828]">
-                    <MapPin className="w-3.5 h-3.5 text-[#E94E18]" />
+                  <span className="flex items-center gap-1.5 bg-canvas px-2.5 py-1 rounded-lg border border-chip">
+                    <MapPin className="w-3.5 h-3.5 text-brand-alt" />
                     {emp.location}
                   </span>
                 )}
@@ -238,32 +238,32 @@ export const EmployeeDetailModal: React.FC = () => {
 
         {/* 2. Métricas & Desempenho */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10">
-          <div className="bg-[#121212] border border-[#282828] rounded-2xl p-3.5 text-center">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">
+          <div className="bg-canvas border border-chip rounded-2xl p-3.5 text-center">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">
               Total Atribuídas
             </span>
             <span className="text-2xl font-semibold text-white">{totalCount}</span>
           </div>
 
-          <div className="bg-[#121212] border border-[#282828] rounded-2xl p-3.5 text-center">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 block mb-1">
+          <div className="bg-canvas border border-chip rounded-2xl p-3.5 text-center">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 block mb-1">
               Concluídas / Postar
             </span>
             <span className="text-2xl font-semibold text-emerald-400">{doneCount}</span>
           </div>
 
-          <div className="bg-[#121212] border border-[#282828] rounded-2xl p-3.5 text-center">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#E4007E] block mb-1">
+          <div className="bg-canvas border border-chip rounded-2xl p-3.5 text-center">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-brand block mb-1">
               Em Produção
             </span>
-            <span className="text-2xl font-semibold text-[#E4007E]">{doingCount}</span>
+            <span className="text-2xl font-semibold text-brand">{doingCount}</span>
           </div>
 
-          <div className="bg-[#121212] border border-[#282828] rounded-2xl p-3.5 text-center">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#FFB903] block mb-1">
+          <div className="bg-canvas border border-chip rounded-2xl p-3.5 text-center">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-gold block mb-1">
               Taxa de Eficiência
             </span>
-            <span className="text-2xl font-semibold text-[#FFB903]">{rate}%</span>
+            <span className="text-2xl font-semibold text-gold">{rate}%</span>
           </div>
         </div>
 
@@ -271,7 +271,7 @@ export const EmployeeDetailModal: React.FC = () => {
         <div className="space-y-4 relative z-10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#E4007E]" />
+              <Layers className="w-4 h-4 text-brand" />
               <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
                 Demandas do Colaborador ({displayedTasks.length})
               </h3>
@@ -292,13 +292,13 @@ export const EmployeeDetailModal: React.FC = () => {
           </div>
 
           {/* Filtro de Abas por Status */}
-          <div className="flex items-center gap-1 bg-[#121212] p-1 rounded-xl border border-white/5 overflow-x-auto">
+          <div className="flex items-center gap-1 bg-canvas p-1 rounded-xl border border-white/5 overflow-x-auto">
             <button
               type="button"
               onClick={() => setActiveTab('all')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'all'
-                  ? 'bg-[#282828] text-white shadow-xs font-semibold'
+                  ? 'bg-chip text-white shadow-xs font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -309,7 +309,7 @@ export const EmployeeDetailModal: React.FC = () => {
               onClick={() => setActiveTab('doing')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'doing'
-                  ? 'bg-[#E4007E]/20 text-[#E4007E] border border-[#E4007E]/40 font-semibold'
+                  ? 'bg-brand/20 text-brand border border-brand/40 font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -331,7 +331,7 @@ export const EmployeeDetailModal: React.FC = () => {
               onClick={() => setActiveTab('backlog')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'backlog'
-                  ? 'bg-slate-800 text-slate-200 border border-slate-700 font-semibold'
+                  ? 'bg-slate-800 text-slate-200 border border-line font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -353,8 +353,8 @@ export const EmployeeDetailModal: React.FC = () => {
           {/* Lista de Cards de Tarefas */}
           <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
             {displayedTasks.length === 0 ? (
-              <div className="py-10 text-center text-xs text-slate-500 bg-[#141414] border border-[#262626] rounded-2xl flex flex-col items-center gap-2">
-                <Folder className="w-8 h-8 text-slate-600" />
+              <div className="py-10 text-center text-xs text-slate-500 bg-surface border border-line rounded-2xl flex flex-col items-center gap-2">
+                <Folder className="w-8 h-8 text-fg-muted" />
                 <span>Nenhuma demanda encontrada nesta categoria.</span>
               </div>
             ) : (
@@ -368,7 +368,7 @@ export const EmployeeDetailModal: React.FC = () => {
                       setSelectedEmployeeForDetail(null);
                       setEditingTask(t);
                     }}
-                    className="p-3.5 bg-[#141414] border border-[#282828] hover:border-[#3E3E3E] hover:bg-[#1E1E1E] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs cursor-pointer group transition-all"
+                    className="p-3.5 bg-surface border border-chip hover:border-[#3E3E3E] hover:bg-raised rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs cursor-pointer group transition-all"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <span
@@ -378,7 +378,7 @@ export const EmployeeDetailModal: React.FC = () => {
                             : isTaskOverdue(t)
                             ? 'bg-rose-500'
                             : t.status === 'in_progress'
-                            ? 'bg-[#E4007E]'
+                            ? 'bg-brand'
                             : 'bg-slate-500'
                         }`}
                       />
@@ -386,7 +386,7 @@ export const EmployeeDetailModal: React.FC = () => {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4
-                            className={`font-semibold text-sm text-white group-hover:text-[#E4007E] transition-colors truncate max-w-[280px] sm:max-w-[340px] ${
+                            className={`font-semibold text-sm text-white group-hover:text-brand transition-colors truncate max-w-[280px] sm:max-w-[340px] ${
                               isDone ? 'line-through text-slate-400' : ''
                             }`}
                           >
@@ -400,7 +400,7 @@ export const EmployeeDetailModal: React.FC = () => {
                             const style = getLabelColorHex(firstLabel.name, firstLabel.color);
                             return (
                               <span
-                                className="text-[10px] px-2 py-0.2 rounded-md font-semibold uppercase shadow-2xs border"
+                                className="text-[11px] px-2 py-0.2 rounded-md font-semibold uppercase shadow-2xs border"
                                 style={{
                                   backgroundColor: style.bg,
                                   color: style.text,
@@ -414,20 +414,20 @@ export const EmployeeDetailModal: React.FC = () => {
                         </div>
 
                         {/* Metadados: Anexos e Comentários */}
-                        <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1">
+                        <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
                           {t.projectName && (
                             <span className="font-semibold text-slate-300 truncate max-w-[120px]">
                               {t.projectName}
                             </span>
                           )}
                           {(t.commentsCount || (t.comments && t.comments.length)) ? (
-                            <span className="flex items-center gap-1 text-[#E4007E] font-bold">
+                            <span className="flex items-center gap-1 text-brand font-bold">
                               <MessageSquare className="w-3 h-3" />
                               <span>{t.commentsCount || t.comments?.length}</span>
                             </span>
                           ) : null}
                           {(t.attachmentsCount || (t.attachments && t.attachments.length)) ? (
-                            <span className="flex items-center gap-1 text-[#E4007E] font-bold">
+                            <span className="flex items-center gap-1 text-brand font-bold">
                               <Paperclip className="w-3 h-3" />
                               <span>{t.attachmentsCount || t.attachments?.length}</span>
                             </span>
@@ -438,7 +438,7 @@ export const EmployeeDetailModal: React.FC = () => {
 
                     {/* Lado Direito: Status e Prazo */}
                     <div className="flex items-center gap-3 self-end sm:self-auto shrink-0">
-                      <span className="text-[11px] text-slate-300 font-bold">
+                      <span className="text-xs text-slate-300 font-bold">
                         {t.dueDate && t.dueDate !== 'Sem prazo' ? t.dueDate : 'Sem prazo'}
                       </span>
                       {renderStatusBadge(t)}

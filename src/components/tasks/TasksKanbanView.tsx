@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   CheckSquare,
   MessageSquare,
@@ -61,6 +61,28 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverColumnId, setDragOverColumnId] = useState<string | null>(null);
 
+  // Região aria-live: leitores de tela anunciam o resultado de movimentos feitos pelo teclado
+  const [liveMessage, setLiveMessage] = useState('');
+  const announce = (message: string) => {
+    setLiveMessage('');
+    setTimeout(() => setLiveMessage(message), 50);
+  };
+
+  // Celular: uma coluna por vez, escolhida por abas (o quadro largo não cabe em 375 px)
+  const [mobileColumnId, setMobileColumnId] = useState<string | null>(null);
+  const columnsWithTasks = columns
+    .map((col) => ({ col, count: filteredTasks.filter((t) => t.status === col.id).length }))
+    .filter((c) => c.count > 0);
+  const activeMobileId = columnsWithTasks.find((c) => c.col.id === mobileColumnId)?.col.id ?? columnsWithTasks[0]?.col.id;
+
+  // "Concluir Tudo" move muitas tarefas de uma vez: exige um segundo clique e se cancela sozinho
+  const [isConfirmingCompleteAll, setIsConfirmingCompleteAll] = useState(false);
+  useEffect(() => {
+    if (!isConfirmingCompleteAll) return;
+    const timer = setTimeout(() => setIsConfirmingCompleteAll(false), 5000);
+    return () => clearTimeout(timer);
+  }, [isConfirmingCompleteAll]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!kanbanRef.current) return;
     // Only initiate canvas drag if clicking background (not buttons/inputs/cards click)
@@ -88,6 +110,24 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
   };
 
   return (
+    <>
+    <div aria-live="polite" role="status" className="sr-only">{liveMessage}</div>
+    <div role="tablist" aria-label="Colunas do quadro" className="sm:hidden flex gap-2 overflow-x-auto no-scrollbar pb-2 shrink-0">
+      {columnsWithTasks.map(({ col, count }) => (
+        <button
+          key={col.id}
+          type="button"
+          role="tab"
+          aria-selected={col.id === activeMobileId}
+          onClick={() => setMobileColumnId(col.id)}
+          className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors cursor-pointer ${
+            col.id === activeMobileId ? 'bg-brand text-white border-brand' : 'bg-surface text-fg-muted border-line'
+          }`}
+        >
+          {col.label} <span className="opacity-80">{count}</span>
+        </button>
+      ))}
+    </div>
     <div
       ref={kanbanRef}
       onMouseDown={handleMouseDown}
@@ -115,7 +155,7 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
                 }
               }}
               onClick={() => setIsNewTaskModalOpen(true)}
-              className="w-12 shrink-0 min-w-[48px] rounded-2xl bg-[#161616] hover:bg-[#1C1C1C] h-[240px] flex flex-col items-center justify-center transition-all duration-300 cursor-pointer border border-[#262626] mt-0"
+              className="hidden sm:flex w-12 shrink-0 min-w-[48px] rounded-2xl bg-surface hover:bg-raised h-[240px] flex-col items-center justify-center transition-all duration-300 cursor-pointer border border-line mt-0"
               title={`Adicionar tarefa em ${col.label}`}
             >
               <div
@@ -154,9 +194,9 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
               }
               setDraggedTaskId(null);
             }}
-            className={`w-80 shrink-0 min-w-[320px] rounded-2xl p-4 h-full flex flex-col transition-all duration-300 ease-in-out ${
+            className={`${col.id === activeMobileId ? 'flex' : 'hidden sm:flex'} w-full sm:w-80 shrink-0 sm:min-w-[320px] rounded-2xl p-4 h-full flex-col transition-all duration-300 ease-in-out ${
               dragOverColumnId === col.id
-                ? 'bg-[#161616] ring-1 ring-[#E4007E] scale-[1.01]'
+                ? 'bg-surface ring-1 ring-brand scale-[1.01]'
                 : 'bg-transparent'
             }`}
           >
@@ -164,28 +204,54 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
               {/* Column Header */}
               <div className="flex items-center justify-between mb-4 px-1 pt-1 shrink-0">
                 <div className="flex items-center gap-2.5">
-                  <span className={`text-sm font-extrabold ${col.color}`}>{col.label}</span>
-                  <span className="text-xs font-extrabold bg-[#262626] text-white px-2.5 py-0.5 rounded-full border border-[#333333]">
+                  <span className={`text-sm font-bold ${col.color}`}>{col.label}</span>
+                  <span className="text-xs font-bold bg-line text-white px-2.5 py-0.5 rounded-full border border-line-hover">
                     {columnTasks.length}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
                   {col.id === 'backlog' && columnTasks.length > 0 && (
-                    <button
-                      onClick={moveAllBacklogToDoneLocally}
-                      className="flex items-center gap-1 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/60 px-2 py-1 rounded-xl transition-all"
-                      title="Mover todas as tarefas do Backlog para Concluídas"
-                    >
-                      <CheckCheck className="w-3.5 h-3.5" />
-                      <span>Concluir Tudo</span>
-                    </button>
+                    isConfirmingCompleteAll ? (
+                      <div className="flex items-center gap-1" role="alertdialog" aria-label="Confirmar conclusão de todas as tarefas do Backlog">
+                        <button
+                          type="button"
+                          autoFocus
+                          onClick={() => {
+                            setIsConfirmingCompleteAll(false);
+                            moveAllBacklogToDoneLocally();
+                          }}
+                          className="flex items-center gap-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 px-2 py-1 rounded-xl transition-all focus-visible:outline-2 focus-visible:outline-brand"
+                        >
+                          <CheckCheck className="w-3.5 h-3.5" aria-hidden="true" />
+                          <span>Concluir {columnTasks.length} {columnTasks.length === 1 ? 'tarefa' : 'tarefas'}?</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsConfirmingCompleteAll(false)}
+                          className="text-xs font-bold text-fg-muted hover:text-white px-2 py-1 rounded-xl transition-colors focus-visible:outline-2 focus-visible:outline-brand"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsConfirmingCompleteAll(true)}
+                        className="flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/60 px-2 py-1 rounded-xl transition-all focus-visible:outline-2 focus-visible:outline-brand"
+                        title="Mover todas as tarefas do Backlog para Concluídas"
+                      >
+                        <CheckCheck className="w-3.5 h-3.5" aria-hidden="true" />
+                        <span>Concluir Tudo</span>
+                      </button>
+                    )
                   )}
                   <button
                     onClick={() => setIsNewTaskModalOpen(true)}
-                    className="text-[#A0A0A0] hover:text-white p-1.5 rounded-xl hover:bg-[#262626] transition-colors"
+                    className="text-fg-muted hover:text-white p-1.5 rounded-xl hover:bg-line transition-colors focus-visible:outline-2 focus-visible:outline-brand"
                     title="Adicionar tarefa nesta coluna"
+                    aria-label="Adicionar tarefa nesta coluna"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -194,18 +260,18 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
               <div className="space-y-3 flex-1 overflow-y-auto no-scrollbar pr-0.5 min-h-[100px] pb-1">
                 {isLoadingTasks ? (
                   Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="w-full h-[160px] bg-[#161616] rounded-xl animate-pulse border border-[#262626] overflow-hidden flex flex-col">
-                      <div className="w-full h-7 bg-[#1C1C1C]" />
+                    <div key={i} className="w-full h-[160px] bg-surface rounded-xl animate-pulse border border-line overflow-hidden flex flex-col">
+                      <div className="w-full h-7 bg-raised" />
                       <div className="p-4 flex-1 flex flex-col gap-3">
-                        <div className="w-1/3 h-5 bg-[#262626] rounded-full" />
-                        <div className="w-3/4 h-3.5 bg-[#262626] rounded" />
-                        <div className="w-1/2 h-3.5 bg-[#262626] rounded" />
+                        <div className="w-1/3 h-5 bg-line rounded-full" />
+                        <div className="w-3/4 h-3.5 bg-line rounded" />
+                        <div className="w-1/2 h-3.5 bg-line rounded" />
                         <div className="mt-auto flex justify-between items-center pt-2">
                           <div className="flex gap-1.5">
-                            <div className="w-5 h-5 bg-[#262626] rounded-full" />
-                            <div className="w-5 h-5 bg-[#262626] rounded-full" />
+                            <div className="w-5 h-5 bg-line rounded-full" />
+                            <div className="w-5 h-5 bg-line rounded-full" />
                           </div>
-                          <div className="w-12 h-3 bg-[#262626] rounded" />
+                          <div className="w-12 h-3 bg-line rounded" />
                         </div>
                       </div>
                     </div>
@@ -231,6 +297,15 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
                       setDragOverColumnId(null);
                     }}
                     onClick={() => setEditingTask(task)}
+                    onKeyboardMove={(direction) => {
+                      // Alt + ←/→ com o card focado: mesma ação do arrastar, para quem usa teclado
+                      const target = columns[columns.findIndex((c) => c.id === col.id) + direction];
+                      if (!target) return;
+                      moveTaskStatus(task.id, target.id as TaskStatus);
+                      announce(`Tarefa ${task.title} movida para ${target.label}`);
+                      // O card é remontado na nova coluna: devolve o foco a ele
+                      setTimeout(() => document.querySelector<HTMLElement>(`[data-task-id="${task.id}"]`)?.focus(), 150);
+                    }}
                     onClone={(clonedTask) => setEditingTask(clonedTask)}
                     updateTask={updateTask}
                     addTask={addTask}
@@ -238,17 +313,10 @@ export const TasksKanbanView: React.FC<TasksKanbanViewProps> = React.memo(({
                 )))}
               </div>
             </div>
-
-            <button
-              onClick={() => setIsNewTaskModalOpen(true)}
-              className="w-full mt-4 py-2.5 bg-[#101010] hover:bg-[#282828] text-[#A0A0A0] hover:text-white border border-[#262626] rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Adicionar Cartão</span>
-            </button>
           </div>
         );
       })}
     </div>
+    </>
   );
 });
