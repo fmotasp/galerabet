@@ -84,11 +84,12 @@ export const ProjectsProvider: React.FC<{
   const mapRowToProject = (row: any): Project => {
     const { cleanDescription, brandMeta } = decodeProjectDescription(row.description);
     const safeParse = (val: any, fallback: any) => {
-      if (Array.isArray(val)) return val;
-      if (typeof val === 'string') {
-        try { return JSON.parse(val); } catch { return fallback; }
+      let parsed = fallback;
+      if (Array.isArray(val)) parsed = val;
+      else if (typeof val === 'string') {
+        try { parsed = JSON.parse(val); } catch { parsed = fallback; }
       }
-      return fallback;
+      return (Array.isArray(parsed) && parsed.length > 0) ? parsed : fallback;
     };
 
     return {
@@ -387,6 +388,7 @@ export const ProjectsProvider: React.FC<{
       if (upsertErr) {
         // Fallback apenas com colunas padrão do schema para não dar 400 Bad Request
         const { error: fallbackErr } = await supabase.from('projects').upsert(payload);
+        if (fallbackErr) console.error('[CRITICAL] fallbackErr:', fallbackErr);
         if (fallbackErr) {
           console.warn('[Supabase] Falha no fallback de update do projeto:', fallbackErr.message);
         }
