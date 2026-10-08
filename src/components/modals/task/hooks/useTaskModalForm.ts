@@ -528,8 +528,50 @@ export const useTaskModalForm = ({
       });
     }
 
+    // 4. Ensure there is ALWAYS a 'created' entry in the timeline
+    const hasCreatedAction = list.some((l) => l.type === 'created');
+    if (!hasCreatedAction) {
+      // Find the creator in activityLog, or fall back to author / assignee
+      const createdLog = editingTask.activityLog?.find(
+        (a) => a.type === 'created' || (a.description && a.description.toLowerCase().includes('criada'))
+      );
+      
+      const creationDate = editingTask.createdAt || editingTask.created_at;
+      const cTs = safeParseTimestamp(creationDate, Date.now());
+
+      let creatorName = createdLog?.user;
+      let creatorInitials = createdLog?.userInitials;
+      let creatorAvatar = createdLog?.avatarUrl;
+
+      if (!creatorName || creatorName === 'Membro' || creatorName === 'Equipe') {
+        // Tenta achar o colaborador no array de membros ou employees
+        const firstMember = editingTask.members && editingTask.members.length > 0 ? editingTask.members[0] : null;
+        creatorName = firstMember?.name || editingTask.assigneeName || 'Membro';
+        creatorInitials = firstMember?.initials || editingTask.assigneeInitials || 'MB';
+        creatorAvatar = firstMember?.avatarUrl;
+      }
+
+      const matchedEmp = employees.find((e) => e.name.toLowerCase().trim() === (creatorName || '').toLowerCase().trim());
+      if (matchedEmp) {
+        creatorInitials = matchedEmp.initials;
+        creatorAvatar = matchedEmp.avatarUrl || creatorAvatar;
+      }
+
+      list.push({
+        id: `created-${editingTask.id}`,
+        type: 'created',
+        user: creatorName || 'Membro',
+        userInitials: creatorInitials || 'MB',
+        avatarUrl: creatorAvatar,
+        title: 'Demanda criada',
+        details: 'Criada no quadro',
+        date: safeFormatISO(cTs),
+        rawTimestamp: cTs,
+      });
+    }
+
     return list.sort((a, b) => b.rawTimestamp - a.rawTimestamp);
-  }, [editingTask, comments, attachments]);
+  }, [editingTask, comments, attachments, employees]);
 
   const prevIsOpenRef = useRef(false);
   const prevEditingTaskIdRef = useRef<string | null>(null);

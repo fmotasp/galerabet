@@ -125,19 +125,14 @@ export const getActiveWorkloadCount = (emp: Employee, filteredTasks: Task[]): nu
     const empFullName = emp.name.toLowerCase().trim();
     const isAssigned =
       (t.assigneeId && t.assigneeId === emp.id) ||
-      (t.assigneeName && t.assigneeName.toLowerCase().trim() === empFullName) ||
-      (t.members && t.members.some((m) => m && (m.id === emp.id || (m.name && m.name.toLowerCase().trim() === empFullName))));
+      (t.assigneeName && (t.assigneeName.toLowerCase().trim() === empFullName || empFullName.includes(t.assigneeName.toLowerCase().trim()))) ||
+      (t.members && t.members.some((m) => m && (m.id === emp.id || (m.name && (m.name.toLowerCase().trim() === empFullName || empFullName.includes(m.name.toLowerCase().trim()))))));
 
     if (!isAssigned) return false;
 
-    const isStatusActive =
-      s === 'in_progress' ||
-      s === 'backlog' ||
-      s.includes('doing') ||
-      s.includes('andamento') ||
-      s.includes('progress');
-
-    return isStatusActive;
+    // Se a tarefa não foi excluída nas regras acima (não está em aprovação, concluída, etc.),
+    // ela é considerada ativa no pipeline de produção do membro.
+    return true;
   }).length;
 };
 
@@ -194,8 +189,8 @@ export const computeWorkloadMembers = (
       const allEmpTasks = filteredTasks.filter((t) => {
         const isAssigned =
           (t.assigneeId && (t.assigneeId === emp.id || t.assigneeId.toLowerCase().trim() === empId)) ||
-          (t.assigneeName && t.assigneeName.toLowerCase().trim() === empFullName) ||
-          (t.members && t.members.some((m) => m && (m.id === emp.id || (m.name && m.name.toLowerCase().trim() === empFullName))));
+          (t.assigneeName && (t.assigneeName.toLowerCase().trim() === empFullName || empFullName.includes(t.assigneeName.toLowerCase().trim()))) ||
+          (t.members && t.members.some((m) => m && (m.id === emp.id || (m.name && (m.name.toLowerCase().trim() === empFullName || empFullName.includes(m.name.toLowerCase().trim()))))));
         return Boolean(isAssigned);
       });
 
