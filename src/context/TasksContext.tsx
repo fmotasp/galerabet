@@ -77,10 +77,17 @@ export const TasksProvider: React.FC<{
         }
       } catch (err) {}
     }
+    const matchedEmp = employees.find(
+      (e) =>
+        (actor?.id && e.id === actor.id) ||
+        (actor?.email && e.email?.toLowerCase() === actor.email.toLowerCase()) ||
+        (actor?.name && e.name.toLowerCase() === actor.name.toLowerCase())
+    );
     return {
-      name: actor?.name || 'Membro',
-      initials: actor?.initials || 'MB',
-      avatarUrl: actor?.avatarUrl,
+      id: matchedEmp?.id || actor?.id || 'unassigned',
+      name: matchedEmp?.name || actor?.name || 'Membro',
+      initials: matchedEmp?.initials || actor?.initials || 'MB',
+      avatarUrl: matchedEmp?.avatarUrl || actor?.avatarUrl,
     };
   };
 
@@ -279,23 +286,19 @@ export const TasksProvider: React.FC<{
       },
     ] : [];
 
-    // Adiciona os gestores padrão na lista de membros da nova tarefa
-    const defaultManagerNames = ['giovanni', 'fernanda', 'guilherme gonçalves', 'fabio mozart'];
-    const existingMemberIds = new Set((newTaskData.members || []).map(m => m.id));
     let updatedMembers = [...(newTaskData.members || [])];
+    const existingMemberIds = new Set(updatedMembers.map(m => m.id));
 
-    employees.forEach(emp => {
-      const isManager = defaultManagerNames.some(name => emp.name.toLowerCase().includes(name));
-      if (isManager && !existingMemberIds.has(emp.id)) {
-        updatedMembers.push({
-          id: emp.id,
-          name: emp.name,
-          initials: emp.initials,
-          avatarUrl: emp.avatarUrl,
-        });
-        existingMemberIds.add(emp.id);
-      }
-    });
+    // Se o criador da tarefa for conhecido e ainda não estiver na lista de membros, adiciona-o
+    if (actor.name && actor.name !== 'Membro' && actor.id !== 'unassigned' && !existingMemberIds.has(actor.id)) {
+      updatedMembers.push({
+        id: actor.id,
+        name: actor.name,
+        initials: actor.initials,
+        avatarUrl: actor.avatarUrl,
+      });
+      existingMemberIds.add(actor.id);
+    }
 
     const newTask: Task = {
       ...newTaskData,

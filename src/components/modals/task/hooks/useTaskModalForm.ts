@@ -310,6 +310,73 @@ export const useTaskModalForm = ({
       category: nextLabels.join(', ') || 'Geral',
     }));
 
+    // Regra automática de membros por cliente:
+    // Luva ou F12 -> Guilherme Moraes
+    // Galera Bet ou Brasil Bet -> Mauricio
+    const guilhermeEmp = employees.find((e) =>
+      e.name.toLowerCase().includes('guilherme moraes')
+    );
+    const mauricioEmp = employees.find((e) =>
+      e.name.toLowerCase().includes('mauricio')
+    );
+
+    const hasGuilhermeClient = nextLabels.some((lbl) => {
+      const lower = lbl.toLowerCase();
+      return lower.includes('luva') || lower.includes('f12');
+    });
+
+    const hasMauricioClient = nextLabels.some((lbl) => {
+      const lower = lbl.toLowerCase();
+      return lower.includes('galera') || lower.includes('brasil');
+    });
+
+    let updatedMembers = [...taskMembers];
+    let membersChanged = false;
+
+    // Gerenciar Guilherme Moraes
+    if (guilhermeEmp) {
+      const alreadyIn = updatedMembers.some((m) => m.id === guilhermeEmp.id);
+      if (hasGuilhermeClient && !alreadyIn) {
+        updatedMembers.push({
+          id: guilhermeEmp.id,
+          name: guilhermeEmp.name,
+          initials: guilhermeEmp.initials,
+          avatarUrl: guilhermeEmp.avatarUrl,
+        });
+        membersChanged = true;
+      } else if (!hasGuilhermeClient && alreadyIn) {
+        updatedMembers = updatedMembers.filter((m) => m.id !== guilhermeEmp.id);
+        membersChanged = true;
+      }
+    }
+
+    // Gerenciar Mauricio
+    if (mauricioEmp) {
+      const alreadyIn = updatedMembers.some((m) => m.id === mauricioEmp.id);
+      if (hasMauricioClient && !alreadyIn) {
+        updatedMembers.push({
+          id: mauricioEmp.id,
+          name: mauricioEmp.name,
+          initials: mauricioEmp.initials,
+          avatarUrl: mauricioEmp.avatarUrl,
+        });
+        membersChanged = true;
+      } else if (!hasMauricioClient && alreadyIn) {
+        updatedMembers = updatedMembers.filter((m) => m.id !== mauricioEmp.id);
+        membersChanged = true;
+      }
+    }
+
+    if (membersChanged) {
+      isMembersDirtyRef.current = true;
+      setTaskMembers(updatedMembers);
+      const primaryAssigneeId = updatedMembers[0]?.id || 'unassigned';
+      setFormData((prev) => ({
+        ...prev,
+        assigneeId: primaryAssigneeId,
+      }));
+    }
+
     if (editingTask) {
       const updatedLabels = nextLabels.map((name) => {
         const found = projects.find((p) => p.name.toLowerCase() === name.toLowerCase());
@@ -320,12 +387,34 @@ export const useTaskModalForm = ({
         };
       });
 
-      updateTask(editingTask.id, {
+      const primaryAssigneeId = updatedMembers[0]?.id || 'unassigned';
+      const taskUpdatePayload: any = {
         labels: updatedLabels,
         projectId: newProjectId,
         projectName: newProjectName,
         category: nextLabels.join(', ') || 'Geral',
-      });
+      };
+
+      if (membersChanged) {
+        taskUpdatePayload.members = updatedMembers;
+        taskUpdatePayload.assigneeId = primaryAssigneeId;
+        taskUpdatePayload.assigneeName = updatedMembers[0]?.name || 'Sem membro';
+        taskUpdatePayload.assigneeInitials = updatedMembers[0]?.initials || 'SM';
+
+        setEditingTask((prev) =>
+          prev
+            ? {
+                ...prev,
+                members: updatedMembers,
+                assigneeId: primaryAssigneeId,
+                assigneeName: updatedMembers[0]?.name || 'Sem membro',
+                assigneeInitials: updatedMembers[0]?.initials || 'SM',
+              }
+            : null
+        );
+      }
+
+      updateTask(editingTask.id, taskUpdatePayload);
     }
   };
 
@@ -639,23 +728,6 @@ export const useTaskModalForm = ({
         } : null);
 
         const initialMembers = initialMember ? [initialMember] : [];
-        
-        // Adiciona os gestores padrão na lista de membros da nova tarefa
-        const defaultManagerNames = ['giovanni', 'fernanda', 'guilherme gonçalves', 'fabio mozart'];
-        const existingMemberIds = new Set(initialMembers.map(m => m.id));
-        
-        employees.forEach(emp => {
-          const isManager = defaultManagerNames.some(name => emp.name.toLowerCase().includes(name));
-          if (isManager && !existingMemberIds.has(emp.id)) {
-            initialMembers.push({
-              id: emp.id,
-              name: emp.name,
-              initials: emp.initials,
-              avatarUrl: emp.avatarUrl,
-            });
-            existingMemberIds.add(emp.id);
-          }
-        });
 
         setFormData({
           title: '',

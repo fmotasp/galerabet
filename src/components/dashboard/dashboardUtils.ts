@@ -176,6 +176,15 @@ export const computeWorkloadMembers = (
         roleType === 'manager' ||
         roleType === 'admin';
 
+      const empNameLower = (emp.name || '').toLowerCase();
+      const isExplicitlyIncluded =
+        empNameLower.includes('felipe mota') ||
+        empNameLower.includes('giovanni dias') ||
+        emp.id === 'emp-felipe' ||
+        emp.id === 'emp-1788927461378';
+
+      if (isExplicitlyIncluded) return true;
+
       return isCreative && !isGestor;
     })
     .map((emp) => {

@@ -75,9 +75,16 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
           dept.includes('video') ||
           tags.some((t) => t.includes('video') || t.includes('maker') || t.includes('motion'));
 
-        if (!isDesigner && !isVideoMaker) return false;
+        const empNameLower = (emp.name || '').toLowerCase();
+        const isExplicitCreative =
+          empNameLower.includes('felipe mota') ||
+          empNameLower.includes('giovanni dias') ||
+          emp.id === 'emp-felipe' ||
+          emp.id === 'emp-1788927461378';
 
-        if (selectedRole === 'designer') return isDesigner;
+        if (!isDesigner && !isVideoMaker && !isExplicitCreative) return false;
+
+        if (selectedRole === 'designer') return isDesigner || isExplicitCreative;
         if (selectedRole === 'videomaker') return isVideoMaker;
 
         return true;

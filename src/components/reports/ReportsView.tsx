@@ -19,7 +19,18 @@ import { getClientLogoFallback } from '../tasks/useTasksFilter';
 import { ReportsDataViz } from './ReportsDataViz';
 
 // Helper para identificar exclusivamente profissionais de Design e Audiovisual/Vídeo
-export const isDesignerOrVideomaker = (emp: { role?: string; department?: string; tags?: string[] }): boolean => {
+export const isDesignerOrVideomaker = (emp: { id?: string; name?: string; role?: string; department?: string; tags?: string[] }): boolean => {
+  const name = (emp.name || '').toLowerCase();
+  const id = (emp.id || '').toLowerCase();
+  if (
+    name.includes('felipe mota') ||
+    name.includes('giovanni dias') ||
+    id === 'emp-felipe' ||
+    id === 'emp-1788927461378'
+  ) {
+    return true;
+  }
+
   const role = (emp.role || '').toLowerCase();
   const dept = (emp.department || '').toLowerCase();
   const tags = (emp.tags || []).map((t) => t.toLowerCase());
