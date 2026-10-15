@@ -268,7 +268,7 @@ export const ProjectsProvider: React.FC<{
 
     // Persiste no Supabase
     try {
-      const { error } = await supabase.from('projects').upsert({
+      const basePayload: any = {
         id: newProj.id,
         name: newProj.name,
         category: newProj.category,
@@ -286,32 +286,22 @@ export const ProjectsProvider: React.FC<{
         client_names: newProj.clientNames,
         client_id: newProj.clientId,
         client_name: newProj.clientName,
+      };
+
+      const extendedPayload: any = {
+        ...basePayload,
         color_palette: newProj.colorPalette,
         brand_manual_url: newProj.brandManualUrl,
         logos_pack_url: newProj.logosPackUrl,
         typography_url: newProj.typographyUrl,
         additional_materials_url: newProj.additionalMaterialsUrl,
-        tarjas_url: newProj.tarjasUrl,
-        psd_base_url: newProj.psdBaseUrl,
-      });
+      };
+
+      const { error } = await supabase.from('projects').upsert(extendedPayload);
 
       if (error) {
         // Fallback without extra columns if not migrated yet
-        await supabase.from('projects').upsert({
-          id: newProj.id,
-          name: newProj.name,
-          category: newProj.category,
-          description: packedDescription,
-          status: newProj.status,
-          progress: newProj.progress,
-          current_sprint: newProj.currentSprint,
-          icon_type: newProj.iconType,
-          icon_color: newProj.iconColor,
-          team_member_ids: newProj.teamMemberIds,
-          label_id: newProj.labelId,
-          label_color: newProj.labelColor,
-          logo_url: newProj.logoUrl,
-        });
+        await supabase.from('projects').upsert(basePayload);
       }
       addToast('Cliente Salvo ☁️', `"${newProj.name}" e materiais gravados com sucesso.`, 'success');
     } catch (sbErr: any) {
@@ -322,20 +312,23 @@ export const ProjectsProvider: React.FC<{
   };
 
   const updateProject = async (id: string, updates: Partial<Project>) => {
+    let mergedProj: Project;
+    setProjects((prev) => {
+      const existingProj = prev.find((p) => p.id === id);
+      mergedProj = existingProj
+        ? { ...existingProj, ...updates }
+        : ({ id, ...updates } as Project);
+      const updatedList = prev.map((proj) => (proj.id === id ? mergedProj : proj));
+      try {
+        localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(updatedList));
+      } catch (err) {}
+      return updatedList;
+    });
+
     const existingProj = projects.find((p) => p.id === id);
-    const mergedProj: Project = existingProj
+    mergedProj = existingProj
       ? { ...existingProj, ...updates }
       : ({ id, ...updates } as Project);
-
-    setProjects((prev) =>
-      prev.map((proj) => (proj.id === id ? mergedProj : proj))
-    );
-
-    // Salva imediatamente no localStorage para não perder em refresh
-    try {
-      const updatedList = projects.map((proj) => (proj.id === id ? mergedProj : proj));
-      localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(updatedList));
-    } catch (err) {}
 
     const { cleanDescription } = decodeProjectDescription(mergedProj.description || '');
     const packedDescription = encodeProjectDescription(cleanDescription, {
@@ -352,46 +345,43 @@ export const ProjectsProvider: React.FC<{
 
     // Atualiza no Supabase
     try {
-      const payload: any = {
-        id,
+      const updateData: any = {
         description: packedDescription,
       };
-      if (mergedProj.name !== undefined) payload.name = mergedProj.name;
-      if (mergedProj.category !== undefined) payload.category = mergedProj.category;
-      if (mergedProj.status !== undefined) payload.status = mergedProj.status;
-      if (mergedProj.progress !== undefined) payload.progress = mergedProj.progress;
-      if (mergedProj.currentSprint !== undefined) payload.current_sprint = mergedProj.currentSprint;
-      if (mergedProj.iconType !== undefined) payload.icon_type = mergedProj.iconType;
-      if (mergedProj.iconColor !== undefined) payload.icon_color = mergedProj.iconColor;
-      if (mergedProj.teamMemberIds !== undefined) payload.team_member_ids = mergedProj.teamMemberIds;
-      if (mergedProj.labelId !== undefined) payload.label_id = mergedProj.labelId;
-      if (mergedProj.labelColor !== undefined) payload.label_color = mergedProj.labelColor;
-      if (mergedProj.logoUrl !== undefined) payload.logo_url = mergedProj.logoUrl;
-      if (mergedProj.clientIds !== undefined) payload.client_ids = mergedProj.clientIds;
-      if (mergedProj.clientNames !== undefined) payload.client_names = mergedProj.clientNames;
-      if (mergedProj.clientId !== undefined) payload.client_id = mergedProj.clientId;
-      if (mergedProj.clientName !== undefined) payload.client_name = mergedProj.clientName;
+      if (mergedProj.name !== undefined) updateData.name = mergedProj.name;
+      if (mergedProj.category !== undefined) updateData.category = mergedProj.category;
+      if (mergedProj.status !== undefined) updateData.status = mergedProj.status;
+      if (mergedProj.progress !== undefined) updateData.progress = mergedProj.progress;
+      if (mergedProj.currentSprint !== undefined) updateData.current_sprint = mergedProj.currentSprint;
+      if (mergedProj.iconType !== undefined) updateData.icon_type = mergedProj.iconType;
+      if (mergedProj.iconColor !== undefined) updateData.icon_color = mergedProj.iconColor;
+      if (mergedProj.teamMemberIds !== undefined) updateData.team_member_ids = mergedProj.teamMemberIds;
+      if (mergedProj.labelId !== undefined) updateData.label_id = mergedProj.labelId;
+      if (mergedProj.labelColor !== undefined) updateData.label_color = mergedProj.labelColor;
+      if (mergedProj.logoUrl !== undefined) updateData.logo_url = mergedProj.logoUrl;
+      if (mergedProj.clientIds !== undefined) updateData.client_ids = mergedProj.clientIds;
+      if (mergedProj.clientNames !== undefined) updateData.client_names = mergedProj.clientNames;
+      if (mergedProj.clientId !== undefined) updateData.client_id = mergedProj.clientId;
+      if (mergedProj.clientName !== undefined) updateData.client_name = mergedProj.clientName;
+      if (mergedProj.colorPalette !== undefined) updateData.color_palette = mergedProj.colorPalette;
+      if (mergedProj.brandManualUrl !== undefined) updateData.brand_manual_url = mergedProj.brandManualUrl;
+      if (mergedProj.logosPackUrl !== undefined) updateData.logos_pack_url = mergedProj.logosPackUrl;
+      if (mergedProj.typographyUrl !== undefined) updateData.typography_url = mergedProj.typographyUrl;
+      if (mergedProj.additionalMaterialsUrl !== undefined) updateData.additional_materials_url = mergedProj.additionalMaterialsUrl;
 
-      // Tenta atualizar primeiro com colunas dinâmicas se existirem
-      const extendedPayload = {
-        ...payload,
-        color_palette: mergedProj.colorPalette,
-        brand_manual_url: mergedProj.brandManualUrl,
-        logos_pack_url: mergedProj.logosPackUrl,
-        typography_url: mergedProj.typographyUrl,
-        additional_materials_url: mergedProj.additionalMaterialsUrl,
-        tarjas_url: mergedProj.tarjasUrl,
-        psd_base_url: mergedProj.psdBaseUrl,
-      };
-
-      const { error: upsertErr } = await supabase.from('projects').upsert(extendedPayload);
-      if (upsertErr) {
-        // Fallback apenas com colunas padrão do schema para não dar 400 Bad Request
-        const { error: fallbackErr } = await supabase.from('projects').upsert(payload);
-        if (fallbackErr) console.error('[CRITICAL] fallbackErr:', fallbackErr);
-        if (fallbackErr) {
-          console.warn('[Supabase] Falha no fallback de update do projeto:', fallbackErr.message);
-        }
+      const { error: updateErr } = await supabase.from('projects').update(updateData).eq('id', id);
+      if (updateErr) {
+        console.warn('[Supabase] Falha no update detalhado, tentando apenas colunas base:', updateErr.message);
+        // Fallback apenas com description e campos base
+        const fallbackData: any = {
+          description: packedDescription,
+        };
+        if (mergedProj.name !== undefined) fallbackData.name = mergedProj.name;
+        if (mergedProj.category !== undefined) fallbackData.category = mergedProj.category;
+        if (mergedProj.status !== undefined) fallbackData.status = mergedProj.status;
+        if (mergedProj.progress !== undefined) fallbackData.progress = mergedProj.progress;
+        if (mergedProj.logoUrl !== undefined) fallbackData.logo_url = mergedProj.logoUrl;
+        await supabase.from('projects').update(fallbackData).eq('id', id);
       }
     } catch (sbErr) {
       console.warn('Supabase project update warning:', sbErr);
