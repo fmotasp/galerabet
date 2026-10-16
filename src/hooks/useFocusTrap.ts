@@ -33,6 +33,10 @@ export const useFocusTrap = <T extends HTMLElement>(isActive: boolean) => {
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
+      // Só o modal do topo prende o foco: com um diálogo aberto por cima, o de baixo não interfere
+      const modals = document.querySelectorAll('[aria-modal="true"]');
+      const top = modals[modals.length - 1];
+      if (top && !top.contains(container)) return;
       const items = getItems();
       if (items.length === 0) {
         e.preventDefault();

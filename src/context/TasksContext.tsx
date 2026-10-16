@@ -12,6 +12,12 @@ import { createNotifications } from '../lib/notificationsService';
 export interface TasksContextType {
   tasks: Task[];
   addTask: (newTaskData: Omit<Task, 'id' | 'createdAt'>) => Promise<void>;
+  /** Cria várias tarefas de uma vez (importação). Devolve os ids criados e quantas falharam. */
+  addTasksBulk: (
+    list: Omit<Task, 'id' | 'createdAt'>[],
+    onProgress?: (done: number, total: number) => void
+  ) => Promise<{ createdIds: string[]; failed: number }>;
+  deleteTasksBulk: (ids: string[]) => Promise<void>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   moveTaskStatus: (id: string, newStatus: TaskStatus) => Promise<void>;
@@ -378,6 +384,132 @@ export const TasksProvider: React.FC<{
     
     return newTask;
   }, [employees, currentUser, addActivity, addToast, setEmployees, setTasks]);
+
+  const addTasksBulk = useCallback(
+    async (list: Omit<Task, 'id' | 'createdAt'>[], onProgress?: (done: number, total: number) => void) => {
+      const actor = getCurrentActor();
+      const hasRealActor = actor.name && actor.name !== 'Membro' && actor.name !== 'Equipe';
+      const nowMs = Date.now();
+      const nowIso = new Date().toISOString();
+      const batchId = Math.random().toString(36).slice(2, 7);
+
+      const newTasks: Task[] = list.map((data, index) => {
+        const members = [...(data.members || [])];
+        if (hasRealActor && actor.id !== 'unassigned' && !members.some((m) => m.id === actor.id)) {
+          members.push({ id: actor.id, name: actor.name, initials: actor.initials, avatarUrl: actor.avatarUrl });
+        }
+        return {
+          ...data,
+          members,
+          // id único por tarefa: o addTask usa só Date.now(), que repetiria dentro do mesmo milissegundo
+          id: `task-${nowMs}-${batchId}-${index}`,
+          createdAt: nowIso.split('T')[0],
+          commentsCount: 0,
+          attachmentsCount: 0,
+          lastMovedAt: nowMs,
+          activityLog: hasRealActor
+            ? [
+                {
+                  id: `act-${nowMs}-${batchId}-${index}`,
+                  type: 'created' as const,
+                  user: actor.name,
+                  userInitials: actor.initials || actor.name.substring(0, 2).toUpperCase(),
+                  avatarUrl: actor.avatarUrl,
+                  description: 'Demanda criada',
+                  timestamp: nowIso,
+                  details: 'Criada por importação em massa',
+                },
+              ]
+            : [],
+        };
+      });
+
+      const toPayload = (t: Task) => ({
+        id: t.id,
+        title: t.title,
+        description: encodeTaskDescriptionWithChecklist(t.description || '', t.checklists || []),
+        category: t.category || 'Geral',
+        status: (t.status === 'overdue' ? 'novos_pedidos' : t.status) || 'backlog',
+        due_date: t.dueDate || null,
+        points: t.points || 0,
+        is_flagged: Boolean(t.isFlagged),
+        project_id: t.projectId || null,
+        project_name: t.projectName || 'General',
+        sprint_id: t.sprintId || 'sprint-1',
+        assignee_id: t.assigneeId || null,
+        assignee_name: t.assigneeName || null,
+        assignee_initials: t.assigneeInitials || null,
+        members: t.members || [],
+        labels: t.labels || [],
+        reference_images: t.referenceImages || [],
+        attachments: t.attachments || [],
+        comments: t.comments || [],
+        checklists: t.checklists || [],
+        cover_image_url: t.coverImageUrl || null,
+        cover_attachment_id: t.coverAttachmentId || null,
+        last_moved_at: t.lastMovedAt,
+        activity_log: t.activityLog || [],
+        created_at: nowIso,
+        updated_at: nowIso,
+      });
+
+      const CHUNK = 20;
+      const createdIds: string[] = [];
+      let failed = 0;
+
+      for (let i = 0; i < newTasks.length; i += CHUNK) {
+        const chunk = newTasks.slice(i, i + CHUNK);
+        const payload = chunk.map(toPayload);
+        let ok = false;
+        try {
+          let { error } = await supabase.from('tasks').insert(payload);
+          if (error) {
+            // Mesma tolerância do addTask: tenta de novo sem colunas que podem não existir no banco
+            const fallback = payload.map(({ activity_log, checklists, ...rest }) => rest);
+            ({ error } = await supabase.from('tasks').insert(fallback));
+          }
+          ok = !error;
+          if (error) console.error('[Supabase] Falha ao inserir lote de tarefas:', error.message);
+        } catch (err) {
+          console.error('[Supabase] Falha ao inserir lote de tarefas:', err);
+        }
+        if (ok) createdIds.push(...chunk.map((t) => t.id));
+        else failed += chunk.length;
+        onProgress?.(Math.min(i + CHUNK, newTasks.length), newTasks.length);
+      }
+
+      // O quadro só recebe o que realmente foi gravado no banco, na ordem do documento
+      const saved = new Set(createdIds);
+      setTasks((prev) => [...newTasks.filter((t) => saved.has(t.id)), ...prev]);
+
+      if (createdIds.length > 0) {
+        addActivity(currentUser?.name || 'Theo R.', currentUser?.initials || 'TR', `importou ${createdIds.length} tarefas em massa`, 'blue');
+        logSystemAction('CREATE', createdIds[0], `Importação em massa: ${createdIds.length} tarefas`, actor.name || 'Desconhecido', {
+          count: createdIds.length,
+          failed,
+        });
+      }
+      return { createdIds, failed };
+    },
+    [currentUser, addActivity, setTasks]
+  );
+
+  const deleteTasksBulk = useCallback(
+    async (ids: string[]) => {
+      if (ids.length === 0) return;
+      try {
+        await supabase.from('tasks').delete().in('id', ids);
+        logSystemAction('DELETE', ids[0], `Importação em massa desfeita: ${ids.length} tarefas`, getCurrentActor().name || 'Desconhecido', {
+          count: ids.length,
+        });
+      } catch (err) {
+        console.warn('Supabase bulk delete warning:', err);
+      }
+      const gone = new Set(ids);
+      setTasks((prev) => prev.filter((t) => !gone.has(t.id)));
+    },
+    [setTasks]
+  );
 
   const updateTask = useCallback(async (id: string, updates: Partial<Task>) => {
     const now = Date.now();
@@ -783,6 +915,8 @@ export const TasksProvider: React.FC<{
       value={{
         tasks: visibleTasks,
         addTask,
+        addTasksBulk,
+        deleteTasksBulk,
         updateTask,
         deleteTask,
         moveTaskStatus,

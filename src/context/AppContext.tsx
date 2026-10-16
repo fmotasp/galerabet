@@ -68,6 +68,11 @@ export interface AppContextType {
   // Tasks
   tasks: Task[];
   addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  addTasksBulk: (
+    list: Omit<Task, 'id' | 'createdAt'>[],
+    onProgress?: (done: number, total: number) => void
+  ) => Promise<{ createdIds: string[]; failed: number }>;
+  deleteTasksBulk: (ids: string[]) => Promise<void>;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   moveTaskStatus: (id: string, newStatus: TaskStatus) => void;
@@ -93,8 +98,18 @@ export interface AppContextType {
   addActivity: (userName: string, userInitials: string, message: string, dotColor?: ActivityItem['dotColor']) => void;
 
   // Modals & Drawers
+  /** Janela da tarefa individual (modo clássico). */
   isNewTaskModalOpen: boolean;
+  /** `true` abre o seletor "Nova tarefa / Tarefas em massa"; `false` fecha a janela da tarefa. */
   setIsNewTaskModalOpen: (open: boolean) => void;
+  isNewTaskChooserOpen: boolean;
+  setIsNewTaskChooserOpen: (open: boolean) => void;
+  /** Escolha "Nova tarefa": abre a janela de tarefa de sempre. */
+  openClassicNewTask: () => void;
+  /** Escolha "Tarefas em massa": abre a importação por documento. */
+  isBulkTasksModalOpen: boolean;
+  setIsBulkTasksModalOpen: (open: boolean) => void;
+  openBulkTasks: () => void;
   editingTask: Task | null;
   setEditingTask: (task: Task | null) => void;
 
@@ -385,7 +400,23 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   // Modais
-  const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
+  const [isNewTaskModalOpen, setNewTaskModalOpenRaw] = useState(false);
+  const [isNewTaskChooserOpen, setIsNewTaskChooserOpen] = useState(false);
+  const [isBulkTasksModalOpen, setIsBulkTasksModalOpen] = useState(false);
+
+  // Todo ponto do sistema que pede "nova tarefa" passa pelo seletor; fechar continua direto
+  const setIsNewTaskModalOpen = useCallback((open: boolean) => {
+    if (open) setIsNewTaskChooserOpen(true);
+    else setNewTaskModalOpenRaw(false);
+  }, []);
+  const openClassicNewTask = useCallback(() => {
+    setIsNewTaskChooserOpen(false);
+    setNewTaskModalOpenRaw(true);
+  }, []);
+  const openBulkTasks = useCallback(() => {
+    setIsNewTaskChooserOpen(false);
+    setIsBulkTasksModalOpen(true);
+  }, []);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -544,6 +575,8 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         resetSpineStatusesToDefault,
         tasks: tasksContext.tasks,
         addTask: tasksContext.addTask,
+        addTasksBulk: tasksContext.addTasksBulk,
+        deleteTasksBulk: tasksContext.deleteTasksBulk,
         updateTask: tasksContext.updateTask,
         deleteTask: tasksContext.deleteTask,
         moveTaskStatus: tasksContext.moveTaskStatus,
@@ -563,6 +596,12 @@ const AppFacadeProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addActivity,
         isNewTaskModalOpen,
         setIsNewTaskModalOpen,
+        isNewTaskChooserOpen,
+        setIsNewTaskChooserOpen,
+        openClassicNewTask,
+        isBulkTasksModalOpen,
+        setIsBulkTasksModalOpen,
+        openBulkTasks,
         editingTask,
         setEditingTask,
         isNewProjectModalOpen,

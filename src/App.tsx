@@ -65,6 +65,12 @@ const EmployeeDetailModal = lazy(() =>
 const ProjectDetailModal = lazy(() =>
   import('./components/modals/ProjectDetailModal').then((m) => ({ default: m.ProjectDetailModal }))
 );
+const NewTaskChooserModal = lazy(() =>
+  import('./components/modals/NewTaskChooserModal').then((m) => ({ default: m.NewTaskChooserModal }))
+);
+const BulkTasksModal = lazy(() =>
+  import('./components/modals/BulkTasksModal').then((m) => ({ default: m.BulkTasksModal }))
+);
 const CommandPaletteModal = lazy(() =>
   import('./components/common/CommandPaletteModal').then((m) => ({ default: m.CommandPaletteModal }))
 );
@@ -180,6 +186,8 @@ const MainLayout: React.FC = () => {
         <EmployeeDetailModal />
         <ProjectDetailModal />
         <CommandPaletteModal />
+        <NewTaskChooserModal />
+        <BulkTasksModal />
       </Suspense>
       <ToastContainer />
       <DialogHost />

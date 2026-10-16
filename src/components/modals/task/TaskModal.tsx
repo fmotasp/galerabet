@@ -16,6 +16,9 @@ import { useTaskDriveFiles } from './hooks/useTaskDriveFiles';
 import { confirmDialog } from '../../../lib/dialogs';
 import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
+// Apenas estes usuários podem alterar os pontos da demanda; os demais mantêm o padrão (1)
+const POINTS_EDITORS = ['giovanni dias', 'felipe mota'];
+
 export const TaskModal: React.FC = () => {
   const {
     isNewTaskModalOpen,
@@ -33,6 +36,8 @@ export const TaskModal: React.FC = () => {
     addToast,
     currentUser,
   } = useApp();
+
+  const canEditPoints = POINTS_EDITORS.some((n) => (currentUser?.name || '').toLowerCase().includes(n));
 
   const isOpen = isNewTaskModalOpen || editingTask !== null;
   const [activeBottomTab, setActiveBottomTab] = React.useState<'comments' | 'checklists' | 'attachments' | 'references' | 'history'>('comments');
@@ -311,7 +316,26 @@ export const TaskModal: React.FC = () => {
           {/* Right Column */}
           <div className="relative w-full md:w-[340px] lg:w-[380px] bg-field shadow-[-12px_0_40px_-12px_rgba(0,0,0,0.8)] shrink-0 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-y-auto flex flex-col p-4 sm:p-6 custom-scrollbar">
-            <h4 className="text-xs font-bold text-slate-500 tracking-widest uppercase mb-6">Detalhes</h4>
+            <div className="flex items-center justify-between gap-3 mb-6">
+              <h4 className="text-xs font-bold text-slate-500 tracking-widest uppercase">Detalhes</h4>
+              {canEditPoints && (
+                <label htmlFor="input-task-points" className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider" title="Padrão: 1 ponto por demanda. Ex.: demanda com 10 tarefas = 10 pontos.">
+                  Pontos
+                  <input
+                    id="input-task-points"
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={formData.points}
+                    onChange={(e) => {
+                      const n = Math.floor(Number(e.target.value));
+                      setFormData((prev) => ({ ...prev, points: Number.isFinite(n) && n >= 1 ? n : 1 }));
+                    }}
+                    className="w-16 h-8 px-2 bg-canvas border border-white/5 rounded-lg text-sm font-semibold text-white tabular-nums text-center focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30"
+                  />
+                </label>
+              )}
+            </div>
             
             <div className="space-y-6">
               <TaskMembersAndClients
