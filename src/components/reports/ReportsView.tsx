@@ -104,10 +104,13 @@ const isTaskDoneOrInReview = (t: Task): boolean => {
   );
 };
 
+// Cada ponto de uma demanda conta como uma tarefa (padrão: 1 ponto = 1 tarefa)
+const taskWeight = (t: Task): number => Math.max(1, Math.floor(Number(t.points) || 1));
+const sumWeight = (list: Task[]): number => list.reduce((sum, t) => sum + taskWeight(t), 0);
 
 // Cálculos de SLA, prazos e ciclo para um conjunto de tarefas
 const computeMetrics = (filteredTasks: Task[]) => {
-  const total = filteredTasks.length;
+  const total = sumWeight(filteredTasks);
   const completed = filteredTasks.filter(isTaskDoneOrInReview);
   const active = filteredTasks.filter((t) => !isTaskDoneOrInReview(t));
   const overdueActive = active.filter((t) => isTaskOverdue(t));
@@ -127,13 +130,13 @@ const computeMetrics = (filteredTasks: Task[]) => {
       const dueEnd = new Date(due);
       dueEnd.setHours(23, 59, 59, 999);
       if (delivery.getTime() <= dueEnd.getTime()) {
-        onTimeCount++;
+        onTimeCount += taskWeight(t);
       } else {
-        lateCount++;
+        lateCount += taskWeight(t);
       }
     } else if (!due && delivery) {
       // Sem prazo definido não dá para avaliar pontualidade: fica fora do índice de SLA
-      noDueDateCount++;
+      noDueDateCount += taskWeight(t);
     }
 
     const created = parseDateSafe(t.createdAt);
@@ -161,9 +164,9 @@ const computeMetrics = (filteredTasks: Task[]) => {
 
   return {
     total,
-    completedCount: completed.length,
-    activeCount: active.length,
-    overdueActiveCount: overdueActive.length,
+    completedCount: sumWeight(completed),
+    activeCount: sumWeight(active),
+    overdueActiveCount: sumWeight(overdueActive),
     onTimeCount,
     lateCount,
     noDueDateCount,
@@ -367,7 +370,8 @@ export const ReportsView: React.FC = () => {
           (t.activityLog && t.activityLog.some((a) => a.type === 'status_changed' && (a.details?.includes('Ajustes') || a.description?.includes('Ajustes'))))
       );
       const points = completed.reduce((sum, t) => sum + (t.points || 1), 0);
-      const overdue = empTasks.filter((t) => !isTaskDoneOrInReview(t) && isTaskOverdue(t)).length;
+      const overdue = sumWeight(empTasks.filter((t) => !isTaskDoneOrInReview(t) && isTaskOverdue(t)));
+      const empTotal = sumWeight(empTasks);
 
       return {
         id: emp.id,
@@ -375,11 +379,11 @@ export const ReportsView: React.FC = () => {
         initials: emp.initials,
         avatarUrl: emp.avatarUrl,
         department: emp.department || emp.role || 'Criação',
-        total: empTasks.length,
-        completed: completed.length,
-        inProgress: inProgress.length,
-        adjustments: inAdjustments.length,
-        adjustmentRate: empTasks.length > 0 ? Math.round((inAdjustments.length / empTasks.length) * 100) : 0,
+        total: empTotal,
+        completed: sumWeight(completed),
+        inProgress: sumWeight(inProgress),
+        adjustments: sumWeight(inAdjustments),
+        adjustmentRate: empTotal > 0 ? Math.round((sumWeight(inAdjustments) / empTotal) * 100) : 0,
         overdue,
         points,
       };
@@ -401,14 +405,15 @@ export const ReportsView: React.FC = () => {
         );
       });
 
-      const completed = clientTasks.filter(isTaskDoneOrInReview).length;
-      const overdue = clientTasks.filter((t) => !isTaskDoneOrInReview(t) && isTaskOverdue(t)).length;
-      const pending = clientTasks.length - completed;
+      const clientTotal = sumWeight(clientTasks);
+      const completed = sumWeight(clientTasks.filter(isTaskDoneOrInReview));
+      const overdue = sumWeight(clientTasks.filter((t) => !isTaskDoneOrInReview(t) && isTaskOverdue(t)));
+      const pending = clientTotal - completed;
 
       // Contagem detalhada por todas as colunas / status do pipeline
       const statusCounts: Record<string, number> = {};
       spineStatuses.forEach((st) => {
-        statusCounts[st.id] = clientTasks.filter((t) => (t.status || 'backlog') === st.id).length;
+        statusCounts[st.id] = sumWeight(clientTasks.filter((t) => (t.status || 'backlog') === st.id));
       });
 
       return {
@@ -416,11 +421,11 @@ export const ReportsView: React.FC = () => {
         name: p.name,
         color: p.color || '#E4007E',
         logoUrl: getClientLogoFallback(p.name, p.logoUrl),
-        total: clientTasks.length,
+        total: clientTotal,
         completed,
         pending,
         overdue,
-        completionRate: clientTasks.length > 0 ? Math.round((completed / clientTasks.length) * 100) : 0,
+        completionRate: clientTotal > 0 ? Math.round((completed / clientTotal) * 100) : 0,
         statusCounts,
       };
     }).filter((c) => c.total > 0 || selectedClientId === c.id)
@@ -429,9 +434,9 @@ export const ReportsView: React.FC = () => {
 
   // 5. Funil de Gargalos por Status
   const statusFunnel = useMemo(() => {
-    const total = filteredTasks.length || 1;
+    const total = sumWeight(filteredTasks) || 1;
     return spineStatuses.map((st) => {
-      const count = filteredTasks.filter((t) => t.status === st.id).length;
+      const count = sumWeight(filteredTasks.filter((t) => t.status === st.id));
       const percentage = Math.round((count / total) * 100);
       return {
         id: st.id,
@@ -952,7 +957,7 @@ export const ReportsView: React.FC = () => {
         <div className="p-5 bg-surface border border-line rounded-2xl space-y-3" role="region" aria-label={DRILL_TITLES[drill]}>
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-base font-medium text-white tracking-tight">
-              {DRILL_TITLES[drill]} <span className="text-slate-500 font-normal">({drillTasks.length})</span>
+              {DRILL_TITLES[drill]} <span className="text-slate-500 font-normal">({sumWeight(drillTasks)}{sumWeight(drillTasks) !== drillTasks.length ? ` em ${drillTasks.length} demandas` : ''})</span>
             </h2>
             <button
               type="button"
@@ -1015,7 +1020,7 @@ export const ReportsView: React.FC = () => {
                 <h2 className="text-base font-semibold text-white tracking-tight">Funil de Produção</h2>
               </div>
               <span className="text-xs font-semibold text-slate-400 tabular-nums">
-                {metrics.total} demandas no fluxo
+                {metrics.total} tarefas no fluxo
               </span>
             </div>
             <p className="text-xs text-slate-400">
@@ -1275,7 +1280,7 @@ export const ReportsView: React.FC = () => {
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-rose-400" />
               <h2 className="text-base font-medium text-rose-300 tracking-tight">
-                Atenção da Gestão: Demandas Atrasadas ({metrics.overdueTasks.length})
+                Atenção da Gestão: Demandas Atrasadas ({sumWeight(metrics.overdueTasks)}{sumWeight(metrics.overdueTasks) !== metrics.overdueTasks.length ? ` tarefas em ${metrics.overdueTasks.length} demandas` : ''})
               </h2>
             </div>
             <span className="text-xs text-rose-400 font-bold">Exigem ação imediata</span>

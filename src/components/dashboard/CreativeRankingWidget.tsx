@@ -132,8 +132,10 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
           );
         };
 
-        const total = empTasks.length;
-        const completed = empTasks.filter(isTaskDoneOrInReview).length;
+        // Cada ponto da demanda conta como uma entrega (padrão: 1 ponto = 1 entrega)
+        const deliveryWeight = (t: Task): number => Math.max(1, Math.floor(Number(t.points) || 1));
+        const total = empTasks.reduce((sum, t) => sum + deliveryWeight(t), 0);
+        const completed = empTasks.filter(isTaskDoneOrInReview).reduce((sum, t) => sum + deliveryWeight(t), 0);
 
         const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
