@@ -17,6 +17,7 @@ import { useTasks, useProjects, useEmployees, useApp } from '../../context/AppCo
 import type { Task } from '../../types';
 import { useCountUp } from '../../hooks/useCountUp';
 import { isTaskOverdue, isTaskCompleted, getTaskOverdueDays, parseTaskDueDate } from '../../lib/taskDateUtils';
+import { sumTaskWeight, taskWeight } from '../../lib/taskUtils';
 import { getClientLogoFallback } from '../tasks/useTasksFilter';
 import { ReportsDataViz } from './ReportsDataViz';
 import { useDropdownA11y } from '../../hooks/useDropdownA11y';
@@ -104,9 +105,7 @@ const isTaskDoneOrInReview = (t: Task): boolean => {
   );
 };
 
-// Cada ponto de uma demanda conta como uma tarefa (padrão: 1 ponto = 1 tarefa)
-const taskWeight = (t: Task): number => Math.max(1, Math.floor(Number(t.points) || 1));
-const sumWeight = (list: Task[]): number => list.reduce((sum, t) => sum + taskWeight(t), 0);
+const sumWeight = sumTaskWeight;
 
 // Cálculos de SLA, prazos e ciclo para um conjunto de tarefas
 const computeMetrics = (filteredTasks: Task[]) => {

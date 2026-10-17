@@ -14,6 +14,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Task } from '../../types';
 import { isTaskCompleted, isTaskOverdue, getTaskOverdueDays } from '../../lib/taskDateUtils';
+import { sumTaskWeight } from '../../lib/taskUtils';
 import { getLabelColorHex } from '../tasks/TasksView';
 import { Button, Badge, Avatar } from '../ui';
 
@@ -86,11 +87,12 @@ export const EmployeeDetailModal: React.FC = () => {
     return !isTaskCompleted(t) && (s === 'backlog' || s === 'blocked' || s.includes('backlog') || s.includes('novo') || (!s && !doingTasks.includes(t) && !reviewTasks.includes(t)));
   });
 
-  const totalCount = allEmpTasks.length;
-  const doneCount = doneTasks.length;
-  const doingCount = doingTasks.length;
-  const reviewCount = reviewTasks.length;
-  const backlogCount = backlogTasks.length;
+  // Cada ponto da demanda conta como uma tarefa
+  const totalCount = sumTaskWeight(allEmpTasks);
+  const doneCount = sumTaskWeight(doneTasks);
+  const doingCount = sumTaskWeight(doingTasks);
+  const reviewCount = sumTaskWeight(reviewTasks);
+  const backlogCount = sumTaskWeight(backlogTasks);
   const rate = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
 
   // Tarefas visíveis conforme a aba selecionada
@@ -273,7 +275,7 @@ export const EmployeeDetailModal: React.FC = () => {
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-brand" />
               <h3 className="text-sm font-semibold text-white uppercase tracking-wider">
-                Demandas do Colaborador ({displayedTasks.length})
+                Demandas do Colaborador ({sumTaskWeight(displayedTasks)})
               </h3>
             </div>
 

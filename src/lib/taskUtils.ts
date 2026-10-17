@@ -175,3 +175,10 @@ export const decodeEmployeeLocationWithAvatar = (
   return { cleanLocation, avatarUrl };
 };
 
+
+/** Cada ponto de uma demanda conta como uma tarefa (padrão: 1 ponto = 1 tarefa/entrega). */
+export const taskWeight = (task: Pick<Task, 'points'>): number =>
+  Math.max(1, Math.floor(Number(task.points) || 1));
+
+export const sumTaskWeight = (list: Pick<Task, 'points'>[]): number =>
+  list.reduce((sum, t) => sum + taskWeight(t), 0);

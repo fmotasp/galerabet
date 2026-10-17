@@ -5,7 +5,7 @@ import {
   isTaskInProgress,
   parseTaskDueDate,
 } from '../../lib/taskDateUtils';
-import { isTaskAssignedToMe } from '../../lib/taskUtils';
+import { isTaskAssignedToMe, sumTaskWeight, taskWeight } from '../../lib/taskUtils';
 
 export interface DashboardMetrics {
   totalTasks: number;
@@ -69,23 +69,26 @@ export const computeDashboardMetrics = (
   filteredTasks: Task[],
   projects: Project[]
 ): DashboardMetrics => {
-  const completed = filteredTasks.filter((t) => isTaskCompleted(t)).length;
-  const inProgress = filteredTasks.filter((t) => isTaskInProgress(t)).length;
-  const backlog = filteredTasks.filter(
-    (t) =>
-      !isTaskCompleted(t) &&
-      !isTaskInProgress(t) &&
-      (t.status === 'backlog' || t.status === 'blocked')
-  ).length;
-  const overdue = filteredTasks.filter((t) => isTaskOverdue(t)).length;
-  const total = filteredTasks.length;
+  // Cada ponto da demanda conta como uma tarefa
+  const completed = sumTaskWeight(filteredTasks.filter((t) => isTaskCompleted(t)));
+  const inProgress = sumTaskWeight(filteredTasks.filter((t) => isTaskInProgress(t)));
+  const backlog = sumTaskWeight(
+    filteredTasks.filter(
+      (t) =>
+        !isTaskCompleted(t) &&
+        !isTaskInProgress(t) &&
+        (t.status === 'backlog' || t.status === 'blocked')
+    )
+  );
+  const overdue = sumTaskWeight(filteredTasks.filter((t) => isTaskOverdue(t)));
+  const total = sumTaskWeight(filteredTasks);
 
   const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   const activeProjectsCount =
     new Set(filteredTasks.map((t) => t.projectId).filter(Boolean)).size ||
     projects.filter((p) => !['proj-orion', 'proj-bloom', 'proj-aurora', 'proj-apex'].includes(p.id)).length;
-  const velocity = filteredTasks.reduce((acc, t) => acc + (t.points || 1), 0);
-  const escalatedCount = filteredTasks.filter((t) => isTaskAlerted(t)).length;
+  const velocity = total;
+  const escalatedCount = sumTaskWeight(filteredTasks.filter((t) => isTaskAlerted(t)));
 
   return {
     totalTasks: total,
@@ -106,7 +109,7 @@ export const computeDashboardMetrics = (
 export const getActiveWorkloadCount = (emp: Employee, filteredTasks: Task[]): number => {
   const empFirstName = emp.name.toLowerCase().split(' ')[0];
 
-  return filteredTasks.filter((t) => {
+  return sumTaskWeight(filteredTasks.filter((t) => {
     const s = (t.status || '').toLowerCase();
 
     // Se a tarefa está em aprovação, concluída ou postada, não conta como backlog/em andamento do designer
@@ -133,7 +136,7 @@ export const getActiveWorkloadCount = (emp: Employee, filteredTasks: Task[]): nu
     // Se a tarefa não foi excluída nas regras acima (não está em aprovação, concluída, etc.),
     // ela é considerada ativa no pipeline de produção do membro.
     return true;
-  }).length;
+  }));
 };
 
 /**
@@ -149,7 +152,7 @@ export const computeWorkloadMembers = (
     return !isDone && (s === 'backlog' || s === 'novos_pedidos' || !t.assigneeId || t.assigneeId === 'unassigned');
   });
 
-  const totalBacklogCount = unassignedBacklogTasks.length;
+  const totalBacklogCount = sumTaskWeight(unassignedBacklogTasks);
 
   const workloadMembers = employees
     .filter((emp) => {
@@ -194,7 +197,7 @@ export const computeWorkloadMembers = (
         return Boolean(isAssigned);
       });
 
-      const totalDemands = allEmpTasks.length;
+      const totalDemands = sumTaskWeight(allEmpTasks);
       const activeDemands = getActiveWorkloadCount(emp, filteredTasks);
       
       // Capacidade baseada no workloadCapacity ou currentWorkload (padrão é 4 ou currentWorkload / 10)

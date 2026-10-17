@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Employee, Task } from '../../types';
 import { isTaskCompleted, parseTaskDueDate } from '../../lib/taskDateUtils';
+import { sumTaskWeight } from '../../lib/taskUtils';
 
 interface CreativeRankingWidgetProps {
   employees: Employee[];
@@ -133,9 +134,8 @@ export const CreativeRankingWidget: React.FC<CreativeRankingWidgetProps> = ({
         };
 
         // Cada ponto da demanda conta como uma entrega (padrão: 1 ponto = 1 entrega)
-        const deliveryWeight = (t: Task): number => Math.max(1, Math.floor(Number(t.points) || 1));
-        const total = empTasks.reduce((sum, t) => sum + deliveryWeight(t), 0);
-        const completed = empTasks.filter(isTaskDoneOrInReview).reduce((sum, t) => sum + deliveryWeight(t), 0);
+        const total = sumTaskWeight(empTasks);
+        const completed = sumTaskWeight(empTasks.filter(isTaskDoneOrInReview));
 
         const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 

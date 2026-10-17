@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { realtimeHub } from '../lib/realtimeHub';
 import { logSystemAction } from '../lib/systemLog';
 import { isTaskOverdue, isTaskCompleted, getTaskOverdueDays } from '../lib/taskDateUtils';
-import { encodeTaskDescriptionWithChecklist, decodeTaskDescriptionWithChecklist } from '../lib/taskUtils';
+import { encodeTaskDescriptionWithChecklist, decodeTaskDescriptionWithChecklist, sumTaskWeight } from '../lib/taskUtils';
 import { Task, TaskStatus, SpineStatusConfig, Employee } from '../types';
 import { INITIAL_TASKS } from '../data/mockData';
 import { useTasksStore } from '../store/useTasksStore';
@@ -892,12 +892,13 @@ export const TasksProvider: React.FC<{
   // Visibility & computed metrics
   const visibleTasks = useMemo(() => tasks, [tasks]);
 
-  const completedTasksCount = visibleTasks.filter((t) => isTaskCompleted(t)).length;
-  const overdueTasksCount = visibleTasks.filter((t) => isTaskOverdue(t)).length;
-  const totalTasksCount = visibleTasks.length;
+  // Cada ponto da demanda conta como uma tarefa
+  const completedTasksCount = sumTaskWeight(visibleTasks.filter((t) => isTaskCompleted(t)));
+  const overdueTasksCount = sumTaskWeight(visibleTasks.filter((t) => isTaskOverdue(t)));
+  const totalTasksCount = sumTaskWeight(visibleTasks);
   const completionPercentage = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
   const uniqueProjectsCount = new Set(visibleTasks.map((t) => t.projectId).filter(Boolean)).size || projectsCount;
-  const velocityPoints = visibleTasks.reduce((sum, t) => sum + (t.points || 1), 0);
+  const velocityPoints = totalTasksCount;
   const flaggedOrOverdueCount = visibleTasks.filter((t) => t.isFlagged || isTaskOverdue(t) || t.status === 'blocked').length;
 
   const computedMetrics = {
