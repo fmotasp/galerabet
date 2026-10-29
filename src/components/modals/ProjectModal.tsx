@@ -15,6 +15,7 @@ import { useApp } from '../../context/AppContext';
 import { Project, BrandColor } from '../../types';
 import { Button, Input, Textarea, Modal } from '../ui';
 import { confirmDialog, alertDialog } from '../../lib/dialogs';
+import { normalizeHex, sanitizeHexInput } from '../../lib/colorUtils';
 
 export const ProjectModal: React.FC = () => {
   const {
@@ -151,6 +152,16 @@ export const ProjectModal: React.FC = () => {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
+    // Todo código de cor precisa ser um hexadecimal válido; os curtos/sem # são completados
+    const invalidColor = formData.colorPalette.find((c) => c.hex && !normalizeHex(c.hex));
+    if (invalidColor) {
+      await alertDialog(`O código de cor "${invalidColor.hex}" está incompleto. Use 6 dígitos, por exemplo #E4007E.`, 'Código de cor inválido');
+      return;
+    }
+    const palette = formData.colorPalette
+      .filter((c) => Boolean(c.hex))
+      .map((c) => ({ ...c, hex: normalizeHex(c.hex) as string }));
+
     const payload: Omit<Project, 'id'> = {
       name: formData.name.trim(),
       category: formData.category.trim() || 'Geral',
@@ -163,7 +174,7 @@ export const ProjectModal: React.FC = () => {
       teamMemberIds: editingProject ? editingProject.teamMemberIds : [],
       labelColor: formData.labelColor,
       logoUrl: formData.logoUrl,
-      colorPalette: formData.colorPalette.filter((c) => Boolean(c.hex)),
+      colorPalette: palette,
       brandManualUrl: formData.brandManualUrl.trim(),
       logosPackUrl: formData.logosPackUrl.trim(),
       typographyUrl: formData.typographyUrl.trim(),
@@ -333,8 +344,10 @@ export const ProjectModal: React.FC = () => {
                 <div className="relative shrink-0">
                   <input
                     type="color"
-                    value={color.hex.startsWith('#') && color.hex.length === 7 ? color.hex : '#E4007E'}
+                    // O seletor só aceita #RRGGBB; código incompleto/ inválido mostra cinza neutro, nunca outra cor da marca
+                    value={normalizeHex(color.hex) ?? '#808080'}
                     onChange={(e) => handleUpdateColor(index, 'hex', e.target.value.toUpperCase())}
+                    aria-label={`Escolher cor ${index + 1}`}
                     className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0 p-0"
                   />
                 </div>
@@ -345,8 +358,21 @@ export const ProjectModal: React.FC = () => {
                     type="text"
                     placeholder="#HEX"
                     value={color.hex}
-                    onChange={(e) => handleUpdateColor(index, 'hex', e.target.value.toUpperCase())}
-                    className="w-full px-2 py-1 bg-surface border border-line rounded-lg text-xs font-mono font-bold text-white uppercase focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/30"
+                    maxLength={7}
+                    spellCheck={false}
+                    onChange={(e) => handleUpdateColor(index, 'hex', sanitizeHexInput(e.target.value))}
+                    // Ao sair do campo, completa o código curto (#F00 -> #FF0000)
+                    onBlur={(e) => {
+                      const full = normalizeHex(e.target.value);
+                      if (full && full !== e.target.value) handleUpdateColor(index, 'hex', full);
+                    }}
+                    aria-label={`Código da cor ${index + 1}`}
+                    aria-invalid={!!color.hex && !normalizeHex(color.hex)}
+                    className={`w-full px-2 py-1 bg-surface border rounded-lg text-xs font-mono font-bold text-white uppercase focus:outline-none focus:ring-2 ${
+                      color.hex && !normalizeHex(color.hex)
+                        ? 'border-rose-500/60 focus:border-rose-500 focus:ring-rose-500/30'
+                        : 'border-line focus:border-brand/50 focus:ring-brand/30'
+                    }`}
                   />
                 </div>
 

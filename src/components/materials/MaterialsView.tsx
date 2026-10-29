@@ -12,6 +12,7 @@ import {
   ImageIcon,
 } from 'lucide-react';
 import { useApp, useProjects } from '../../context/AppContext';
+import { normalizeHex } from '../../lib/colorUtils';
 
 export const MaterialsView: React.FC = () => {
   const { projects } = useProjects();
@@ -204,23 +205,25 @@ export const MaterialsView: React.FC = () => {
                     {hasColors ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {client.colorPalette!.map((c, i) => {
-                          const isCopied = copiedHex === c.hex;
+                          // Dados antigos podem estar sem # ou no formato curto: mostra e copia sempre o código completo
+                          const hex = normalizeHex(c.hex) ?? c.hex;
+                          const isCopied = copiedHex === hex;
                           return (
-                            <button aria-label={`Copiar cor ${c.hex}`}
+                            <button aria-label={`Copiar cor ${hex}`}
                               key={i}
                               type="button"
-                              onClick={() => handleCopyColor(c.hex, client.name)}
+                              onClick={() => handleCopyColor(hex, client.name)}
                               className="p-2 rounded-xl bg-raised border border-white/5 hover:border-line-hover transition-all text-left group/color cursor-pointer active:scale-95 relative overflow-hidden"
-                              title={`Copiar ${c.hex}`}
+                              title={`Copiar ${hex}`}
                             >
                               <div className="flex items-center gap-2">
                                 <div
                                   className="w-5 h-5 rounded-lg border border-white/20 shadow-xs shrink-0"
-                                  style={{ backgroundColor: c.hex }}
+                                  style={{ backgroundColor: hex }}
                                 />
                                 <div className="min-w-0 flex-1">
                                   <span className="text-[11px] font-mono font-semibold text-white block truncate uppercase">
-                                    {c.hex}
+                                    {hex}
                                   </span>
                                   <span className="text-[11px] text-slate-300 block truncate font-medium">
                                     {c.name || `Cor ${i + 1}`}
